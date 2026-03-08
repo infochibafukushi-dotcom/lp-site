@@ -17,6 +17,9 @@ header{
   padding:16px 20px;
   font-size:20px;
   font-weight:bold;
+  position:sticky;
+  top:0;
+  z-index:100;
 }
 main{
   max-width:900px;
@@ -45,11 +48,16 @@ label{
   font-size:14px;
   font-weight:bold;
 }
-input{
+input, textarea{
   padding:10px 12px;
   border:1px solid #ccc;
   border-radius:8px;
   font-size:14px;
+  font-family:inherit;
+}
+textarea{
+  min-height:120px;
+  resize:vertical;
 }
 button{
   padding:10px 16px;
@@ -60,9 +68,13 @@ button{
   cursor:pointer;
   font-size:14px;
 }
+button.secondary{
+  background:#6c757d;
+}
 .note{
   font-size:13px;
   color:#666;
+  line-height:1.6;
 }
 .preview{
   margin-top:8px;
@@ -71,6 +83,25 @@ button{
   border:1px dashed #ccc;
   border-radius:8px;
   font-size:14px;
+  white-space:pre-wrap;
+  word-break:break-all;
+}
+.actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.success{
+  color:#0a7a2f;
+  font-weight:bold;
+}
+.error{
+  color:#c62828;
+  font-weight:bold;
+}
+.warn{
+  color:#9a6700;
+  font-weight:bold;
 }
 @media (max-width: 640px){
   header{
@@ -90,8 +121,39 @@ button{
 
   <div class="card">
     <h2>現在の状態</h2>
-    <p class="note">まずは config.json の内容を読み込んで表示する画面です。次の段階で保存機能を追加します。</p>
+    <p class="note">config.json の読み込みと、GitHub保存用の入力欄です。今回はまず config.json を GitHub に保存できる形まで作ります。</p>
     <div class="preview" id="statusBox">読み込み中...</div>
+  </div>
+
+  <div class="card">
+    <h2>GitHub接続設定</h2>
+
+    <div class="row">
+      <label>GitHub ユーザー名</label>
+      <input type="text" id="githubOwner" placeholder="例: infochibafukushi-dotcom">
+    </div>
+
+    <div class="row">
+      <label>リポジトリ名</label>
+      <input type="text" id="githubRepo" placeholder="例: lp-site">
+    </div>
+
+    <div class="row">
+      <label>ブランチ名</label>
+      <input type="text" id="githubBranch" placeholder="例: main">
+    </div>
+
+    <div class="row">
+      <label>GitHub Personal Access Token</label>
+      <input type="password" id="githubToken" placeholder="GitHubトークンを入力">
+    </div>
+
+    <p class="note">この画面では、まず config.json を GitHub に保存するための設定を入れます。トークンはブラウザ保存用に localStorage を使います。</p>
+
+    <div class="actions">
+      <button type="button" class="secondary" onclick="saveGitHubSettings()">接続設定を保存</button>
+      <button type="button" class="secondary" onclick="loadGitHubSettings()">接続設定を再読込</button>
+    </div>
   </div>
 
   <div class="card">
@@ -174,46 +236,45 @@ button{
       <label>現在のパスワード</label>
       <input type="text" id="passwordText">
     </div>
+  </div>
 
-    <p class="note">次の段階で、この内容をGitHubへ保存できるようにします。</p>
-    <button type="button" onclick="showDraft()">入力内容を確認</button>
+  <div class="card">
+    <h2>保存前プレビュー</h2>
+    <p class="note">まずは保存前のJSONを確認できます。</p>
+    <div class="actions">
+      <button type="button" onclick="showDraft()">入力内容を確認</button>
+    </div>
     <div class="preview" id="draftBox">まだ確認していません。</div>
+  </div>
+
+  <div class="card">
+    <h2>GitHubへ保存</h2>
+    <p class="note">このボタンで <strong>data/config.json</strong> をGitHubに保存します。</p>
+    <div class="actions">
+      <button type="button" onclick="saveConfigToGitHub()">config.json を保存</button>
+    </div>
+    <div class="preview" id="saveResult">まだ保存していません。</div>
   </div>
 
 </main>
 
 <script>
-async function loadConfig(){
-  try{
-    const res = await fetch('./data/config.json?' + Date.now());
-    const config = await res.json();
+const CONFIG_PATH = 'data/config.json';
 
-    document.getElementById('logoText').value = config.logo || '';
-
-    document.getElementById('btn1Text').value = config.buttons?.[0]?.text || '';
-    document.getElementById('btn1Link').value = config.buttons?.[0]?.link || '';
-    document.getElementById('btn2Text').value = config.buttons?.[1]?.text || '';
-    document.getElementById('btn2Link').value = config.buttons?.[1]?.link || '';
-    document.getElementById('btn3Text').value = config.buttons?.[2]?.text || '';
-    document.getElementById('btn3Link').value = config.buttons?.[2]?.link || '';
-
-    document.getElementById('footer1Text').value = config.footer?.[0]?.text || '';
-    document.getElementById('footer1Link').value = config.footer?.[0]?.link || '';
-    document.getElementById('footer2Text').value = config.footer?.[1]?.text || '';
-    document.getElementById('footer2Link').value = config.footer?.[1]?.link || '';
-    document.getElementById('footer3Text').value = config.footer?.[2]?.text || '';
-    document.getElementById('footer3Link').value = config.footer?.[2]?.link || '';
-
-    document.getElementById('passwordText').value = config.password || '';
-
-    document.getElementById('statusBox').innerText = 'config.json の読み込みに成功しました。';
-  }catch(error){
-    document.getElementById('statusBox').innerText = '読み込み失敗: ' + error.message;
-  }
+function setStatus(message, type = ''){
+  const box = document.getElementById('statusBox');
+  box.className = 'preview ' + type;
+  box.innerText = message;
 }
 
-function showDraft(){
-  const draft = {
+function setSaveResult(message, type = ''){
+  const box = document.getElementById('saveResult');
+  box.className = 'preview ' + type;
+  box.innerText = message;
+}
+
+function buildDraft(){
+  return {
     password: document.getElementById('passwordText').value,
     logo: document.getElementById('logoText').value,
     buttons: [
@@ -245,10 +306,148 @@ function showDraft(){
       }
     ]
   };
+}
 
+function showDraft(){
+  const draft = buildDraft();
   document.getElementById('draftBox').innerText = JSON.stringify(draft, null, 2);
 }
 
+function saveGitHubSettings(){
+  const settings = {
+    owner: document.getElementById('githubOwner').value.trim(),
+    repo: document.getElementById('githubRepo').value.trim(),
+    branch: document.getElementById('githubBranch').value.trim(),
+    token: document.getElementById('githubToken').value.trim()
+  };
+
+  localStorage.setItem('lpGithubSettings', JSON.stringify(settings));
+  setSaveResult('GitHub接続設定をブラウザに保存しました。', 'success');
+}
+
+function loadGitHubSettings(){
+  try{
+    const raw = localStorage.getItem('lpGithubSettings');
+    if(!raw){
+      setSaveResult('接続設定はまだ保存されていません。', 'warn');
+      return;
+    }
+
+    const settings = JSON.parse(raw);
+    document.getElementById('githubOwner').value = settings.owner || '';
+    document.getElementById('githubRepo').value = settings.repo || '';
+    document.getElementById('githubBranch').value = settings.branch || 'main';
+    document.getElementById('githubToken').value = settings.token || '';
+
+    setSaveResult('GitHub接続設定を読み込みました。', 'success');
+  }catch(error){
+    setSaveResult('接続設定の読み込みに失敗しました: ' + error.message, 'error');
+  }
+}
+
+async function loadConfig(){
+  try{
+    const res = await fetch('./data/config.json?' + Date.now());
+    const config = await res.json();
+
+    document.getElementById('logoText').value = config.logo || '';
+
+    document.getElementById('btn1Text').value = config.buttons?.[0]?.text || '';
+    document.getElementById('btn1Link').value = config.buttons?.[0]?.link || '';
+    document.getElementById('btn2Text').value = config.buttons?.[1]?.text || '';
+    document.getElementById('btn2Link').value = config.buttons?.[1]?.link || '';
+    document.getElementById('btn3Text').value = config.buttons?.[2]?.text || '';
+    document.getElementById('btn3Link').value = config.buttons?.[2]?.link || '';
+
+    document.getElementById('footer1Text').value = config.footer?.[0]?.text || '';
+    document.getElementById('footer1Link').value = config.footer?.[0]?.link || '';
+    document.getElementById('footer2Text').value = config.footer?.[1]?.text || '';
+    document.getElementById('footer2Link').value = config.footer?.[1]?.link || '';
+    document.getElementById('footer3Text').value = config.footer?.[2]?.text || '';
+    document.getElementById('footer3Link').value = config.footer?.[2]?.link || '';
+
+    document.getElementById('passwordText').value = config.password || '';
+
+    setStatus('config.json の読み込みに成功しました。', 'success');
+  }catch(error){
+    setStatus('読み込み失敗: ' + error.message, 'error');
+  }
+}
+
+async function getCurrentFileSha(owner, repo, branch, token, path){
+  const url = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + path + '?ref=' + encodeURIComponent(branch);
+
+  const res = await fetch(url, {
+    headers: {
+      'Authorization': 'Bearer ' + token,
+      'Accept': 'application/vnd.github+json'
+    }
+  });
+
+  if(!res.ok){
+    throw new Error('SHA取得失敗: ' + res.status + ' ' + res.statusText);
+  }
+
+  const data = await res.json();
+  return data.sha;
+}
+
+function utf8ToBase64(str){
+  return btoa(unescape(encodeURIComponent(str)));
+}
+
+async function saveConfigToGitHub(){
+  try{
+    const owner = document.getElementById('githubOwner').value.trim();
+    const repo = document.getElementById('githubRepo').value.trim();
+    const branch = document.getElementById('githubBranch').value.trim() || 'main';
+    const token = document.getElementById('githubToken').value.trim();
+
+    if(!owner || !repo || !branch || !token){
+      setSaveResult('GitHub接続設定をすべて入力してください。', 'error');
+      return;
+    }
+
+    const draft = buildDraft();
+    const contentString = JSON.stringify(draft, null, 2);
+    const contentBase64 = utf8ToBase64(contentString);
+
+    setSaveResult('保存中です...', 'warn');
+
+    const sha = await getCurrentFileSha(owner, repo, branch, token, CONFIG_PATH);
+
+    const apiUrl = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + CONFIG_PATH;
+
+    const res = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: 'Update config.json from admin panel',
+        content: contentBase64,
+        branch: branch,
+        sha: sha
+      })
+    });
+
+    const result = await res.json();
+
+    if(!res.ok){
+      const errText = result?.message ? result.message : (res.status + ' ' + res.statusText);
+      throw new Error(errText);
+    }
+
+    setSaveResult('GitHub保存に成功しました。数十秒後にLPへ反映されます。', 'success');
+    document.getElementById('draftBox').innerText = JSON.stringify(draft, null, 2);
+  }catch(error){
+    setSaveResult('保存失敗: ' + error.message, 'error');
+  }
+}
+
+loadGitHubSettings();
 loadConfig();
 </script>
 
