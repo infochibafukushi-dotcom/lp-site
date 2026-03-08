@@ -1,0 +1,26 @@
+[
+  {
+    "id": "section-001",
+    "type": "normal",
+    "enabled": true,
+    "title": "ごあいさつ",
+    "text": "ここにノーマルセクションの説明文が入ります。",
+    "image": "",
+    "link": "#",
+    "textSize": "medium",
+    "bgColor": "#ffffff",
+    "alignY": "middle"
+  },
+  {
+    "id": "section-002",
+    "type": "slider",
+    "enabled": true,
+    "title": "スライダー見本",
+    "text": "ここにスライダー説明文が入ります。",
+    "images": [],
+    "link": "#",
+    "textSize": "medium",
+    "bgColor": "#f8f9fa",
+    "alignY": "middle"
+  }
+]
