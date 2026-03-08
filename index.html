@@ -9,7 +9,7 @@
 
 body{
 margin:0;
-font-family:Arial;
+font-family:Arial, Helvetica, sans-serif;
 background:#f5f5f5;
 }
 
@@ -20,6 +20,9 @@ display:flex;
 align-items:center;
 gap:10px;
 border-bottom:1px solid #ddd;
+position:sticky;
+top:0;
+z-index:1000;
 }
 
 .logo{
@@ -37,7 +40,7 @@ text-decoration:none;
 }
 
 section{
-padding:40px;
+padding:60px 20px;
 text-align:center;
 }
 
@@ -49,7 +52,7 @@ width:100%;
 background:#ffffff;
 display:flex;
 justify-content:space-around;
-padding:10px;
+padding:12px;
 border-top:1px solid #ccc;
 }
 
@@ -59,21 +62,46 @@ color:#000;
 font-size:14px;
 }
 
-</style>
+.adminPanel{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:#fff;
+padding:30px;
+box-shadow:0 0 20px rgba(0,0,0,0.2);
+display:none;
+z-index:2000;
+}
 
+.adminPanel input{
+padding:10px;
+width:200px;
+margin-bottom:10px;
+}
+
+.adminPanel button{
+padding:10px 15px;
+background:#007bff;
+color:#fff;
+border:none;
+cursor:pointer;
+}
+
+</style>
 </head>
 
 <body>
 
 <header>
 
-<div class="logo">
+<div class="logo" id="logo">
 LOGO
 </div>
 
-<a class="topbtn" href="#">ボタン1</a>
-<a class="topbtn" href="#">ボタン2</a>
-<a class="topbtn" href="#">ボタン3</a>
+<a class="topbtn" id="btn1">ボタン1</a>
+<a class="topbtn" id="btn2">ボタン2</a>
+<a class="topbtn" id="btn3">ボタン3</a>
 
 </header>
 
@@ -89,11 +117,93 @@ LOGO
 
 <footer>
 
-<a class="footerbtn" href="#">電話</a>
-<a class="footerbtn" href="#">LINE</a>
-<a class="footerbtn" href="#">予約</a>
+<a class="footerbtn" id="f1">電話</a>
+<a class="footerbtn" id="f2">LINE</a>
+<a class="footerbtn" id="f3">予約</a>
 
 </footer>
+
+
+<div class="adminPanel" id="adminPanel">
+
+<h3>管理ログイン</h3>
+
+<input type="password" id="pass" placeholder="パスワード">
+
+<br>
+
+<button onclick="login()">ログイン</button>
+
+</div>
+
+
+<script>
+
+let clickCount = 0
+
+document.getElementById("logo").onclick = function(){
+
+clickCount++
+
+if(clickCount>=5){
+
+document.getElementById("adminPanel").style.display="block"
+
+clickCount=0
+
+}
+
+}
+
+async function loadConfig(){
+
+const res = await fetch("./data/config.json")
+
+const config = await res.json()
+
+document.querySelector(".logo").innerText = config.logo
+
+document.getElementById("btn1").innerText = config.buttons[0].text
+document.getElementById("btn1").href = config.buttons[0].link
+
+document.getElementById("btn2").innerText = config.buttons[1].text
+document.getElementById("btn2").href = config.buttons[1].link
+
+document.getElementById("btn3").innerText = config.buttons[2].text
+document.getElementById("btn3").href = config.buttons[2].link
+
+document.getElementById("f1").innerText = config.footer[0].text
+document.getElementById("f1").href = config.footer[0].link
+
+document.getElementById("f2").innerText = config.footer[1].text
+document.getElementById("f2").href = config.footer[1].link
+
+document.getElementById("f3").innerText = config.footer[2].text
+document.getElementById("f3").href = config.footer[2].link
+
+window.sitePassword = config.password
+
+}
+
+function login(){
+
+let input = document.getElementById("pass").value
+
+if(input === window.sitePassword){
+
+alert("管理画面ログイン成功")
+
+}else{
+
+alert("パスワード違います")
+
+}
+
+}
+
+loadConfig()
+
+</script>
 
 </body>
 </html>
