@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理画面</title>
+<style>
+body{
+  margin:0;
+  font-family:Arial, Helvetica, sans-serif;
+  background:#f5f5f5;
+  color:#222;
+}
+header{
+  background:#ffffff;
+  border-bottom:1px solid #ddd;
+  padding:16px 20px;
+  font-size:20px;
+  font-weight:bold;
+}
+main{
+  max-width:900px;
+  margin:20px auto 120px;
+  padding:0 16px;
+}
+.card{
+  background:#ffffff;
+  border:1px solid #e5e5e5;
+  border-radius:12px;
+  padding:20px;
+  margin-bottom:20px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.05);
+}
+.card h2{
+  margin-top:0;
+  font-size:20px;
+}
+.row{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-bottom:14px;
+}
+label{
+  font-size:14px;
+  font-weight:bold;
+}
+input{
+  padding:10px 12px;
+  border:1px solid #ccc;
+  border-radius:8px;
+  font-size:14px;
+}
+button{
+  padding:10px 16px;
+  background:#007bff;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:14px;
+}
+.note{
+  font-size:13px;
+  color:#666;
+}
+.preview{
+  margin-top:8px;
+  padding:10px 12px;
+  background:#fafafa;
+  border:1px dashed #ccc;
+  border-radius:8px;
+  font-size:14px;
+}
+@media (max-width: 640px){
+  header{
+    font-size:18px;
+  }
+  .card{
+    padding:16px;
+  }
+}
+</style>
+</head>
+<body>
+
+<header>管理画面</header>
+
+<main>
+
+  <div class="card">
+    <h2>現在の状態</h2>
+    <p class="note">まずは config.json の内容を読み込んで表示する画面です。次の段階で保存機能を追加します。</p>
+    <div class="preview" id="statusBox">読み込み中...</div>
+  </div>
+
+  <div class="card">
+    <h2>ヘッダー</h2>
+
+    <div class="row">
+      <label>ロゴ文字</label>
+      <input type="text" id="logoText">
+    </div>
+
+    <div class="row">
+      <label>ボタン1 名称</label>
+      <input type="text" id="btn1Text">
+    </div>
+
+    <div class="row">
+      <label>ボタン1 リンク</label>
+      <input type="text" id="btn1Link">
+    </div>
+
+    <div class="row">
+      <label>ボタン2 名称</label>
+      <input type="text" id="btn2Text">
+    </div>
+
+    <div class="row">
+      <label>ボタン2 リンク</label>
+      <input type="text" id="btn2Link">
+    </div>
+
+    <div class="row">
+      <label>ボタン3 名称</label>
+      <input type="text" id="btn3Text">
+    </div>
+
+    <div class="row">
+      <label>ボタン3 リンク</label>
+      <input type="text" id="btn3Link">
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>下部固定メニュー</h2>
+
+    <div class="row">
+      <label>電話 名称</label>
+      <input type="text" id="footer1Text">
+    </div>
+
+    <div class="row">
+      <label>電話 リンク</label>
+      <input type="text" id="footer1Link">
+    </div>
+
+    <div class="row">
+      <label>LINE 名称</label>
+      <input type="text" id="footer2Text">
+    </div>
+
+    <div class="row">
+      <label>LINE リンク</label>
+      <input type="text" id="footer2Link">
+    </div>
+
+    <div class="row">
+      <label>予約 名称</label>
+      <input type="text" id="footer3Text">
+    </div>
+
+    <div class="row">
+      <label>予約 リンク</label>
+      <input type="text" id="footer3Link">
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>パスワード</h2>
+
+    <div class="row">
+      <label>現在のパスワード</label>
+      <input type="text" id="passwordText">
+    </div>
+
+    <p class="note">次の段階で、この内容をGitHubへ保存できるようにします。</p>
+    <button type="button" onclick="showDraft()">入力内容を確認</button>
+    <div class="preview" id="draftBox">まだ確認していません。</div>
+  </div>
+
+</main>
+
+<script>
+async function loadConfig(){
+  try{
+    const res = await fetch('./data/config.json?' + Date.now());
+    const config = await res.json();
+
+    document.getElementById('logoText').value = config.logo || '';
+
+    document.getElementById('btn1Text').value = config.buttons?.[0]?.text || '';
+    document.getElementById('btn1Link').value = config.buttons?.[0]?.link || '';
+    document.getElementById('btn2Text').value = config.buttons?.[1]?.text || '';
+    document.getElementById('btn2Link').value = config.buttons?.[1]?.link || '';
+    document.getElementById('btn3Text').value = config.buttons?.[2]?.text || '';
+    document.getElementById('btn3Link').value = config.buttons?.[2]?.link || '';
+
+    document.getElementById('footer1Text').value = config.footer?.[0]?.text || '';
+    document.getElementById('footer1Link').value = config.footer?.[0]?.link || '';
+    document.getElementById('footer2Text').value = config.footer?.[1]?.text || '';
+    document.getElementById('footer2Link').value = config.footer?.[1]?.link || '';
+    document.getElementById('footer3Text').value = config.footer?.[2]?.text || '';
+    document.getElementById('footer3Link').value = config.footer?.[2]?.link || '';
+
+    document.getElementById('passwordText').value = config.password || '';
+
+    document.getElementById('statusBox').innerText = 'config.json の読み込みに成功しました。';
+  }catch(error){
+    document.getElementById('statusBox').innerText = '読み込み失敗: ' + error.message;
+  }
+}
+
+function showDraft(){
+  const draft = {
+    password: document.getElementById('passwordText').value,
+    logo: document.getElementById('logoText').value,
+    buttons: [
+      {
+        text: document.getElementById('btn1Text').value,
+        link: document.getElementById('btn1Link').value
+      },
+      {
+        text: document.getElementById('btn2Text').value,
+        link: document.getElementById('btn2Link').value
+      },
+      {
+        text: document.getElementById('btn3Text').value,
+        link: document.getElementById('btn3Link').value
+      }
+    ],
+    footer: [
+      {
+        text: document.getElementById('footer1Text').value,
+        link: document.getElementById('footer1Link').value
+      },
+      {
+        text: document.getElementById('footer2Text').value,
+        link: document.getElementById('footer2Link').value
+      },
+      {
+        text: document.getElementById('footer3Text').value,
+        link: document.getElementById('footer3Link').value
+      }
+    ]
+  };
+
+  document.getElementById('draftBox').innerText = JSON.stringify(draft, null, 2);
+}
+
+loadConfig();
+</script>
+
+</body>
+</html>
