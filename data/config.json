@@ -1,0 +1,14 @@
+{
+  "password":"95123",
+  "logo":"LOGO",
+  "buttons":[
+    {"text":"ボタン1","link":"#"},
+    {"text":"ボタン2","link":"#"},
+    {"text":"ボタン3","link":"#"}
+  ],
+  "footer":[
+    {"text":"電話","link":"#"},
+    {"text":"LINE","link":"#"},
+    {"text":"予約","link":"#"}
+  ]
+}
