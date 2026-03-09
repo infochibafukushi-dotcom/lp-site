@@ -2,8 +2,8 @@
   "password": "95123",
   "logo": "",
   "logoImage": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/logo/1773058174979-ChatGPT-Image-202612-19_21_37---.png",
-  "headerBgColor": "#dcfce7",
-  "footerBgColor": "#dcfce7",
+  "headerBgColor": "#ffffff",
+  "footerBgColor": "#ffffff",
   "buttons": [
     {
       "text": "メール問合せ",
@@ -29,7 +29,7 @@
       "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/footer/1773052792726-cube-icon_pink039.png"
     },
     {
-      "text": "LINE",
+      "text": "公式LINE",
       "link": "#",
       "visible": true,
       "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/footer/1773052797121-image-1.png"
