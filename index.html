@@ -57,14 +57,12 @@ header{
   white-space:nowrap;
 }
 .top-buttons{
-  display:flex;
-  align-items:center;
-  justify-content:flex-start;
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
   gap:8px;
-  flex-wrap:nowrap;
   flex:1 1 auto;
   min-width:0;
-  overflow:hidden;
+  max-width:560px;
 }
 .topbtn{
   padding:8px 12px;
@@ -72,13 +70,11 @@ header{
   color:#fff;
   border-radius:8px;
   text-decoration:none;
-  display:inline-flex;
+  display:flex;
   align-items:center;
   justify-content:center;
   white-space:nowrap;
-  flex:0 0 auto;
-  min-width:120px;
-  max-width:220px;
+  min-width:0;
   overflow:hidden;
   text-overflow:ellipsis;
   font-size:14px;
@@ -202,7 +198,7 @@ main{
   margin-top:16px;
 }
 .card-grid-4{
-  grid-template-columns:repeat(4, 1fr);
+  grid-template-columns:repeat(2, minmax(0, 1fr));
 }
 .card-grid-3{
   grid-template-columns:repeat(3, 1fr);
@@ -339,15 +335,12 @@ footer{
   }
   .top-buttons{
     gap:6px;
-    flex-wrap:nowrap;
+    max-width:none;
   }
   .topbtn{
     padding:8px 6px;
     font-size:12px;
     border-radius:6px;
-    flex:1 1 0;
-    min-width:0;
-    max-width:none;
   }
 
   .section{
