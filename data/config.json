@@ -4,29 +4,38 @@
   "buttons": [
     {
       "text": "テスト",
-      "link": "#"
+      "link": "#",
+      "visible": true
     },
     {
       "text": "ボタン2",
-      "link": "#"
+      "link": "#",
+      "visible": true
     },
     {
       "text": "ボタン3",
-      "link": "#"
+      "link": "#",
+      "visible": true
     }
   ],
   "footer": [
     {
       "text": "電話",
-      "link": "#"
+      "link": "#",
+      "visible": true,
+      "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/footer/1773052723281-cube-icon_pink039.png"
     },
     {
       "text": "LINE",
-      "link": "#"
+      "link": "#",
+      "visible": true,
+      "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/footer/1773052729999-image-1.png"
     },
     {
       "text": "予約",
-      "link": "#"
+      "link": "#",
+      "visible": true,
+      "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/footer/1773052740239-messageImage_1770430107621.jpg"
     }
   ]
 }
