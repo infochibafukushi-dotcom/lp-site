@@ -12,6 +12,9 @@
   --header-bg:#ffffff;
   --footer-bg:#ffffff;
 }
+html{
+  scroll-behavior:smooth;
+}
 body{
   margin:0;
   font-family:Arial, Helvetica, sans-serif;
@@ -84,6 +87,7 @@ main{
 }
 .section{
   padding:40px 20px;
+  scroll-margin-top:90px;
 }
 .section-inner{
   max-width:1100px;
@@ -476,6 +480,14 @@ function escapeHtml(text){
     .replaceAll("'", "&#039;");
 }
 
+function escapeAttr(text){
+  return String(text ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
 function ensureConfigShape(config){
   if(!Array.isArray(config.buttons)){
     config.buttons = [
@@ -517,6 +529,47 @@ function ensureConfigShape(config){
   config.headerBgColor = config.headerBgColor || "#ffffff";
   config.footerBgColor = config.footerBgColor || "#ffffff";
   return config;
+}
+
+function ensureSectionShape(section, idx){
+  if(!section || typeof section !== "object"){
+    return {
+      id: "section-" + idx,
+      sectionId: "",
+      type: "normal",
+      enabled: true,
+      title: "",
+      text: "",
+      image: "",
+      link: "#",
+      textSize: "medium",
+      bgColor: "#ffffff",
+      alignY: "middle"
+    };
+  }
+
+  section.id = section.id || ("section-" + idx);
+  section.sectionId = section.sectionId || "";
+  section.type = section.type || "normal";
+  section.enabled = section.enabled !== false;
+  section.title = section.title || "";
+  section.text = section.text || "";
+  section.image = section.image || "";
+  section.link = section.link || "#";
+  section.textSize = section.textSize || "medium";
+  section.bgColor = section.bgColor || "#ffffff";
+  section.alignY = section.alignY || "middle";
+
+  if(!Array.isArray(section.images)) section.images = [];
+  if(!Array.isArray(section.items)) section.items = [];
+
+  return section;
+}
+
+function getSectionAnchorAttr(section){
+  const id = String(section?.sectionId || "").trim();
+  if(!id) return "";
+  return ` id="${escapeAttr(id)}"`;
 }
 
 function applyTopButton(el, data, fallbackText){
@@ -599,23 +652,23 @@ async function loadConfig(){
 
 function wrapLink(link, innerHtml, className = ""){
   if(link && link !== "#"){
-    return `<a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer" class="${escapeHtml(className)}">${innerHtml}</a>`;
+    return `<a href="${escapeAttr(link)}" target="_blank" rel="noopener noreferrer" class="${escapeAttr(className)}">${innerHtml}</a>`;
   }
   return innerHtml;
 }
 
 function renderNormal(section){
   const imageHtml = section.image
-    ? `<img class="normal-image" src="${escapeHtml(section.image)}" alt="${escapeHtml(section.title || "")}">`
+    ? `<img class="normal-image" src="${escapeAttr(section.image)}" alt="${escapeAttr(section.title || "")}">`
     : "";
   const linkedImage = wrapLink(section.link || "#", imageHtml, "");
 
   return `
-    <section class="section align-${escapeHtml(section.alignY || "middle")}" style="background:${escapeHtml(section.bgColor || "#ffffff")}">
+    <section${getSectionAnchorAttr(section)} class="section align-${escapeAttr(section.alignY || "middle")}" style="background:${escapeAttr(section.bgColor || "#ffffff")}">
       <div class="section-inner">
         <h2 class="section-title">${escapeHtml(section.title || "")}</h2>
         <div class="normal-image-wrap">${linkedImage}</div>
-        <p class="section-text text-${escapeHtml(section.textSize || "medium")}">${escapeHtml(section.text || "")}</p>
+        <p class="section-text text-${escapeAttr(section.textSize || "medium")}">${escapeHtml(section.text || "")}</p>
       </div>
     </section>
   `;
@@ -625,7 +678,7 @@ function renderSlider(section, idx){
   const images = Array.isArray(section.images) ? section.images : [];
   const slides = images.length
     ? images.map(src => {
-        const image = `<img src="${escapeHtml(src)}" alt="${escapeHtml(section.title || "")}">`;
+        const image = `<img src="${escapeAttr(src)}" alt="${escapeAttr(section.title || "")}">`;
         return `<div class="slider-slide">${wrapLink(section.link || "#", image, "")}</div>`;
       }).join("")
     : `<div class="slider-empty">画像がまだありません</div>`;
@@ -635,7 +688,7 @@ function renderSlider(section, idx){
     : "";
 
   return `
-    <section class="section align-${escapeHtml(section.alignY || "middle")}" style="background:${escapeHtml(section.bgColor || "#f8f9fa")}">
+    <section${getSectionAnchorAttr(section)} class="section align-${escapeAttr(section.alignY || "middle")}" style="background:${escapeAttr(section.bgColor || "#f8f9fa")}">
       <div class="section-inner">
         <h2 class="section-title">${escapeHtml(section.title || "")}</h2>
         <div class="slider-shell" data-slider-index="${idx}">
@@ -646,7 +699,7 @@ function renderSlider(section, idx){
           </div>
           ${dots}
         </div>
-        <p class="section-text text-${escapeHtml(section.textSize || "medium")}">${escapeHtml(section.text || "")}</p>
+        <p class="section-text text-${escapeAttr(section.textSize || "medium")}">${escapeHtml(section.text || "")}</p>
       </div>
     </section>
   `;
@@ -664,9 +717,9 @@ function renderCardItems(items, textSize){
     const link = item?.link || "#";
 
     const inner = `
-      ${image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(title)}">` : ""}
+      ${image ? `<img src="${escapeAttr(image)}" alt="${escapeAttr(title)}">` : ""}
       ${title ? `<h3 class="card-item-title">${escapeHtml(title)}</h3>` : ""}
-      ${text ? `<div class="section-text text-${escapeHtml(textSize || "medium")}">${escapeHtml(text)}</div>` : ""}
+      ${text ? `<div class="section-text text-${escapeAttr(textSize || "medium")}">${escapeHtml(text)}</div>` : ""}
     `;
 
     return `<div class="card-item">${wrapLink(link, inner, "card-link")}</div>`;
@@ -675,7 +728,7 @@ function renderCardItems(items, textSize){
 
 function renderCard4(section){
   return `
-    <section class="section" style="background:${escapeHtml(section.bgColor || "#ffffff")}">
+    <section${getSectionAnchorAttr(section)} class="section" style="background:${escapeAttr(section.bgColor || "#ffffff")}">
       <div class="section-inner">
         <h2 class="section-title">${escapeHtml(section.title || "")}</h2>
         <div class="card-grid-4">
@@ -688,7 +741,7 @@ function renderCard4(section){
 
 function renderCard3(section){
   return `
-    <section class="section" style="background:${escapeHtml(section.bgColor || "#ffffff")}">
+    <section${getSectionAnchorAttr(section)} class="section" style="background:${escapeAttr(section.bgColor || "#ffffff")}">
       <div class="section-inner">
         <h2 class="section-title">${escapeHtml(section.title || "")}</h2>
         <div class="card-grid-3">
@@ -701,7 +754,7 @@ function renderCard3(section){
 
 function renderCard2(section){
   return `
-    <section class="section" style="background:${escapeHtml(section.bgColor || "#ffffff")}">
+    <section${getSectionAnchorAttr(section)} class="section" style="background:${escapeAttr(section.bgColor || "#ffffff")}">
       <div class="section-inner">
         <h2 class="section-title">${escapeHtml(section.title || "")}</h2>
         <div class="card-grid-2">
@@ -716,18 +769,18 @@ function renderMedia(section, reverse = false){
   const image = section.image
     ? wrapLink(
         section.link || "#",
-        `<img src="${escapeHtml(section.image)}" alt="${escapeHtml(section.title || "")}">`,
+        `<img src="${escapeAttr(section.image)}" alt="${escapeAttr(section.title || "")}">`,
         ""
       )
     : "";
 
   return `
-    <section class="section align-${escapeHtml(section.alignY || "middle")}" style="background:${escapeHtml(section.bgColor || "#ffffff")}">
+    <section${getSectionAnchorAttr(section)} class="section align-${escapeAttr(section.alignY || "middle")}" style="background:${escapeAttr(section.bgColor || "#ffffff")}">
       <div class="section-inner">
         <div class="media-row ${reverse ? "reverse" : ""}">
           <div>
             <h2 class="section-title">${escapeHtml(section.title || "")}</h2>
-            <p class="section-text text-${escapeHtml(section.textSize || "medium")}">${escapeHtml(section.text || "")}</p>
+            <p class="section-text text-${escapeAttr(section.textSize || "medium")}">${escapeHtml(section.text || "")}</p>
           </div>
           <div>${image}</div>
         </div>
@@ -737,6 +790,8 @@ function renderMedia(section, reverse = false){
 }
 
 function renderSection(section, idx){
+  section = ensureSectionShape(section, idx);
+
   if(!section || section.enabled === false){
     return "";
   }
@@ -758,7 +813,7 @@ function renderSection(section, idx){
       return renderMedia(section, true);
     default:
       return `
-        <section class="section" style="background:#fff3cd">
+        <section${getSectionAnchorAttr(section)} class="section" style="background:#fff3cd">
           <div class="section-inner">
             <h2 class="section-title">未対応セクション</h2>
             <p class="section-text">type: ${escapeHtml(section.type || "")}</p>
@@ -773,15 +828,25 @@ async function loadSections(){
 
   try{
     const res = await fetch("./data/sections.json?" + Date.now());
-    const sections = await res.json();
+    let sections = await res.json();
 
     if(!Array.isArray(sections) || sections.length === 0){
       container.innerHTML = '<div class="empty-box">セクションがまだありません。</div>';
       return;
     }
 
+    sections = sections.map((section, idx) => ensureSectionShape(section, idx));
     container.innerHTML = sections.map((section, idx) => renderSection(section, idx)).join("");
     initSliders();
+
+    if(location.hash){
+      const target = document.querySelector(location.hash);
+      if(target){
+        setTimeout(() => {
+          target.scrollIntoView({ behavior:"smooth", block:"start" });
+        }, 50);
+      }
+    }
   }catch(error){
     container.innerHTML = '<div class="empty-box">sections.json の読み込みに失敗しました。</div>';
   }
@@ -966,6 +1031,15 @@ function goToSliderDot(idx, dotIndex){
   updateSliderPosition(idx);
   resetSliderTimer(idx);
 }
+
+window.addEventListener("hashchange", () => {
+  if(location.hash){
+    const target = document.querySelector(location.hash);
+    if(target){
+      target.scrollIntoView({ behavior:"smooth", block:"start" });
+    }
+  }
+});
 
 async function init(){
   await loadConfig();
