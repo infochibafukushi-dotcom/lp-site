@@ -55,5 +55,27 @@
         "link": "#"
       }
     ]
+  },
+  {
+    "id": "section-1773052122071",
+    "type": "card2",
+    "enabled": true,
+    "title": "新しいカード2",
+    "textSize": "medium",
+    "bgColor": "#ffffff",
+    "items": [
+      {
+        "title": "カード1",
+        "text": "説明",
+        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773052136820-cube-icon_pink039.png",
+        "link": "#"
+      },
+      {
+        "title": "カード2",
+        "text": "説明",
+        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773052146057-cube-icon_pink039.png",
+        "link": "#"
+      }
+    ]
   }
 ]
