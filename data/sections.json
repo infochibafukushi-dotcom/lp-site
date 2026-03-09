@@ -22,5 +22,33 @@
     "textSize": "medium",
     "bgColor": "#f8f9fa",
     "alignY": "middle"
+  },
+  {
+    "id": "section-1773049874928",
+    "type": "card3",
+    "enabled": true,
+    "title": "サービズ紹介",
+    "textSize": "medium",
+    "bgColor": "#ffffff",
+    "items": [
+      {
+        "title": "カード1",
+        "text": "説明",
+        "image": "",
+        "link": "#"
+      },
+      {
+        "title": "カード2",
+        "text": "説明",
+        "image": "",
+        "link": "#"
+      },
+      {
+        "title": "カード3",
+        "text": "説明",
+        "image": "",
+        "link": "#"
+      }
+    ]
   }
 ]
