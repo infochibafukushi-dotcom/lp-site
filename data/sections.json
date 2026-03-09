@@ -16,7 +16,8 @@
     "link": "#",
     "textSize": "medium",
     "bgColor": "#b7e4c7",
-    "alignY": "middle"
+    "alignY": "middle",
+    "sectionId": ""
   },
   {
     "id": "section-001",
@@ -28,7 +29,8 @@
     "link": "#",
     "textSize": "medium",
     "bgColor": "#ffcad4",
-    "alignY": "middle"
+    "alignY": "middle",
+    "sectionId": ""
   },
   {
     "id": "section-1773049874928",
@@ -56,7 +58,8 @@
         "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773051212124-image-1.png",
         "link": "#"
       }
-    ]
+    ],
+    "sectionId": ""
   },
   {
     "id": "section-1773052122071",
@@ -78,7 +81,8 @@
         "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773052146057-cube-icon_pink039.png",
         "link": "#"
       }
-    ]
+    ],
+    "sectionId": ""
   },
   {
     "id": "section-1773060504302",
@@ -90,7 +94,8 @@
     "link": "#",
     "textSize": "medium",
     "bgColor": "#ffffff",
-    "alignY": "middle"
+    "alignY": "middle",
+    "sectionId": ""
   },
   {
     "id": "section-1773060508054",
@@ -102,7 +107,8 @@
     "link": "#",
     "textSize": "medium",
     "bgColor": "#ffffff",
-    "alignY": "middle"
+    "alignY": "middle",
+    "sectionId": ""
   },
   {
     "id": "section-1773062931061",
@@ -136,6 +142,7 @@
         "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773062985662-messageImage_1770383194104.jpg",
         "link": "#"
       }
-    ]
+    ],
+    "sectionId": ""
   }
 ]
