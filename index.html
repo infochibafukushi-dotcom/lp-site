@@ -15,7 +15,7 @@ body{
   color:#222;
 }
 header{
-  background:#ffffff;
+  background:var(--header-bg, #ffffff);
   padding:15px;
   display:flex;
   align-items:center;
@@ -36,8 +36,9 @@ header{
   flex:0 0 auto;
 }
 .logo-img{
-  width:44px;
-  height:44px;
+  width:auto;
+  height:60px;
+  max-width:220px;
   object-fit:contain;
   display:none;
 }
@@ -135,9 +136,9 @@ main{
 .slider-slide img{
   width:100%;
   max-width:700px;
-  height:auto;
-  max-height:380px;
-  object-fit:cover;
+  height:380px;
+  object-fit:contain;
+  object-position:center;
   border-radius:12px;
   display:block;
   margin:0 auto;
@@ -150,24 +151,26 @@ main{
   display:inline-block;
 }
 .slider-arrow{
-  position:absolute;
-  top:50%;
-  transform:translateY(-50%);
-  width:42px;
-  height:42px;
+  display:none !important;
+}
+.slider-dots{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:8px;
+  margin-top:12px;
+}
+.slider-dot{
+  width:10px;
+  height:10px;
   border:none;
   border-radius:999px;
-  background:rgba(0,0,0,0.55);
-  color:#fff;
-  font-size:20px;
+  background:#c9ced6;
+  padding:0;
   cursor:pointer;
-  z-index:2;
 }
-.slider-arrow.left{
-  left:10px;
-}
-.slider-arrow.right{
-  right:10px;
+.slider-dot.active{
+  background:#5c6673;
 }
 
 .card-grid-4,
@@ -231,7 +234,7 @@ footer{
   bottom:0;
   left:0;
   width:100%;
-  background:#ffffff;
+  background:var(--footer-bg, #ffffff);
   display:flex;
   justify-content:space-around;
   align-items:center;
@@ -297,6 +300,13 @@ footer{
 }
 
 @media (max-width: 768px){
+  header{
+    padding:12px;
+  }
+  .logo-img{
+    height:54px;
+    max-width:180px;
+  }
   .section{
     padding:28px 12px;
   }
@@ -324,14 +334,14 @@ footer{
     height:46px;
   }
   .slider-slide img{
-    max-height:260px;
+    height:260px;
   }
 }
 </style>
 </head>
 <body>
 
-<header>
+<header id="siteHeader">
   <div class="logo" id="logoTrigger">
     <img id="logoImg" class="logo-img" alt="">
     <div class="logo-text" id="logoTextView">LOGO</div>
@@ -374,6 +384,7 @@ footer{
 let clickCount = 0;
 let sitePassword = "95123";
 let sliderTimers = [];
+let sliderTouchState = {};
 
 document.getElementById("logoTrigger").onclick = function(){
   clickCount++;
@@ -440,6 +451,8 @@ function ensureConfigShape(config){
   }));
 
   config.logoImage = config.logoImage || "";
+  config.headerBgColor = config.headerBgColor || config.topBandColor || "#ffffff";
+  config.footerBgColor = config.footerBgColor || config.bottomBandColor || "#ffffff";
   return config;
 }
 
@@ -488,6 +501,9 @@ async function loadConfig(){
     logoImgEl.src = "";
     logoImgEl.style.display = "none";
   }
+
+  document.documentElement.style.setProperty("--header-bg", config.headerBgColor);
+  document.documentElement.style.setProperty("--footer-bg", config.footerBgColor);
 
   applyTopButton(document.getElementById("btn1"), config.buttons[0], "ボタン1");
   applyTopButton(document.getElementById("btn2"), config.buttons[1], "ボタン2");
@@ -551,18 +567,21 @@ function renderSlider(section, idx){
       }).join("")
     : `<div class="slider-empty">画像がまだありません</div>`;
 
+  const dots = images.length > 1
+    ? `<div class="slider-dots" id="slider-dots-${idx}"></div>`
+    : "";
+
   return `
     <section class="section align-${escapeHtml(section.alignY || "middle")}" style="background:${escapeHtml(section.bgColor || "#f8f9fa")}">
       <div class="section-inner">
         <h2 class="section-title">${escapeHtml(section.title || "")}</h2>
         <div class="slider-shell" data-slider-index="${idx}">
-          <button class="slider-arrow left" type="button" onclick="moveSlider(${idx}, -1)">←</button>
           <div class="slider-window">
             <div class="slider-track" id="slider-track-${idx}">
               ${slides}
             </div>
           </div>
-          <button class="slider-arrow right" type="button" onclick="moveSlider(${idx}, 1)">→</button>
+          ${dots}
         </div>
         <p class="section-text text-${escapeHtml(section.textSize || "medium")}">${escapeHtml(section.text || "")}</p>
       </div>
@@ -706,31 +725,120 @@ async function loadSections(){
 }
 
 function clearSliderTimers(){
-  sliderTimers.forEach(timer => clearInterval(timer));
+  sliderTimers.forEach(timer => clearInterval(timer.id));
   sliderTimers = [];
+  sliderTouchState = {};
+}
+
+function buildSliderDots(idx, total){
+  const dotsWrap = document.getElementById(`slider-dots-${idx}`);
+  if(!dotsWrap) return;
+
+  let html = "";
+  for(let i = 0; i < total; i++){
+    html += `<button class="slider-dot${i === 0 ? " active" : ""}" type="button" onclick="goToSlider(${idx}, ${i})"></button>`;
+  }
+  dotsWrap.innerHTML = html;
+}
+
+function updateSliderDots(idx, current){
+  const dotsWrap = document.getElementById(`slider-dots-${idx}`);
+  if(!dotsWrap) return;
+  const dots = dotsWrap.querySelectorAll(".slider-dot");
+  dots.forEach((dot, i) => {
+    dot.classList.toggle("active", i === current);
+  });
+}
+
+function attachSliderSwipe(shell, idx){
+  const track = document.getElementById(`slider-track-${idx}`);
+  if(!track) return;
+
+  sliderTouchState[idx] = { startX:0, startY:0 };
+
+  shell.addEventListener("touchstart", (e) => {
+    const t = e.touches[0];
+    sliderTouchState[idx].startX = t.clientX;
+    sliderTouchState[idx].startY = t.clientY;
+  }, { passive:true });
+
+  shell.addEventListener("touchend", (e) => {
+    const state = sliderTouchState[idx];
+    if(!state) return;
+
+    const t = e.changedTouches[0];
+    const diffX = t.clientX - state.startX;
+    const diffY = t.clientY - state.startY;
+
+    if(Math.abs(diffX) < 40) return;
+    if(Math.abs(diffY) > Math.abs(diffX)) return;
+
+    if(diffX < 0){
+      moveSlider(idx, 1);
+      resetSliderTimer(idx);
+    }
+  }, { passive:true });
+}
+
+function createSliderTimer(idx){
+  const track = document.getElementById(`slider-track-${idx}`);
+  if(!track) return null;
+
+  const slides = track.querySelectorAll(".slider-slide");
+  if(slides.length <= 1) return null;
+
+  const id = setInterval(() => {
+    moveSlider(idx, 1);
+  }, 3000);
+
+  return { idx, id };
+}
+
+function resetSliderTimer(idx){
+  const item = sliderTimers.find(v => v.idx === idx);
+  if(item){
+    clearInterval(item.id);
+    item.id = setInterval(() => {
+      moveSlider(idx, 1);
+    }, 3000);
+  }
 }
 
 function initSliders(){
   clearSliderTimers();
 
-  document.querySelectorAll('.slider-shell').forEach((shell) => {
+  document.querySelectorAll(".slider-shell").forEach((shell) => {
     const idx = Number(shell.dataset.sliderIndex);
     const track = document.getElementById(`slider-track-${idx}`);
     if(!track) return;
 
-    const slides = track.querySelectorAll('.slider-slide');
-    if(slides.length <= 1) return;
+    const slides = track.querySelectorAll(".slider-slide");
+    const total = slides.length;
+
+    if(total === 0) return;
 
     track.dataset.current = "0";
     updateSliderPosition(idx);
+    buildSliderDots(idx, total);
+    attachSliderSwipe(shell, idx);
 
-    const timer = setInterval(() => {
-      moveSlider(idx, 1);
-    }, 3000);
+    if(total > 1){
+      const timer = createSliderTimer(idx);
+      if(timer){
+        sliderTimers.push(timer);
+      }
 
-    sliderTimers.push(timer);
+      shell.addEventListener("mouseenter", () => {
+        const item = sliderTimers.find(v => v.idx === idx);
+        if(item){
+          clearInterval(item.id);
+        }
+      });
 
-    shell.addEventListener('mouseenter', () => clearInterval(timer));
+      shell.addEventListener("mouseleave", () => {
+        resetSliderTimer(idx);
+      });
+    }
   });
 }
 
@@ -738,7 +846,7 @@ function updateSliderPosition(idx){
   const track = document.getElementById(`slider-track-${idx}`);
   if(!track) return;
 
-  const slides = track.querySelectorAll('.slider-slide');
+  const slides = track.querySelectorAll(".slider-slide");
   const total = slides.length;
   if(total === 0) return;
 
@@ -748,16 +856,34 @@ function updateSliderPosition(idx){
 
   track.dataset.current = String(current);
   track.style.transform = `translateX(-${current * 100}%)`;
+  updateSliderDots(idx, current);
 }
 
 function moveSlider(idx, step){
   const track = document.getElementById(`slider-track-${idx}`);
   if(!track) return;
 
+  const slides = track.querySelectorAll(".slider-slide");
+  const total = slides.length;
+  if(total === 0) return;
+
   let current = Number(track.dataset.current || "0");
   current += step;
+
+  if(current >= total) current = 0;
+  if(current < 0) current = total - 1;
+
   track.dataset.current = String(current);
   updateSliderPosition(idx);
+}
+
+function goToSlider(idx, target){
+  const track = document.getElementById(`slider-track-${idx}`);
+  if(!track) return;
+
+  track.dataset.current = String(target);
+  updateSliderPosition(idx);
+  resetSliderTimer(idx);
 }
 
 async function init(){
