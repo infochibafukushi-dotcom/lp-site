@@ -6,6 +6,9 @@
 <title>管理画面</title>
 <style>
 *{box-sizing:border-box;}
+html{
+  scroll-behavior:smooth;
+}
 body{
   margin:0;
   font-family:Arial, Helvetica, sans-serif;
@@ -246,11 +249,49 @@ button.small-btn{
   justify-content:center;
   font-weight:bold;
 }
+.jump-menu{
+  display:grid;
+  grid-template-columns:repeat(5, 1fr);
+  gap:10px;
+}
+.jump-btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  min-height:52px;
+  border-radius:10px;
+  background:#f8f9fa;
+  border:1px solid #ddd;
+  color:#222;
+  text-decoration:none;
+  font-size:14px;
+  font-weight:bold;
+  padding:10px;
+}
+.jump-btn:hover{
+  background:#eef5ff;
+  border-color:#9cc2ff;
+}
+.save-inline{
+  margin-top:14px;
+}
+.section-anchor{
+  scroll-margin-top:90px;
+}
+@media (max-width: 900px){
+  .jump-menu{
+    grid-template-columns:repeat(2, 1fr);
+  }
+}
 @media (max-width: 768px){
   .grid2{grid-template-columns:1fr;}
   header{font-size:18px;}
   .card{padding:16px;}
   .band-preview-wrap{grid-template-columns:1fr;}
+  .jump-menu{
+    grid-template-columns:1fr;
+  }
 }
 </style>
 </head>
@@ -263,6 +304,18 @@ button.small-btn{
   <div class="card">
     <h2>現在の状態</h2>
     <div class="preview" id="statusBox">読み込み中...</div>
+  </div>
+
+  <div class="card">
+    <h2>編集メニュー</h2>
+    <p class="note">編集したい場所を先に選んでください。選んだ位置まで移動できます。</p>
+    <div class="jump-menu">
+      <a class="jump-btn" href="#topSettingsCard">上部設定</a>
+      <a class="jump-btn" href="#bottomSettingsCard">下部設定</a>
+      <a class="jump-btn" href="#sectionAddCard">セクション追加</a>
+      <a class="jump-btn" href="#sectionsListCard">セクション一覧</a>
+      <a class="jump-btn" href="#previewCard">保存前プレビュー</a>
+    </div>
   </div>
 
   <div class="card">
@@ -291,7 +344,7 @@ button.small-btn{
     </div>
   </div>
 
-  <div class="card">
+  <div class="card section-anchor" id="topSettingsCard">
     <h2>上部設定</h2>
     <div class="grid2">
       <div>
@@ -360,9 +413,13 @@ button.small-btn{
         </div>
       </div>
     </div>
+
+    <div class="actions save-inline">
+      <button type="button" onclick="saveConfigToGitHub()">上部設定を保存</button>
+    </div>
   </div>
 
-  <div class="card">
+  <div class="card section-anchor" id="bottomSettingsCard">
     <h2>下部設定</h2>
     <div class="grid2">
       <div>
@@ -465,12 +522,12 @@ button.small-btn{
     </div>
 
     <div class="actions" style="margin-top:14px;">
-      <button type="button" onclick="saveConfigToGitHub()">config.json を保存</button>
+      <button type="button" onclick="saveConfigToGitHub()">下部設定を保存</button>
     </div>
     <div class="preview" id="configSaveResult">まだ保存していません。</div>
   </div>
 
-  <div class="card">
+  <div class="card section-anchor" id="sectionAddCard">
     <h2>セクション追加</h2>
     <p class="note">7種類を簡単に追加できます。追加後に sections.json を保存してください。</p>
 
@@ -498,7 +555,7 @@ button.small-btn{
     </div>
   </div>
 
-  <div class="card">
+  <div class="card section-anchor" id="sectionsListCard">
     <h2>セクション一覧</h2>
     <div id="sectionsEditor">読み込み中...</div>
     <div class="actions">
@@ -507,7 +564,7 @@ button.small-btn{
     <div class="preview" id="sectionsSaveResult">まだ保存していません。</div>
   </div>
 
-  <div class="card">
+  <div class="card section-anchor" id="previewCard">
     <h2>保存前プレビュー</h2>
     <div class="actions">
       <button type="button" class="secondary" onclick="showDrafts()">config / sections を確認</button>
