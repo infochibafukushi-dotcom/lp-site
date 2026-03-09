@@ -159,6 +159,17 @@ button.small-btn{
   border-radius:8px;
   border:1px solid #ddd;
 }
+.card-item-editor{
+  border:1px solid #ddd;
+  border-radius:10px;
+  background:#fff;
+  padding:12px;
+  margin-bottom:12px;
+}
+.card-item-editor h4{
+  margin:0 0 10px;
+  font-size:16px;
+}
 @media (max-width: 768px){
   .grid2{
     grid-template-columns:1fr;
@@ -447,21 +458,18 @@ async function loadConfig(){
   const config = await res.json();
 
   document.getElementById('logoText').value = config.logo || '';
-
   document.getElementById('btn1Text').value = config.buttons?.[0]?.text || '';
   document.getElementById('btn1Link').value = config.buttons?.[0]?.link || '';
   document.getElementById('btn2Text').value = config.buttons?.[1]?.text || '';
   document.getElementById('btn2Link').value = config.buttons?.[1]?.link || '';
   document.getElementById('btn3Text').value = config.buttons?.[2]?.text || '';
   document.getElementById('btn3Link').value = config.buttons?.[2]?.link || '';
-
   document.getElementById('footer1Text').value = config.footer?.[0]?.text || '';
   document.getElementById('footer1Link').value = config.footer?.[0]?.link || '';
   document.getElementById('footer2Text').value = config.footer?.[1]?.text || '';
   document.getElementById('footer2Link').value = config.footer?.[1]?.link || '';
   document.getElementById('footer3Text').value = config.footer?.[2]?.text || '';
   document.getElementById('footer3Link').value = config.footer?.[2]?.link || '';
-
   document.getElementById('passwordText').value = config.password || '';
 }
 
@@ -621,22 +629,8 @@ function updateSectionEnabled(index, checked){
 }
 
 function updateSliderImages(index, value){
-  const list = value
-    .split('\n')
-    .map(v => v.trim())
-    .filter(v => v);
+  const list = value.split('\n').map(v => v.trim()).filter(v => v);
   sectionsData[index].images = list;
-  renderSectionsEditor();
-}
-
-function updateCardItems(index, value){
-  try{
-    const parsed = JSON.parse(value);
-    if(Array.isArray(parsed)){
-      sectionsData[index].items = parsed;
-    }
-  }catch(error){
-  }
 }
 
 function escapeHtml(text){
@@ -721,9 +715,7 @@ async function uploadAssetFile(file, folder = 'sections'){
 async function uploadSingleImage(index, input){
   try{
     const file = input.files?.[0];
-    if(!file){
-      return;
-    }
+    if(!file) return;
 
     setSectionsSaveResult('画像アップロード中です...', 'warn');
     const url = await uploadAssetFile(file, 'sections');
@@ -740,11 +732,10 @@ async function uploadSingleImage(index, input){
 async function uploadSliderImages(index, input){
   try{
     const files = Array.from(input.files || []);
-    if(files.length === 0){
-      return;
-    }
+    if(files.length === 0) return;
 
     setSectionsSaveResult('スライダー画像アップロード中です...', 'warn');
+
     const urls = [];
     for(const file of files){
       const url = await uploadAssetFile(file, 'sections');
@@ -768,6 +759,27 @@ async function uploadSliderImages(index, input){
 function removeSliderImage(sectionIndex, imageIndex){
   sectionsData[sectionIndex].images.splice(imageIndex, 1);
   renderSectionsEditor();
+}
+
+function updateCardItemField(sectionIndex, itemIndex, field, value){
+  sectionsData[sectionIndex].items[itemIndex][field] = value;
+}
+
+async function uploadCardItemImage(sectionIndex, itemIndex, input){
+  try{
+    const file = input.files?.[0];
+    if(!file) return;
+
+    setSectionsSaveResult('カード画像アップロード中です...', 'warn');
+    const url = await uploadAssetFile(file, 'sections');
+    sectionsData[sectionIndex].items[itemIndex].image = url;
+    renderSectionsEditor();
+    setSectionsSaveResult('カード画像アップロードに成功しました。最後に sections.json を保存してください。', 'success');
+  }catch(error){
+    setSectionsSaveResult('画像アップロード失敗: ' + error.message, 'error');
+  }finally{
+    input.value = '';
+  }
 }
 
 function renderSliderThumbs(section, index){
@@ -804,6 +816,47 @@ function renderSingleImageBlock(section, index){
       </div>
     </div>
   `;
+}
+
+function renderCardItemsEditor(section, sectionIndex){
+  const items = Array.isArray(section.items) ? section.items : [];
+  if(items.length === 0){
+    return '<div class="small">カードデータがありません。</div>';
+  }
+
+  return items.map((item, itemIndex) => `
+    <div class="card-item-editor">
+      <h4>カード ${itemIndex + 1}</h4>
+
+      <div class="grid2">
+        <div class="row">
+          <label>タイトル</label>
+          <input type="text" value="${escapeAttr(item.title || '')}" oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'title', this.value)">
+        </div>
+
+        <div class="row">
+          <label>リンク</label>
+          <input type="text" value="${escapeAttr(item.link || '#')}" oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'link', this.value)">
+        </div>
+
+        <div class="row" style="grid-column:1 / -1;">
+          <label>説明文</label>
+          <textarea oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'text', this.value)">${escapeHtml(item.text || '')}</textarea>
+        </div>
+
+        <div class="row" style="grid-column:1 / -1;">
+          <label>画像URL</label>
+          <input type="text" value="${escapeAttr(item.image || '')}" oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'image', this.value)">
+          <div class="upload-box">
+            <label>画像ファイル選択</label>
+            <input type="file" accept="image/*" onchange="uploadCardItemImage(${sectionIndex}, ${itemIndex}, this)">
+            <div class="small">選択すると GitHub の assets/sections にアップロードされます。</div>
+            ${item.image ? `<img class="image-preview" src="${escapeAttr(item.image)}" alt="">` : ''}
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
 }
 
 function renderSectionsEditor(){
@@ -892,9 +945,8 @@ function renderSectionsEditor(){
 
           ${isCards ? `
           <div class="row" style="grid-column:1 / -1;">
-            <label>カードデータJSON</label>
-            <textarea oninput="updateCardItems(${index}, this.value)">${escapeHtml(JSON.stringify(section.items || [], null, 2))}</textarea>
-            <div class="small">title / text / image / link を持つ配列のまま編集します。</div>
+            <label>カード編集</label>
+            ${renderCardItemsEditor(section, index)}
           </div>` : ''}
         </div>
       </div>
