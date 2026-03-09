@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>管理画面</title>
 <style>
+*{
+  box-sizing:border-box;
+}
 body{
   margin:0;
   font-family:Arial, Helvetica, sans-serif;
@@ -22,7 +25,7 @@ header{
   z-index:100;
 }
 main{
-  max-width:900px;
+  max-width:1100px;
   margin:20px auto 120px;
   padding:0 16px;
 }
@@ -48,7 +51,7 @@ label{
   font-size:14px;
   font-weight:bold;
 }
-input, textarea{
+input, textarea, select{
   padding:10px 12px;
   border:1px solid #ccc;
   border-radius:8px;
@@ -71,6 +74,14 @@ button{
 button.secondary{
   background:#6c757d;
 }
+button.danger{
+  background:#dc3545;
+}
+.actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
 .note{
   font-size:13px;
   color:#666;
@@ -86,11 +97,6 @@ button.secondary{
   white-space:pre-wrap;
   word-break:break-all;
 }
-.actions{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
 .success{
   color:#0a7a2f;
   font-weight:bold;
@@ -103,7 +109,30 @@ button.secondary{
   color:#9a6700;
   font-weight:bold;
 }
-@media (max-width: 640px){
+.section-item{
+  border:1px solid #ddd;
+  border-radius:12px;
+  padding:14px;
+  margin-bottom:14px;
+  background:#fcfcfc;
+}
+.section-item h3{
+  margin:0 0 12px;
+  font-size:18px;
+}
+.grid2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+.small{
+  font-size:12px;
+  color:#777;
+}
+@media (max-width: 768px){
+  .grid2{
+    grid-template-columns:1fr;
+  }
   header{
     font-size:18px;
   }
@@ -121,34 +150,33 @@ button.secondary{
 
   <div class="card">
     <h2>現在の状態</h2>
-    <p class="note">config.json の読み込みと、GitHub保存用の入力欄です。今回はまず config.json を GitHub に保存できる形まで作ります。</p>
     <div class="preview" id="statusBox">読み込み中...</div>
   </div>
 
   <div class="card">
     <h2>GitHub接続設定</h2>
 
-    <div class="row">
-      <label>GitHub ユーザー名</label>
-      <input type="text" id="githubOwner" placeholder="例: infochibafukushi-dotcom">
-    </div>
+    <div class="grid2">
+      <div class="row">
+        <label>GitHub ユーザー名</label>
+        <input type="text" id="githubOwner" placeholder="例: infochibafukushi-dotcom">
+      </div>
 
-    <div class="row">
-      <label>リポジトリ名</label>
-      <input type="text" id="githubRepo" placeholder="例: lp-site">
-    </div>
+      <div class="row">
+        <label>リポジトリ名</label>
+        <input type="text" id="githubRepo" placeholder="例: lp-site">
+      </div>
 
-    <div class="row">
-      <label>ブランチ名</label>
-      <input type="text" id="githubBranch" placeholder="例: main">
-    </div>
+      <div class="row">
+        <label>ブランチ名</label>
+        <input type="text" id="githubBranch" placeholder="例: main">
+      </div>
 
-    <div class="row">
-      <label>GitHub Personal Access Token</label>
-      <input type="password" id="githubToken" placeholder="GitHubトークンを入力">
+      <div class="row">
+        <label>GitHub Personal Access Token</label>
+        <input type="password" id="githubToken" placeholder="GitHubトークンを入力">
+      </div>
     </div>
-
-    <p class="note">この画面では、まず config.json を GitHub に保存するための設定を入れます。トークンはブラウザ保存用に localStorage を使います。</p>
 
     <div class="actions">
       <button type="button" class="secondary" onclick="saveGitHubSettings()">接続設定を保存</button>
@@ -157,109 +185,142 @@ button.secondary{
   </div>
 
   <div class="card">
-    <h2>ヘッダー</h2>
+    <h2>基本設定</h2>
 
-    <div class="row">
-      <label>ロゴ文字</label>
-      <input type="text" id="logoText">
+    <div class="grid2">
+      <div>
+        <div class="row">
+          <label>ロゴ文字</label>
+          <input type="text" id="logoText">
+        </div>
+
+        <div class="row">
+          <label>ボタン1 名称</label>
+          <input type="text" id="btn1Text">
+        </div>
+
+        <div class="row">
+          <label>ボタン1 リンク</label>
+          <input type="text" id="btn1Link">
+        </div>
+
+        <div class="row">
+          <label>ボタン2 名称</label>
+          <input type="text" id="btn2Text">
+        </div>
+
+        <div class="row">
+          <label>ボタン2 リンク</label>
+          <input type="text" id="btn2Link">
+        </div>
+
+        <div class="row">
+          <label>ボタン3 名称</label>
+          <input type="text" id="btn3Text">
+        </div>
+
+        <div class="row">
+          <label>ボタン3 リンク</label>
+          <input type="text" id="btn3Link">
+        </div>
+      </div>
+
+      <div>
+        <div class="row">
+          <label>電話 名称</label>
+          <input type="text" id="footer1Text">
+        </div>
+
+        <div class="row">
+          <label>電話 リンク</label>
+          <input type="text" id="footer1Link">
+        </div>
+
+        <div class="row">
+          <label>LINE 名称</label>
+          <input type="text" id="footer2Text">
+        </div>
+
+        <div class="row">
+          <label>LINE リンク</label>
+          <input type="text" id="footer2Link">
+        </div>
+
+        <div class="row">
+          <label>予約 名称</label>
+          <input type="text" id="footer3Text">
+        </div>
+
+        <div class="row">
+          <label>予約 リンク</label>
+          <input type="text" id="footer3Link">
+        </div>
+
+        <div class="row">
+          <label>現在のパスワード</label>
+          <input type="text" id="passwordText">
+        </div>
+      </div>
     </div>
 
-    <div class="row">
-      <label>ボタン1 名称</label>
-      <input type="text" id="btn1Text">
+    <div class="actions">
+      <button type="button" onclick="saveConfigToGitHub()">config.json を保存</button>
+    </div>
+    <div class="preview" id="configSaveResult">まだ保存していません。</div>
+  </div>
+
+  <div class="card">
+    <h2>セクション追加</h2>
+    <p class="note">まずは7種類を簡単に追加できる状態を作ります。追加後に一覧から保存してください。</p>
+
+    <div class="grid2">
+      <div class="row">
+        <label>追加するセクション種類</label>
+        <select id="newSectionType">
+          <option value="normal">normal</option>
+          <option value="slider">slider</option>
+          <option value="card4">card4</option>
+          <option value="card3">card3</option>
+          <option value="card2">card2</option>
+          <option value="card1-right">card1-right</option>
+          <option value="card1-left">card1-left</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label>追加するタイトル</label>
+        <input type="text" id="newSectionTitle" placeholder="例: サービス紹介">
+      </div>
     </div>
 
-    <div class="row">
-      <label>ボタン1 リンク</label>
-      <input type="text" id="btn1Link">
-    </div>
-
-    <div class="row">
-      <label>ボタン2 名称</label>
-      <input type="text" id="btn2Text">
-    </div>
-
-    <div class="row">
-      <label>ボタン2 リンク</label>
-      <input type="text" id="btn2Link">
-    </div>
-
-    <div class="row">
-      <label>ボタン3 名称</label>
-      <input type="text" id="btn3Text">
-    </div>
-
-    <div class="row">
-      <label>ボタン3 リンク</label>
-      <input type="text" id="btn3Link">
+    <div class="actions">
+      <button type="button" onclick="addSection()">セクション追加</button>
     </div>
   </div>
 
   <div class="card">
-    <h2>下部固定メニュー</h2>
-
-    <div class="row">
-      <label>電話 名称</label>
-      <input type="text" id="footer1Text">
+    <h2>セクション一覧</h2>
+    <div id="sectionsEditor">読み込み中...</div>
+    <div class="actions">
+      <button type="button" onclick="saveSectionsToGitHub()">sections.json を保存</button>
     </div>
-
-    <div class="row">
-      <label>電話 リンク</label>
-      <input type="text" id="footer1Link">
-    </div>
-
-    <div class="row">
-      <label>LINE 名称</label>
-      <input type="text" id="footer2Text">
-    </div>
-
-    <div class="row">
-      <label>LINE リンク</label>
-      <input type="text" id="footer2Link">
-    </div>
-
-    <div class="row">
-      <label>予約 名称</label>
-      <input type="text" id="footer3Text">
-    </div>
-
-    <div class="row">
-      <label>予約 リンク</label>
-      <input type="text" id="footer3Link">
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>パスワード</h2>
-
-    <div class="row">
-      <label>現在のパスワード</label>
-      <input type="text" id="passwordText">
-    </div>
+    <div class="preview" id="sectionsSaveResult">まだ保存していません。</div>
   </div>
 
   <div class="card">
     <h2>保存前プレビュー</h2>
-    <p class="note">まずは保存前のJSONを確認できます。</p>
     <div class="actions">
-      <button type="button" onclick="showDraft()">入力内容を確認</button>
+      <button type="button" class="secondary" onclick="showDrafts()">config / sections を確認</button>
     </div>
     <div class="preview" id="draftBox">まだ確認していません。</div>
-  </div>
-
-  <div class="card">
-    <h2>GitHubへ保存</h2>
-    <p class="note">このボタンで <strong>data/config.json</strong> をGitHubに保存します。</p>
-    <div class="actions">
-      <button type="button" onclick="saveConfigToGitHub()">config.json を保存</button>
-    </div>
-    <div class="preview" id="saveResult">まだ保存していません。</div>
   </div>
 
 </main>
 
 <script>
 const CONFIG_PATH = 'data/config.json';
+const SECTIONS_PATH = 'data/sections.json';
+let sectionsData = [];
 
 function setStatus(message, type = ''){
   const box = document.getElementById('statusBox');
@@ -267,13 +328,48 @@ function setStatus(message, type = ''){
   box.innerText = message;
 }
 
-function setSaveResult(message, type = ''){
-  const box = document.getElementById('saveResult');
+function setConfigSaveResult(message, type = ''){
+  const box = document.getElementById('configSaveResult');
   box.className = 'preview ' + type;
   box.innerText = message;
 }
 
-function buildDraft(){
+function setSectionsSaveResult(message, type = ''){
+  const box = document.getElementById('sectionsSaveResult');
+  box.className = 'preview ' + type;
+  box.innerText = message;
+}
+
+function saveGitHubSettings(){
+  const settings = {
+    owner: document.getElementById('githubOwner').value.trim(),
+    repo: document.getElementById('githubRepo').value.trim(),
+    branch: document.getElementById('githubBranch').value.trim(),
+    token: document.getElementById('githubToken').value.trim()
+  };
+  localStorage.setItem('lpGithubSettings', JSON.stringify(settings));
+  setStatus('GitHub接続設定を保存しました。', 'success');
+}
+
+function loadGitHubSettings(){
+  try{
+    const raw = localStorage.getItem('lpGithubSettings');
+    if(!raw){
+      setStatus('GitHub接続設定はまだ保存されていません。', 'warn');
+      return;
+    }
+
+    const settings = JSON.parse(raw);
+    document.getElementById('githubOwner').value = settings.owner || '';
+    document.getElementById('githubRepo').value = settings.repo || '';
+    document.getElementById('githubBranch').value = settings.branch || 'main';
+    document.getElementById('githubToken').value = settings.token || '';
+  }catch(error){
+    setStatus('GitHub接続設定の読み込み失敗: ' + error.message, 'error');
+  }
+}
+
+function buildConfigDraft(){
   return {
     password: document.getElementById('passwordText').value,
     logo: document.getElementById('logoText').value,
@@ -308,70 +404,317 @@ function buildDraft(){
   };
 }
 
-function showDraft(){
-  const draft = buildDraft();
-  document.getElementById('draftBox').innerText = JSON.stringify(draft, null, 2);
-}
-
-function saveGitHubSettings(){
-  const settings = {
-    owner: document.getElementById('githubOwner').value.trim(),
-    repo: document.getElementById('githubRepo').value.trim(),
-    branch: document.getElementById('githubBranch').value.trim(),
-    token: document.getElementById('githubToken').value.trim()
+function showDrafts(){
+  const drafts = {
+    config: buildConfigDraft(),
+    sections: sectionsData
   };
-
-  localStorage.setItem('lpGithubSettings', JSON.stringify(settings));
-  setSaveResult('GitHub接続設定をブラウザに保存しました。', 'success');
-}
-
-function loadGitHubSettings(){
-  try{
-    const raw = localStorage.getItem('lpGithubSettings');
-    if(!raw){
-      setSaveResult('接続設定はまだ保存されていません。', 'warn');
-      return;
-    }
-
-    const settings = JSON.parse(raw);
-    document.getElementById('githubOwner').value = settings.owner || '';
-    document.getElementById('githubRepo').value = settings.repo || '';
-    document.getElementById('githubBranch').value = settings.branch || 'main';
-    document.getElementById('githubToken').value = settings.token || '';
-
-    setSaveResult('GitHub接続設定を読み込みました。', 'success');
-  }catch(error){
-    setSaveResult('接続設定の読み込みに失敗しました: ' + error.message, 'error');
-  }
+  document.getElementById('draftBox').innerText = JSON.stringify(drafts, null, 2);
 }
 
 async function loadConfig(){
-  try{
-    const res = await fetch('./data/config.json?' + Date.now());
-    const config = await res.json();
+  const res = await fetch('./data/config.json?' + Date.now());
+  const config = await res.json();
 
-    document.getElementById('logoText').value = config.logo || '';
+  document.getElementById('logoText').value = config.logo || '';
 
-    document.getElementById('btn1Text').value = config.buttons?.[0]?.text || '';
-    document.getElementById('btn1Link').value = config.buttons?.[0]?.link || '';
-    document.getElementById('btn2Text').value = config.buttons?.[1]?.text || '';
-    document.getElementById('btn2Link').value = config.buttons?.[1]?.link || '';
-    document.getElementById('btn3Text').value = config.buttons?.[2]?.text || '';
-    document.getElementById('btn3Link').value = config.buttons?.[2]?.link || '';
+  document.getElementById('btn1Text').value = config.buttons?.[0]?.text || '';
+  document.getElementById('btn1Link').value = config.buttons?.[0]?.link || '';
+  document.getElementById('btn2Text').value = config.buttons?.[1]?.text || '';
+  document.getElementById('btn2Link').value = config.buttons?.[1]?.link || '';
+  document.getElementById('btn3Text').value = config.buttons?.[2]?.text || '';
+  document.getElementById('btn3Link').value = config.buttons?.[2]?.link || '';
 
-    document.getElementById('footer1Text').value = config.footer?.[0]?.text || '';
-    document.getElementById('footer1Link').value = config.footer?.[0]?.link || '';
-    document.getElementById('footer2Text').value = config.footer?.[1]?.text || '';
-    document.getElementById('footer2Link').value = config.footer?.[1]?.link || '';
-    document.getElementById('footer3Text').value = config.footer?.[2]?.text || '';
-    document.getElementById('footer3Link').value = config.footer?.[2]?.link || '';
+  document.getElementById('footer1Text').value = config.footer?.[0]?.text || '';
+  document.getElementById('footer1Link').value = config.footer?.[0]?.link || '';
+  document.getElementById('footer2Text').value = config.footer?.[1]?.text || '';
+  document.getElementById('footer2Link').value = config.footer?.[1]?.link || '';
+  document.getElementById('footer3Text').value = config.footer?.[2]?.text || '';
+  document.getElementById('footer3Link').value = config.footer?.[2]?.link || '';
 
-    document.getElementById('passwordText').value = config.password || '';
+  document.getElementById('passwordText').value = config.password || '';
+}
 
-    setStatus('config.json の読み込みに成功しました。', 'success');
-  }catch(error){
-    setStatus('読み込み失敗: ' + error.message, 'error');
+async function loadSections(){
+  const res = await fetch('./data/sections.json?' + Date.now());
+  sectionsData = await res.json();
+  renderSectionsEditor();
+}
+
+function createDefaultSection(type, title){
+  const id = 'section-' + Date.now();
+
+  if(type === 'normal'){
+    return {
+      id,
+      type: 'normal',
+      enabled: true,
+      title: title || '新しいノーマル',
+      text: '説明文を入力してください。',
+      image: '',
+      link: '#',
+      textSize: 'medium',
+      bgColor: '#ffffff',
+      alignY: 'middle'
+    };
   }
+
+  if(type === 'slider'){
+    return {
+      id,
+      type: 'slider',
+      enabled: true,
+      title: title || '新しいスライダー',
+      text: 'スライダー説明を入力してください。',
+      images: [],
+      link: '#',
+      textSize: 'medium',
+      bgColor: '#f8f9fa',
+      alignY: 'middle'
+    };
+  }
+
+  if(type === 'card4'){
+    return {
+      id,
+      type: 'card4',
+      enabled: true,
+      title: title || '新しいカード4',
+      textSize: 'medium',
+      bgColor: '#ffffff',
+      items: [
+        { title: 'カード1', text: '説明', image: '', link: '#' },
+        { title: 'カード2', text: '説明', image: '', link: '#' },
+        { title: 'カード3', text: '説明', image: '', link: '#' },
+        { title: 'カード4', text: '説明', image: '', link: '#' }
+      ]
+    };
+  }
+
+  if(type === 'card3'){
+    return {
+      id,
+      type: 'card3',
+      enabled: true,
+      title: title || '新しいカード3',
+      textSize: 'medium',
+      bgColor: '#ffffff',
+      items: [
+        { title: 'カード1', text: '説明', image: '', link: '#' },
+        { title: 'カード2', text: '説明', image: '', link: '#' },
+        { title: 'カード3', text: '説明', image: '', link: '#' }
+      ]
+    };
+  }
+
+  if(type === 'card2'){
+    return {
+      id,
+      type: 'card2',
+      enabled: true,
+      title: title || '新しいカード2',
+      textSize: 'medium',
+      bgColor: '#ffffff',
+      items: [
+        { title: 'カード1', text: '説明', image: '', link: '#' },
+        { title: 'カード2', text: '説明', image: '', link: '#' }
+      ]
+    };
+  }
+
+  if(type === 'card1-right'){
+    return {
+      id,
+      type: 'card1-right',
+      enabled: true,
+      title: title || '新しいカード1右',
+      text: '説明文を入力してください。',
+      image: '',
+      link: '#',
+      textSize: 'medium',
+      bgColor: '#ffffff',
+      alignY: 'middle'
+    };
+  }
+
+  return {
+    id,
+    type: 'card1-left',
+    enabled: true,
+    title: title || '新しいカード1左',
+    text: '説明文を入力してください。',
+    image: '',
+    link: '#',
+    textSize: 'medium',
+    bgColor: '#ffffff',
+    alignY: 'middle'
+  };
+}
+
+function addSection(){
+  const type = document.getElementById('newSectionType').value;
+  const title = document.getElementById('newSectionTitle').value.trim();
+  const section = createDefaultSection(type, title);
+  sectionsData.push(section);
+  renderSectionsEditor();
+  document.getElementById('newSectionTitle').value = '';
+  setSectionsSaveResult('追加しました。保存すると公開LPへ反映されます。', 'success');
+}
+
+function removeSection(index){
+  sectionsData.splice(index, 1);
+  renderSectionsEditor();
+}
+
+function moveSectionUp(index){
+  if(index <= 0) return;
+  const temp = sectionsData[index - 1];
+  sectionsData[index - 1] = sectionsData[index];
+  sectionsData[index] = temp;
+  renderSectionsEditor();
+}
+
+function moveSectionDown(index){
+  if(index >= sectionsData.length - 1) return;
+  const temp = sectionsData[index + 1];
+  sectionsData[index + 1] = sectionsData[index];
+  sectionsData[index] = temp;
+  renderSectionsEditor();
+}
+
+function updateSectionField(index, field, value){
+  sectionsData[index][field] = value;
+}
+
+function updateSectionEnabled(index, checked){
+  sectionsData[index].enabled = checked;
+}
+
+function updateSliderImages(index, value){
+  const list = value
+    .split('\n')
+    .map(v => v.trim())
+    .filter(v => v);
+  sectionsData[index].images = list;
+}
+
+function updateCardItems(index, value){
+  try{
+    const parsed = JSON.parse(value);
+    if(Array.isArray(parsed)){
+      sectionsData[index].items = parsed;
+    }
+  }catch(error){
+  }
+}
+
+function renderSectionsEditor(){
+  const box = document.getElementById('sectionsEditor');
+
+  if(!Array.isArray(sectionsData) || sectionsData.length === 0){
+    box.innerHTML = '<div class="preview">セクションはまだありません。</div>';
+    return;
+  }
+
+  box.innerHTML = sectionsData.map((section, index) => {
+    const isSlider = section.type === 'slider';
+    const isCards = ['card4','card3','card2'].includes(section.type);
+    const hasSingleImage = ['normal','card1-right','card1-left'].includes(section.type);
+
+    return `
+      <div class="section-item">
+        <h3>${index + 1}. ${section.type} <span class="small">(${section.id})</span></h3>
+
+        <div class="actions" style="margin-bottom:12px;">
+          <button type="button" class="secondary" onclick="moveSectionUp(${index})">↑ 上へ</button>
+          <button type="button" class="secondary" onclick="moveSectionDown(${index})">↓ 下へ</button>
+          <button type="button" class="danger" onclick="removeSection(${index})">削除</button>
+        </div>
+
+        <div class="grid2">
+          <div class="row">
+            <label>表示する</label>
+            <input type="checkbox" ${section.enabled !== false ? 'checked' : ''} onchange="updateSectionEnabled(${index}, this.checked)">
+          </div>
+
+          <div class="row">
+            <label>タイトル</label>
+            <input type="text" value="${escapeAttr(section.title || '')}" oninput="updateSectionField(${index}, 'title', this.value)">
+          </div>
+
+          ${!isCards ? `
+          <div class="row">
+            <label>説明文</label>
+            <textarea oninput="updateSectionField(${index}, 'text', this.value)">${escapeHtml(section.text || '')}</textarea>
+          </div>` : ''}
+
+          ${hasSingleImage ? `
+          <div class="row">
+            <label>画像URL</label>
+            <input type="text" value="${escapeAttr(section.image || '')}" oninput="updateSectionField(${index}, 'image', this.value)">
+          </div>` : ''}
+
+          ${hasSingleImage ? `
+          <div class="row">
+            <label>リンク</label>
+            <input type="text" value="${escapeAttr(section.link || '#')}" oninput="updateSectionField(${index}, 'link', this.value)">
+          </div>` : ''}
+
+          <div class="row">
+            <label>文字サイズ</label>
+            <select onchange="updateSectionField(${index}, 'textSize', this.value)">
+              <option value="small" ${section.textSize === 'small' ? 'selected' : ''}>small</option>
+              <option value="medium" ${!section.textSize || section.textSize === 'medium' ? 'selected' : ''}>medium</option>
+              <option value="large" ${section.textSize === 'large' ? 'selected' : ''}>large</option>
+            </select>
+          </div>
+
+          <div class="row">
+            <label>背景色</label>
+            <input type="text" value="${escapeAttr(section.bgColor || '#ffffff')}" oninput="updateSectionField(${index}, 'bgColor', this.value)">
+          </div>
+
+          ${!isCards ? `
+          <div class="row">
+            <label>上下位置</label>
+            <select onchange="updateSectionField(${index}, 'alignY', this.value)">
+              <option value="top" ${section.alignY === 'top' ? 'selected' : ''}>top</option>
+              <option value="middle" ${!section.alignY || section.alignY === 'middle' ? 'selected' : ''}>middle</option>
+              <option value="bottom" ${section.alignY === 'bottom' ? 'selected' : ''}>bottom</option>
+            </select>
+          </div>` : ''}
+
+          ${isSlider ? `
+          <div class="row" style="grid-column:1 / -1;">
+            <label>画像URL一覧（1行に1件）</label>
+            <textarea oninput="updateSliderImages(${index}, this.value)">${escapeHtml((section.images || []).join('\n'))}</textarea>
+          </div>` : ''}
+
+          ${isCards ? `
+          <div class="row" style="grid-column:1 / -1;">
+            <label>カードデータJSON</label>
+            <textarea oninput="updateCardItems(${index}, this.value)">${escapeHtml(JSON.stringify(section.items || [], null, 2))}</textarea>
+            <div class="small">title / text / image / link を持つ配列のまま編集します。</div>
+          </div>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function escapeHtml(text){
+  return String(text ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
+}
+
+function escapeAttr(text){
+  return String(text ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('"', '&quot;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
 }
 
 async function getCurrentFileSha(owner, repo, branch, token, path){
@@ -396,59 +739,78 @@ function utf8ToBase64(str){
   return btoa(unescape(encodeURIComponent(str)));
 }
 
+async function saveFileToGitHub(path, contentString, successSetter){
+  const owner = document.getElementById('githubOwner').value.trim();
+  const repo = document.getElementById('githubRepo').value.trim();
+  const branch = document.getElementById('githubBranch').value.trim() || 'main';
+  const token = document.getElementById('githubToken').value.trim();
+
+  if(!owner || !repo || !branch || !token){
+    throw new Error('GitHub接続設定をすべて入力してください。');
+  }
+
+  const contentBase64 = utf8ToBase64(contentString);
+  const sha = await getCurrentFileSha(owner, repo, branch, token, path);
+  const apiUrl = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + path;
+
+  const res = await fetch(apiUrl, {
+    method: 'PUT',
+    headers: {
+      'Authorization': 'Bearer ' + token,
+      'Accept': 'application/vnd.github+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      message: 'Update ' + path + ' from admin panel',
+      content: contentBase64,
+      branch: branch,
+      sha: sha
+    })
+  });
+
+  const result = await res.json();
+
+  if(!res.ok){
+    const errText = result?.message ? result.message : (res.status + ' ' + res.statusText);
+    throw new Error(errText);
+  }
+
+  return result;
+}
+
 async function saveConfigToGitHub(){
   try{
-    const owner = document.getElementById('githubOwner').value.trim();
-    const repo = document.getElementById('githubRepo').value.trim();
-    const branch = document.getElementById('githubBranch').value.trim() || 'main';
-    const token = document.getElementById('githubToken').value.trim();
-
-    if(!owner || !repo || !branch || !token){
-      setSaveResult('GitHub接続設定をすべて入力してください。', 'error');
-      return;
-    }
-
-    const draft = buildDraft();
-    const contentString = JSON.stringify(draft, null, 2);
-    const contentBase64 = utf8ToBase64(contentString);
-
-    setSaveResult('保存中です...', 'warn');
-
-    const sha = await getCurrentFileSha(owner, repo, branch, token, CONFIG_PATH);
-
-    const apiUrl = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + CONFIG_PATH;
-
-    const res = await fetch(apiUrl, {
-      method: 'PUT',
-      headers: {
-        'Authorization': 'Bearer ' + token,
-        'Accept': 'application/vnd.github+json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        message: 'Update config.json from admin panel',
-        content: contentBase64,
-        branch: branch,
-        sha: sha
-      })
-    });
-
-    const result = await res.json();
-
-    if(!res.ok){
-      const errText = result?.message ? result.message : (res.status + ' ' + res.statusText);
-      throw new Error(errText);
-    }
-
-    setSaveResult('GitHub保存に成功しました。数十秒後にLPへ反映されます。', 'success');
-    document.getElementById('draftBox').innerText = JSON.stringify(draft, null, 2);
+    setConfigSaveResult('保存中です...', 'warn');
+    const draft = buildConfigDraft();
+    await saveFileToGitHub(CONFIG_PATH, JSON.stringify(draft, null, 2));
+    setConfigSaveResult('config.json の保存に成功しました。数十秒後にLPへ反映されます。', 'success');
   }catch(error){
-    setSaveResult('保存失敗: ' + error.message, 'error');
+    setConfigSaveResult('保存失敗: ' + error.message, 'error');
   }
 }
 
-loadGitHubSettings();
-loadConfig();
+async function saveSectionsToGitHub(){
+  try{
+    setSectionsSaveResult('保存中です...', 'warn');
+    await saveFileToGitHub(SECTIONS_PATH, JSON.stringify(sectionsData, null, 2));
+    setSectionsSaveResult('sections.json の保存に成功しました。数十秒後にLPへ反映されます。', 'success');
+  }catch(error){
+    setSectionsSaveResult('保存失敗: ' + error.message, 'error');
+  }
+}
+
+async function init(){
+  try{
+    loadGitHubSettings();
+    await loadConfig();
+    await loadSections();
+    setStatus('config.json / sections.json の読み込みに成功しました。', 'success');
+  }catch(error){
+    setStatus('読み込み失敗: ' + error.message, 'error');
+  }
+}
+
+init();
 </script>
 
 </body>
