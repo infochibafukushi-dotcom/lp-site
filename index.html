@@ -354,13 +354,22 @@ footer{
   }
 
   .card-grid-4{
-    grid-template-columns:repeat(2, 1fr);
+    grid-template-columns:repeat(2, minmax(0, 1fr));
   }
   .card-grid-3{
-    grid-template-columns:repeat(2, 1fr);
+    grid-template-columns:repeat(2, minmax(0, 1fr));
   }
   .card-grid-2{
-    grid-template-columns:repeat(2, 1fr);
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+  }
+
+  /* 3枚のときの最後を中央寄せ */
+  .card-grid-3 .card-item:last-child:nth-child(odd),
+  .card-grid-4 .card-item:last-child:nth-child(odd){
+    grid-column:1 / -1;
+    max-width:calc(50% - 8px);
+    width:100%;
+    margin:0 auto;
   }
 
   .media-row{
