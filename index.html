@@ -773,9 +773,6 @@ function updateSliderDots(idx, current, total){
 }
 
 function attachSliderSwipe(shell, idx){
-  const track = document.getElementById(`slider-track-${idx}`);
-  if(!track) return;
-
   sliderTouchState[idx] = { startX:0, startY:0 };
 
   shell.addEventListener("touchstart", (e) => {
