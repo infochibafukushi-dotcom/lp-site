@@ -125,6 +125,15 @@ button.small-btn{
   margin-top:8px;
   border:1px solid #ddd;
 }
+.logo-preview{
+  max-width:180px;
+  max-height:120px;
+  display:block;
+  border-radius:10px;
+  margin-top:8px;
+  border:1px solid #ddd;
+  background:#fff;
+}
 .footer-image-preview{
   max-width:140px;
   display:block;
@@ -170,6 +179,45 @@ button.small-btn{
 .checkline input[type="checkbox"]{
   width:auto;
   margin:0;
+}
+.color-field{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.color-input-wrap{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.color-picker{
+  width:56px;
+  height:44px;
+  padding:4px;
+  border:1px solid #ccc;
+  border-radius:8px;
+  background:#fff;
+}
+.color-text{
+  flex:1 1 180px;
+}
+.color-palette{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.color-swatch{
+  width:28px;
+  height:28px;
+  border-radius:6px;
+  border:2px solid #ddd;
+  cursor:pointer;
+  padding:0;
+}
+.color-swatch.active{
+  border-color:#000;
+  transform:scale(1.05);
 }
 @media (max-width: 768px){
   .grid2{grid-template-columns:1fr;}
@@ -221,7 +269,7 @@ button.small-btn{
   </div>
 
   <div class="card">
-    <h2>基本設定</h2>
+    <h2>上部設定</h2>
 
     <div class="grid2">
       <div>
@@ -230,6 +278,20 @@ button.small-btn{
           <input type="text" id="logoText">
         </div>
 
+        <div class="row">
+          <label>ロゴ画像URL</label>
+          <input type="text" id="logoImage">
+        </div>
+
+        <div class="upload-box">
+          <label>ロゴ画像ファイル選択</label>
+          <input type="file" accept="image/*" onchange="uploadLogoImage(this)">
+          <div class="small">選択すると GitHub の assets/logo にアップロードされます。</div>
+          <img id="logoPreview" class="logo-preview" style="display:none;" alt="">
+        </div>
+      </div>
+
+      <div>
         <div class="row">
           <label>ボタン1 名称</label>
           <input type="text" id="btn1Text">
@@ -275,7 +337,13 @@ button.small-btn{
           <label class="checkline"><input type="checkbox" id="btn3Visible"> 表示する</label>
         </div>
       </div>
+    </div>
+  </div>
 
+  <div class="card">
+    <h2>下部設定</h2>
+
+    <div class="grid2">
       <div>
         <div class="row">
           <label>電話 名称</label>
@@ -299,8 +367,10 @@ button.small-btn{
           <div class="small">選択すると GitHub の assets/footer にアップロードされます。</div>
           <img id="footer1Preview" class="footer-image-preview" style="display:none;" alt="">
         </div>
+      </div>
 
-        <div class="row" style="margin-top:14px;">
+      <div>
+        <div class="row">
           <label>LINE 名称</label>
           <input type="text" id="footer2Text">
         </div>
@@ -322,8 +392,10 @@ button.small-btn{
           <div class="small">選択すると GitHub の assets/footer にアップロードされます。</div>
           <img id="footer2Preview" class="footer-image-preview" style="display:none;" alt="">
         </div>
+      </div>
 
-        <div class="row" style="margin-top:14px;">
+      <div>
+        <div class="row">
           <label>予約 名称</label>
           <input type="text" id="footer3Text">
         </div>
@@ -345,8 +417,10 @@ button.small-btn{
           <div class="small">選択すると GitHub の assets/footer にアップロードされます。</div>
           <img id="footer3Preview" class="footer-image-preview" style="display:none;" alt="">
         </div>
+      </div>
 
-        <div class="row" style="margin-top:14px;">
+      <div>
+        <div class="row">
           <label>現在のパスワード</label>
           <input type="text" id="passwordText">
         </div>
@@ -410,6 +484,13 @@ button.small-btn{
 <script>
 const CONFIG_PATH = 'data/config.json';
 const SECTIONS_PATH = 'data/sections.json';
+const COLOR_PRESETS = [
+  '#ffffff','#f8f9fa','#f1f3f5','#e9ecef','#dee2e6',
+  '#000000','#343a40','#495057','#6c757d','#adb5bd',
+  '#fff3cd','#ffe5b4','#ffd6a5','#ffcad4','#f8edeb',
+  '#d8f3dc','#b7e4c7','#95d5b2','#dbeafe','#e0f2fe',
+  '#ede9fe','#f3e8ff','#fae8ff','#fee2e2','#dcfce7'
+];
 let sectionsData = [];
 
 function setStatus(message, type = ''){
@@ -438,6 +519,7 @@ function saveGitHubSettings(){
   localStorage.setItem('lpGithubSettings', JSON.stringify(settings));
   setStatus('GitHub接続設定を保存しました。', 'success');
 }
+
 function loadGitHubSettings(){
   try{
     const raw = localStorage.getItem('lpGithubSettings');
@@ -492,6 +574,7 @@ function ensureConfigShape(config){
     image: f?.image || ''
   }));
 
+  config.logoImage = config.logoImage || '';
   return config;
 }
 
@@ -499,6 +582,7 @@ function buildConfigDraft(){
   return {
     password: document.getElementById('passwordText').value,
     logo: document.getElementById('logoText').value,
+    logoImage: document.getElementById('logoImage').value,
     buttons: [
       {
         text: document.getElementById('btn1Text').value,
@@ -558,12 +642,25 @@ function setFooterPreview(index, url){
   }
 }
 
+function setLogoPreview(url){
+  const el = document.getElementById('logoPreview');
+  if(url){
+    el.src = url;
+    el.style.display = 'block';
+  }else{
+    el.src = '';
+    el.style.display = 'none';
+  }
+}
+
 async function loadConfig(){
   const res = await fetch('./data/config.json?' + Date.now());
   let config = await res.json();
   config = ensureConfigShape(config);
 
   document.getElementById('logoText').value = config.logo || '';
+  document.getElementById('logoImage').value = config.logoImage || '';
+  setLogoPreview(config.logoImage || '');
 
   document.getElementById('btn1Text').value = config.buttons[0].text || '';
   document.getElementById('btn1Link').value = config.buttons[0].link || '#';
@@ -769,6 +866,57 @@ function updateCardItemField(sectionIndex, itemIndex, field, value){
   sectionsData[sectionIndex].items[itemIndex][field] = value;
 }
 
+function setSectionBgColor(index, value){
+  sectionsData[index].bgColor = value;
+  const textInput = document.getElementById(`bgColorText-${index}`);
+  const colorInput = document.getElementById(`bgColorPicker-${index}`);
+  if(textInput) textInput.value = value;
+  if(colorInput) colorInput.value = normalizeColor(value);
+  renderSectionsEditor();
+}
+
+function normalizeColor(value){
+  if(/^#[0-9a-fA-F]{6}$/.test(value || '')){
+    return value;
+  }
+  return '#ffffff';
+}
+
+function renderColorField(index, currentValue){
+  const current = currentValue || '#ffffff';
+  return `
+    <div class="color-field">
+      <div class="color-input-wrap">
+        <input
+          type="color"
+          id="bgColorPicker-${index}"
+          class="color-picker"
+          value="${escapeAttr(normalizeColor(current))}"
+          oninput="setSectionBgColor(${index}, this.value)"
+        >
+        <input
+          type="text"
+          id="bgColorText-${index}"
+          class="color-text"
+          value="${escapeAttr(current)}"
+          oninput="updateSectionField(${index}, 'bgColor', this.value)"
+        >
+      </div>
+      <div class="color-palette">
+        ${COLOR_PRESETS.map(color => `
+          <button
+            type="button"
+            class="color-swatch ${current.toLowerCase() === color.toLowerCase() ? 'active' : ''}"
+            style="background:${color}"
+            onclick="setSectionBgColor(${index}, '${color}')"
+            title="${color}"
+          ></button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
 function escapeHtml(text){
   return String(text ?? '')
     .replaceAll('&', '&amp;')
@@ -843,6 +991,23 @@ async function uploadAssetFile(file, folder = 'sections'){
   return 'https://raw.githubusercontent.com/' + owner + '/' + repo + '/' + branch + '/' + path;
 }
 
+async function uploadLogoImage(input){
+  try{
+    const file = input.files?.[0];
+    if(!file) return;
+
+    setConfigSaveResult('ロゴ画像アップロード中です...', 'warn');
+    const url = await uploadAssetFile(file, 'logo');
+    document.getElementById('logoImage').value = url;
+    setLogoPreview(url);
+    setConfigSaveResult('ロゴ画像アップロードに成功しました。最後に config.json を保存してください。', 'success');
+  }catch(error){
+    setConfigSaveResult('画像アップロード失敗: ' + error.message, 'error');
+  }finally{
+    input.value = '';
+  }
+}
+
 async function uploadFooterImage(index, input){
   try{
     const file = input.files?.[0];
@@ -878,310 +1043,4 @@ async function uploadSingleImage(index, input){
   }
 }
 
-async function uploadSliderImages(index, input){
-  try{
-    const files = Array.from(input.files || []);
-    if(files.length === 0) return;
-
-    setSectionsSaveResult('スライダー画像アップロード中です...', 'warn');
-    const urls = [];
-    for(const file of files){
-      const url = await uploadAssetFile(file, 'slider');
-      urls.push(url);
-    }
-
-    if(!Array.isArray(sectionsData[index].images)){
-      sectionsData[index].images = [];
-    }
-
-    sectionsData[index].images.push(...urls);
-    renderSectionsEditor();
-    setSectionsSaveResult('スライダー画像アップロードに成功しました。最後に sections.json を保存してください。', 'success');
-  }catch(error){
-    setSectionsSaveResult('画像アップロード失敗: ' + error.message, 'error');
-  }finally{
-    input.value = '';
-  }
-}
-
-function removeSliderImage(sectionIndex, imageIndex){
-  sectionsData[sectionIndex].images.splice(imageIndex, 1);
-  renderSectionsEditor();
-}
-
-async function uploadCardItemImage(sectionIndex, itemIndex, input){
-  try{
-    const file = input.files?.[0];
-    if(!file) return;
-
-    setSectionsSaveResult('カード画像アップロード中です...', 'warn');
-    const url = await uploadAssetFile(file, 'cards');
-    sectionsData[sectionIndex].items[itemIndex].image = url;
-    renderSectionsEditor();
-    setSectionsSaveResult('カード画像アップロードに成功しました。最後に sections.json を保存してください。', 'success');
-  }catch(error){
-    setSectionsSaveResult('画像アップロード失敗: ' + error.message, 'error');
-  }finally{
-    input.value = '';
-  }
-}
-
-function renderSliderThumbs(section, index){
-  const images = Array.isArray(section.images) ? section.images : [];
-  if(images.length === 0){
-    return '<div class="small">まだ画像がありません。</div>';
-  }
-
-  return `
-    <div class="slider-thumb-list">
-      ${images.map((src, imageIndex) => `
-        <div>
-          <img class="slider-thumb" src="${escapeAttr(src)}" alt="">
-          <div class="actions" style="margin-top:6px;">
-            <button type="button" class="danger small-btn" onclick="removeSliderImage(${index}, ${imageIndex})">削除</button>
-          </div>
-        </div>
-      `).join('')}
-    </div>
-  `;
-}
-
-function renderSingleImageBlock(section, index){
-  const imageUrl = section.image || '';
-  return `
-    <div class="row">
-      <label>画像URL</label>
-      <input type="text" value="${escapeAttr(imageUrl)}" oninput="updateSectionField(${index}, 'image', this.value)">
-      <div class="upload-box">
-        <label>画像ファイル選択</label>
-        <input type="file" accept="image/*" onchange="uploadSingleImage(${index}, this)">
-        <div class="small">選択すると GitHub の assets/sections にアップロードされます。</div>
-        ${imageUrl ? `<img class="image-preview" src="${escapeAttr(imageUrl)}" alt="">` : ''}
-      </div>
-    </div>
-  `;
-}
-
-function renderCardItemsEditor(section, sectionIndex){
-  const items = Array.isArray(section.items) ? section.items : [];
-  if(items.length === 0){
-    return '<div class="small">カードデータがありません。</div>';
-  }
-
-  return items.map((item, itemIndex) => `
-    <div class="card-item-editor">
-      <h4>カード ${itemIndex + 1}</h4>
-      <div class="grid2">
-        <div class="row">
-          <label>タイトル</label>
-          <input type="text" value="${escapeAttr(item.title || '')}" oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'title', this.value)">
-        </div>
-
-        <div class="row">
-          <label>リンク</label>
-          <input type="text" value="${escapeAttr(item.link || '#')}" oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'link', this.value)">
-        </div>
-
-        <div class="row" style="grid-column:1 / -1;">
-          <label>説明文</label>
-          <textarea oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'text', this.value)">${escapeHtml(item.text || '')}</textarea>
-        </div>
-
-        <div class="row" style="grid-column:1 / -1;">
-          <label>画像URL</label>
-          <input type="text" value="${escapeAttr(item.image || '')}" oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'image', this.value)">
-          <div class="upload-box">
-            <label>画像ファイル選択</label>
-            <input type="file" accept="image/*" onchange="uploadCardItemImage(${sectionIndex}, ${itemIndex}, this)">
-            <div class="small">選択すると GitHub の assets/cards にアップロードされます。</div>
-            ${item.image ? `<img class="image-preview" src="${escapeAttr(item.image)}" alt="">` : ''}
-          </div>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function renderSectionsEditor(){
-  const box = document.getElementById('sectionsEditor');
-
-  if(!Array.isArray(sectionsData) || sectionsData.length === 0){
-    box.innerHTML = '<div class="preview">セクションはまだありません。</div>';
-    return;
-  }
-
-  box.innerHTML = sectionsData.map((section, index) => {
-    const isSlider = section.type === 'slider';
-    const isCards = ['card4','card3','card2'].includes(section.type);
-    const hasSingleImage = ['normal','card1-right','card1-left'].includes(section.type);
-
-    return `
-      <div class="section-item">
-        <h3>${index + 1}. ${section.type} <span class="small">(${section.id})</span></h3>
-
-        <div class="actions" style="margin-bottom:12px;">
-          <button type="button" class="secondary" onclick="moveSectionUp(${index})">↑ 上へ</button>
-          <button type="button" class="secondary" onclick="moveSectionDown(${index})">↓ 下へ</button>
-          <button type="button" class="secondary" onclick="duplicateSection(${index})">複製</button>
-          <button type="button" class="danger" onclick="removeSection(${index})">削除</button>
-        </div>
-
-        <div class="grid2">
-          <div class="row">
-            <label>表示する</label>
-            <label class="checkline"><input type="checkbox" ${section.enabled !== false ? 'checked' : ''} onchange="updateSectionEnabled(${index}, this.checked)"> 表示する</label>
-          </div>
-
-          <div class="row">
-            <label>タイトル</label>
-            <input type="text" value="${escapeAttr(section.title || '')}" oninput="updateSectionField(${index}, 'title', this.value)">
-          </div>
-
-          ${!isCards ? `
-          <div class="row">
-            <label>説明文</label>
-            <textarea oninput="updateSectionField(${index}, 'text', this.value)">${escapeHtml(section.text || '')}</textarea>
-          </div>` : ''}
-
-          ${hasSingleImage ? renderSingleImageBlock(section, index) : ''}
-
-          ${hasSingleImage ? `
-          <div class="row">
-            <label>リンク</label>
-            <input type="text" value="${escapeAttr(section.link || '#')}" oninput="updateSectionField(${index}, 'link', this.value)">
-          </div>` : ''}
-
-          <div class="row">
-            <label>文字サイズ</label>
-            <select onchange="updateSectionField(${index}, 'textSize', this.value)">
-              <option value="small" ${section.textSize === 'small' ? 'selected' : ''}>small</option>
-              <option value="medium" ${!section.textSize || section.textSize === 'medium' ? 'selected' : ''}>medium</option>
-              <option value="large" ${section.textSize === 'large' ? 'selected' : ''}>large</option>
-            </select>
-          </div>
-
-          <div class="row">
-            <label>背景色</label>
-            <input type="text" value="${escapeAttr(section.bgColor || '#ffffff')}" oninput="updateSectionField(${index}, 'bgColor', this.value)">
-          </div>
-
-          ${!isCards ? `
-          <div class="row">
-            <label>上下位置</label>
-            <select onchange="updateSectionField(${index}, 'alignY', this.value)">
-              <option value="top" ${section.alignY === 'top' ? 'selected' : ''}>top</option>
-              <option value="middle" ${!section.alignY || section.alignY === 'middle' ? 'selected' : ''}>middle</option>
-              <option value="bottom" ${section.alignY === 'bottom' ? 'selected' : ''}>bottom</option>
-            </select>
-          </div>` : ''}
-
-          ${isSlider ? `
-          <div class="row" style="grid-column:1 / -1;">
-            <label>画像URL一覧（1行に1件）</label>
-            <textarea oninput="updateSliderImages(${index}, this.value)">${escapeHtml((section.images || []).join('\n'))}</textarea>
-            <div class="upload-box" style="margin-top:8px;">
-              <label>スライダー画像ファイル選択（複数可）</label>
-              <input type="file" accept="image/*" multiple onchange="uploadSliderImages(${index}, this)">
-              <div class="small">選択すると GitHub の assets/slider にアップロードされます。</div>
-              ${renderSliderThumbs(section, index)}
-            </div>
-          </div>` : ''}
-
-          ${isCards ? `
-          <div class="row" style="grid-column:1 / -1;">
-            <label>カード編集</label>
-            ${renderCardItemsEditor(section, index)}
-          </div>` : ''}
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-async function getCurrentFileSha(owner, repo, branch, token, path){
-  const url = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + path + '?ref=' + encodeURIComponent(branch);
-  const res = await fetch(url, {
-    headers: {
-      'Authorization': 'Bearer ' + token,
-      'Accept': 'application/vnd.github+json'
-    }
-  });
-
-  if(!res.ok){
-    throw new Error('SHA取得失敗: ' + res.status + ' ' + res.statusText);
-  }
-
-  const data = await res.json();
-  return data.sha;
-}
-
-function utf8ToBase64(str){
-  return btoa(unescape(encodeURIComponent(str)));
-}
-
-async function saveFileToGitHub(path, contentString){
-  const { owner, repo, branch, token } = getGitHubSettings();
-  const contentBase64 = utf8ToBase64(contentString);
-  const sha = await getCurrentFileSha(owner, repo, branch, token, path);
-  const apiUrl = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + path;
-
-  const res = await fetch(apiUrl, {
-    method: 'PUT',
-    headers: {
-      'Authorization': 'Bearer ' + token,
-      'Accept': 'application/vnd.github+json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      message: 'Update ' + path + ' from admin panel',
-      content: contentBase64,
-      branch: branch,
-      sha: sha
-    })
-  });
-
-  const result = await res.json();
-  if(!res.ok){
-    const errText = result?.message ? result.message : (res.status + ' ' + res.statusText);
-    throw new Error(errText);
-  }
-  return result;
-}
-
-async function saveConfigToGitHub(){
-  try{
-    setConfigSaveResult('保存中です...', 'warn');
-    const draft = buildConfigDraft();
-    await saveFileToGitHub(CONFIG_PATH, JSON.stringify(draft, null, 2));
-    setConfigSaveResult('config.json の保存に成功しました。数十秒後にLPへ反映されます。', 'success');
-  }catch(error){
-    setConfigSaveResult('保存失敗: ' + error.message, 'error');
-  }
-}
-
-async function saveSectionsToGitHub(){
-  try{
-    setSectionsSaveResult('保存中です...', 'warn');
-    await saveFileToGitHub(SECTIONS_PATH, JSON.stringify(sectionsData, null, 2));
-    setSectionsSaveResult('sections.json の保存に成功しました。数十秒後にLPへ反映されます。', 'success');
-  }catch(error){
-    setSectionsSaveResult('保存失敗: ' + error.message, 'error');
-  }
-}
-
-async function init(){
-  try{
-    loadGitHubSettings();
-    await loadConfig();
-    await loadSections();
-    setStatus('config.json / sections.json の読み込みに成功しました。', 'success');
-  }catch(error){
-    setStatus('読み込み失敗: ' + error.message, 'error');
-  }
-}
-
-init();
-</script>
-
-</body>
-</html>
+async function uploadSliderImages
