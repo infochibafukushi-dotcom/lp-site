@@ -4,206 +4,500 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>介護タクシーLP</title>
-
 <style>
-
+*{
+  box-sizing:border-box;
+}
 body{
-margin:0;
-font-family:Arial, Helvetica, sans-serif;
-background:#f5f5f5;
+  margin:0;
+  font-family:Arial, Helvetica, sans-serif;
+  background:#f5f5f5;
+  color:#222;
 }
-
 header{
-background:#ffffff;
-padding:15px;
-display:flex;
-align-items:center;
-gap:10px;
-border-bottom:1px solid #ddd;
-position:sticky;
-top:0;
-z-index:1000;
+  background:#ffffff;
+  padding:15px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  border-bottom:1px solid #ddd;
+  position:sticky;
+  top:0;
+  z-index:1000;
+  flex-wrap:wrap;
 }
-
 .logo{
-font-weight:bold;
-font-size:20px;
-cursor:pointer;
+  font-weight:bold;
+  font-size:20px;
+  cursor:pointer;
 }
-
 .topbtn{
-padding:8px 12px;
-background:#007bff;
-color:#fff;
-border-radius:5px;
-text-decoration:none;
+  padding:8px 12px;
+  background:#007bff;
+  color:#fff;
+  border-radius:5px;
+  text-decoration:none;
+  display:inline-block;
 }
-
-section{
-padding:60px 20px;
-text-align:center;
+main{
+  padding:0 0 90px;
 }
-
+.section{
+  padding:40px 20px;
+}
+.section-inner{
+  max-width:1100px;
+  margin:0 auto;
+}
+.section-title{
+  margin:0 0 16px;
+  font-size:28px;
+}
+.section-text{
+  line-height:1.8;
+  margin:12px 0 0;
+}
+.text-small{
+  font-size:14px;
+}
+.text-medium{
+  font-size:16px;
+}
+.text-large{
+  font-size:20px;
+}
+.align-top .section-inner{
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+}
+.align-middle .section-inner{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.align-bottom .section-inner{
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+}
+.normal-image-wrap{
+  margin-top:16px;
+}
+.normal-image{
+  width:100%;
+  max-width:700px;
+  border-radius:12px;
+  display:block;
+  margin:0 auto;
+}
+.slider-track{
+  display:flex;
+  gap:12px;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  padding-bottom:6px;
+}
+.slider-track img{
+  width:280px;
+  height:180px;
+  object-fit:cover;
+  border-radius:12px;
+  flex:0 0 auto;
+  scroll-snap-align:start;
+  background:#e9ecef;
+}
+.card-grid-4,
+.card-grid-3,
+.card-grid-2{
+  display:grid;
+  gap:16px;
+  margin-top:16px;
+}
+.card-grid-4{
+  grid-template-columns:repeat(4, 1fr);
+}
+.card-grid-3{
+  grid-template-columns:repeat(3, 1fr);
+}
+.card-grid-2{
+  grid-template-columns:repeat(2, 1fr);
+}
+.card-item{
+  background:#fff;
+  border-radius:14px;
+  padding:14px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.08);
+}
+.card-item img{
+  width:100%;
+  border-radius:10px;
+  display:block;
+  margin-bottom:10px;
+}
+.card-item-title{
+  margin:0 0 8px;
+  font-size:18px;
+}
+.media-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+  align-items:center;
+}
+.media-row img{
+  width:100%;
+  border-radius:12px;
+  display:block;
+}
+.media-row.reverse{
+  direction:rtl;
+}
+.media-row.reverse > *{
+  direction:ltr;
+}
 footer{
-position:fixed;
-bottom:0;
-left:0;
-width:100%;
-background:#ffffff;
-display:flex;
-justify-content:space-around;
-padding:12px;
-border-top:1px solid #ccc;
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  background:#ffffff;
+  display:flex;
+  justify-content:space-around;
+  padding:12px;
+  border-top:1px solid #ccc;
+  z-index:1001;
 }
-
 .footerbtn{
-text-decoration:none;
-color:#000;
-font-size:14px;
+  text-decoration:none;
+  color:#000;
+  font-size:14px;
 }
-
 .adminPanel{
-position:fixed;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-background:#fff;
-padding:30px;
-box-shadow:0 0 20px rgba(0,0,0,0.2);
-display:none;
-z-index:2000;
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:#fff;
+  padding:30px;
+  box-shadow:0 0 20px rgba(0,0,0,0.2);
+  display:none;
+  z-index:2000;
+  border-radius:12px;
 }
-
 .adminPanel input{
-padding:10px;
-width:200px;
-margin-bottom:10px;
+  padding:10px;
+  width:220px;
+  margin-bottom:10px;
 }
-
 .adminPanel button{
-padding:10px 15px;
-background:#007bff;
-color:#fff;
-border:none;
-cursor:pointer;
+  padding:10px 15px;
+  background:#007bff;
+  color:#fff;
+  border:none;
+  cursor:pointer;
+  border-radius:8px;
 }
-
+.empty-box{
+  max-width:1100px;
+  margin:30px auto;
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+}
+@media (max-width: 768px){
+  .section{
+    padding:28px 12px;
+  }
+  .section-title{
+    font-size:22px;
+  }
+  .card-grid-4{
+    grid-template-columns:repeat(4, 1fr);
+  }
+  .card-grid-3{
+    grid-template-columns:repeat(3, 1fr);
+  }
+  .card-grid-2{
+    grid-template-columns:repeat(2, 1fr);
+  }
+  .media-row{
+    grid-template-columns:1fr;
+  }
+}
 </style>
 </head>
-
 <body>
 
 <header>
-
-<div class="logo" id="logo">
-LOGO
-</div>
-
-<a class="topbtn" id="btn1">ボタン1</a>
-<a class="topbtn" id="btn2">ボタン2</a>
-<a class="topbtn" id="btn3">ボタン3</a>
-
+  <div class="logo" id="logo">LOGO</div>
+  <a class="topbtn" id="btn1" href="#">ボタン1</a>
+  <a class="topbtn" id="btn2" href="#">ボタン2</a>
+  <a class="topbtn" id="btn3" href="#">ボタン3</a>
 </header>
 
-<section>
-
-<h1>介護タクシーLP</h1>
-
-<p>
-ここにLPの内容が入ります
-</p>
-
-</section>
+<main id="sectionsContainer">
+  <div class="empty-box">読み込み中...</div>
+</main>
 
 <footer>
-
-<a class="footerbtn" id="f1">電話</a>
-<a class="footerbtn" id="f2">LINE</a>
-<a class="footerbtn" id="f3">予約</a>
-
+  <a class="footerbtn" id="f1" href="#">電話</a>
+  <a class="footerbtn" id="f2" href="#">LINE</a>
+  <a class="footerbtn" id="f3" href="#">予約</a>
 </footer>
 
-
 <div class="adminPanel" id="adminPanel">
-
-<h3>管理ログイン</h3>
-
-<input type="password" id="pass" placeholder="パスワード">
-
-<br>
-
-<button onclick="login()">ログイン</button>
-
+  <h3>管理ログイン</h3>
+  <input type="password" id="pass" placeholder="パスワード">
+  <br>
+  <button onclick="login()">ログイン</button>
 </div>
 
-
 <script>
-
-let clickCount = 0
+let clickCount = 0;
+let sitePassword = "95123";
 
 document.getElementById("logo").onclick = function(){
+  clickCount++;
+  if(clickCount >= 5){
+    document.getElementById("adminPanel").style.display = "block";
+    clickCount = 0;
+  }
+};
 
-clickCount++
-
-if(clickCount>=5){
-
-document.getElementById("adminPanel").style.display="block"
-
-clickCount=0
-
-}
-
+function login(){
+  const input = document.getElementById("pass").value;
+  if(input === sitePassword){
+    alert("管理画面ログイン成功");
+    location.href = "./admin.html";
+  }else{
+    alert("パスワード違います");
+  }
 }
 
 async function loadConfig(){
+  const res = await fetch("./data/config.json?" + Date.now());
+  const config = await res.json();
 
-const res = await fetch("./data/config.json")
+  document.getElementById("logo").innerText = config.logo || "LOGO";
 
-const config = await res.json()
+  document.getElementById("btn1").innerText = config.buttons?.[0]?.text || "ボタン1";
+  document.getElementById("btn1").href = config.buttons?.[0]?.link || "#";
 
-document.querySelector(".logo").innerText = config.logo
+  document.getElementById("btn2").innerText = config.buttons?.[1]?.text || "ボタン2";
+  document.getElementById("btn2").href = config.buttons?.[1]?.link || "#";
 
-document.getElementById("btn1").innerText = config.buttons[0].text
-document.getElementById("btn1").href = config.buttons[0].link
+  document.getElementById("btn3").innerText = config.buttons?.[2]?.text || "ボタン3";
+  document.getElementById("btn3").href = config.buttons?.[2]?.link || "#";
 
-document.getElementById("btn2").innerText = config.buttons[1].text
-document.getElementById("btn2").href = config.buttons[1].link
+  document.getElementById("f1").innerText = config.footer?.[0]?.text || "電話";
+  document.getElementById("f1").href = config.footer?.[0]?.link || "#";
 
-document.getElementById("btn3").innerText = config.buttons[2].text
-document.getElementById("btn3").href = config.buttons[2].link
+  document.getElementById("f2").innerText = config.footer?.[1]?.text || "LINE";
+  document.getElementById("f2").href = config.footer?.[1]?.link || "#";
 
-document.getElementById("f1").innerText = config.footer[0].text
-document.getElementById("f1").href = config.footer[0].link
+  document.getElementById("f3").innerText = config.footer?.[2]?.text || "予約";
+  document.getElementById("f3").href = config.footer?.[2]?.link || "#";
 
-document.getElementById("f2").innerText = config.footer[1].text
-document.getElementById("f2").href = config.footer[1].link
-
-document.getElementById("f3").innerText = config.footer[2].text
-document.getElementById("f3").href = config.footer[2].link
-
-window.sitePassword = config.password
-
+  sitePassword = config.password || "95123";
 }
 
-function login(){
-
-let input = document.getElementById("pass").value
-
-if(input === window.sitePassword){
-
-alert("管理画面ログイン成功")
-
-}else{
-
-alert("パスワード違います")
-
+function escapeHtml(text){
+  return String(text ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
+function renderImage(src, alt = ""){
+  if(!src){
+    return "";
+  }
+  return '<img src="' + escapeHtml(src) + '" alt="' + escapeHtml(alt) + '">';
 }
 
-loadConfig()
+function renderLinkedImage(src, link, alt = ""){
+  if(!src){
+    return "";
+  }
+  if(link && link !== "#"){
+    return '<a href="' + escapeHtml(link) + '" target="_blank" rel="noopener noreferrer">' +
+      '<img class="normal-image" src="' + escapeHtml(src) + '" alt="' + escapeHtml(alt) + '">' +
+    '</a>';
+  }
+  return '<img class="normal-image" src="' + escapeHtml(src) + '" alt="' + escapeHtml(alt) + '">';
+}
 
+function renderNormal(section){
+  return `
+    <section class="section align-${escapeHtml(section.alignY || "middle")}" style="background:${escapeHtml(section.bgColor || "#ffffff")}">
+      <div class="section-inner">
+        <h2 class="section-title">${escapeHtml(section.title || "")}</h2>
+        <div class="normal-image-wrap">
+          ${renderLinkedImage(section.image || "", section.link || "#", section.title || "")}
+        </div>
+        <p class="section-text text-${escapeHtml(section.textSize || "medium")}">${escapeHtml(section.text || "")}</p>
+      </div>
+    </section>
+  `;
+}
+
+function renderSlider(section){
+  const images = Array.isArray(section.images) ? section.images : [];
+  const imageHtml = images.length
+    ? images.map(src => '<img src="' + escapeHtml(src) + '" alt="' + escapeHtml(section.title || "") + '">').join("")
+    : '<div class="card-item">画像がまだありません</div>';
+
+  return `
+    <section class="section align-${escapeHtml(section.alignY || "middle")}" style="background:${escapeHtml(section.bgColor || "#f8f9fa")}">
+      <div class="section-inner">
+        <h2 class="section-title">${escapeHtml(section.title || "")}</h2>
+        <div class="slider-track">${imageHtml}</div>
+        <p class="section-text text-${escapeHtml(section.textSize || "medium")}">${escapeHtml(section.text || "")}</p>
+      </div>
+    </section>
+  `;
+}
+
+function renderCardItems(items, textSize){
+  if(!Array.isArray(items) || items.length === 0){
+    return '<div class="card-item">カードデータがありません</div>';
+  }
+
+  return items.map(item => {
+    const title = item?.title || "";
+    const text = item?.text || "";
+    const image = item?.image || "";
+    const link = item?.link || "#";
+
+    const inner = `
+      ${image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(title)}">` : ""}
+      ${title ? `<h3 class="card-item-title">${escapeHtml(title)}</h3>` : ""}
+      ${text ? `<div class="section-text text-${escapeHtml(textSize || "medium")}">${escapeHtml(text)}</div>` : ""}
+    `;
+
+    if(link && link !== "#"){
+      return `<div class="card-item"><a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit;">${inner}</a></div>`;
+    }
+    return `<div class="card-item">${inner}</div>`;
+  }).join("");
+}
+
+function renderCard4(section){
+  return `
+    <section class="section" style="background:${escapeHtml(section.bgColor || "#ffffff")}">
+      <div class="section-inner">
+        <h2 class="section-title">${escapeHtml(section.title || "")}</h2>
+        <div class="card-grid-4">
+          ${renderCardItems(section.items || [], section.textSize || "medium")}
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderCard3(section){
+  return `
+    <section class="section" style="background:${escapeHtml(section.bgColor || "#ffffff")}">
+      <div class="section-inner">
+        <h2 class="section-title">${escapeHtml(section.title || "")}</h2>
+        <div class="card-grid-3">
+          ${renderCardItems(section.items || [], section.textSize || "medium")}
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderCard2(section){
+  return `
+    <section class="section" style="background:${escapeHtml(section.bgColor || "#ffffff")}">
+      <div class="section-inner">
+        <h2 class="section-title">${escapeHtml(section.title || "")}</h2>
+        <div class="card-grid-2">
+          ${renderCardItems(section.items || [], section.textSize || "medium")}
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderMedia(section, reverse = false){
+  return `
+    <section class="section align-${escapeHtml(section.alignY || "middle")}" style="background:${escapeHtml(section.bgColor || "#ffffff")}">
+      <div class="section-inner">
+        <div class="media-row ${reverse ? "reverse" : ""}">
+          <div>
+            <h2 class="section-title">${escapeHtml(section.title || "")}</h2>
+            <p class="section-text text-${escapeHtml(section.textSize || "medium")}">${escapeHtml(section.text || "")}</p>
+          </div>
+          <div>
+            ${section.image ? `<img src="${escapeHtml(section.image)}" alt="${escapeHtml(section.title || "")}">` : ""}
+          </div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderSection(section){
+  if(!section || section.enabled === false){
+    return "";
+  }
+
+  switch(section.type){
+    case "normal":
+      return renderNormal(section);
+    case "slider":
+      return renderSlider(section);
+    case "card4":
+      return renderCard4(section);
+    case "card3":
+      return renderCard3(section);
+    case "card2":
+      return renderCard2(section);
+    case "card1-right":
+      return renderMedia(section, false);
+    case "card1-left":
+      return renderMedia(section, true);
+    default:
+      return `
+        <section class="section" style="background:#fff3cd">
+          <div class="section-inner">
+            <h2 class="section-title">未対応セクション</h2>
+            <p class="section-text">type: ${escapeHtml(section.type || "")}</p>
+          </div>
+        </section>
+      `;
+  }
+}
+
+async function loadSections(){
+  const container = document.getElementById("sectionsContainer");
+
+  try{
+    const res = await fetch("./data/sections.json?" + Date.now());
+    const sections = await res.json();
+
+    if(!Array.isArray(sections) || sections.length === 0){
+      container.innerHTML = '<div class="empty-box">セクションがまだありません。</div>';
+      return;
+    }
+
+    container.innerHTML = sections.map(renderSection).join("");
+  }catch(error){
+    container.innerHTML = '<div class="empty-box">sections.json の読み込みに失敗しました。</div>';
+  }
+}
+
+async function init(){
+  await loadConfig();
+  await loadSections();
+}
+
+init();
 </script>
-
 </body>
 </html>
