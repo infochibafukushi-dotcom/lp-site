@@ -26,7 +26,7 @@
   {
     "id": "section-1773049874928",
     "type": "card3",
-    "enabled": false,
+    "enabled": true,
     "title": "サービズ紹介",
     "textSize": "medium",
     "bgColor": "#ffffff",
