@@ -8,6 +8,10 @@
 *{
   box-sizing:border-box;
 }
+:root{
+  --header-bg:#ffffff;
+  --footer-bg:#ffffff;
+}
 body{
   margin:0;
   font-family:Arial, Helvetica, sans-serif;
@@ -15,7 +19,7 @@ body{
   color:#222;
 }
 header{
-  background:var(--header-bg, #ffffff);
+  background:var(--header-bg);
   padding:15px;
   display:flex;
   align-items:center;
@@ -26,6 +30,7 @@ header{
   top:0;
   z-index:1000;
   flex-wrap:wrap;
+  min-height:75px;
 }
 .logo{
   display:flex;
@@ -37,8 +42,8 @@ header{
 }
 .logo-img{
   width:auto;
-  height:60px;
-  max-width:220px;
+  height:52px;
+  max-width:180px;
   object-fit:contain;
   display:none;
 }
@@ -234,7 +239,7 @@ footer{
   bottom:0;
   left:0;
   width:100%;
-  background:var(--footer-bg, #ffffff);
+  background:var(--footer-bg);
   display:flex;
   justify-content:space-around;
   align-items:center;
@@ -300,13 +305,6 @@ footer{
 }
 
 @media (max-width: 768px){
-  header{
-    padding:12px;
-  }
-  .logo-img{
-    height:54px;
-    max-width:180px;
-  }
   .section{
     padding:28px 12px;
   }
@@ -323,7 +321,9 @@ footer{
     grid-template-columns:repeat(2, 1fr);
   }
   .media-row{
-    grid-template-columns:1fr;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    align-items:center;
   }
   .footerbtn{
     min-width:70px;
@@ -336,12 +336,19 @@ footer{
   .slider-slide img{
     height:260px;
   }
+  .logo-img{
+    height:50px;
+    max-width:160px;
+  }
+  .logo-text{
+    font-size:18px;
+  }
 }
 </style>
 </head>
 <body>
 
-<header id="siteHeader">
+<header>
   <div class="logo" id="logoTrigger">
     <img id="logoImg" class="logo-img" alt="">
     <div class="logo-text" id="logoTextView">LOGO</div>
@@ -385,6 +392,7 @@ let clickCount = 0;
 let sitePassword = "95123";
 let sliderTimers = [];
 let sliderTouchState = {};
+const FIXED_DOT_COUNT = 5;
 
 document.getElementById("logoTrigger").onclick = function(){
   clickCount++;
@@ -451,8 +459,8 @@ function ensureConfigShape(config){
   }));
 
   config.logoImage = config.logoImage || "";
-  config.headerBgColor = config.headerBgColor || config.topBandColor || "#ffffff";
-  config.footerBgColor = config.footerBgColor || config.bottomBandColor || "#ffffff";
+  config.headerBgColor = config.headerBgColor || "#ffffff";
+  config.footerBgColor = config.footerBgColor || "#ffffff";
   return config;
 }
 
@@ -735,18 +743,32 @@ function buildSliderDots(idx, total){
   if(!dotsWrap) return;
 
   let html = "";
-  for(let i = 0; i < total; i++){
-    html += `<button class="slider-dot${i === 0 ? " active" : ""}" type="button" onclick="goToSlider(${idx}, ${i})"></button>`;
+  for(let i = 0; i < FIXED_DOT_COUNT; i++){
+    html += `<button class="slider-dot${i === 0 ? " active" : ""}" type="button" onclick="goToSliderDot(${idx}, ${i})"></button>`;
   }
   dotsWrap.innerHTML = html;
+  updateSliderDots(idx, 0, total);
 }
 
-function updateSliderDots(idx, current){
+function getFixedDotIndex(current, total){
+  if(total <= 1) return 0;
+  const ratio = current / (total - 1);
+  return Math.max(0, Math.min(FIXED_DOT_COUNT - 1, Math.round(ratio * (FIXED_DOT_COUNT - 1))));
+}
+
+function getSlideIndexFromDot(dotIndex, total){
+  if(total <= 1) return 0;
+  const ratio = dotIndex / (FIXED_DOT_COUNT - 1);
+  return Math.max(0, Math.min(total - 1, Math.round(ratio * (total - 1))));
+}
+
+function updateSliderDots(idx, current, total){
   const dotsWrap = document.getElementById(`slider-dots-${idx}`);
   if(!dotsWrap) return;
   const dots = dotsWrap.querySelectorAll(".slider-dot");
+  const activeDot = getFixedDotIndex(current, total);
   dots.forEach((dot, i) => {
-    dot.classList.toggle("active", i === current);
+    dot.classList.toggle("active", i === activeDot);
   });
 }
 
@@ -819,7 +841,9 @@ function initSliders(){
 
     track.dataset.current = "0";
     updateSliderPosition(idx);
-    buildSliderDots(idx, total);
+    if(total > 1){
+      buildSliderDots(idx, total);
+    }
     attachSliderSwipe(shell, idx);
 
     if(total > 1){
@@ -856,7 +880,7 @@ function updateSliderPosition(idx){
 
   track.dataset.current = String(current);
   track.style.transform = `translateX(-${current * 100}%)`;
-  updateSliderDots(idx, current);
+  updateSliderDots(idx, current, total);
 }
 
 function moveSlider(idx, step){
@@ -877,10 +901,15 @@ function moveSlider(idx, step){
   updateSliderPosition(idx);
 }
 
-function goToSlider(idx, target){
+function goToSliderDot(idx, dotIndex){
   const track = document.getElementById(`slider-track-${idx}`);
   if(!track) return;
 
+  const slides = track.querySelectorAll(".slider-slide");
+  const total = slides.length;
+  if(total === 0) return;
+
+  const target = getSlideIndexFromDot(dotIndex, total);
   track.dataset.current = String(target);
   updateSliderPosition(idx);
   resetSliderTimer(idx);
