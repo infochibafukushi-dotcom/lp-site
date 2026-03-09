@@ -8,7 +8,7 @@
     "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773050787122-image-1.png",
     "link": "#",
     "textSize": "medium",
-    "bgColor": "#ffffff",
+    "bgColor": "#ffcad4",
     "alignY": "middle"
   },
   {
@@ -25,7 +25,7 @@
     ],
     "link": "#",
     "textSize": "medium",
-    "bgColor": "#f8f9fa",
+    "bgColor": "#b7e4c7",
     "alignY": "middle"
   },
   {
@@ -34,7 +34,7 @@
     "enabled": true,
     "title": "サービズ紹介",
     "textSize": "medium",
-    "bgColor": "#ffffff",
+    "bgColor": "#f75fe2",
     "items": [
       {
         "title": "カード1",
@@ -77,5 +77,17 @@
         "link": "#"
       }
     ]
+  },
+  {
+    "id": "section-1773058244287",
+    "type": "normal",
+    "enabled": true,
+    "title": "新しいノーマル",
+    "text": "説明文を入力してください。",
+    "image": "",
+    "link": "#",
+    "textSize": "medium",
+    "bgColor": "#ffffff",
+    "alignY": "middle"
   }
 ]
