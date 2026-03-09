@@ -1,17 +1,5 @@
 [
   {
-    "id": "section-001",
-    "type": "normal",
-    "enabled": true,
-    "title": "ごあいさつ",
-    "text": "ここにノーマルセクションの説明文が入ります。",
-    "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773050787122-image-1.png",
-    "link": "#",
-    "textSize": "medium",
-    "bgColor": "#ffcad4",
-    "alignY": "middle"
-  },
-  {
     "id": "section-002",
     "type": "slider",
     "enabled": true,
@@ -26,6 +14,18 @@
     "link": "#",
     "textSize": "medium",
     "bgColor": "#b7e4c7",
+    "alignY": "middle"
+  },
+  {
+    "id": "section-001",
+    "type": "normal",
+    "enabled": true,
+    "title": "ごあいさつ",
+    "text": "ここにノーマルセクションの説明文が入ります。",
+    "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773050787122-image-1.png",
+    "link": "#",
+    "textSize": "medium",
+    "bgColor": "#ffcad4",
     "alignY": "middle"
   },
   {
