@@ -20,7 +20,7 @@ body{
 }
 header{
   background:var(--header-bg);
-  padding:15px;
+  padding:12px 14px;
   display:flex;
   align-items:center;
   justify-content:flex-start;
@@ -29,43 +29,58 @@ header{
   position:sticky;
   top:0;
   z-index:1000;
-  flex-wrap:wrap;
-  min-height:75px;
+  flex-wrap:nowrap;
+  min-height:72px;
+  overflow:hidden;
 }
 .logo{
   display:flex;
   align-items:center;
-  gap:10px;
+  gap:8px;
   cursor:pointer;
-  margin-right:8px;
+  margin-right:6px;
   flex:0 0 auto;
+  min-width:0;
 }
 .logo-img{
   width:auto;
   height:52px;
-  max-width:180px;
+  max-width:170px;
   object-fit:contain;
   display:none;
+  flex:0 0 auto;
 }
 .logo-text{
   font-weight:bold;
   font-size:20px;
   line-height:1;
+  white-space:nowrap;
 }
 .top-buttons{
   display:flex;
   align-items:center;
   justify-content:flex-start;
-  gap:10px;
-  flex-wrap:wrap;
+  gap:8px;
+  flex-wrap:nowrap;
+  flex:1 1 auto;
+  min-width:0;
+  overflow:hidden;
 }
 .topbtn{
   padding:8px 12px;
   background:#007bff;
   color:#fff;
-  border-radius:5px;
+  border-radius:8px;
   text-decoration:none;
-  display:inline-block;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  white-space:nowrap;
+  flex:1 1 0;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  font-size:14px;
 }
 main{
   padding:0 0 100px;
@@ -305,26 +320,55 @@ footer{
 }
 
 @media (max-width: 768px){
+  header{
+    padding:10px 8px;
+    gap:6px;
+    flex-wrap:nowrap;
+  }
+  .logo{
+    gap:6px;
+    margin-right:4px;
+  }
+  .logo-img{
+    height:42px;
+    max-width:110px;
+  }
+  .logo-text{
+    font-size:16px;
+  }
+  .top-buttons{
+    gap:6px;
+    flex-wrap:nowrap;
+  }
+  .topbtn{
+    padding:8px 6px;
+    font-size:12px;
+    border-radius:6px;
+  }
+
   .section{
     padding:28px 12px;
   }
   .section-title{
     font-size:22px;
   }
+
   .card-grid-4{
-    grid-template-columns:repeat(4, 1fr);
+    grid-template-columns:repeat(2, 1fr);
   }
   .card-grid-3{
-    grid-template-columns:repeat(3, 1fr);
+    grid-template-columns:repeat(2, 1fr);
   }
   .card-grid-2{
     grid-template-columns:repeat(2, 1fr);
   }
+
   .media-row{
     grid-template-columns:1fr 1fr;
     gap:14px;
     align-items:center;
   }
+
   .footerbtn{
     min-width:70px;
     font-size:12px;
@@ -336,12 +380,26 @@ footer{
   .slider-slide img{
     height:260px;
   }
+}
+
+@media (max-width: 420px){
+  header{
+    padding:8px 6px;
+    gap:4px;
+  }
   .logo-img{
-    height:50px;
-    max-width:160px;
+    height:38px;
+    max-width:90px;
   }
   .logo-text{
-    font-size:18px;
+    font-size:14px;
+  }
+  .top-buttons{
+    gap:4px;
+  }
+  .topbtn{
+    padding:7px 4px;
+    font-size:11px;
   }
 }
 </style>
