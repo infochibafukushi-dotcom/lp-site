@@ -6,17 +6,17 @@
   "footerBgColor": "#dcfce7",
   "buttons": [
     {
-      "text": "テスト",
+      "text": "メール問合せ",
       "link": "#",
       "visible": true
     },
     {
-      "text": "ボタン2",
+      "text": "料金表",
       "link": "#",
       "visible": true
     },
     {
-      "text": "ボタン3",
+      "text": "Q＆A",
       "link": "#",
       "visible": true
     }
