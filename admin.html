@@ -324,6 +324,7 @@ button.small-btn{
         <div class="row">
           <label>ボタン1 リンク</label>
           <input type="text" id="btn1Link">
+          <div class="small">例: #service または https://example.com</div>
         </div>
         <div class="row">
           <label>ボタン1 表示</label>
@@ -337,6 +338,7 @@ button.small-btn{
         <div class="row">
           <label>ボタン2 リンク</label>
           <input type="text" id="btn2Link">
+          <div class="small">例: #price</div>
         </div>
         <div class="row">
           <label>ボタン2 表示</label>
@@ -350,6 +352,7 @@ button.small-btn{
         <div class="row">
           <label>ボタン3 リンク</label>
           <input type="text" id="btn3Link">
+          <div class="small">例: #contact</div>
         </div>
         <div class="row">
           <label>ボタン3 表示</label>
@@ -613,6 +616,23 @@ function ensureConfigShape(config){
   return config;
 }
 
+function slugifySectionId(text){
+  return String(text || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^\wぁ-んァ-ヶー一-龠-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function ensureSectionShape(section, index){
+  if(!section || typeof section !== 'object'){
+    return createDefaultSection('normal', '新しいノーマル');
+  }
+  section.id = section.id || ('section-' + Date.now() + '-' + index);
+  section.sectionId = section.sectionId || '';
+  return section;
+}
+
 function buildConfigDraft(){
   return {
     password: document.getElementById('passwordText').value,
@@ -733,7 +753,7 @@ function renderNamedColorField(targetId, currentValue, labelKey){
   document.getElementById(targetId).innerHTML = html;
 }
 
-function setNamedColor(labelKey, value, fromText = false){
+function setNamedColor(labelKey, value){
   const textEl = document.getElementById(`${labelKey}Text`);
   const pickerEl = document.getElementById(`${labelKey}Picker`);
   if(textEl){
@@ -811,18 +831,31 @@ async function loadConfig(){
 async function loadSections(){
   const res = await fetch('./data/sections.json?' + Date.now());
   sectionsData = await res.json();
+  if(!Array.isArray(sectionsData)) sectionsData = [];
+  sectionsData = sectionsData.map((section, index) => ensureSectionShape(section, index));
   renderSectionsEditor();
 }
 
 function createDefaultSection(type, title){
+  const baseTitle = title || (
+    type === 'normal' ? '新しいノーマル' :
+    type === 'slider' ? '新しいスライダー' :
+    type === 'card4' ? '新しいカード4' :
+    type === 'card3' ? '新しいカード3' :
+    type === 'card2' ? '新しいカード2' :
+    type === 'card1-right' ? '新しいカード1右' :
+    '新しいカード1左'
+  );
   const id = 'section-' + Date.now();
+  const sectionId = slugifySectionId(baseTitle);
 
   if(type === 'normal'){
     return {
       id,
+      sectionId,
       type: 'normal',
       enabled: true,
-      title: title || '新しいノーマル',
+      title: baseTitle,
       text: '説明文を入力してください。',
       image: '',
       link: '#',
@@ -835,9 +868,10 @@ function createDefaultSection(type, title){
   if(type === 'slider'){
     return {
       id,
+      sectionId,
       type: 'slider',
       enabled: true,
-      title: title || '新しいスライダー',
+      title: baseTitle,
       text: 'スライダー説明を入力してください。',
       images: [],
       link: '#',
@@ -850,9 +884,10 @@ function createDefaultSection(type, title){
   if(type === 'card4'){
     return {
       id,
+      sectionId,
       type: 'card4',
       enabled: true,
-      title: title || '新しいカード4',
+      title: baseTitle,
       textSize: 'medium',
       bgColor: '#ffffff',
       items: [
@@ -867,9 +902,10 @@ function createDefaultSection(type, title){
   if(type === 'card3'){
     return {
       id,
+      sectionId,
       type: 'card3',
       enabled: true,
-      title: title || '新しいカード3',
+      title: baseTitle,
       textSize: 'medium',
       bgColor: '#ffffff',
       items: [
@@ -883,9 +919,10 @@ function createDefaultSection(type, title){
   if(type === 'card2'){
     return {
       id,
+      sectionId,
       type: 'card2',
       enabled: true,
-      title: title || '新しいカード2',
+      title: baseTitle,
       textSize: 'medium',
       bgColor: '#ffffff',
       items: [
@@ -898,9 +935,10 @@ function createDefaultSection(type, title){
   if(type === 'card1-right'){
     return {
       id,
+      sectionId,
       type: 'card1-right',
       enabled: true,
-      title: title || '新しいカード1右',
+      title: baseTitle,
       text: '説明文を入力してください。',
       image: '',
       link: '#',
@@ -912,9 +950,10 @@ function createDefaultSection(type, title){
 
   return {
     id,
+    sectionId,
     type: 'card1-left',
     enabled: true,
-    title: title || '新しいカード1左',
+    title: baseTitle,
     text: '説明文を入力してください。',
     image: '',
     link: '#',
@@ -931,6 +970,7 @@ function deepClone(obj){
 function duplicateSection(index){
   const copy = deepClone(sectionsData[index]);
   copy.id = 'section-' + Date.now();
+  copy.sectionId = copy.sectionId ? `${copy.sectionId}-copy` : '';
   copy.title = (copy.title || 'コピー') + ' コピー';
   sectionsData.splice(index + 1, 0, copy);
   renderSectionsEditor();
@@ -1300,6 +1340,12 @@ function renderSectionsEditor(){
           <div class="row">
             <label>表示する</label>
             <label class="checkline"><input type="checkbox" ${section.enabled !== false ? 'checked' : ''} onchange="updateSectionEnabled(${index}, this.checked)"> 表示する</label>
+          </div>
+
+          <div class="row">
+            <label>セクションID</label>
+            <input type="text" value="${escapeAttr(section.sectionId || '')}" oninput="updateSectionField(${index}, 'sectionId', this.value)">
+            <div class="small">例: service / price / contact。上部ボタンのリンクに #service のように入力すると移動できます。</div>
           </div>
 
           <div class="row">
