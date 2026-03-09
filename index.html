@@ -28,11 +28,23 @@ header{
   flex-wrap:wrap;
 }
 .logo{
-  font-weight:bold;
-  font-size:20px;
+  display:flex;
+  align-items:center;
+  gap:10px;
   cursor:pointer;
   margin-right:8px;
   flex:0 0 auto;
+}
+.logo-img{
+  width:44px;
+  height:44px;
+  object-fit:contain;
+  display:none;
+}
+.logo-text{
+  font-weight:bold;
+  font-size:20px;
+  line-height:1;
 }
 .top-buttons{
   display:flex;
@@ -98,26 +110,64 @@ main{
   margin:0 auto;
 }
 
+.slider-shell{
+  position:relative;
+  margin-top:12px;
+}
+.slider-window{
+  overflow:hidden;
+  border-radius:12px;
+}
 .slider-track{
   display:flex;
-  gap:12px;
-  overflow-x:auto;
-  scroll-snap-type:x mandatory;
-  padding-bottom:6px;
+  transition:transform 0.45s ease;
+  will-change:transform;
 }
-.slider-item{
-  flex:0 0 auto;
+.slider-slide{
+  min-width:100%;
+  flex:0 0 100%;
+  padding:0;
+}
+.slider-slide a,
+.slider-slide div{
   display:block;
 }
-.slider-track img{
-  width:280px;
-  height:180px;
+.slider-slide img{
+  width:100%;
+  max-width:700px;
+  height:auto;
+  max-height:380px;
   object-fit:cover;
   border-radius:12px;
-  flex:0 0 auto;
-  scroll-snap-align:start;
-  background:#e9ecef;
   display:block;
+  margin:0 auto;
+  background:#e9ecef;
+}
+.slider-empty{
+  background:#fff;
+  padding:18px;
+  border-radius:12px;
+  display:inline-block;
+}
+.slider-arrow{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:42px;
+  height:42px;
+  border:none;
+  border-radius:999px;
+  background:rgba(0,0,0,0.55);
+  color:#fff;
+  font-size:20px;
+  cursor:pointer;
+  z-index:2;
+}
+.slider-arrow.left{
+  left:10px;
+}
+.slider-arrow.right{
+  right:10px;
 }
 
 .card-grid-4,
@@ -273,13 +323,19 @@ footer{
     width:46px;
     height:46px;
   }
+  .slider-slide img{
+    max-height:260px;
+  }
 }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo" id="logo">LOGO</div>
+  <div class="logo" id="logoTrigger">
+    <img id="logoImg" class="logo-img" alt="">
+    <div class="logo-text" id="logoTextView">LOGO</div>
+  </div>
 
   <div class="top-buttons" id="topButtons">
     <a class="topbtn" id="btn1" href="#">ボタン1</a>
@@ -317,8 +373,9 @@ footer{
 <script>
 let clickCount = 0;
 let sitePassword = "95123";
+let sliderTimers = [];
 
-document.getElementById("logo").onclick = function(){
+document.getElementById("logoTrigger").onclick = function(){
   clickCount++;
   if(clickCount >= 5){
     document.getElementById("adminPanel").style.display = "block";
@@ -382,6 +439,7 @@ function ensureConfigShape(config){
     image: f?.image || ""
   }));
 
+  config.logoImage = config.logoImage || "";
   return config;
 }
 
@@ -419,7 +477,17 @@ async function loadConfig(){
   let config = await res.json();
   config = ensureConfigShape(config);
 
-  document.getElementById("logo").innerText = config.logo || "LOGO";
+  const logoTextEl = document.getElementById("logoTextView");
+  const logoImgEl = document.getElementById("logoImg");
+
+  logoTextEl.innerText = config.logo || "";
+  if(config.logoImage){
+    logoImgEl.src = config.logoImage;
+    logoImgEl.style.display = "block";
+  }else{
+    logoImgEl.src = "";
+    logoImgEl.style.display = "none";
+  }
 
   applyTopButton(document.getElementById("btn1"), config.buttons[0], "ボタン1");
   applyTopButton(document.getElementById("btn2"), config.buttons[1], "ボタン2");
@@ -450,13 +518,6 @@ async function loadConfig(){
   sitePassword = config.password || "95123";
 }
 
-function renderImageTag(src, alt, className = ""){
-  if(!src){
-    return "";
-  }
-  return `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt || "")}" class="${escapeHtml(className)}">`;
-}
-
 function wrapLink(link, innerHtml, className = ""){
   if(link && link !== "#"){
     return `<a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer" class="${escapeHtml(className)}">${innerHtml}</a>`;
@@ -465,36 +526,44 @@ function wrapLink(link, innerHtml, className = ""){
 }
 
 function renderNormal(section){
-  const imageHtml = renderImageTag(section.image || "", section.title || "", "normal-image");
+  const imageHtml = section.image
+    ? `<img class="normal-image" src="${escapeHtml(section.image)}" alt="${escapeHtml(section.title || "")}">`
+    : "";
   const linkedImage = wrapLink(section.link || "#", imageHtml, "");
 
   return `
     <section class="section align-${escapeHtml(section.alignY || "middle")}" style="background:${escapeHtml(section.bgColor || "#ffffff")}">
       <div class="section-inner">
         <h2 class="section-title">${escapeHtml(section.title || "")}</h2>
-        <div class="normal-image-wrap">
-          ${linkedImage}
-        </div>
+        <div class="normal-image-wrap">${linkedImage}</div>
         <p class="section-text text-${escapeHtml(section.textSize || "medium")}">${escapeHtml(section.text || "")}</p>
       </div>
     </section>
   `;
 }
 
-function renderSlider(section){
+function renderSlider(section, idx){
   const images = Array.isArray(section.images) ? section.images : [];
-  const itemHtml = images.length
+  const slides = images.length
     ? images.map(src => {
         const image = `<img src="${escapeHtml(src)}" alt="${escapeHtml(section.title || "")}">`;
-        return wrapLink(section.link || "#", image, "slider-item");
+        return `<div class="slider-slide">${wrapLink(section.link || "#", image, "")}</div>`;
       }).join("")
-    : `<div class="card-item">画像がまだありません</div>`;
+    : `<div class="slider-empty">画像がまだありません</div>`;
 
   return `
     <section class="section align-${escapeHtml(section.alignY || "middle")}" style="background:${escapeHtml(section.bgColor || "#f8f9fa")}">
       <div class="section-inner">
         <h2 class="section-title">${escapeHtml(section.title || "")}</h2>
-        <div class="slider-track">${itemHtml}</div>
+        <div class="slider-shell" data-slider-index="${idx}">
+          <button class="slider-arrow left" type="button" onclick="moveSlider(${idx}, -1)">←</button>
+          <div class="slider-window">
+            <div class="slider-track" id="slider-track-${idx}">
+              ${slides}
+            </div>
+          </div>
+          <button class="slider-arrow right" type="button" onclick="moveSlider(${idx}, 1)">→</button>
+        </div>
         <p class="section-text text-${escapeHtml(section.textSize || "medium")}">${escapeHtml(section.text || "")}</p>
       </div>
     </section>
@@ -578,16 +647,14 @@ function renderMedia(section, reverse = false){
             <h2 class="section-title">${escapeHtml(section.title || "")}</h2>
             <p class="section-text text-${escapeHtml(section.textSize || "medium")}">${escapeHtml(section.text || "")}</p>
           </div>
-          <div>
-            ${image}
-          </div>
+          <div>${image}</div>
         </div>
       </div>
     </section>
   `;
 }
 
-function renderSection(section){
+function renderSection(section, idx){
   if(!section || section.enabled === false){
     return "";
   }
@@ -596,7 +663,7 @@ function renderSection(section){
     case "normal":
       return renderNormal(section);
     case "slider":
-      return renderSlider(section);
+      return renderSlider(section, idx);
     case "card4":
       return renderCard4(section);
     case "card3":
@@ -631,10 +698,66 @@ async function loadSections(){
       return;
     }
 
-    container.innerHTML = sections.map(renderSection).join("");
+    container.innerHTML = sections.map((section, idx) => renderSection(section, idx)).join("");
+    initSliders();
   }catch(error){
     container.innerHTML = '<div class="empty-box">sections.json の読み込みに失敗しました。</div>';
   }
+}
+
+function clearSliderTimers(){
+  sliderTimers.forEach(timer => clearInterval(timer));
+  sliderTimers = [];
+}
+
+function initSliders(){
+  clearSliderTimers();
+
+  document.querySelectorAll('.slider-shell').forEach((shell) => {
+    const idx = Number(shell.dataset.sliderIndex);
+    const track = document.getElementById(`slider-track-${idx}`);
+    if(!track) return;
+
+    const slides = track.querySelectorAll('.slider-slide');
+    if(slides.length <= 1) return;
+
+    track.dataset.current = "0";
+    updateSliderPosition(idx);
+
+    const timer = setInterval(() => {
+      moveSlider(idx, 1);
+    }, 3000);
+
+    sliderTimers.push(timer);
+
+    shell.addEventListener('mouseenter', () => clearInterval(timer));
+  });
+}
+
+function updateSliderPosition(idx){
+  const track = document.getElementById(`slider-track-${idx}`);
+  if(!track) return;
+
+  const slides = track.querySelectorAll('.slider-slide');
+  const total = slides.length;
+  if(total === 0) return;
+
+  let current = Number(track.dataset.current || "0");
+  if(current < 0) current = total - 1;
+  if(current >= total) current = 0;
+
+  track.dataset.current = String(current);
+  track.style.transform = `translateX(-${current * 100}%)`;
+}
+
+function moveSlider(idx, step){
+  const track = document.getElementById(`slider-track-${idx}`);
+  if(!track) return;
+
+  let current = Number(track.dataset.current || "0");
+  current += step;
+  track.dataset.current = String(current);
+  updateSliderPosition(idx);
 }
 
 async function init(){
