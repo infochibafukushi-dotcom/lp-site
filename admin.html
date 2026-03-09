@@ -219,10 +219,38 @@ button.small-btn{
   border-color:#000;
   transform:scale(1.05);
 }
+.band-preview-wrap{
+  margin-top:8px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+.band-preview-card{
+  border:1px solid #ddd;
+  border-radius:12px;
+  overflow:hidden;
+  background:#fff;
+}
+.band-preview-head{
+  padding:10px 12px;
+  font-size:13px;
+  font-weight:bold;
+  border-bottom:1px solid #eee;
+  background:#fafafa;
+}
+.band-preview-body{
+  padding:16px 12px;
+  min-height:70px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+}
 @media (max-width: 768px){
   .grid2{grid-template-columns:1fr;}
   header{font-size:18px;}
   .card{padding:16px;}
+  .band-preview-wrap{grid-template-columns:1fr;}
 }
 </style>
 </head>
@@ -280,6 +308,11 @@ button.small-btn{
           <input type="file" accept="image/*" onchange="uploadLogoImage(this)">
           <div class="small">選択すると GitHub の assets/logo にアップロードされます。</div>
           <img id="logoPreview" class="logo-preview" style="display:none;" alt="">
+        </div>
+
+        <div class="row">
+          <label>上ベッター背景色</label>
+          <div id="headerBgColorField"></div>
         </div>
       </div>
 
@@ -409,10 +442,26 @@ button.small-btn{
           <label>現在のパスワード</label>
           <input type="text" id="passwordText">
         </div>
+
+        <div class="row">
+          <label>下ベッター背景色</label>
+          <div id="footerBgColorField"></div>
+        </div>
       </div>
     </div>
 
-    <div class="actions">
+    <div class="band-preview-wrap">
+      <div class="band-preview-card">
+        <div class="band-preview-head">上ベッター見本</div>
+        <div class="band-preview-body" id="headerBandPreview">HEADER</div>
+      </div>
+      <div class="band-preview-card">
+        <div class="band-preview-head">下ベッター見本</div>
+        <div class="band-preview-body" id="footerBandPreview">FOOTER</div>
+      </div>
+    </div>
+
+    <div class="actions" style="margin-top:14px;">
       <button type="button" onclick="saveConfigToGitHub()">config.json を保存</button>
     </div>
     <div class="preview" id="configSaveResult">まだ保存していません。</div>
@@ -559,6 +608,8 @@ function ensureConfigShape(config){
   }));
 
   config.logoImage = config.logoImage || '';
+  config.headerBgColor = config.headerBgColor || '#ffffff';
+  config.footerBgColor = config.footerBgColor || '#ffffff';
   return config;
 }
 
@@ -567,6 +618,8 @@ function buildConfigDraft(){
     password: document.getElementById('passwordText').value,
     logo: document.getElementById('logoText').value,
     logoImage: document.getElementById('logoImage').value,
+    headerBgColor: document.getElementById('headerBgColorText').value || '#ffffff',
+    footerBgColor: document.getElementById('footerBgColorText').value || '#ffffff',
     buttons: [
       {
         text: document.getElementById('btn1Text').value,
@@ -637,6 +690,78 @@ function setLogoPreview(url){
   }
 }
 
+function normalizeColor(value){
+  if(/^#[0-9a-fA-F]{6}$/.test(value || '')){
+    return value;
+  }
+  return '#ffffff';
+}
+
+function renderNamedColorField(targetId, currentValue, labelKey){
+  const current = currentValue || '#ffffff';
+  const html = `
+    <div class="color-field">
+      <div class="color-input-wrap">
+        <input
+          type="color"
+          id="${labelKey}Picker"
+          class="color-picker"
+          value="${escapeAttr(normalizeColor(current))}"
+          oninput="setNamedColor('${labelKey}', this.value)"
+        >
+        <input
+          type="text"
+          id="${labelKey}Text"
+          class="color-text"
+          value="${escapeAttr(current)}"
+          oninput="setNamedColor('${labelKey}', this.value, true)"
+        >
+      </div>
+      <div class="color-palette">
+        ${COLOR_PRESETS.map(color => `
+          <button
+            type="button"
+            class="color-swatch ${current.toLowerCase() === color.toLowerCase() ? 'active' : ''}"
+            style="background:${color}"
+            onclick="setNamedColor('${labelKey}', '${color}')"
+            title="${color}"
+          ></button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  document.getElementById(targetId).innerHTML = html;
+}
+
+function setNamedColor(labelKey, value, fromText = false){
+  const textEl = document.getElementById(`${labelKey}Text`);
+  const pickerEl = document.getElementById(`${labelKey}Picker`);
+  if(textEl){
+    textEl.value = value;
+  }
+  if(pickerEl){
+    pickerEl.value = normalizeColor(value);
+  }
+  refreshNamedColorPalette(labelKey, value);
+  updateBandPreview();
+}
+
+function refreshNamedColorPalette(labelKey, currentValue){
+  const container = document.getElementById(labelKey === 'headerBgColor' ? 'headerBgColorField' : 'footerBgColorField');
+  if(!container) return;
+  container.querySelectorAll('.color-swatch').forEach(btn => {
+    const title = String(btn.title || '').toLowerCase();
+    btn.classList.toggle('active', title === String(currentValue || '').toLowerCase());
+  });
+}
+
+function updateBandPreview(){
+  const headerColor = document.getElementById('headerBgColorText')?.value || '#ffffff';
+  const footerColor = document.getElementById('footerBgColorText')?.value || '#ffffff';
+  document.getElementById('headerBandPreview').style.background = headerColor;
+  document.getElementById('footerBandPreview').style.background = footerColor;
+}
+
 async function loadConfig(){
   const res = await fetch('./data/config.json?' + Date.now());
   let config = await res.json();
@@ -645,6 +770,10 @@ async function loadConfig(){
   document.getElementById('logoText').value = config.logo || '';
   document.getElementById('logoImage').value = config.logoImage || '';
   setLogoPreview(config.logoImage || '');
+
+  renderNamedColorField('headerBgColorField', config.headerBgColor || '#ffffff', 'headerBgColor');
+  renderNamedColorField('footerBgColorField', config.footerBgColor || '#ffffff', 'footerBgColor');
+  updateBandPreview();
 
   document.getElementById('btn1Text').value = config.buttons[0].text || '';
   document.getElementById('btn1Link').value = config.buttons[0].link || '#';
@@ -857,13 +986,6 @@ function setSectionBgColor(index, value){
   if(textInput) textInput.value = value;
   if(colorInput) colorInput.value = normalizeColor(value);
   renderSectionsEditor();
-}
-
-function normalizeColor(value){
-  if(/^#[0-9a-fA-F]{6}$/.test(value || '')){
-    return value;
-  }
-  return '#ffffff';
 }
 
 function renderColorField(index, currentValue){
