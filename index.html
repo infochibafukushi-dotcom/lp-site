@@ -19,6 +19,7 @@ header{
   padding:15px;
   display:flex;
   align-items:center;
+  justify-content:flex-start;
   gap:10px;
   border-bottom:1px solid #ddd;
   position:sticky;
@@ -30,6 +31,15 @@ header{
   font-weight:bold;
   font-size:20px;
   cursor:pointer;
+  margin-right:8px;
+  flex:0 0 auto;
+}
+.top-buttons{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:10px;
+  flex-wrap:wrap;
 }
 .topbtn{
   padding:8px 12px;
@@ -40,7 +50,7 @@ header{
   display:inline-block;
 }
 main{
-  padding:0 0 90px;
+  padding:0 0 100px;
 }
 .section{
   padding:40px 20px;
@@ -57,15 +67,10 @@ main{
   line-height:1.8;
   margin:12px 0 0;
 }
-.text-small{
-  font-size:14px;
-}
-.text-medium{
-  font-size:16px;
-}
-.text-large{
-  font-size:20px;
-}
+.text-small{font-size:14px;}
+.text-medium{font-size:16px;}
+.text-large{font-size:20px;}
+
 .align-top .section-inner{
   display:flex;
   flex-direction:column;
@@ -81,6 +86,7 @@ main{
   flex-direction:column;
   justify-content:flex-end;
 }
+
 .normal-image-wrap{
   margin-top:16px;
 }
@@ -91,12 +97,17 @@ main{
   display:block;
   margin:0 auto;
 }
+
 .slider-track{
   display:flex;
   gap:12px;
   overflow-x:auto;
   scroll-snap-type:x mandatory;
   padding-bottom:6px;
+}
+.slider-item{
+  flex:0 0 auto;
+  display:block;
 }
 .slider-track img{
   width:280px;
@@ -106,7 +117,9 @@ main{
   flex:0 0 auto;
   scroll-snap-align:start;
   background:#e9ecef;
+  display:block;
 }
+
 .card-grid-4,
 .card-grid-3,
 .card-grid-2{
@@ -139,6 +152,12 @@ main{
   margin:0 0 8px;
   font-size:18px;
 }
+.card-link{
+  display:block;
+  text-decoration:none;
+  color:inherit;
+}
+
 .media-row{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -156,6 +175,7 @@ main{
 .media-row.reverse > *{
   direction:ltr;
 }
+
 footer{
   position:fixed;
   bottom:0;
@@ -164,15 +184,32 @@ footer{
   background:#ffffff;
   display:flex;
   justify-content:space-around;
-  padding:12px;
+  align-items:center;
+  padding:10px;
   border-top:1px solid #ccc;
   z-index:1001;
+  gap:8px;
 }
 .footerbtn{
   text-decoration:none;
   color:#000;
   font-size:14px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-width:80px;
+  text-align:center;
 }
+.footerbtn img{
+  width:52px;
+  height:52px;
+  object-fit:cover;
+  border-radius:10px;
+  display:block;
+  margin-bottom:6px;
+}
+
 .adminPanel{
   position:fixed;
   top:50%;
@@ -205,6 +242,10 @@ footer{
   padding:20px;
   border-radius:12px;
 }
+.hidden{
+  display:none !important;
+}
+
 @media (max-width: 768px){
   .section{
     padding:28px 12px;
@@ -224,6 +265,14 @@ footer{
   .media-row{
     grid-template-columns:1fr;
   }
+  .footerbtn{
+    min-width:70px;
+    font-size:12px;
+  }
+  .footerbtn img{
+    width:46px;
+    height:46px;
+  }
 }
 </style>
 </head>
@@ -231,19 +280,31 @@ footer{
 
 <header>
   <div class="logo" id="logo">LOGO</div>
-  <a class="topbtn" id="btn1" href="#">ボタン1</a>
-  <a class="topbtn" id="btn2" href="#">ボタン2</a>
-  <a class="topbtn" id="btn3" href="#">ボタン3</a>
+
+  <div class="top-buttons" id="topButtons">
+    <a class="topbtn" id="btn1" href="#">ボタン1</a>
+    <a class="topbtn" id="btn2" href="#">ボタン2</a>
+    <a class="topbtn" id="btn3" href="#">ボタン3</a>
+  </div>
 </header>
 
 <main id="sectionsContainer">
   <div class="empty-box">読み込み中...</div>
 </main>
 
-<footer>
-  <a class="footerbtn" id="f1" href="#">電話</a>
-  <a class="footerbtn" id="f2" href="#">LINE</a>
-  <a class="footerbtn" id="f3" href="#">予約</a>
+<footer id="footerMenu">
+  <a class="footerbtn" id="f1" href="#">
+    <img id="f1img" class="hidden" alt="">
+    <span id="f1text">電話</span>
+  </a>
+  <a class="footerbtn" id="f2" href="#">
+    <img id="f2img" class="hidden" alt="">
+    <span id="f2text">LINE</span>
+  </a>
+  <a class="footerbtn" id="f3" href="#">
+    <img id="f3img" class="hidden" alt="">
+    <span id="f3text">予約</span>
+  </a>
 </footer>
 
 <div class="adminPanel" id="adminPanel">
@@ -275,33 +336,6 @@ function login(){
   }
 }
 
-async function loadConfig(){
-  const res = await fetch("./data/config.json?" + Date.now());
-  const config = await res.json();
-
-  document.getElementById("logo").innerText = config.logo || "LOGO";
-
-  document.getElementById("btn1").innerText = config.buttons?.[0]?.text || "ボタン1";
-  document.getElementById("btn1").href = config.buttons?.[0]?.link || "#";
-
-  document.getElementById("btn2").innerText = config.buttons?.[1]?.text || "ボタン2";
-  document.getElementById("btn2").href = config.buttons?.[1]?.link || "#";
-
-  document.getElementById("btn3").innerText = config.buttons?.[2]?.text || "ボタン3";
-  document.getElementById("btn3").href = config.buttons?.[2]?.link || "#";
-
-  document.getElementById("f1").innerText = config.footer?.[0]?.text || "電話";
-  document.getElementById("f1").href = config.footer?.[0]?.link || "#";
-
-  document.getElementById("f2").innerText = config.footer?.[1]?.text || "LINE";
-  document.getElementById("f2").href = config.footer?.[1]?.link || "#";
-
-  document.getElementById("f3").innerText = config.footer?.[2]?.text || "予約";
-  document.getElementById("f3").href = config.footer?.[2]?.link || "#";
-
-  sitePassword = config.password || "95123";
-}
-
 function escapeHtml(text){
   return String(text ?? "")
     .replaceAll("&", "&amp;")
@@ -311,32 +345,135 @@ function escapeHtml(text){
     .replaceAll("'", "&#039;");
 }
 
-function renderImage(src, alt = ""){
-  if(!src){
-    return "";
+function ensureConfigShape(config){
+  if(!Array.isArray(config.buttons)){
+    config.buttons = [
+      { text:"ボタン1", link:"#", visible:true },
+      { text:"ボタン2", link:"#", visible:true },
+      { text:"ボタン3", link:"#", visible:true }
+    ];
   }
-  return '<img src="' + escapeHtml(src) + '" alt="' + escapeHtml(alt) + '">';
+  while(config.buttons.length < 3){
+    config.buttons.push({ text:"ボタン", link:"#", visible:true });
+  }
+
+  if(!Array.isArray(config.footer)){
+    config.footer = [
+      { text:"電話", link:"#", visible:true, image:"" },
+      { text:"LINE", link:"#", visible:true, image:"" },
+      { text:"予約", link:"#", visible:true, image:"" }
+    ];
+  }
+  while(config.footer.length < 3){
+    config.footer.push({ text:"ボタン", link:"#", visible:true, image:"" });
+  }
+
+  config.buttons = config.buttons.map((b, i) => ({
+    text: b?.text || `ボタン${i + 1}`,
+    link: b?.link || "#",
+    visible: b?.visible !== false
+  }));
+
+  const footerDefaults = ["電話", "LINE", "予約"];
+  config.footer = config.footer.map((f, i) => ({
+    text: f?.text || footerDefaults[i] || "ボタン",
+    link: f?.link || "#",
+    visible: f?.visible !== false,
+    image: f?.image || ""
+  }));
+
+  return config;
 }
 
-function renderLinkedImage(src, link, alt = ""){
+function applyTopButton(el, data, fallbackText){
+  el.innerText = data?.text || fallbackText;
+  el.href = data?.link || "#";
+  if(data?.visible === false){
+    el.classList.add("hidden");
+  }else{
+    el.classList.remove("hidden");
+  }
+}
+
+function applyFooterButton(anchorEl, imgEl, textEl, data, fallbackText){
+  textEl.innerText = data?.text || fallbackText;
+  anchorEl.href = data?.link || "#";
+
+  if(data?.visible === false){
+    anchorEl.classList.add("hidden");
+  }else{
+    anchorEl.classList.remove("hidden");
+  }
+
+  if(data?.image){
+    imgEl.src = data.image;
+    imgEl.classList.remove("hidden");
+  }else{
+    imgEl.src = "";
+    imgEl.classList.add("hidden");
+  }
+}
+
+async function loadConfig(){
+  const res = await fetch("./data/config.json?" + Date.now());
+  let config = await res.json();
+  config = ensureConfigShape(config);
+
+  document.getElementById("logo").innerText = config.logo || "LOGO";
+
+  applyTopButton(document.getElementById("btn1"), config.buttons[0], "ボタン1");
+  applyTopButton(document.getElementById("btn2"), config.buttons[1], "ボタン2");
+  applyTopButton(document.getElementById("btn3"), config.buttons[2], "ボタン3");
+
+  applyFooterButton(
+    document.getElementById("f1"),
+    document.getElementById("f1img"),
+    document.getElementById("f1text"),
+    config.footer[0],
+    "電話"
+  );
+  applyFooterButton(
+    document.getElementById("f2"),
+    document.getElementById("f2img"),
+    document.getElementById("f2text"),
+    config.footer[1],
+    "LINE"
+  );
+  applyFooterButton(
+    document.getElementById("f3"),
+    document.getElementById("f3img"),
+    document.getElementById("f3text"),
+    config.footer[2],
+    "予約"
+  );
+
+  sitePassword = config.password || "95123";
+}
+
+function renderImageTag(src, alt, className = ""){
   if(!src){
     return "";
   }
+  return `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt || "")}" class="${escapeHtml(className)}">`;
+}
+
+function wrapLink(link, innerHtml, className = ""){
   if(link && link !== "#"){
-    return '<a href="' + escapeHtml(link) + '" target="_blank" rel="noopener noreferrer">' +
-      '<img class="normal-image" src="' + escapeHtml(src) + '" alt="' + escapeHtml(alt) + '">' +
-    '</a>';
+    return `<a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer" class="${escapeHtml(className)}">${innerHtml}</a>`;
   }
-  return '<img class="normal-image" src="' + escapeHtml(src) + '" alt="' + escapeHtml(alt) + '">';
+  return innerHtml;
 }
 
 function renderNormal(section){
+  const imageHtml = renderImageTag(section.image || "", section.title || "", "normal-image");
+  const linkedImage = wrapLink(section.link || "#", imageHtml, "");
+
   return `
     <section class="section align-${escapeHtml(section.alignY || "middle")}" style="background:${escapeHtml(section.bgColor || "#ffffff")}">
       <div class="section-inner">
         <h2 class="section-title">${escapeHtml(section.title || "")}</h2>
         <div class="normal-image-wrap">
-          ${renderLinkedImage(section.image || "", section.link || "#", section.title || "")}
+          ${linkedImage}
         </div>
         <p class="section-text text-${escapeHtml(section.textSize || "medium")}">${escapeHtml(section.text || "")}</p>
       </div>
@@ -346,15 +483,18 @@ function renderNormal(section){
 
 function renderSlider(section){
   const images = Array.isArray(section.images) ? section.images : [];
-  const imageHtml = images.length
-    ? images.map(src => '<img src="' + escapeHtml(src) + '" alt="' + escapeHtml(section.title || "") + '">').join("")
-    : '<div class="card-item">画像がまだありません</div>';
+  const itemHtml = images.length
+    ? images.map(src => {
+        const image = `<img src="${escapeHtml(src)}" alt="${escapeHtml(section.title || "")}">`;
+        return wrapLink(section.link || "#", image, "slider-item");
+      }).join("")
+    : `<div class="card-item">画像がまだありません</div>`;
 
   return `
     <section class="section align-${escapeHtml(section.alignY || "middle")}" style="background:${escapeHtml(section.bgColor || "#f8f9fa")}">
       <div class="section-inner">
         <h2 class="section-title">${escapeHtml(section.title || "")}</h2>
-        <div class="slider-track">${imageHtml}</div>
+        <div class="slider-track">${itemHtml}</div>
         <p class="section-text text-${escapeHtml(section.textSize || "medium")}">${escapeHtml(section.text || "")}</p>
       </div>
     </section>
@@ -363,7 +503,7 @@ function renderSlider(section){
 
 function renderCardItems(items, textSize){
   if(!Array.isArray(items) || items.length === 0){
-    return '<div class="card-item">カードデータがありません</div>';
+    return `<div class="card-item">カードデータがありません</div>`;
   }
 
   return items.map(item => {
@@ -378,10 +518,7 @@ function renderCardItems(items, textSize){
       ${text ? `<div class="section-text text-${escapeHtml(textSize || "medium")}">${escapeHtml(text)}</div>` : ""}
     `;
 
-    if(link && link !== "#"){
-      return `<div class="card-item"><a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit;">${inner}</a></div>`;
-    }
-    return `<div class="card-item">${inner}</div>`;
+    return `<div class="card-item">${wrapLink(link, inner, "card-link")}</div>`;
   }).join("");
 }
 
@@ -425,6 +562,14 @@ function renderCard2(section){
 }
 
 function renderMedia(section, reverse = false){
+  const image = section.image
+    ? wrapLink(
+        section.link || "#",
+        `<img src="${escapeHtml(section.image)}" alt="${escapeHtml(section.title || "")}">`,
+        ""
+      )
+    : "";
+
   return `
     <section class="section align-${escapeHtml(section.alignY || "middle")}" style="background:${escapeHtml(section.bgColor || "#ffffff")}">
       <div class="section-inner">
@@ -434,7 +579,7 @@ function renderMedia(section, reverse = false){
             <p class="section-text text-${escapeHtml(section.textSize || "medium")}">${escapeHtml(section.text || "")}</p>
           </div>
           <div>
-            ${section.image ? `<img src="${escapeHtml(section.image)}" alt="${escapeHtml(section.title || "")}">` : ""}
+            ${image}
           </div>
         </div>
       </div>
