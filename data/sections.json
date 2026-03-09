@@ -17,7 +17,12 @@
     "enabled": true,
     "title": "スライダー見本",
     "text": "ここにスライダー説明文が入ります。",
-    "images": [],
+    "images": [
+      "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773051986620-ChatGPT-Image-202612-19_21_37-1.png",
+      "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773051990796-image-1.png",
+      "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773051996118-cube-icon_pink039.png",
+      "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773052001927-line.png"
+    ],
     "link": "#",
     "textSize": "medium",
     "bgColor": "#f8f9fa",
