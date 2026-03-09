@@ -2,6 +2,10 @@
   "password": "95123",
   "logo": "",
   "logoImage": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/logo/1773058174979-ChatGPT-Image-202612-19_21_37---.png",
+
+  "headerBgColor": "#ffffff",
+  "footerBgColor": "#ffffff",
+
   "buttons": [
     {
       "text": "テスト",
@@ -19,6 +23,7 @@
       "visible": true
     }
   ],
+
   "footer": [
     {
       "text": "電話",
