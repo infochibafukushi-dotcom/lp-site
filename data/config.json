@@ -6,8 +6,8 @@
   "footerBgColor": "#ffffff",
   "buttons": [
     {
-      "text": "メール問合せ",
-      "link": "#",
+      "text": "問合せ",
+      "link": "https://docs.google.com/forms/d/e/1FAIpQLSc2FZoU0Mz4IxiUQadXuc4rdiaqZn1iWmLhvc4jmj1uk2wF4g/viewform?usp=header",
       "visible": true
     },
     {
