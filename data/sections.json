@@ -11,7 +11,7 @@
     ],
     "link": "#",
     "textSize": "medium",
-    "bgColor": "#b7e4c7",
+    "bgColor": "#e87f00",
     "alignY": "middle",
     "sectionId": ""
   },
@@ -24,7 +24,7 @@
     "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773103736168-messageImage_1770383343976_0.jpg",
     "link": "#",
     "textSize": "medium",
-    "bgColor": "#ffcad4",
+    "bgColor": "#e87f00",
     "alignY": "middle",
     "sectionId": ""
   },
@@ -34,7 +34,7 @@
     "enabled": true,
     "title": "サービズ紹介",
     "textSize": "medium",
-    "bgColor": "#f75fe2",
+    "bgColor": "#e87f00",
     "items": [
       {
         "title": "カード1",
@@ -63,7 +63,7 @@
     "enabled": true,
     "title": "新しいカード2",
     "textSize": "medium",
-    "bgColor": "#ffffff",
+    "bgColor": "#e87f00",
     "items": [
       {
         "title": "カード1",
@@ -89,7 +89,7 @@
     "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773103782069-messageImage_1770383436537_0.jpg",
     "link": "#",
     "textSize": "medium",
-    "bgColor": "#ffffff",
+    "bgColor": "#e87f00",
     "alignY": "middle",
     "sectionId": ""
   },
@@ -102,7 +102,7 @@
     "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773103788406-messageImage_1770383251537.jpg",
     "link": "#",
     "textSize": "medium",
-    "bgColor": "#ffffff",
+    "bgColor": "#e87f00",
     "alignY": "middle",
     "sectionId": ""
   },
@@ -112,7 +112,7 @@
     "enabled": true,
     "title": "新しいカード4",
     "textSize": "medium",
-    "bgColor": "#ffffff",
+    "bgColor": "#e87f00",
     "items": [
       {
         "title": "カード1",
