@@ -7,11 +7,7 @@
     "text": "「千葉市を中心に、通院・お出かけをサポートする介護タクシーです。車いす・ストレッチャーのままご乗車可能。タクシー券の利用や運賃10%OFF制度など、家計に優しい安心価格で24時間いつでもお迎えに上がります。」",
     "images": [
       "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773051986620-ChatGPT-Image-202612-19_21_37-1.png",
-      "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/slider/1773060459927-ChatGPT-Image-202627-21_47_56.png",
-      "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/slider/1773061463147-image-1.png",
-      "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/slider/1773061567271-line-1.png",
-      "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/slider/1773061571924-cube-icon_pink039.png",
-      "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/slider/1773061584091-messageImage_1770430107621.jpg"
+      "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/slider/1773060459927-ChatGPT-Image-202627-21_47_56.png"
     ],
     "link": "#",
     "textSize": "medium",
@@ -25,7 +21,7 @@
     "enabled": true,
     "title": "ごあいさつ",
     "text": "ここにノーマルセクションの説明文が入ります。",
-    "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773050787122-image-1.png",
+    "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773103736168-messageImage_1770383343976_0.jpg",
     "link": "#",
     "textSize": "medium",
     "bgColor": "#ffcad4",
@@ -43,19 +39,19 @@
       {
         "title": "カード1",
         "text": "説明",
-        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773051542663-image-1.png",
+        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773103749339-messageImage_1770383272387_0.jpg",
         "link": "#"
       },
       {
         "title": "カード2",
         "text": "説明",
-        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773051534369-image-1.png",
+        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773103755526-messageImage_1770383194104.jpg",
         "link": "#"
       },
       {
         "title": "カード3",
         "text": "説明",
-        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773051212124-image-1.png",
+        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773103763810-messageImage_1770383486552_0.jpg",
         "link": "#"
       }
     ],
@@ -72,13 +68,13 @@
       {
         "title": "カード1",
         "text": "説明",
-        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773052136820-cube-icon_pink039.png",
+        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773103770492-messageImage_1770383416054_0.jpg",
         "link": "#"
       },
       {
         "title": "カード2",
         "text": "説明",
-        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773052146057-cube-icon_pink039.png",
+        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773103776741-messageImage_1770383541742_0.jpg",
         "link": "#"
       }
     ],
@@ -90,7 +86,7 @@
     "enabled": true,
     "title": "新しいカード1右",
     "text": "説明文を入力してください。",
-    "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773060519158-messageImage_1770430107621.jpg",
+    "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773103782069-messageImage_1770383436537_0.jpg",
     "link": "#",
     "textSize": "medium",
     "bgColor": "#ffffff",
@@ -103,7 +99,7 @@
     "enabled": true,
     "title": "新しいカード1左",
     "text": "説明文を入力してください。",
-    "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773060528157-messageImage_1770430107621.jpg",
+    "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773103788406-messageImage_1770383251537.jpg",
     "link": "#",
     "textSize": "medium",
     "bgColor": "#ffffff",
