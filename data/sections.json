@@ -89,35 +89,48 @@
     "id": "section-1773062931061",
     "type": "card4",
     "enabled": true,
-    "title": "新しいカード4",
+    "title": "安心の対応機材ラインナップ",
     "textSize": "medium",
     "bgColor": "#e87f00",
     "items": [
       {
-        "title": "カード1",
-        "text": "説明",
+        "title": "【車いす】",
+        "text": "標準的な自走式・介助式車いすのまま、安全にご乗車いただけます。\n",
         "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773062960486-messageImage_1770383251537.jpg",
         "link": "#"
       },
       {
-        "title": "カード2",
-        "text": "説明",
+        "title": "【リクライニング車いす】",
+        "text": "長距離の移動でも疲れにくい、背もたれが倒れるタイプも完備。\n",
         "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773062967741-messageImage_1770383272387_0.jpg",
         "link": "#"
       },
       {
-        "title": "カード3",
-        "text": "説明",
+        "title": "【ストレッチャー】",
+        "text": "寝たきりの状態でも、横になったまま安全に搬送可能です。\n",
         "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773062973797-messageImage_1770383486552_0.jpg",
         "link": "#"
       },
       {
-        "title": "カード4",
-        "text": "説明",
+        "title": "【安心の介助用品】",
+        "text": "布担架やスロープなど、あらゆる段差や状況に対応する機材を完備。\n",
         "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773062985662-messageImage_1770383194104.jpg",
         "link": "#"
       }
     ],
+    "sectionId": ""
+  },
+  {
+    "id": "section-1773231943645",
+    "type": "normal",
+    "enabled": true,
+    "title": "車両紹介・乗車定員について",
+    "text": "ちばケアタクシーの車両は、最大で「車いす1台～3台 ＋ 付き添い様5名」まで同時にご乗車可能です。\n広々とした室内空間で、ご家族や介助者の方もゆったりとご同乗いただけます。\n※ストレッチャー利用時の同乗人数については、事前にお電話にてご相談ください。\n",
+    "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773103736168-messageImage_1770383343976_0.jpg",
+    "link": "#",
+    "textSize": "medium",
+    "bgColor": "#e87f00",
+    "alignY": "middle",
     "sectionId": ""
   },
   {
