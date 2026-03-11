@@ -169,6 +169,35 @@
     "sectionId": ""
   },
   {
+    "id": "section-1773246274578",
+    "type": "card3",
+    "enabled": true,
+    "title": "ご利用者様・ご家族様の声",
+    "textSize": "medium",
+    "bgColor": "#e87f00",
+    "items": [
+      {
+        "title": "【丁寧な介助で安心】",
+        "text": "「初めての利用で不安でしたが、電話から当日の介助まで親切で助かりました」\n",
+        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773103749339-messageImage_1770383272387_0.jpg",
+        "link": "#"
+      },
+      {
+        "title": "【機材が清潔で快適】",
+        "text": "「ストレッチャーでの転院でしたが、車両も機材も綺麗で心地よく移動できました」\n",
+        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773103755526-messageImage_1770383194104.jpg",
+        "link": "#"
+      },
+      {
+        "title": "【急な退院にも対応】",
+        "text": "「24時間対応なので、夜間の急な退院時にもすぐ駆けつけてくれ心強かったです」",
+        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773103763810-messageImage_1770383486552_0.jpg",
+        "link": "#"
+      }
+    ],
+    "sectionId": ""
+  },
+  {
     "id": "section-1773052122071",
     "type": "card2",
     "enabled": true,
