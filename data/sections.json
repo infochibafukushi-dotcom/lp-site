@@ -224,34 +224,11 @@
     "alignY": "middle"
   },
   {
-    "id": "section-1773052122071",
-    "type": "card2",
-    "enabled": true,
-    "title": "新しいカード2",
-    "textSize": "medium",
-    "bgColor": "#e87f00",
-    "items": [
-      {
-        "title": "カード1",
-        "text": "説明",
-        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773103770492-messageImage_1770383416054_0.jpg",
-        "link": "#"
-      },
-      {
-        "title": "カード2",
-        "text": "説明",
-        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773103776741-messageImage_1770383541742_0.jpg",
-        "link": "#"
-      }
-    ],
-    "sectionId": ""
-  },
-  {
     "id": "section-1773060504302",
     "type": "card1-right",
     "enabled": true,
-    "title": "新しいカード1右",
-    "text": "説明文を入力してください。",
+    "title": "代表挨拶・サービスへの想い",
+    "text": "代表の笑顔の写真とともに、「安心・安全な外出を全力でサポートします」という一言を添えます。",
     "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773103782069-messageImage_1770383436537_0.jpg",
     "link": "#",
     "textSize": "medium",
@@ -263,8 +240,8 @@
     "id": "section-1773060508054",
     "type": "card1-left",
     "enabled": true,
-    "title": "新しいカード1左",
-    "text": "説明文を入力してください。",
+    "title": "事業所案内・最新の活動状況",
+    "text": " 会社名、住所、営業許可番号。\n右（画像）： TikTokやインスタのQRコード、または活動中の写真。",
     "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773103788406-messageImage_1770383251537.jpg",
     "link": "#",
     "textSize": "medium",
