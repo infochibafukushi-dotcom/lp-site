@@ -134,6 +134,41 @@
     "sectionId": ""
   },
   {
+    "id": "section-1773246058130",
+    "type": "card4",
+    "enabled": true,
+    "title": "ご利用料金の目安",
+    "textSize": "medium",
+    "bgColor": "#e87f00",
+    "items": [
+      {
+        "title": "【運賃】",
+        "text": "一般タクシー同様のメーター制。時間距離併用運賃にて算出いたします。\n",
+        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773062960486-messageImage_1770383251537.jpg",
+        "link": "#"
+      },
+      {
+        "title": "【基本介助料】",
+        "text": "お一人ずつの乗降サポート費用。一律料金設定で安心してご利用頂けます。\n",
+        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773062967741-messageImage_1770383272387_0.jpg",
+        "link": "#"
+      },
+      {
+        "title": "【機材レンタル】",
+        "text": "車いすやストレッチャーの貸出。状況に応じた最適な機材をご用意します。\n",
+        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773062973797-messageImage_1770383486552_0.jpg",
+        "link": "#"
+      },
+      {
+        "title": "【オプション介助】",
+        "text": "階段昇降や室内・院内介助など、必要に応じたサポートも承ります。\n",
+        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773062985662-messageImage_1770383194104.jpg",
+        "link": "#"
+      }
+    ],
+    "sectionId": ""
+  },
+  {
     "id": "section-1773052122071",
     "type": "card2",
     "enabled": true,
