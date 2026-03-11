@@ -29,6 +29,41 @@
     "sectionId": ""
   },
   {
+    "id": "section-1773062931061",
+    "type": "card4",
+    "enabled": true,
+    "title": "新しいカード4",
+    "textSize": "medium",
+    "bgColor": "#e87f00",
+    "items": [
+      {
+        "title": "カード1",
+        "text": "説明",
+        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773062960486-messageImage_1770383251537.jpg",
+        "link": "#"
+      },
+      {
+        "title": "カード2",
+        "text": "説明",
+        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773062967741-messageImage_1770383272387_0.jpg",
+        "link": "#"
+      },
+      {
+        "title": "カード3",
+        "text": "説明",
+        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773062973797-messageImage_1770383486552_0.jpg",
+        "link": "#"
+      },
+      {
+        "title": "カード4",
+        "text": "説明",
+        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773062985662-messageImage_1770383194104.jpg",
+        "link": "#"
+      }
+    ],
+    "sectionId": ""
+  },
+  {
     "id": "section-1773049874928",
     "type": "card3",
     "enabled": true,
@@ -104,41 +139,6 @@
     "textSize": "medium",
     "bgColor": "#e87f00",
     "alignY": "middle",
-    "sectionId": ""
-  },
-  {
-    "id": "section-1773062931061",
-    "type": "card4",
-    "enabled": true,
-    "title": "新しいカード4",
-    "textSize": "medium",
-    "bgColor": "#e87f00",
-    "items": [
-      {
-        "title": "カード1",
-        "text": "説明",
-        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773062960486-messageImage_1770383251537.jpg",
-        "link": "#"
-      },
-      {
-        "title": "カード2",
-        "text": "説明",
-        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773062967741-messageImage_1770383272387_0.jpg",
-        "link": "#"
-      },
-      {
-        "title": "カード3",
-        "text": "説明",
-        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773062973797-messageImage_1770383486552_0.jpg",
-        "link": "#"
-      },
-      {
-        "title": "カード4",
-        "text": "説明",
-        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773062985662-messageImage_1770383194104.jpg",
-        "link": "#"
-      }
-    ],
     "sectionId": ""
   }
 ]
