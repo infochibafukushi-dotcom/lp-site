@@ -3,10 +3,9 @@
     "id": "section-002",
     "type": "slider",
     "enabled": true,
-    "title": "「千葉市の安心・安全な介護タクシー【ちばケアタクシー】24時間365日、車いす・ストレッチャー対応」",
-    "text": "「千葉市を中心に、通院・お出かけをサポートする介護タクシーです。車いす・ストレッチャーのままご乗車可能。タクシー券の利用や運賃10%OFF制度など、家計に優しい安心価格で24時間いつでもお迎えに上がります。」",
+    "title": "千葉市全域｜24時間365日対応｜介護タクシー【ちばケアタクシー】",
+    "text": "車いす・ストレッチャー対応｜病院の通院・転院・お買い物・自由な外出をサポート",
     "images": [
-      "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773051986620-ChatGPT-Image-202612-19_21_37-1.png",
       "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/slider/1773060459927-ChatGPT-Image-202627-21_47_56.png"
     ],
     "link": "#",
