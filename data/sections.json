@@ -198,6 +198,32 @@
     "sectionId": ""
   },
   {
+    "id": "section-1773246586759",
+    "sectionId": "ご予約から当日までの流れ",
+    "type": "normal",
+    "enabled": true,
+    "title": "ご予約から当日までの流れ",
+    "text": "お問合せ：お電話・LINE・フォームより承ります。\n内容確認：日時、場所、身体状況をお伺いし概算を提示。\nご予約：内容にご納得いただければ予約確定です。\n当日送迎：安全・丁寧にご指定の場所までお運びします。\n",
+    "image": "",
+    "link": "#",
+    "textSize": "medium",
+    "bgColor": "#ffffff",
+    "alignY": "middle"
+  },
+  {
+    "id": "section-1773246634089",
+    "sectionId": "ご予約から当日までの流れ-copy",
+    "type": "normal",
+    "enabled": true,
+    "title": "よくあるご質問（Q&A）",
+    "text": "\nQ. タクシーチケットは使えますか？\nA. 現在申請中です。利用可能になり次第お知らせいたします。\nQ. 当日の予約は可能ですか？\nA. 空き状況により可能です。まずはお電話ください。",
+    "image": "",
+    "link": "#",
+    "textSize": "medium",
+    "bgColor": "#ffffff",
+    "alignY": "middle"
+  },
+  {
     "id": "section-1773052122071",
     "type": "card2",
     "enabled": true,
