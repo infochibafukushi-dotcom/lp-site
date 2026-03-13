@@ -82,6 +82,7 @@ header{
   text-overflow:ellipsis;
   font-size:14px;
 }
+
 main{
   padding:0 0 100px;
 }
@@ -96,10 +97,13 @@ main{
 .section-title{
   margin:0 0 16px;
   font-size:28px;
+  white-space:pre-line;
+  line-height:1.45;
 }
 .section-text{
   line-height:1.8;
   margin:12px 0 0;
+  white-space:pre-line;
 }
 .text-small{font-size:14px;}
 .text-medium{font-size:16px;}
@@ -120,6 +124,10 @@ main{
   flex-direction:column;
   justify-content:flex-end;
 }
+
+.text-left{text-align:left;}
+.text-center{text-align:center;}
+.text-right{text-align:right;}
 
 .normal-image-wrap{
   margin-top:16px;
@@ -225,6 +233,8 @@ main{
 .card-item-title{
   margin:0 0 8px;
   font-size:18px;
+  white-space:pre-line;
+  line-height:1.45;
 }
 .card-link{
   display:block;
@@ -248,6 +258,40 @@ main{
 }
 .media-row.reverse > *{
   direction:ltr;
+}
+
+.section-bottom-links{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-top:20px;
+}
+.section-bottom-links.center{
+  justify-content:center;
+}
+.section-bottom-links.right{
+  justify-content:flex-end;
+}
+.section-bottom-link{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:44px;
+  padding:10px 18px;
+  border-radius:999px;
+  text-decoration:none;
+  background:#ffffff;
+  color:#222;
+  border:1px solid #d9d9d9;
+  box-shadow:0 3px 10px rgba(0,0,0,0.06);
+  font-size:14px;
+  font-weight:bold;
+  line-height:1.4;
+  max-width:100%;
+  word-break:break-word;
+}
+.section-bottom-link:hover{
+  opacity:0.92;
 }
 
 footer{
@@ -365,7 +409,6 @@ footer{
     grid-template-columns:repeat(2, minmax(0, 1fr));
   }
 
-  /* スマホ時の card3 だけ小さめ調整して3枚水平表示 */
   .card-grid-3 .card-item{
     padding:10px;
     border-radius:12px;
@@ -389,6 +432,13 @@ footer{
     grid-template-columns:1fr 1fr;
     gap:14px;
     align-items:center;
+  }
+
+  .section-bottom-links{
+    gap:10px;
+  }
+  .section-bottom-link{
+    width:100%;
   }
 
   .footerbtn{
@@ -480,6 +530,7 @@ footer{
   <button onclick="login()">ログイン</button>
 </div>
 
+<script src="./index-sections-buttons.js"></script>
 <script>
 let clickCount = 0;
 let sitePassword = "95123";
@@ -565,9 +616,70 @@ function ensureConfigShape(config){
   return config;
 }
 
+function ensureSectionLinks(section){
+  if(!Array.isArray(section.links)){
+    section.links = [];
+  }
+  while(section.links.length < 3){
+    section.links.push({
+      text: "",
+      url: "#",
+      visible: false
+    });
+  }
+  section.links = section.links.slice(0, 3).map((link) => ({
+    text: link?.text || "",
+    url: link?.url || "#",
+    visible: link?.visible === true
+  }));
+  return section.links;
+}
+
+function slugifySectionId(text){
+  let value = String(text || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[ 　]+/g, "-")
+    .replace(/[^\wぁ-んァ-ヶー一-龠-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  if(!value){
+    value = "section";
+  }
+  if(/^\d/.test(value)){
+    value = "section-" + value;
+  }
+  return value;
+}
+
+function ensureUniqueSectionIds(sections){
+  const used = new Set();
+
+  return sections.map((section, idx) => {
+    let current = String(section?.sectionId || "").trim();
+
+    if(!current){
+      current = slugifySectionId(section?.title || section?.type || `section-${idx + 1}`);
+    }else{
+      current = slugifySectionId(current);
+    }
+
+    let unique = current;
+    let count = 2;
+    while(used.has(unique)){
+      unique = `${current}-${count}`;
+      count++;
+    }
+    used.add(unique);
+    section.sectionId = unique;
+    return section;
+  });
+}
+
 function ensureSectionShape(section, idx){
   if(!section || typeof section !== "object"){
-    return {
+    section = {
       id: "section-" + idx,
       sectionId: "",
       type: "normal",
@@ -578,7 +690,9 @@ function ensureSectionShape(section, idx){
       link: "#",
       textSize: "medium",
       bgColor: "#ffffff",
-      alignY: "middle"
+      alignY: "middle",
+      titleAlign: "left",
+      textAlign: "left"
     };
   }
 
@@ -593,10 +707,22 @@ function ensureSectionShape(section, idx){
   section.textSize = section.textSize || "medium";
   section.bgColor = section.bgColor || "#ffffff";
   section.alignY = section.alignY || "middle";
+  section.titleAlign = section.titleAlign || "left";
+  section.textAlign = section.textAlign || "left";
 
   if(!Array.isArray(section.images)) section.images = [];
   if(!Array.isArray(section.items)) section.items = [];
 
+  if(Array.isArray(section.items)){
+    section.items = section.items.map((item) => ({
+      title: item?.title || "",
+      text: item?.text || "",
+      image: item?.image || "",
+      link: item?.link || "#"
+    }));
+  }
+
+  ensureSectionLinks(section);
   return section;
 }
 
@@ -691,6 +817,13 @@ function wrapLink(link, innerHtml, className = ""){
   return innerHtml;
 }
 
+function renderSectionBottomLinks(section){
+  if(window.SectionBottomButtons && typeof window.SectionBottomButtons.render === "function"){
+    return window.SectionBottomButtons.render(section, escapeAttr, escapeHtml);
+  }
+  return "";
+}
+
 function renderNormal(section){
   const imageHtml = section.image
     ? `<img class="normal-image" src="${escapeAttr(section.image)}" alt="${escapeAttr(section.title || "")}">`
@@ -700,9 +833,10 @@ function renderNormal(section){
   return `
     <section${getSectionAnchorAttr(section)} class="section align-${escapeAttr(section.alignY || "middle")}" style="background:${escapeAttr(section.bgColor || "#ffffff")}">
       <div class="section-inner">
-        <h2 class="section-title">${escapeHtml(section.title || "")}</h2>
+        <h2 class="section-title text-${escapeAttr(section.titleAlign || "left")}">${escapeHtml(section.title || "")}</h2>
         <div class="normal-image-wrap">${linkedImage}</div>
-        <p class="section-text text-${escapeAttr(section.textSize || "medium")}">${escapeHtml(section.text || "")}</p>
+        <p class="section-text text-${escapeAttr(section.textSize || "medium")} text-${escapeAttr(section.textAlign || "left")}">${escapeHtml(section.text || "")}</p>
+        ${renderSectionBottomLinks(section)}
       </div>
     </section>
   `;
@@ -724,7 +858,7 @@ function renderSlider(section, idx){
   return `
     <section${getSectionAnchorAttr(section)} class="section align-${escapeAttr(section.alignY || "middle")}" style="background:${escapeAttr(section.bgColor || "#f8f9fa")}">
       <div class="section-inner">
-        <h2 class="section-title">${escapeHtml(section.title || "")}</h2>
+        <h2 class="section-title text-${escapeAttr(section.titleAlign || "left")}">${escapeHtml(section.title || "")}</h2>
         <div class="slider-shell" data-slider-index="${idx}">
           <div class="slider-window">
             <div class="slider-track" id="slider-track-${idx}">
@@ -733,13 +867,14 @@ function renderSlider(section, idx){
           </div>
           ${dots}
         </div>
-        <p class="section-text text-${escapeAttr(section.textSize || "medium")}">${escapeHtml(section.text || "")}</p>
+        <p class="section-text text-${escapeAttr(section.textSize || "medium")} text-${escapeAttr(section.textAlign || "left")}">${escapeHtml(section.text || "")}</p>
+        ${renderSectionBottomLinks(section)}
       </div>
     </section>
   `;
 }
 
-function renderCardItems(items, textSize){
+function renderCardItems(items, textSize, textAlign){
   if(!Array.isArray(items) || items.length === 0){
     return `<div class="card-item">カードデータがありません</div>`;
   }
@@ -752,8 +887,8 @@ function renderCardItems(items, textSize){
 
     const inner = `
       ${image ? `<img src="${escapeAttr(image)}" alt="${escapeAttr(title)}">` : ""}
-      ${title ? `<h3 class="card-item-title">${escapeHtml(title)}</h3>` : ""}
-      ${text ? `<div class="section-text text-${escapeAttr(textSize || "medium")}">${escapeHtml(text)}</div>` : ""}
+      ${title ? `<h3 class="card-item-title text-${escapeAttr(textAlign || "left")}">${escapeHtml(title)}</h3>` : ""}
+      ${text ? `<div class="section-text text-${escapeAttr(textSize || "medium")} text-${escapeAttr(textAlign || "left")}">${escapeHtml(text)}</div>` : ""}
     `;
 
     return `<div class="card-item">${wrapLink(link, inner, "card-link")}</div>`;
@@ -764,10 +899,11 @@ function renderCard4(section){
   return `
     <section${getSectionAnchorAttr(section)} class="section" style="background:${escapeAttr(section.bgColor || "#ffffff")}">
       <div class="section-inner">
-        <h2 class="section-title">${escapeHtml(section.title || "")}</h2>
+        <h2 class="section-title text-${escapeAttr(section.titleAlign || "left")}">${escapeHtml(section.title || "")}</h2>
         <div class="card-grid-4">
-          ${renderCardItems(section.items || [], section.textSize || "medium")}
+          ${renderCardItems(section.items || [], section.textSize || "medium", section.textAlign || "left")}
         </div>
+        ${renderSectionBottomLinks(section)}
       </div>
     </section>
   `;
@@ -777,10 +913,11 @@ function renderCard3(section){
   return `
     <section${getSectionAnchorAttr(section)} class="section" style="background:${escapeAttr(section.bgColor || "#ffffff")}">
       <div class="section-inner">
-        <h2 class="section-title">${escapeHtml(section.title || "")}</h2>
+        <h2 class="section-title text-${escapeAttr(section.titleAlign || "left")}">${escapeHtml(section.title || "")}</h2>
         <div class="card-grid-3">
-          ${renderCardItems(section.items || [], section.textSize || "medium")}
+          ${renderCardItems(section.items || [], section.textSize || "medium", section.textAlign || "left")}
         </div>
+        ${renderSectionBottomLinks(section)}
       </div>
     </section>
   `;
@@ -790,10 +927,11 @@ function renderCard2(section){
   return `
     <section${getSectionAnchorAttr(section)} class="section" style="background:${escapeAttr(section.bgColor || "#ffffff")}">
       <div class="section-inner">
-        <h2 class="section-title">${escapeHtml(section.title || "")}</h2>
+        <h2 class="section-title text-${escapeAttr(section.titleAlign || "left")}">${escapeHtml(section.title || "")}</h2>
         <div class="card-grid-2">
-          ${renderCardItems(section.items || [], section.textSize || "medium")}
+          ${renderCardItems(section.items || [], section.textSize || "medium", section.textAlign || "left")}
         </div>
+        ${renderSectionBottomLinks(section)}
       </div>
     </section>
   `;
@@ -813,8 +951,9 @@ function renderMedia(section, reverse = false){
       <div class="section-inner">
         <div class="media-row ${reverse ? "reverse" : ""}">
           <div>
-            <h2 class="section-title">${escapeHtml(section.title || "")}</h2>
-            <p class="section-text text-${escapeAttr(section.textSize || "medium")}">${escapeHtml(section.text || "")}</p>
+            <h2 class="section-title text-${escapeAttr(section.titleAlign || "left")}">${escapeHtml(section.title || "")}</h2>
+            <p class="section-text text-${escapeAttr(section.textSize || "medium")} text-${escapeAttr(section.textAlign || "left")}">${escapeHtml(section.text || "")}</p>
+            ${renderSectionBottomLinks(section)}
           </div>
           <div>${image}</div>
         </div>
@@ -870,6 +1009,8 @@ async function loadSections(){
     }
 
     sections = sections.map((section, idx) => ensureSectionShape(section, idx));
+    sections = ensureUniqueSectionIds(sections);
+
     container.innerHTML = sections.map((section, idx) => renderSection(section, idx)).join("");
     initSliders();
 
