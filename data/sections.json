@@ -248,5 +248,18 @@
     "bgColor": "#e87f00",
     "alignY": "middle",
     "sectionId": ""
+  },
+  {
+    "id": "section-1773401444426",
+    "sectionId": "",
+    "type": "normal",
+    "enabled": true,
+    "title": "介護タクシー開業・加盟サポート/許可申請、開業準備、ホームページ、予約導線づくりまでサポート予定",
+    "text": "3つのメリット\n\n開業の流れをわかりやすく案内\n\n集客用LPと予約導線を用意\n\n開業後の運用や導線づくりも支援",
+    "image": "",
+    "link": "#",
+    "textSize": "medium",
+    "bgColor": "#ffffff",
+    "alignY": "middle"
   }
 ]
