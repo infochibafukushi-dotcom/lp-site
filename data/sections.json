@@ -12,7 +12,28 @@
     "textSize": "medium",
     "bgColor": "#e87f00",
     "alignY": "middle",
-    "sectionId": ""
+    "sectionId": "千葉市全域-24時間365日対応-介護タクシー-ちばケアタクシー",
+    "image": "",
+    "titleAlign": "center",
+    "textAlign": "left",
+    "items": [],
+    "links": [
+      {
+        "text": "テスト",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "テスト",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "テスト",
+        "url": "#",
+        "visible": true
+      }
+    ]
   },
   {
     "id": "section-001",
@@ -25,7 +46,28 @@
     "textSize": "medium",
     "bgColor": "#e87f00",
     "alignY": "middle",
-    "sectionId": ""
+    "sectionId": "千葉市全域-四街道市-市原市に対応",
+    "titleAlign": "left",
+    "textAlign": "left",
+    "images": [],
+    "items": [],
+    "links": [
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ]
   },
   {
     "id": "section-1773049874928",
@@ -54,7 +96,31 @@
         "link": "#"
       }
     ],
-    "sectionId": ""
+    "sectionId": "ちばケアタクシーが選ばれる理由",
+    "text": "",
+    "image": "",
+    "link": "#",
+    "alignY": "middle",
+    "titleAlign": "left",
+    "textAlign": "left",
+    "images": [],
+    "links": [
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ]
   },
   {
     "id": "section-1773231572547",
@@ -83,7 +149,31 @@
         "link": "#"
       }
     ],
-    "sectionId": ""
+    "sectionId": "幅広いご利用シーン",
+    "text": "",
+    "image": "",
+    "link": "#",
+    "alignY": "middle",
+    "titleAlign": "left",
+    "textAlign": "left",
+    "images": [],
+    "links": [
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ]
   },
   {
     "id": "section-1773062931061",
@@ -118,7 +208,31 @@
         "link": "#"
       }
     ],
-    "sectionId": ""
+    "sectionId": "安心の対応機材ラインナップ",
+    "text": "",
+    "image": "",
+    "link": "#",
+    "alignY": "middle",
+    "titleAlign": "left",
+    "textAlign": "left",
+    "images": [],
+    "links": [
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ]
   },
   {
     "id": "section-1773231943645",
@@ -131,7 +245,28 @@
     "textSize": "medium",
     "bgColor": "#e87f00",
     "alignY": "middle",
-    "sectionId": ""
+    "sectionId": "車両紹介-乗車定員について",
+    "titleAlign": "left",
+    "textAlign": "left",
+    "images": [],
+    "items": [],
+    "links": [
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ]
   },
   {
     "id": "section-1773246058130",
@@ -166,7 +301,31 @@
         "link": "#"
       }
     ],
-    "sectionId": ""
+    "sectionId": "ご利用料金の目安",
+    "text": "",
+    "image": "",
+    "link": "#",
+    "alignY": "middle",
+    "titleAlign": "left",
+    "textAlign": "left",
+    "images": [],
+    "links": [
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ]
   },
   {
     "id": "section-1773246274578",
@@ -195,7 +354,31 @@
         "link": "#"
       }
     ],
-    "sectionId": ""
+    "sectionId": "ご利用者様-ご家族様の声",
+    "text": "",
+    "image": "",
+    "link": "#",
+    "alignY": "middle",
+    "titleAlign": "left",
+    "textAlign": "left",
+    "images": [],
+    "links": [
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ]
   },
   {
     "id": "section-1773246586759",
@@ -208,7 +391,28 @@
     "link": "#",
     "textSize": "medium",
     "bgColor": "#ffffff",
-    "alignY": "middle"
+    "alignY": "middle",
+    "titleAlign": "left",
+    "textAlign": "left",
+    "images": [],
+    "items": [],
+    "links": [
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ]
   },
   {
     "id": "section-1773246634089",
@@ -221,7 +425,28 @@
     "link": "#",
     "textSize": "medium",
     "bgColor": "#ffffff",
-    "alignY": "middle"
+    "alignY": "middle",
+    "titleAlign": "left",
+    "textAlign": "left",
+    "images": [],
+    "items": [],
+    "links": [
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ]
   },
   {
     "id": "section-1773060504302",
@@ -234,7 +459,28 @@
     "textSize": "medium",
     "bgColor": "#e87f00",
     "alignY": "middle",
-    "sectionId": ""
+    "sectionId": "代表挨拶-サービスへの想い",
+    "titleAlign": "left",
+    "textAlign": "left",
+    "images": [],
+    "items": [],
+    "links": [
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ]
   },
   {
     "id": "section-1773060508054",
@@ -247,11 +493,32 @@
     "textSize": "medium",
     "bgColor": "#e87f00",
     "alignY": "middle",
-    "sectionId": ""
+    "sectionId": "事業所案内-最新の活動状況",
+    "titleAlign": "left",
+    "textAlign": "left",
+    "images": [],
+    "items": [],
+    "links": [
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ]
   },
   {
     "id": "section-1773401444426",
-    "sectionId": "",
+    "sectionId": "介護タクシー開業パートナー募集-年商1000万円以上を目指せる介護タクシー事業-地域の通院搬送需要により-継続的な利用が見込める安定した事業が期待できます",
     "type": "normal",
     "enabled": true,
     "title": "介護タクシー開業パートナー募集  【年商1000万円以上を目指せる介護タクシー事業 】 地域の通院搬送需要により、継続的な利用が見込める安定した事業が期待できます。",
@@ -260,6 +527,27 @@
     "link": "#",
     "textSize": "medium",
     "bgColor": "#ffffff",
-    "alignY": "middle"
+    "alignY": "middle",
+    "titleAlign": "left",
+    "textAlign": "left",
+    "images": [],
+    "items": [],
+    "links": [
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ]
   }
 ]
