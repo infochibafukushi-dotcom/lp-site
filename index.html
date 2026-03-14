@@ -875,8 +875,9 @@ function ensureSectionShape(section, idx){
 }
 
 function getSectionAnchorAttr(section){
-  const id = String(section?.sectionId || "").trim();
+    let  id = String(section?.sectionId || "").trim();
   if(!id) return "";
+   id = slugifySectionId(id);
   return ` id="${escapeAttr(id)}"`;
 }
 
