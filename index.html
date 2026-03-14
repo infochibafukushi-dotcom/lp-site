@@ -4,28 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>介護タクシーLP</title>
-
 <style>
-*{box-sizing:border-box;}
-
+*{
+  box-sizing:border-box;
+}
 :root{
   --header-bg:#ffffff;
   --footer-bg:#ffffff;
 }
-
-html{scroll-behavior:smooth;}
-
+html{
+  scroll-behavior:smooth;
+}
 body{
   margin:0;
   font-family:Arial, Helvetica, sans-serif;
   background:#f5f5f5;
   color:#222;
 }
-
-/* =========================
-HEADER
-========================= */
-
 header{
   background:var(--header-bg);
   padding:12px 14px;
@@ -41,7 +36,6 @@ header{
   min-height:72px;
   overflow:hidden;
 }
-
 .logo{
   display:flex;
   align-items:center;
@@ -51,7 +45,6 @@ header{
   flex:0 0 auto;
   min-width:0;
 }
-
 .logo-img{
   width:auto;
   height:52px;
@@ -60,27 +53,20 @@ header{
   display:none;
   flex:0 0 auto;
 }
-
 .logo-text{
   font-weight:bold;
   font-size:20px;
   line-height:1;
   white-space:nowrap;
 }
-
-/* =========================
-TOP BUTTONS
-========================= */
-
 .top-buttons{
   display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-template-columns:repeat(3, minmax(0, 1fr));
   gap:8px;
   flex:1 1 auto;
   min-width:0;
   max-width:560px;
 }
-
 .topbtn{
   padding:8px 12px;
   background:#007bff;
@@ -97,71 +83,55 @@ TOP BUTTONS
   font-size:14px;
 }
 
-/* =========================
-MAIN
-========================= */
-
 main{
   padding:0 0 100px;
 }
-
 .section{
   padding:40px 20px;
   scroll-margin-top:90px;
 }
-
 .section-inner{
   max-width:1100px;
   margin:0 auto;
 }
-
 .section-title{
   margin:0 0 16px;
   font-size:28px;
   white-space:pre-line;
   line-height:1.45;
 }
-
 .section-text{
   line-height:1.8;
   margin:12px 0 0;
   white-space:pre-line;
 }
-
 .text-small{font-size:14px;}
 .text-medium{font-size:16px;}
 .text-large{font-size:20px;}
-
-.text-left{text-align:left;}
-.text-center{text-align:center;}
-.text-right{text-align:right;}
 
 .align-top .section-inner{
   display:flex;
   flex-direction:column;
   justify-content:flex-start;
 }
-
 .align-middle .section-inner{
   display:flex;
   flex-direction:column;
   justify-content:center;
 }
-
 .align-bottom .section-inner{
   display:flex;
   flex-direction:column;
   justify-content:flex-end;
 }
 
-/* =========================
-IMAGE
-========================= */
+.text-left{text-align:left;}
+.text-center{text-align:center;}
+.text-right{text-align:right;}
 
 .normal-image-wrap{
   margin-top:16px;
 }
-
 .normal-image{
   width:100%;
   max-width:700px;
@@ -170,29 +140,28 @@ IMAGE
   margin:0 auto;
 }
 
-/* =========================
-SLIDER
-========================= */
-
 .slider-shell{
   position:relative;
   margin-top:12px;
 }
-
 .slider-window{
   overflow:hidden;
   border-radius:12px;
 }
-
 .slider-track{
   display:flex;
-  transition:transform .45s ease;
+  transition:transform 0.45s ease;
+  will-change:transform;
 }
-
 .slider-slide{
   min-width:100%;
+  flex:0 0 100%;
+  padding:0;
 }
-
+.slider-slide a,
+.slider-slide div{
+  display:block;
+}
 .slider-slide img{
   width:100%;
   max-width:700px;
@@ -200,25 +169,26 @@ SLIDER
   object-fit:contain;
   object-position:center;
   border-radius:12px;
-  margin:0 auto;
   display:block;
+  margin:0 auto;
   background:#e9ecef;
 }
-
 .slider-empty{
   background:#fff;
   padding:18px;
   border-radius:12px;
   display:inline-block;
 }
-
+.slider-arrow{
+  display:none !important;
+}
 .slider-dots{
   display:flex;
   justify-content:center;
+  align-items:center;
   gap:8px;
   margin-top:12px;
 }
-
 .slider-dot{
   width:10px;
   height:10px;
@@ -228,14 +198,9 @@ SLIDER
   padding:0;
   cursor:pointer;
 }
-
 .slider-dot.active{
   background:#5c6673;
 }
-
-/* =========================
-CARDS
-========================= */
 
 .card-grid-4,
 .card-grid-3,
@@ -244,40 +209,38 @@ CARDS
   gap:16px;
   margin-top:16px;
 }
-
-.card-grid-4{grid-template-columns:repeat(2,1fr);}
-.card-grid-3{grid-template-columns:repeat(3,1fr);}
-.card-grid-2{grid-template-columns:repeat(2,1fr);}
-
+.card-grid-4{
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+}
+.card-grid-3{
+  grid-template-columns:repeat(3, 1fr);
+}
+.card-grid-2{
+  grid-template-columns:repeat(2, 1fr);
+}
 .card-item{
   background:#fff;
   border-radius:14px;
   padding:14px;
   box-shadow:0 4px 14px rgba(0,0,0,0.08);
 }
-
 .card-item img{
   width:100%;
   border-radius:10px;
   display:block;
   margin-bottom:10px;
 }
-
 .card-item-title{
   margin:0 0 8px;
   font-size:18px;
   white-space:pre-line;
+  line-height:1.45;
 }
-
 .card-link{
   display:block;
   text-decoration:none;
   color:inherit;
 }
-
-/* =========================
-MEDIA
-========================= */
 
 .media-row{
   display:grid;
@@ -285,23 +248,17 @@ MEDIA
   gap:20px;
   align-items:center;
 }
-
 .media-row img{
   width:100%;
   border-radius:12px;
+  display:block;
 }
-
 .media-row.reverse{
   direction:rtl;
 }
-
-.media-row.reverse>*{
+.media-row.reverse > *{
   direction:ltr;
 }
-
-/* =========================
-BOTTOM BUTTONS
-========================= */
 
 .section-bottom-links{
   display:flex;
@@ -309,10 +266,12 @@ BOTTOM BUTTONS
   gap:12px;
   margin-top:20px;
 }
-
-.section-bottom-links.center{justify-content:center;}
-.section-bottom-links.right{justify-content:flex-end;}
-
+.section-bottom-links.center{
+  justify-content:center;
+}
+.section-bottom-links.right{
+  justify-content:flex-end;
+}
 .section-bottom-link{
   display:inline-flex;
   align-items:center;
@@ -321,22 +280,20 @@ BOTTOM BUTTONS
   padding:10px 18px;
   border-radius:999px;
   text-decoration:none;
-  background:#fff;
+  background:#ffffff;
   color:#222;
   border:1px solid #d9d9d9;
+  box-shadow:0 3px 10px rgba(0,0,0,0.06);
   font-size:14px;
   font-weight:bold;
   line-height:1.4;
+  max-width:100%;
   word-break:break-word;
-  flex:1 1 auto;
-  max-width:280px;
+  white-space:normal;
 }
-
-.section-bottom-link:hover{opacity:.92}
-
-/* =========================
-FOOTER
-========================= */
+.section-bottom-link:hover{
+  opacity:0.92;
+}
 
 footer{
   position:fixed;
@@ -352,7 +309,6 @@ footer{
   z-index:1001;
   gap:8px;
 }
-
 .footerbtn{
   text-decoration:none;
   color:#000;
@@ -364,357 +320,1060 @@ footer{
   min-width:80px;
   text-align:center;
 }
-
 .footerbtn img{
   width:52px;
   height:52px;
   object-fit:cover;
   border-radius:10px;
+  display:block;
   margin-bottom:6px;
 }
 
-.hidden{display:none!important}
-
-/* =========================
-RESPONSIVE
-========================= */
-
-@media (max-width:768px){
-
-.section{padding:28px 12px;}
-
-.section-title{font-size:22px;}
-
-.card-grid-3{
-grid-template-columns:repeat(3,1fr);
-gap:10px;
+.adminPanel{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:#fff;
+  padding:30px;
+  box-shadow:0 0 20px rgba(0,0,0,0.2);
+  display:none;
+  z-index:2000;
+  border-radius:12px;
+}
+.adminPanel input{
+  padding:10px;
+  width:220px;
+  margin-bottom:10px;
+}
+.adminPanel button{
+  padding:10px 15px;
+  background:#007bff;
+  color:#fff;
+  border:none;
+  cursor:pointer;
+  border-radius:8px;
+}
+.empty-box{
+  max-width:1100px;
+  margin:30px auto;
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+}
+.hidden{
+  display:none !important;
 }
 
-.card-grid-2{
-grid-template-columns:repeat(2,1fr);
+@media (max-width: 768px){
+  header{
+    padding:10px 8px;
+    gap:6px;
+    flex-wrap:nowrap;
+  }
+  .logo{
+    gap:6px;
+    margin-right:4px;
+  }
+  .logo-img{
+    height:42px;
+    max-width:110px;
+  }
+  .logo-text{
+    font-size:16px;
+  }
+  .top-buttons{
+    gap:6px;
+    max-width:none;
+  }
+  .topbtn{
+    padding:8px 6px;
+    font-size:12px;
+    border-radius:6px;
+  }
+
+  .section{
+    padding:28px 12px;
+  }
+  .section-title{
+    font-size:22px;
+  }
+
+  .card-grid-4{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+  }
+  .card-grid-3{
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:10px;
+  }
+  .card-grid-2{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+  }
+
+  .card-grid-3 .card-item{
+    padding:10px;
+    border-radius:12px;
+  }
+  .card-grid-3 .card-item img{
+    margin-bottom:8px;
+    border-radius:8px;
+  }
+  .card-grid-3 .card-item-title{
+    font-size:14px;
+    margin:0 0 6px;
+    line-height:1.3;
+  }
+  .card-grid-3 .section-text{
+    font-size:12px;
+    line-height:1.5;
+    margin:8px 0 0;
+  }
+
+  .media-row{
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    align-items:center;
+  }
+
+  .section-bottom-links{
+    gap:10px;
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    justify-content:flex-start;
+    -webkit-overflow-scrolling:touch;
+  }
+  .section-bottom-link{
+    width:auto;
+    min-width:140px;
+    flex:0 0 auto;
+  }
+
+  .footerbtn{
+    min-width:70px;
+    font-size:12px;
+  }
+  .footerbtn img{
+    width:46px;
+    height:46px;
+  }
+  .slider-slide img{
+    height:260px;
+  }
 }
 
-.section-bottom-links{
-flex-wrap:wrap;
+@media (max-width: 420px){
+  header{
+    padding:8px 6px;
+    gap:4px;
+  }
+  .logo-img{
+    height:38px;
+    max-width:90px;
+  }
+  .logo-text{
+    font-size:14px;
+  }
+  .top-buttons{
+    gap:4px;
+  }
+  .topbtn{
+    padding:7px 4px;
+    font-size:11px;
+  }
+
+  .card-grid-3{
+    gap:8px;
+  }
+  .card-grid-3 .card-item{
+    padding:8px;
+  }
+  .card-grid-3 .card-item-title{
+    font-size:13px;
+  }
+  .card-grid-3 .section-text{
+    font-size:11px;
+  }
+
+  .section-bottom-link{
+    min-width:128px;
+    padding:10px 14px;
+    font-size:13px;
+  }
 }
-
-.section-bottom-link{
-flex:1 1 45%;
-max-width:none;
-}
-
-.slider-slide img{height:260px;}
-}
-
-@media (max-width:420px){
-
-.section-bottom-link{
-flex:1 1 100%;
-}
-
-.card-grid-3{
-grid-template-columns:repeat(2,1fr);
-}
-
-}
-
 </style>
-
 </head>
-
 <body>
 
 <header>
+  <div class="logo" id="logoTrigger">
+    <img id="logoImg" class="logo-img" alt="">
+    <div class="logo-text" id="logoTextView">LOGO</div>
+  </div>
 
-<div class="logo" id="logoTrigger">
-<img id="logoImg" class="logo-img" alt="">
-<div class="logo-text" id="logoTextView">LOGO</div>
-</div>
-
-<div class="top-buttons" id="topButtons">
-<a class="topbtn" id="btn1" href="#">ボタン1</a>
-<a class="topbtn" id="btn2" href="#">ボタン2</a>
-<a class="topbtn" id="btn3" href="#">ボタン3</a>
-</div>
-
+  <div class="top-buttons" id="topButtons">
+    <a class="topbtn" id="btn1" href="#">ボタン1</a>
+    <a class="topbtn" id="btn2" href="#">ボタン2</a>
+    <a class="topbtn" id="btn3" href="#">ボタン3</a>
+  </div>
 </header>
 
 <main id="sectionsContainer">
-<div class="empty-box">読み込み中...</div>
+  <div class="empty-box">読み込み中...</div>
 </main>
 
 <footer id="footerMenu">
-
-<a class="footerbtn" id="f1" href="#">
-<img id="f1img" class="hidden">
-<span id="f1text">電話</span>
-</a>
-
-<a class="footerbtn" id="f2" href="#">
-<img id="f2img" class="hidden">
-<span id="f2text">LINE</span>
-</a>
-
-<a class="footerbtn" id="f3" href="#">
-<img id="f3img" class="hidden">
-<span id="f3text">予約</span>
-</a>
-
+  <a class="footerbtn" id="f1" href="#">
+    <img id="f1img" class="hidden" alt="">
+    <span id="f1text">電話</span>
+  </a>
+  <a class="footerbtn" id="f2" href="#">
+    <img id="f2img" class="hidden" alt="">
+    <span id="f2text">LINE</span>
+  </a>
+  <a class="footerbtn" id="f3" href="#">
+    <img id="f3img" class="hidden" alt="">
+    <span id="f3text">予約</span>
+  </a>
 </footer>
 
 <div class="adminPanel" id="adminPanel">
-<h3>管理ログイン</h3>
-<input type="password" id="pass" placeholder="パスワード">
-<br>
-<button onclick="login()">ログイン</button>
+  <h3>管理ログイン</h3>
+  <input type="password" id="pass" placeholder="パスワード">
+  <br>
+  <button onclick="login()">ログイン</button>
 </div>
 
 <script src="./index-sections-buttons.js"></script>
-
 <script>
+let clickCount = 0;
+let sitePassword = "95123";
+let sliderTimers = [];
+let sliderTouchState = {};
+const FIXED_DOT_COUNT = 5;
+const ROMAJI_PHRASE_MAP = [
+  ['ご予約から当日までの流れ','go-yoyaku-kara-tojitsu-made-no-nagare'],
+  ['よくあるご質問','yoku-aru-go-shitsumon'],
+  ['ご利用料金の目安','goriyo-ryokin-no-meyasu'],
+  ['ご利用者様・ご家族様の声','goriyosha-sama-go-kazoku-sama-no-koe'],
+  ['代表挨拶・サービスへの想い','daihyo-aisatsu-service-eno-omoi'],
+  ['事業所案内・最新の活動状況','jigyosho-annai-saishin-no-katsudo-jokyo'],
+  ['千葉市全域','chiba-city'],
+  ['四街道市','yotsukaido-city'],
+  ['市原市','ichihara-city'],
+  ['介護タクシー','kaigo-taxi'],
+  ['福祉タクシー','fukushi-taxi'],
+  ['公式line','official-line'],
+  ['公式LINE','official-line'],
+  ['line','line'],
+  ['q&a','qa'],
+  ['Q&A','qa'],
+  ['q＆a','qa'],
+  ['Q＆A','qa'],
+  ['24時間365日対応','24h-365days'],
+  ['料金表','price'],
+  ['料金','price'],
+  ['問合せ','contact'],
+  ['お問い合わせ','contact'],
+  ['予約','reserve'],
+  ['ご予約','reserve'],
+  ['流れ','nagare'],
+  ['よくある','yoku-aru'],
+  ['質問','shitsumon'],
+  ['開業','kaigyo'],
+  ['パートナー募集','partner-boshu'],
+  ['サービス','service'],
+  ['案内','annai'],
+  ['活動状況','katsudo-jokyo'],
+  ['車両紹介','vehicle-introduction'],
+  ['乗車定員について','capacity'],
+  ['安心の対応機材ラインナップ','equipment-lineup'],
+  ['幅広いご利用シーン','usage-scenes'],
+  ['ちばケアタクシーが選ばれる理由','reason-chiba-care-taxi']
+];
+const HIRAGANA_DIGRAPH_MAP = {
+  'きゃ':'kya','きゅ':'kyu','きょ':'kyo',
+  'しゃ':'sha','しゅ':'shu','しょ':'sho',
+  'ちゃ':'cha','ちゅ':'chu','ちょ':'cho',
+  'にゃ':'nya','にゅ':'nyu','にょ':'nyo',
+  'ひゃ':'hya','ひゅ':'hyu','ひょ':'hyo',
+  'みゃ':'mya','みゅ':'myu','みょ':'myo',
+  'りゃ':'rya','りゅ':'ryu','りょ':'ryo',
+  'ぎゃ':'gya','ぎゅ':'gyu','ぎょ':'gyo',
+  'じゃ':'ja','じゅ':'ju','じょ':'jo',
+  'びゃ':'bya','びゅ':'byu','びょ':'byo',
+  'ぴゃ':'pya','ぴゅ':'pyu','ぴょ':'pyo',
+  'ゔぁ':'va','ゔぃ':'vi','ゔぇ':'ve','ゔぉ':'vo','ゔゅ':'vyu'
+};
+const HIRAGANA_MAP = {
+  'あ':'a','い':'i','う':'u','え':'e','お':'o',
+  'か':'ka','き':'ki','く':'ku','け':'ke','こ':'ko',
+  'さ':'sa','し':'shi','す':'su','せ':'se','そ':'so',
+  'た':'ta','ち':'chi','つ':'tsu','て':'te','と':'to',
+  'な':'na','に':'ni','ぬ':'nu','ね':'ne','の':'no',
+  'は':'ha','ひ':'hi','ふ':'fu','へ':'he','ほ':'ho',
+  'ま':'ma','み':'mi','む':'mu','め':'me','も':'mo',
+  'や':'ya','ゆ':'yu','よ':'yo',
+  'ら':'ra','り':'ri','る':'ru','れ':'re','ろ':'ro',
+  'わ':'wa','を':'wo','ん':'n',
+  'が':'ga','ぎ':'gi','ぐ':'gu','げ':'ge','ご':'go',
+  'ざ':'za','じ':'ji','ず':'zu','ぜ':'ze','ぞ':'zo',
+  'だ':'da','ぢ':'ji','づ':'zu','で':'de','ど':'do',
+  'ば':'ba','び':'bi','ぶ':'bu','べ':'be','ぼ':'bo',
+  'ぱ':'pa','ぴ':'pi','ぷ':'pu','ぺ':'pe','ぽ':'po',
+  'ぁ':'a','ぃ':'i','ぅ':'u','ぇ':'e','ぉ':'o',
+  'ゃ':'ya','ゅ':'yu','ょ':'yo','っ':'','ゔ':'vu',
+  'ー':'-'
+};
 
-let clickCount=0;
-let sitePassword="95123";
-
-document.getElementById("logoTrigger").onclick=function(){
-
-clickCount++;
-
-if(clickCount>=5){
-
-document.getElementById("adminPanel").style.display="block";
-clickCount=0;
-
-}
-
+document.getElementById("logoTrigger").onclick = function(){
+  clickCount++;
+  if(clickCount >= 5){
+    document.getElementById("adminPanel").style.display = "block";
+    clickCount = 0;
+  }
 };
 
 function login(){
-
-const input=document.getElementById("pass").value;
-
-if(input===sitePassword){
-
-alert("管理画面ログイン成功");
-location.href="./admin.html";
-
-}else{
-
-alert("パスワード違います");
-
+  const input = document.getElementById("pass").value;
+  if(input === sitePassword){
+    alert("管理画面ログイン成功");
+    location.href = "./admin.html";
+  }else{
+    alert("パスワード違います");
+  }
 }
-
-}
-
-/* ======================
-ESCAPE
-====================== */
 
 function escapeHtml(text){
-
-return String(text??"")
-.replaceAll("&","&amp;")
-.replaceAll("<","&lt;")
-.replaceAll(">","&gt;")
-.replaceAll('"',"&quot;")
-.replaceAll("'","&#039;");
-
+  return String(text ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 function escapeAttr(text){
-
-return String(text??"")
-.replaceAll("&","&amp;")
-.replaceAll('"',"&quot;")
-.replaceAll("<","&lt;")
-.replaceAll(">","&gt;");
-
+  return String(text ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
 }
 
-/* ======================
-CONFIG
-====================== */
+function ensureConfigShape(config){
+  if(!Array.isArray(config.buttons)){
+    config.buttons = [
+      { text:"ボタン1", link:"#", visible:true },
+      { text:"ボタン2", link:"#", visible:true },
+      { text:"ボタン3", link:"#", visible:true }
+    ];
+  }
+  while(config.buttons.length < 3){
+    config.buttons.push({ text:"ボタン", link:"#", visible:true });
+  }
 
-async function loadConfig(){
+  if(!Array.isArray(config.footer)){
+    config.footer = [
+      { text:"電話", link:"#", visible:true, image:"" },
+      { text:"LINE", link:"#", visible:true, image:"" },
+      { text:"予約", link:"#", visible:true, image:"" }
+    ];
+  }
+  while(config.footer.length < 3){
+    config.footer.push({ text:"ボタン", link:"#", visible:true, image:"" });
+  }
 
-const res=await fetch("./data/config.json?"+Date.now());
-let config=await res.json();
+  config.buttons = config.buttons.map((b, i) => ({
+    text: b?.text || `ボタン${i + 1}`,
+    link: b?.link || "#",
+    visible: b?.visible !== false
+  }));
 
-if(!Array.isArray(config.buttons)){
+  const footerDefaults = ["電話", "LINE", "予約"];
+  config.footer = config.footer.map((f, i) => ({
+    text: f?.text || footerDefaults[i] || "ボタン",
+    link: f?.link || "#",
+    visible: f?.visible !== false,
+    image: f?.image || ""
+  }));
 
-config.buttons=[
-{text:"ボタン1",link:"#",visible:true},
-{text:"ボタン2",link:"#",visible:true},
-{text:"ボタン3",link:"#",visible:true}
-];
-
+  config.logoImage = config.logoImage || "";
+  config.headerBgColor = config.headerBgColor || "#ffffff";
+  config.footerBgColor = config.footerBgColor || "#ffffff";
+  return config;
 }
 
-if(!Array.isArray(config.footer)){
-
-config.footer=[
-{text:"電話",link:"#",visible:true,image:""},
-{text:"LINE",link:"#",visible:true,image:""},
-{text:"予約",link:"#",visible:true,image:""}
-];
-
+function ensureSectionLinks(section){
+  if(!Array.isArray(section.links)){
+    section.links = [];
+  }
+  while(section.links.length < 3){
+    section.links.push({
+      text: "",
+      url: "#",
+      visible: false
+    });
+  }
+  section.links = section.links.slice(0, 3).map((link) => ({
+    text: link?.text || "",
+    url: link?.url || "#",
+    visible: link?.visible === true
+  }));
+  return section.links;
 }
 
-const logoTextEl=document.getElementById("logoTextView");
-const logoImgEl=document.getElementById("logoImg");
-
-logoTextEl.innerText=config.logo||"";
-
-if(config.logoImage){
-
-logoImgEl.src=config.logoImage;
-logoImgEl.style.display="block";
-
-}else{
-
-logoImgEl.style.display="none";
-
+function katakanaToHiragana(text){
+  return String(text || '').replace(/[\u30a1-\u30f6]/g, function(char){
+    return String.fromCharCode(char.charCodeAt(0) - 0x60);
+  });
 }
 
-document.documentElement.style.setProperty("--header-bg",config.headerBgColor||"#fff");
-document.documentElement.style.setProperty("--footer-bg",config.footerBgColor||"#fff");
+function replaceKnownJapanesePhrases(text){
+  let value = String(text || '');
+  const list = ROMAJI_PHRASE_MAP.slice().sort((a, b) => b[0].length - a[0].length);
 
-applyTopButton("btn1",config.buttons[0],"ボタン1");
-applyTopButton("btn2",config.buttons[1],"ボタン2");
-applyTopButton("btn3",config.buttons[2],"ボタン3");
+  list.forEach(([jp, romaji]) => {
+    value = value.split(jp).join(' ' + romaji + ' ');
+  });
 
-applyFooterButton(1,config.footer[0]);
-applyFooterButton(2,config.footer[1]);
-applyFooterButton(3,config.footer[2]);
-
-sitePassword=config.password||"95123";
-
+  return value;
 }
 
-function applyTopButton(id,data,fallback){
+function romanizeKana(text){
+  let value = katakanaToHiragana(text);
+  let result = '';
 
-const el=document.getElementById(id);
+  for(let i = 0; i < value.length; i++){
+    const current = value[i];
+    const next = value[i + 1] || '';
+    const pair = current + next;
 
-el.innerText=data?.text||fallback;
-el.href=data?.link||"#";
+    if(current === 'っ'){
+      let nextRomaji = '';
+      if(HIRAGANA_DIGRAPH_MAP[pair]){
+        nextRomaji = HIRAGANA_DIGRAPH_MAP[pair];
+      }else if(HIRAGANA_MAP[next]){
+        nextRomaji = HIRAGANA_MAP[next];
+      }
+      if(nextRomaji){
+        result += nextRomaji.charAt(0);
+      }
+      continue;
+    }
 
-if(data?.visible===false){
-el.classList.add("hidden");
-}else{
-el.classList.remove("hidden");
+    if(HIRAGANA_DIGRAPH_MAP[pair]){
+      result += HIRAGANA_DIGRAPH_MAP[pair];
+      i++;
+      continue;
+    }
+
+    if(HIRAGANA_MAP[current]){
+      result += HIRAGANA_MAP[current];
+      continue;
+    }
+
+    result += current;
+  }
+
+  return result;
 }
 
+function slugifySectionId(text){
+  let value = String(text || "").trim();
+  value = value.normalize('NFKC');
+  value = replaceKnownJapanesePhrases(value);
+  value = value.replace(/&/g, ' and ');
+  value = value.replace(/[／/]/g, ' ');
+  value = value.replace(/[・･]/g, ' ');
+  value = value.replace(/[【】「」『』（）()\[\]]/g, ' ');
+  value = romanizeKana(value);
+  value = value.toLowerCase();
+  value = value.replace(/[^a-z0-9]+/g, '-');
+  value = value.replace(/-+/g, '-');
+  value = value.replace(/^-+|-+$/g, '');
+
+  if(!value){
+    value = 'section';
+  }
+  if(/^\d/.test(value)){
+    value = 'section-' + value;
+  }
+  return value;
 }
 
-function applyFooterButton(i,data){
+function ensureUniqueSectionIds(sections){
+  const used = new Set();
 
-const a=document.getElementById("f"+i);
-const img=document.getElementById("f"+i+"img");
-const text=document.getElementById("f"+i+"text");
+  return sections.map((section, idx) => {
+    let current = String(section?.sectionId || "").trim();
 
-text.innerText=data?.text||"";
-a.href=data?.link||"#";
+    if(!current){
+      current = slugifySectionId(section?.title || section?.type || `section-${idx + 1}`);
+    }else{
+      current = slugifySectionId(current);
+    }
 
-if(data?.visible===false){
-a.classList.add("hidden");
-}else{
-a.classList.remove("hidden");
+    let unique = current;
+    let count = 2;
+    while(used.has(unique)){
+      unique = `${current}-${count}`;
+      count++;
+    }
+    used.add(unique);
+    section.sectionId = unique;
+    return section;
+  });
 }
 
-if(data?.image){
-img.src=data.image;
-img.classList.remove("hidden");
-}else{
-img.classList.add("hidden");
-}
+function ensureSectionShape(section, idx){
+  if(!section || typeof section !== "object"){
+    section = {
+      id: "section-" + idx,
+      sectionId: "",
+      type: "normal",
+      enabled: true,
+      title: "",
+      text: "",
+      image: "",
+      link: "#",
+      textSize: "medium",
+      bgColor: "#ffffff",
+      alignY: "middle",
+      titleAlign: "left",
+      textAlign: "left"
+    };
+  }
 
-}
+  section.id = section.id || ("section-" + idx);
+  section.sectionId = section.sectionId || "";
+  section.type = section.type || "normal";
+  section.enabled = section.enabled !== false;
+  section.title = section.title || "";
+  section.text = section.text || "";
+  section.image = section.image || "";
+  section.link = section.link || "#";
+  section.textSize = section.textSize || "medium";
+  section.bgColor = section.bgColor || "#ffffff";
+  section.alignY = section.alignY || "middle";
+  section.titleAlign = section.titleAlign || "left";
+  section.textAlign = section.textAlign || "left";
 
-/* ======================
-ANCHOR
-====================== */
+  if(!Array.isArray(section.images)) section.images = [];
+  if(!Array.isArray(section.items)) section.items = [];
+
+  if(Array.isArray(section.items)){
+    section.items = section.items.map((item) => ({
+      title: item?.title || "",
+      text: item?.text || "",
+      image: item?.image || "",
+      link: item?.link || "#"
+    }));
+  }
+
+  ensureSectionLinks(section);
+  return section;
+}
 
 function getSectionAnchorAttr(section){
-
-const id=String(section?.sectionId||"").trim();
-
-if(!id)return"";
-
-return` id="${escapeAttr(id)}"`;
-
+  const id = String(section?.sectionId || "").trim();
+  if(!id) return "";
+  return ` id="${escapeAttr(id)}"`;
 }
 
-/* ======================
-SECTIONS
-====================== */
+function applyTopButton(el, data, fallbackText){
+  el.innerText = data?.text || fallbackText;
+  el.href = data?.link || "#";
+  if(data?.visible === false){
+    el.classList.add("hidden");
+  }else{
+    el.classList.remove("hidden");
+  }
+}
 
-function renderSection(section,idx){
+function applyFooterButton(anchorEl, imgEl, textEl, data, fallbackText){
+  textEl.innerText = data?.text || fallbackText;
+  anchorEl.href = data?.link || "#";
 
-if(!section.enabled)return"";
+  if(data?.visible === false){
+    anchorEl.classList.add("hidden");
+  }else{
+    anchorEl.classList.remove("hidden");
+  }
 
-const titleAlign=section.titleAlign||"left";
-const textAlign=section.textAlign||"left";
+  if(data?.image){
+    imgEl.src = data.image;
+    imgEl.classList.remove("hidden");
+  }else{
+    imgEl.src = "";
+    imgEl.classList.add("hidden");
+  }
+}
 
-return`
+async function loadConfig(){
+  const res = await fetch("./data/config.json?" + Date.now());
+  let config = await res.json();
+  config = ensureConfigShape(config);
 
-<section${getSectionAnchorAttr(section)} class="section">
+  const logoTextEl = document.getElementById("logoTextView");
+  const logoImgEl = document.getElementById("logoImg");
 
-<div class="section-inner">
+  logoTextEl.innerText = config.logo || "";
+  if(config.logoImage){
+    logoImgEl.src = config.logoImage;
+    logoImgEl.style.display = "block";
+  }else{
+    logoImgEl.src = "";
+    logoImgEl.style.display = "none";
+  }
 
-<h2 class="section-title text-${escapeAttr(titleAlign)}">${escapeHtml(section.title||"")}</h2>
+  document.documentElement.style.setProperty("--header-bg", config.headerBgColor);
+  document.documentElement.style.setProperty("--footer-bg", config.footerBgColor);
 
-<p class="section-text text-${escapeAttr(textAlign)}">${escapeHtml(section.text||"")}</p>
+  applyTopButton(document.getElementById("btn1"), config.buttons[0], "ボタン1");
+  applyTopButton(document.getElementById("btn2"), config.buttons[1], "ボタン2");
+  applyTopButton(document.getElementById("btn3"), config.buttons[2], "ボタン3");
 
-${window.SectionBottomButtons.render(section,escapeAttr,escapeHtml)}
+  applyFooterButton(
+    document.getElementById("f1"),
+    document.getElementById("f1img"),
+    document.getElementById("f1text"),
+    config.footer[0],
+    "電話"
+  );
+  applyFooterButton(
+    document.getElementById("f2"),
+    document.getElementById("f2img"),
+    document.getElementById("f2text"),
+    config.footer[1],
+    "LINE"
+  );
+  applyFooterButton(
+    document.getElementById("f3"),
+    document.getElementById("f3img"),
+    document.getElementById("f3text"),
+    config.footer[2],
+    "予約"
+  );
 
-</div>
+  sitePassword = config.password || "95123";
+}
 
-</section>
+function wrapLink(link, innerHtml, className = ""){
+  if(link && link !== "#"){
+    return `<a href="${escapeAttr(link)}" target="_blank" rel="noopener noreferrer" class="${escapeAttr(className)}">${innerHtml}</a>`;
+  }
+  return innerHtml;
+}
 
-`;
+function renderSectionBottomLinks(section){
+  if(window.SectionBottomButtons && typeof window.SectionBottomButtons.render === "function"){
+    return window.SectionBottomButtons.render(section, escapeAttr, escapeHtml);
+  }
+  return "";
+}
 
+function renderNormal(section){
+  const imageHtml = section.image
+    ? `<img class="normal-image" src="${escapeAttr(section.image)}" alt="${escapeAttr(section.title || "")}">`
+    : "";
+  const linkedImage = wrapLink(section.link || "#", imageHtml, "");
+
+  return `
+    <section${getSectionAnchorAttr(section)} class="section align-${escapeAttr(section.alignY || "middle")}" style="background:${escapeAttr(section.bgColor || "#ffffff")}">
+      <div class="section-inner">
+        <h2 class="section-title text-${escapeAttr(section.titleAlign || "left")}">${escapeHtml(section.title || "")}</h2>
+        <div class="normal-image-wrap">${linkedImage}</div>
+        <p class="section-text text-${escapeAttr(section.textSize || "medium")} text-${escapeAttr(section.textAlign || "left")}">${escapeHtml(section.text || "")}</p>
+        ${renderSectionBottomLinks(section)}
+      </div>
+    </section>
+  `;
+}
+
+function renderSlider(section, idx){
+  const images = Array.isArray(section.images) ? section.images : [];
+  const slides = images.length
+    ? images.map(src => {
+        const image = `<img src="${escapeAttr(src)}" alt="${escapeAttr(section.title || "")}">`;
+        return `<div class="slider-slide">${wrapLink(section.link || "#", image, "")}</div>`;
+      }).join("")
+    : `<div class="slider-empty">画像がまだありません</div>`;
+
+  const dots = images.length > 1
+    ? `<div class="slider-dots" id="slider-dots-${idx}"></div>`
+    : "";
+
+  return `
+    <section${getSectionAnchorAttr(section)} class="section align-${escapeAttr(section.alignY || "middle")}" style="background:${escapeAttr(section.bgColor || "#f8f9fa")}">
+      <div class="section-inner">
+        <h2 class="section-title text-${escapeAttr(section.titleAlign || "left")}">${escapeHtml(section.title || "")}</h2>
+        <div class="slider-shell" data-slider-index="${idx}">
+          <div class="slider-window">
+            <div class="slider-track" id="slider-track-${idx}">
+              ${slides}
+            </div>
+          </div>
+          ${dots}
+        </div>
+        <p class="section-text text-${escapeAttr(section.textSize || "medium")} text-${escapeAttr(section.textAlign || "left")}">${escapeHtml(section.text || "")}</p>
+        ${renderSectionBottomLinks(section)}
+      </div>
+    </section>
+  `;
+}
+
+function renderCardItems(items, textSize, textAlign){
+  if(!Array.isArray(items) || items.length === 0){
+    return `<div class="card-item">カードデータがありません</div>`;
+  }
+
+  return items.map(item => {
+    const title = item?.title || "";
+    const text = item?.text || "";
+    const image = item?.image || "";
+    const link = item?.link || "#";
+
+    const inner = `
+      ${image ? `<img src="${escapeAttr(image)}" alt="${escapeAttr(title)}">` : ""}
+      ${title ? `<h3 class="card-item-title text-${escapeAttr(textAlign || "left")}">${escapeHtml(title)}</h3>` : ""}
+      ${text ? `<div class="section-text text-${escapeAttr(textSize || "medium")} text-${escapeAttr(textAlign || "left")}">${escapeHtml(text)}</div>` : ""}
+    `;
+
+    return `<div class="card-item">${wrapLink(link, inner, "card-link")}</div>`;
+  }).join("");
+}
+
+function renderCard4(section){
+  return `
+    <section${getSectionAnchorAttr(section)} class="section" style="background:${escapeAttr(section.bgColor || "#ffffff")}">
+      <div class="section-inner">
+        <h2 class="section-title text-${escapeAttr(section.titleAlign || "left")}">${escapeHtml(section.title || "")}</h2>
+        <div class="card-grid-4">
+          ${renderCardItems(section.items || [], section.textSize || "medium", section.textAlign || "left")}
+        </div>
+        ${renderSectionBottomLinks(section)}
+      </div>
+    </section>
+  `;
+}
+
+function renderCard3(section){
+  return `
+    <section${getSectionAnchorAttr(section)} class="section" style="background:${escapeAttr(section.bgColor || "#ffffff")}">
+      <div class="section-inner">
+        <h2 class="section-title text-${escapeAttr(section.titleAlign || "left")}">${escapeHtml(section.title || "")}</h2>
+        <div class="card-grid-3">
+          ${renderCardItems(section.items || [], section.textSize || "medium", section.textAlign || "left")}
+        </div>
+        ${renderSectionBottomLinks(section)}
+      </div>
+    </section>
+  `;
+}
+
+function renderCard2(section){
+  return `
+    <section${getSectionAnchorAttr(section)} class="section" style="background:${escapeAttr(section.bgColor || "#ffffff")}">
+      <div class="section-inner">
+        <h2 class="section-title text-${escapeAttr(section.titleAlign || "left")}">${escapeHtml(section.title || "")}</h2>
+        <div class="card-grid-2">
+          ${renderCardItems(section.items || [], section.textSize || "medium", section.textAlign || "left")}
+        </div>
+        ${renderSectionBottomLinks(section)}
+      </div>
+    </section>
+  `;
+}
+
+function renderMedia(section, reverse = false){
+  const image = section.image
+    ? wrapLink(
+        section.link || "#",
+        `<img src="${escapeAttr(section.image)}" alt="${escapeAttr(section.title || "")}">`,
+        ""
+      )
+    : "";
+
+  return `
+    <section${getSectionAnchorAttr(section)} class="section align-${escapeAttr(section.alignY || "middle")}" style="background:${escapeAttr(section.bgColor || "#ffffff")}">
+      <div class="section-inner">
+        <div class="media-row ${reverse ? "reverse" : ""}">
+          <div>
+            <h2 class="section-title text-${escapeAttr(section.titleAlign || "left")}">${escapeHtml(section.title || "")}</h2>
+            <p class="section-text text-${escapeAttr(section.textSize || "medium")} text-${escapeAttr(section.textAlign || "left")}">${escapeHtml(section.text || "")}</p>
+            ${renderSectionBottomLinks(section)}
+          </div>
+          <div>${image}</div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderSection(section, idx){
+  section = ensureSectionShape(section, idx);
+
+  if(!section || section.enabled === false){
+    return "";
+  }
+
+  switch(section.type){
+    case "normal":
+      return renderNormal(section);
+    case "slider":
+      return renderSlider(section, idx);
+    case "card4":
+      return renderCard4(section);
+    case "card3":
+      return renderCard3(section);
+    case "card2":
+      return renderCard2(section);
+    case "card1-right":
+      return renderMedia(section, false);
+    case "card1-left":
+      return renderMedia(section, true);
+    default:
+      return `
+        <section${getSectionAnchorAttr(section)} class="section" style="background:#fff3cd">
+          <div class="section-inner">
+            <h2 class="section-title">未対応セクション</h2>
+            <p class="section-text">type: ${escapeHtml(section.type || "")}</p>
+          </div>
+        </section>
+      `;
+  }
 }
 
 async function loadSections(){
+  const container = document.getElementById("sectionsContainer");
 
-const container=document.getElementById("sectionsContainer");
+  try{
+    const res = await fetch("./data/sections.json?" + Date.now());
+    let sections = await res.json();
 
-try{
+    if(!Array.isArray(sections) || sections.length === 0){
+      container.innerHTML = '<div class="empty-box">セクションがまだありません。</div>';
+      return;
+    }
 
-const res=await fetch("./data/sections.json?"+Date.now());
-let sections=await res.json();
+    sections = sections.map((section, idx) => ensureSectionShape(section, idx));
+    sections = ensureUniqueSectionIds(sections);
 
-if(!Array.isArray(sections)||sections.length===0){
+    container.innerHTML = sections.map((section, idx) => renderSection(section, idx)).join("");
+    initSliders();
 
-container.innerHTML='<div class="empty-box">セクションがまだありません。</div>';
-return;
-
+    if(location.hash){
+      const target = document.querySelector(location.hash);
+      if(target){
+        setTimeout(() => {
+          target.scrollIntoView({ behavior:"smooth", block:"start" });
+        }, 50);
+      }
+    }
+  }catch(error){
+    container.innerHTML = '<div class="empty-box">sections.json の読み込みに失敗しました。</div>';
+  }
 }
 
-container.innerHTML=sections.map(renderSection).join("");
-
-}catch(e){
-
-container.innerHTML='<div class="empty-box">sections.json 読み込み失敗</div>';
-
+function clearSliderTimers(){
+  sliderTimers.forEach(timer => clearInterval(timer.id));
+  sliderTimers = [];
+  sliderTouchState = {};
 }
 
+function buildSliderDots(idx, total){
+  const dotsWrap = document.getElementById(`slider-dots-${idx}`);
+  if(!dotsWrap) return;
+
+  let html = "";
+  for(let i = 0; i < FIXED_DOT_COUNT; i++){
+    html += `<button class="slider-dot${i === 0 ? " active" : ""}" type="button" onclick="goToSliderDot(${idx}, ${i})"></button>`;
+  }
+  dotsWrap.innerHTML = html;
+  updateSliderDots(idx, 0, total);
 }
 
-/* ======================
-INIT
-====================== */
+function getFixedDotIndex(current, total){
+  if(total <= 1) return 0;
+  const ratio = current / (total - 1);
+  return Math.max(0, Math.min(FIXED_DOT_COUNT - 1, Math.round(ratio * (FIXED_DOT_COUNT - 1))));
+}
+
+function getSlideIndexFromDot(dotIndex, total){
+  if(total <= 1) return 0;
+  const ratio = dotIndex / (FIXED_DOT_COUNT - 1);
+  return Math.max(0, Math.min(total - 1, Math.round(ratio * (total - 1))));
+}
+
+function updateSliderDots(idx, current, total){
+  const dotsWrap = document.getElementById(`slider-dots-${idx}`);
+  if(!dotsWrap) return;
+  const dots = dotsWrap.querySelectorAll(".slider-dot");
+  const activeDot = getFixedDotIndex(current, total);
+  dots.forEach((dot, i) => {
+    dot.classList.toggle("active", i === activeDot);
+  });
+}
+
+function attachSliderSwipe(shell, idx){
+  sliderTouchState[idx] = { startX:0, startY:0 };
+
+  shell.addEventListener("touchstart", (e) => {
+    const t = e.touches[0];
+    sliderTouchState[idx].startX = t.clientX;
+    sliderTouchState[idx].startY = t.clientY;
+  }, { passive:true });
+
+  shell.addEventListener("touchend", (e) => {
+    const state = sliderTouchState[idx];
+    if(!state) return;
+
+    const t = e.changedTouches[0];
+    const diffX = t.clientX - state.startX;
+    const diffY = t.clientY - state.startY;
+
+    if(Math.abs(diffX) < 40) return;
+    if(Math.abs(diffY) > Math.abs(diffX)) return;
+
+    if(diffX < 0){
+      moveSlider(idx, 1);
+      resetSliderTimer(idx);
+    }
+    if(diffX > 0){
+      moveSlider(idx, -1);
+      resetSliderTimer(idx);
+    }
+  }, { passive:true });
+}
+
+function createSliderTimer(idx){
+  const track = document.getElementById(`slider-track-${idx}`);
+  if(!track) return null;
+
+  const slides = track.querySelectorAll(".slider-slide");
+  if(slides.length <= 1) return null;
+
+  const id = setInterval(() => {
+    moveSlider(idx, 1);
+  }, 3000);
+
+  return { idx, id };
+}
+
+function resetSliderTimer(idx){
+  const item = sliderTimers.find(v => v.idx === idx);
+  if(item){
+    clearInterval(item.id);
+    item.id = setInterval(() => {
+      moveSlider(idx, 1);
+    }, 3000);
+  }
+}
+
+function initSliders(){
+  clearSliderTimers();
+
+  document.querySelectorAll(".slider-shell").forEach((shell) => {
+    const idx = Number(shell.dataset.sliderIndex);
+    const track = document.getElementById(`slider-track-${idx}`);
+    if(!track) return;
+
+    const slides = track.querySelectorAll(".slider-slide");
+    const total = slides.length;
+
+    if(total === 0) return;
+
+    track.dataset.current = "0";
+    updateSliderPosition(idx);
+    if(total > 1){
+      buildSliderDots(idx, total);
+    }
+    attachSliderSwipe(shell, idx);
+
+    if(total > 1){
+      const timer = createSliderTimer(idx);
+      if(timer){
+        sliderTimers.push(timer);
+      }
+
+      shell.addEventListener("mouseenter", () => {
+        const item = sliderTimers.find(v => v.idx === idx);
+        if(item){
+          clearInterval(item.id);
+        }
+      });
+
+      shell.addEventListener("mouseleave", () => {
+        resetSliderTimer(idx);
+      });
+    }
+  });
+}
+
+function updateSliderPosition(idx){
+  const track = document.getElementById(`slider-track-${idx}`);
+  if(!track) return;
+
+  const slides = track.querySelectorAll(".slider-slide");
+  const total = slides.length;
+  if(total === 0) return;
+
+  let current = Number(track.dataset.current || "0");
+  if(current < 0) current = total - 1;
+  if(current >= total) current = 0;
+
+  track.dataset.current = String(current);
+  track.style.transform = `translateX(-${current * 100}%)`;
+  updateSliderDots(idx, current, total);
+}
+
+function moveSlider(idx, step){
+  const track = document.getElementById(`slider-track-${idx}`);
+  if(!track) return;
+
+  const slides = track.querySelectorAll(".slider-slide");
+  const total = slides.length;
+  if(total === 0) return;
+
+  let current = Number(track.dataset.current || "0");
+  current += step;
+
+  if(current >= total) current = 0;
+  if(current < 0) current = total - 1;
+
+  track.dataset.current = String(current);
+  updateSliderPosition(idx);
+}
+
+function goToSliderDot(idx, dotIndex){
+  const track = document.getElementById(`slider-track-${idx}`);
+  if(!track) return;
+
+  const slides = track.querySelectorAll(".slider-slide");
+  const total = slides.length;
+  if(total === 0) return;
+
+  const target = getSlideIndexFromDot(dotIndex, total);
+  track.dataset.current = String(target);
+  updateSliderPosition(idx);
+  resetSliderTimer(idx);
+}
+
+window.addEventListener("hashchange", () => {
+  if(location.hash){
+    const target = document.querySelector(location.hash);
+    if(target){
+      target.scrollIntoView({ behavior:"smooth", block:"start" });
+    }
+  }
+});
 
 async function init(){
-
-await loadConfig();
-await loadSections();
-
+  await loadConfig();
+  await loadSections();
 }
 
 init();
-
 </script>
-
 </body>
 </html>
