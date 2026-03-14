@@ -1,4 +1,5 @@
 (function(){
+
   function normalizeLinks(section){
     if(!Array.isArray(section?.links)){
       return [];
@@ -23,6 +24,7 @@
 
   function buildAnchor(url, text, escapeAttr, escapeHtml){
     const href = String(url || "#").trim() || "#";
+
     const isExternal =
       /^https?:\/\//i.test(href) ||
       /^mailto:/i.test(href) ||
@@ -34,6 +36,7 @@
   }
 
   function render(section, escapeAttr, escapeHtml){
+
     const links = normalizeLinks(section);
     if(links.length === 0){
       return "";
@@ -51,4 +54,5 @@
   window.SectionBottomButtons = {
     render: render
   };
+
 })();
