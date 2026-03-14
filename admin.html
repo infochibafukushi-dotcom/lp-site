@@ -206,6 +206,7 @@ button.linklike{
   font-weight:bold;
   line-height:1.4;
   word-break:break-word;
+  white-space:pre-line;
 }
 .section-meta-sub{
   font-size:12px;
@@ -438,6 +439,7 @@ button.linklike{
   font-weight:bold;
   line-height:1.5;
   word-break:break-word;
+  white-space:pre-line;
 }
 .sort-sub{
   font-size:12px;
@@ -482,6 +484,9 @@ button.linklike{
   margin:0;
   white-space:pre-line;
   line-height:1.8;
+}
+.title-textarea{
+  min-height:84px;
 }
 @media (max-width: 1024px){
   .jump-menu{
@@ -801,7 +806,8 @@ button.linklike{
         </div>
         <div class="row">
           <label>追加するタイトル</label>
-          <input type="text" id="newSectionTitle" placeholder="例: サービス紹介">
+          <textarea id="newSectionTitle" class="title-textarea" placeholder="例: サービス紹介"></textarea>
+          <div class="small">タイトルも改行できます。</div>
         </div>
       </div>
 
@@ -972,12 +978,78 @@ function normalizeColor(value){
   return '#ffffff';
 }
 
-function slugifySectionId(text){
-  let value = String(text || '')
+function romanizeJapaneseText(text){
+  const map = {
+    'ご予約から当日までの流れ':'go-yoyaku-nagare',
+    'よくあるご質問':'qa',
+    'よくあるご質問（q&a）':'qa',
+    'よくあるご質問(q&a)':'qa',
+    'q&a':'qa',
+    '料金':'price',
+    '料金表':'price',
+    'ご利用料金の目安':'price',
+    '料金の目安':'price',
+    '問合せ':'contact',
+    'お問い合わせ':'contact',
+    'お問合せ':'contact',
+    'ご相談':'contact',
+    '予約':'reserve',
+    'ご予約':'reserve',
+    '予約フォーム':'reserve',
+    'サービス':'service',
+    'サービス紹介':'service',
+    '利用シーン':'scene',
+    '幅広いご利用シーン':'scene',
+    '選ばれる理由':'reason',
+    'ちばケアタクシーが選ばれる理由':'reason',
+    '機材':'equipment',
+    '安心の対応機材ラインナップ':'equipment',
+    '車両紹介':'vehicle',
+    '車両紹介・乗車定員について':'vehicle',
+    '代表挨拶':'greeting',
+    '代表挨拶・サービスへの想い':'greeting',
+    '事業所案内':'company',
+    '事業所案内・最新の活動状況':'company',
+    'ご利用者様・ご家族様の声':'voice',
+    '口コミ':'voice',
+    '評判':'voice',
+    '千葉市全域':'top',
+    '介護タクシー':'care-taxi'
+  };
+
+  const normalized = String(text || '')
     .trim()
     .toLowerCase()
+    .replace(/[【】\[\]（）()]/g, '')
+    .replace(/\s+/g, ' ')
+    .replace(/　+/g, ' ');
+
+  if(map[normalized]){
+    return map[normalized];
+  }
+
+  for(const key of Object.keys(map)){
+    if(normalized.includes(key)){
+      return map[key];
+    }
+  }
+
+  return '';
+}
+
+function slugifySectionId(text){
+  const original = String(text || '').trim();
+  const romanized = romanizeJapaneseText(original);
+
+  let value = romanized || original.toLowerCase();
+
+  value = value
+    .replace(/[【】\[\]（）()]/g, ' ')
+    .replace(/[＆&]/g, ' and ')
+    .replace(/[\/]/g, ' ')
+    .replace(/[|｜]/g, ' ')
     .replace(/[ 　]+/g, '-')
-    .replace(/[^\wぁ-んァ-ヶー一-龠-]+/g, '-')
+    .replace(/[^\w-]+/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-+|-+$/g, '');
 
@@ -1376,740 +1448,4 @@ function createDefaultSection(type, title){
   return {
     ...base,
     type: 'card1-left',
-    text: '説明文を入力してください。',
-    image: '',
-    link: '#'
-  };
-}
-
-function deepClone(obj){
-  return JSON.parse(JSON.stringify(obj));
-}
-
-function duplicateSection(index){
-  const copy = deepClone(sectionsData[index]);
-  copy.id = 'section-' + Date.now();
-  copy.title = (copy.title || 'コピー') + ' コピー';
-  copy.sectionId = generateUniqueSectionId(copy.title || copy.sectionId || 'section', index);
-  ensureSectionLinks(copy);
-  sectionsData.splice(index + 1, 0, copy);
-  renderSectionsEditor();
-  renderSectionsSortList();
-  setSectionsSaveResult('複製しました。最後に sections.json を保存してください。', 'success');
-}
-
-function addSection(){
-  const type = document.getElementById('newSectionType').value;
-  const title = document.getElementById('newSectionTitle').value.trim();
-  const section = createDefaultSection(type, title);
-  section.sectionId = generateUniqueSectionId(section.sectionId || section.title || type);
-  sectionsData.push(section);
-  renderSectionsEditor();
-  renderSectionsSortList();
-  document.getElementById('newSectionTitle').value = '';
-  setSectionsSaveResult('追加しました。保存すると公開LPへ反映されます。', 'success');
-}
-
-function removeSection(index){
-  sectionsData.splice(index, 1);
-  renderSectionsEditor();
-  renderSectionsSortList();
-}
-function moveSectionUp(index){
-  if(index <= 0) return;
-  const temp = sectionsData[index - 1];
-  sectionsData[index - 1] = sectionsData[index];
-  sectionsData[index] = temp;
-  renderSectionsEditor();
-  renderSectionsSortList();
-}
-function moveSectionDown(index){
-  if(index >= sectionsData.length - 1) return;
-  const temp = sectionsData[index + 1];
-  sectionsData[index + 1] = sectionsData[index];
-  sectionsData[index] = temp;
-  renderSectionsEditor();
-  renderSectionsSortList();
-}
-function updateSectionField(index, field, value){
-  sectionsData[index][field] = value;
-}
-function updateSectionEnabled(index, checked){
-  sectionsData[index].enabled = checked;
-}
-function updateSliderImages(index, value){
-  const list = value.split('\n').map(v => v.trim()).filter(v => v);
-  sectionsData[index].images = list;
-}
-function updateCardItemField(sectionIndex, itemIndex, field, value){
-  sectionsData[sectionIndex].items[itemIndex][field] = value;
-}
-function updateSectionLinkField(sectionIndex, linkIndex, field, value){
-  ensureSectionLinks(sectionsData[sectionIndex]);
-  sectionsData[sectionIndex].links[linkIndex][field] = value;
-}
-function updateSectionLinkVisible(sectionIndex, linkIndex, checked){
-  ensureSectionLinks(sectionsData[sectionIndex]);
-  sectionsData[sectionIndex].links[linkIndex].visible = checked;
-}
-function updateSectionTitle(index, value){
-  sectionsData[index].title = value;
-}
-
-function autoGenerateSectionAnchor(index){
-  const section = sectionsData[index];
-  const source = section.title || section.sectionId || section.type || `section-${index + 1}`;
-  section.sectionId = generateUniqueSectionId(source, index);
-  renderSectionsEditor();
-  renderSectionsSortList();
-  setSectionsSaveResult('アンカーURLを自動作成しました。最後に保存してください。', 'success');
-}
-
-function setSectionBgColor(index, value){
-  sectionsData[index].bgColor = value;
-  const textInput = document.getElementById(`bgColorText-${index}`);
-  const colorInput = document.getElementById(`bgColorPicker-${index}`);
-  if(textInput) textInput.value = value;
-  if(colorInput) colorInput.value = normalizeColor(value);
-  renderSectionsEditor();
-  renderSectionsSortList();
-}
-
-function renderColorField(index, currentValue){
-  const current = currentValue || '#ffffff';
-  return `
-    <div class="color-field">
-      <div class="color-input-wrap">
-        <input
-          type="color"
-          id="bgColorPicker-${index}"
-          class="color-picker"
-          value="${escapeAttr(normalizeColor(current))}"
-          oninput="setSectionBgColor(${index}, this.value)"
-        >
-        <input
-          type="text"
-          id="bgColorText-${index}"
-          class="color-text"
-          value="${escapeAttr(current)}"
-          oninput="updateSectionField(${index}, 'bgColor', this.value)"
-        >
-      </div>
-      <div class="color-palette">
-        ${COLOR_PRESETS.map(color => `
-          <button
-            type="button"
-            class="color-swatch ${current.toLowerCase() === color.toLowerCase() ? 'active' : ''}"
-            style="background:${color}"
-            onclick="setSectionBgColor(${index}, '${color}')"
-            title="${color}"
-          ></button>
-        `).join('')}
-      </div>
-    </div>
-  `;
-}
-
-function renderSectionLinksEditor(sectionIndex, section){
-  ensureSectionLinks(section);
-  return `
-    <div class="links-editor-wrap">
-      ${section.links.map((link, linkIndex) => `
-        <div class="section-link-card">
-          <h4>下部リンクボタン ${linkIndex + 1}</h4>
-          <div class="row">
-            <label>表示</label>
-            <label class="checkline">
-              <input type="checkbox" ${link.visible ? 'checked' : ''} onchange="updateSectionLinkVisible(${sectionIndex}, ${linkIndex}, this.checked)">
-              表示する
-            </label>
-          </div>
-          <div class="row">
-            <label>ボタン名</label>
-            <input type="text" value="${escapeAttr(link.text || '')}" oninput="updateSectionLinkField(${sectionIndex}, ${linkIndex}, 'text', this.value)">
-          </div>
-          <div class="row">
-            <label>リンク先</label>
-            <input type="text" value="${escapeAttr(link.url || '#')}" oninput="updateSectionLinkField(${sectionIndex}, ${linkIndex}, 'url', this.value)">
-            <div class="small">例: #contact / https://example.com</div>
-          </div>
-        </div>
-      `).join('')}
-    </div>
-  `;
-}
-
-function renderSectionPreview(section){
-  const titleAlign = section.titleAlign || 'left';
-  const textAlign = section.textAlign || 'left';
-  return `
-    <div class="section-preview-box" style="background:${escapeAttr(section.bgColor || '#ffffff')}">
-      <h3 class="section-preview-title align-${escapeAttr(titleAlign)}">${escapeHtml(section.title || 'タイトル見本')}</h3>
-      <p class="section-preview-text text-${escapeAttr(section.textSize || 'medium')} align-${escapeAttr(textAlign)}">${escapeHtml(section.text || '説明文の見本です。\n改行はこのように表示されます。')}</p>
-    </div>
-  `;
-}
-
-function escapeHtml(text){
-  return String(text ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;');
-}
-function escapeAttr(text){
-  return String(text ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('"', '&quot;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;');
-}
-function sanitizeFileName(name){
-  return String(name || 'image')
-    .replace(/\s+/g, '-')
-    .replace(/[^a-zA-Z0-9._-]/g, '');
-}
-function getGitHubSettings(){
-  const owner = document.getElementById('githubOwner').value.trim();
-  const repo = document.getElementById('githubRepo').value.trim();
-  const branch = document.getElementById('githubBranch').value.trim() || 'main';
-  const token = document.getElementById('githubToken').value.trim();
-
-  if(!owner || !repo || !branch || !token){
-    throw new Error('GitHub接続設定をすべて入力してください。');
-  }
-  return { owner, repo, branch, token };
-}
-
-async function fileToBase64(file){
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = String(reader.result || '');
-      const base64 = result.split(',')[1] || '';
-      resolve(base64);
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-async function uploadAssetFile(file, folder = 'sections'){
-  const { owner, repo, branch, token } = getGitHubSettings();
-  const safeName = sanitizeFileName(file.name);
-  const uniqueName = Date.now() + '-' + safeName;
-  const path = 'assets/' + folder + '/' + uniqueName;
-  const contentBase64 = await fileToBase64(file);
-  const apiUrl = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + path;
-
-  const res = await fetch(apiUrl, {
-    method: 'PUT',
-    headers: {
-      'Authorization': 'Bearer ' + token,
-      'Accept': 'application/vnd.github+json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      message: 'Upload asset ' + path + ' from admin panel',
-      content: contentBase64,
-      branch: branch
-    })
-  });
-
-  const result = await res.json();
-  if(!res.ok){
-    const errText = result?.message ? result.message : (res.status + ' ' + res.statusText);
-    throw new Error(errText);
-  }
-
-  return 'https://raw.githubusercontent.com/' + owner + '/' + repo + '/' + branch + '/' + path;
-}
-
-async function uploadLogoImage(input){
-  try{
-    const file = input.files?.[0];
-    if(!file) return;
-
-    setConfigSaveResult('ロゴ画像アップロード中です...', 'warn');
-    const url = await uploadAssetFile(file, 'logo');
-    document.getElementById('logoImage').value = url;
-    setLogoPreview(url);
-    setConfigSaveResult('ロゴ画像アップロードに成功しました。最後に config.json を保存してください。', 'success');
-  }catch(error){
-    setConfigSaveResult('画像アップロード失敗: ' + error.message, 'error');
-  }finally{
-    input.value = '';
-  }
-}
-
-async function uploadFooterImage(index, input){
-  try{
-    const file = input.files?.[0];
-    if(!file) return;
-
-    setConfigSaveResult('下部メニュー画像アップロード中です...', 'warn');
-    const url = await uploadAssetFile(file, 'footer');
-    const imageInput = document.getElementById(`footer${index + 1}Image`);
-    imageInput.value = url;
-    setFooterPreview(index, url);
-    setConfigSaveResult('画像アップロードに成功しました。最後に config.json を保存してください。', 'success');
-  }catch(error){
-    setConfigSaveResult('画像アップロード失敗: ' + error.message, 'error');
-  }finally{
-    input.value = '';
-  }
-}
-
-async function uploadSingleImage(index, input){
-  try{
-    const file = input.files?.[0];
-    if(!file) return;
-
-    setSectionsSaveResult('画像アップロード中です...', 'warn');
-    const url = await uploadAssetFile(file, 'sections');
-    sectionsData[index].image = url;
-    renderSectionsEditor();
-    renderSectionsSortList();
-    setSectionsSaveResult('画像アップロードに成功しました。最後に sections.json を保存してください。', 'success');
-  }catch(error){
-    setSectionsSaveResult('画像アップロード失敗: ' + error.message, 'error');
-  }finally{
-    input.value = '';
-  }
-}
-
-async function uploadSliderImages(index, input){
-  try{
-    const files = Array.from(input.files || []);
-    if(files.length === 0) return;
-
-    setSectionsSaveResult('スライダー画像アップロード中です...', 'warn');
-    const urls = [];
-    for(const file of files){
-      const url = await uploadAssetFile(file, 'slider');
-      urls.push(url);
-    }
-
-    if(!Array.isArray(sectionsData[index].images)){
-      sectionsData[index].images = [];
-    }
-    sectionsData[index].images.push(...urls);
-    renderSectionsEditor();
-    renderSectionsSortList();
-    setSectionsSaveResult('スライダー画像アップロードに成功しました。最後に sections.json を保存してください。', 'success');
-  }catch(error){
-    setSectionsSaveResult('画像アップロード失敗: ' + error.message, 'error');
-  }finally{
-    input.value = '';
-  }
-}
-
-function removeSliderImage(sectionIndex, imageIndex){
-  sectionsData[sectionIndex].images.splice(imageIndex, 1);
-  renderSectionsEditor();
-  renderSectionsSortList();
-}
-
-async function uploadCardItemImage(sectionIndex, itemIndex, input){
-  try{
-    const file = input.files?.[0];
-    if(!file) return;
-
-    setSectionsSaveResult('カード画像アップロード中です...', 'warn');
-    const url = await uploadAssetFile(file, 'cards');
-    sectionsData[sectionIndex].items[itemIndex].image = url;
-    renderSectionsEditor();
-    renderSectionsSortList();
-    setSectionsSaveResult('カード画像アップロードに成功しました。最後に sections.json を保存してください。', 'success');
-  }catch(error){
-    setSectionsSaveResult('画像アップロード失敗: ' + error.message, 'error');
-  }finally{
-    input.value = '';
-  }
-}
-
-function renderSliderThumbs(section, index){
-  const images = Array.isArray(section.images) ? section.images : [];
-  if(images.length === 0){
-    return '<div class="small">まだ画像がありません。</div>';
-  }
-
-  return `
-    <div class="slider-thumb-list">
-      ${images.map((src, imageIndex) => `
-        <div>
-          <img class="slider-thumb" src="${escapeAttr(src)}" alt="">
-          <div class="actions" style="margin-top:6px;">
-            <button type="button" class="danger small-btn" onclick="removeSliderImage(${index}, ${imageIndex})">削除</button>
-          </div>
-        </div>
-      `).join('')}
-    </div>
-  `;
-}
-
-function renderSingleImageBlock(section, index){
-  const imageUrl = section.image || '';
-  return `
-    <div class="row">
-      <label>画像URL</label>
-      <input type="text" value="${escapeAttr(imageUrl)}" oninput="updateSectionField(${index}, 'image', this.value)">
-      <div class="upload-box">
-        <label>画像ファイル選択</label>
-        <input type="file" accept="image/*" onchange="uploadSingleImage(${index}, this)">
-        <div class="small">選択すると GitHub の assets/sections にアップロードされます。</div>
-        ${imageUrl ? `<img class="image-preview" src="${escapeAttr(imageUrl)}" alt="">` : ''}
-      </div>
-    </div>
-  `;
-}
-
-function renderCardItemsEditor(section, sectionIndex){
-  const items = Array.isArray(section.items) ? section.items : [];
-  if(items.length === 0){
-    return '<div class="small">カードデータがありません。</div>';
-  }
-
-  return items.map((item, itemIndex) => `
-    <div class="card-item-editor">
-      <h4>カード ${itemIndex + 1}</h4>
-      <div class="grid2">
-        <div class="row">
-          <label>タイトル</label>
-          <input type="text" value="${escapeAttr(item.title || '')}" oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'title', this.value)">
-        </div>
-
-        <div class="row">
-          <label>リンク</label>
-          <input type="text" value="${escapeAttr(item.link || '#')}" oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'link', this.value)">
-        </div>
-
-        <div class="row" style="grid-column:1 / -1;">
-          <label>説明文</label>
-          <textarea oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'text', this.value)">${escapeHtml(item.text || '')}</textarea>
-        </div>
-
-        <div class="row" style="grid-column:1 / -1;">
-          <label>画像URL</label>
-          <input type="text" value="${escapeAttr(item.image || '')}" oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'image', this.value)">
-          <div class="upload-box">
-            <label>画像ファイル選択</label>
-            <input type="file" accept="image/*" onchange="uploadCardItemImage(${sectionIndex}, ${itemIndex}, this)">
-            <div class="small">選択すると GitHub の assets/cards にアップロードされます。</div>
-            ${item.image ? `<img class="image-preview" src="${escapeAttr(item.image)}" alt="">` : ''}
-          </div>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function renderSectionsEditor(){
-  const box = document.getElementById('sectionsEditor');
-
-  if(!Array.isArray(sectionsData) || sectionsData.length === 0){
-    box.innerHTML = '<div class="preview">セクションはまだありません。</div>';
-    return;
-  }
-
-  sectionsData = sectionsData.map((section, index) => ensureSectionShape(section, index));
-
-  box.innerHTML = sectionsData.map((section, index) => {
-    const isSlider = section.type === 'slider';
-    const isCards = ['card4','card3','card2'].includes(section.type);
-    const hasSingleImage = ['normal','card1-right','card1-left'].includes(section.type);
-
-    return `
-      <div class="section-item js-collapsible" data-open="false">
-        <button type="button" class="section-card-toggle js-card-toggle">
-          <div class="section-head-left">
-            <span class="toggle-icon">▶</span>
-            <span class="section-index-badge">${index + 1}</span>
-            <div class="section-meta">
-              <div class="section-meta-title">${escapeHtml(section.title || '(タイトル未設定)')}</div>
-              <div class="section-meta-sub">${escapeHtml(section.type)} / #${escapeHtml(section.sectionId || '')}</div>
-            </div>
-          </div>
-          <span class="toggle-state">閉じています</span>
-        </button>
-
-        <div class="section-body js-card-body">
-          <div class="actions" style="margin-bottom:12px;">
-            <button type="button" class="secondary" onclick="moveSectionUp(${index})">↑ 上へ</button>
-            <button type="button" class="secondary" onclick="moveSectionDown(${index})">↓ 下へ</button>
-            <button type="button" class="secondary" onclick="duplicateSection(${index})">複製</button>
-            <button type="button" class="danger" onclick="removeSection(${index})">削除</button>
-          </div>
-
-          <div class="grid2">
-            <div class="row">
-              <label>表示する</label>
-              <label class="checkline"><input type="checkbox" ${section.enabled !== false ? 'checked' : ''} onchange="updateSectionEnabled(${index}, this.checked)"> 表示する</label>
-            </div>
-
-            <div class="row">
-              <label>セクション種別</label>
-              <input type="text" value="${escapeAttr(section.type || '')}" readonly>
-            </div>
-
-            <div class="row" style="grid-column:1 / -1;">
-              <label>アンカーURL</label>
-              <div class="anchor-line">
-                <input type="text" value="${escapeAttr(section.sectionId || '')}" oninput="updateSectionField(${index}, 'sectionId', this.value)" style="flex:1 1 260px;">
-                <button type="button" class="linklike" onclick="autoGenerateSectionAnchor(${index})">タイトルから自動作成</button>
-                <span class="anchor-chip">#${escapeHtml(section.sectionId || '')}</span>
-              </div>
-              <div class="small">上部ボタンや内部リンクから #アンカー名 で移動できます。空欄でも保存時に自動生成されます。</div>
-            </div>
-
-            <div class="row">
-              <label>タイトル</label>
-              <input type="text" value="${escapeAttr(section.title || '')}" oninput="updateSectionTitle(${index}, this.value)">
-            </div>
-
-            <div class="row">
-              <label>タイトル配置</label>
-              <select onchange="updateSectionField(${index}, 'titleAlign', this.value)">
-                <option value="left" ${section.titleAlign === 'left' ? 'selected' : ''}>left</option>
-                <option value="center" ${section.titleAlign === 'center' ? 'selected' : ''}>center</option>
-                <option value="right" ${section.titleAlign === 'right' ? 'selected' : ''}>right</option>
-              </select>
-            </div>
-
-            ${!isCards ? `
-            <div class="row" style="grid-column:1 / -1;">
-              <label>説明文</label>
-              <textarea oninput="updateSectionField(${index}, 'text', this.value)">${escapeHtml(section.text || '')}</textarea>
-              <div class="small">改行したままLPに反映されます。</div>
-            </div>` : ''}
-
-            ${!isCards ? `
-            <div class="row">
-              <label>説明文配置</label>
-              <select onchange="updateSectionField(${index}, 'textAlign', this.value)">
-                <option value="left" ${section.textAlign === 'left' ? 'selected' : ''}>left</option>
-                <option value="center" ${section.textAlign === 'center' ? 'selected' : ''}>center</option>
-                <option value="right" ${section.textAlign === 'right' ? 'selected' : ''}>right</option>
-              </select>
-            </div>` : `
-            <div class="row">
-              <label>説明文配置</label>
-              <select onchange="updateSectionField(${index}, 'textAlign', this.value)">
-                <option value="left" ${section.textAlign === 'left' ? 'selected' : ''}>left</option>
-                <option value="center" ${section.textAlign === 'center' ? 'selected' : ''}>center</option>
-                <option value="right" ${section.textAlign === 'right' ? 'selected' : ''}>right</option>
-              </select>
-            </div>`}
-
-            ${hasSingleImage ? renderSingleImageBlock(section, index) : ''}
-
-            ${hasSingleImage || isSlider ? `
-            <div class="row">
-              <label>リンク</label>
-              <input type="text" value="${escapeAttr(section.link || '#')}" oninput="updateSectionField(${index}, 'link', this.value)">
-              <div class="small">画像クリック時のリンクです。</div>
-            </div>` : ''}
-
-            <div class="row">
-              <label>文字サイズ</label>
-              <select onchange="updateSectionField(${index}, 'textSize', this.value)">
-                <option value="small" ${section.textSize === 'small' ? 'selected' : ''}>small</option>
-                <option value="medium" ${!section.textSize || section.textSize === 'medium' ? 'selected' : ''}>medium</option>
-                <option value="large" ${section.textSize === 'large' ? 'selected' : ''}>large</option>
-              </select>
-            </div>
-
-            <div class="row">
-              <label>背景色</label>
-              ${renderColorField(index, section.bgColor || '#ffffff')}
-            </div>
-
-            <div class="row">
-              <label>上下位置</label>
-              <select onchange="updateSectionField(${index}, 'alignY', this.value)">
-                <option value="top" ${section.alignY === 'top' ? 'selected' : ''}>top</option>
-                <option value="middle" ${!section.alignY || section.alignY === 'middle' ? 'selected' : ''}>middle</option>
-                <option value="bottom" ${section.alignY === 'bottom' ? 'selected' : ''}>bottom</option>
-              </select>
-            </div>
-
-            ${isSlider ? `
-            <div class="row" style="grid-column:1 / -1;">
-              <label>画像URL一覧（1行に1件）</label>
-              <textarea oninput="updateSliderImages(${index}, this.value)">${escapeHtml((section.images || []).join('\n'))}</textarea>
-              <div class="upload-box" style="margin-top:8px;">
-                <label>スライダー画像ファイル選択（複数可）</label>
-                <input type="file" accept="image/*" multiple onchange="uploadSliderImages(${index}, this)">
-                <div class="small">選択すると GitHub の assets/slider にアップロードされます。</div>
-                ${renderSliderThumbs(section, index)}
-              </div>
-            </div>` : ''}
-
-            ${isCards ? `
-            <div class="row" style="grid-column:1 / -1;">
-              <label>カード編集</label>
-              ${renderCardItemsEditor(section, index)}
-            </div>` : ''}
-
-            <div class="row" style="grid-column:1 / -1;">
-              <label>セクション下部リンクボタン（最大3つ）</label>
-              ${renderSectionLinksEditor(index, section)}
-            </div>
-
-            <div class="row" style="grid-column:1 / -1;">
-              <label>表示見本</label>
-              ${renderSectionPreview(section)}
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  if(window.AdminCollapse && typeof window.AdminCollapse.bindWithin === 'function'){
-    window.AdminCollapse.bindWithin(box);
-  }
-}
-
-function renderSectionsSortList(){
-  if(typeof window.renderSectionSortList === 'function'){
-    window.renderSectionSortList(sectionsData);
-  }
-}
-
-async function getCurrentFileSha(owner, repo, branch, token, path){
-  const url = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + path + '?ref=' + encodeURIComponent(branch);
-  const res = await fetch(url, {
-    headers: {
-      'Authorization': 'Bearer ' + token,
-      'Accept': 'application/vnd.github+json'
-    }
-  });
-
-  if(!res.ok){
-    throw new Error('SHA取得失敗: ' + res.status + ' ' + res.statusText);
-  }
-  const data = await res.json();
-  return data.sha;
-}
-
-function utf8ToBase64(str){
-  return btoa(unescape(encodeURIComponent(str)));
-}
-
-async function saveFileToGitHub(path, contentString){
-  const { owner, repo, branch, token } = getGitHubSettings();
-  const contentBase64 = utf8ToBase64(contentString);
-  const sha = await getCurrentFileSha(owner, repo, branch, token, path);
-  const apiUrl = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + path;
-
-  const res = await fetch(apiUrl, {
-    method: 'PUT',
-    headers: {
-      'Authorization': 'Bearer ' + token,
-      'Accept': 'application/vnd.github+json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      message: 'Update ' + path + ' from admin panel',
-      content: contentBase64,
-      branch: branch,
-      sha: sha
-    })
-  });
-
-  const result = await res.json();
-  if(!res.ok){
-    const errText = result?.message ? result.message : (res.status + ' ' + res.statusText);
-    throw new Error(errText);
-  }
-  return result;
-}
-
-function normalizeSectionBeforeSave(section, index){
-  const normalized = deepClone(ensureSectionShape(section, index));
-
-  normalized.sectionId = String(normalized.sectionId || '').trim();
-  if(!normalized.sectionId){
-    normalized.sectionId = generateUniqueSectionId(normalized.title || normalized.type || `section-${index + 1}`, index);
-  }else{
-    normalized.sectionId = slugifySectionId(normalized.sectionId);
-  }
-
-  normalized.titleAlign = normalized.titleAlign || 'left';
-  normalized.textAlign = normalized.textAlign || 'left';
-  normalized.alignY = normalized.alignY || 'middle';
-  normalized.bgColor = normalized.bgColor || '#ffffff';
-  normalized.textSize = normalized.textSize || 'medium';
-
-  ensureSectionLinks(normalized);
-
-  if(Array.isArray(normalized.links)){
-    normalized.links = normalized.links.slice(0, 3).map((link) => ({
-      text: link?.text || '',
-      url: link?.url || '#',
-      visible: link?.visible === true
-    }));
-  }
-
-  if(Array.isArray(normalized.items)){
-    normalized.items = normalized.items.map((item) => ({
-      title: item?.title || '',
-      text: item?.text || '',
-      image: item?.image || '',
-      link: item?.link || '#'
-    }));
-  }
-
-  if(!Array.isArray(normalized.images)){
-    normalized.images = [];
-  }
-
-  return normalized;
-}
-
-async function saveConfigToGitHub(){
-  try{
-    setConfigSaveResult('保存中です...', 'warn');
-    const draft = buildConfigDraft();
-    await saveFileToGitHub(CONFIG_PATH, JSON.stringify(draft, null, 2));
-    setConfigSaveResult('config.json の保存に成功しました。数十秒後にLPへ反映されます。', 'success');
-  }catch(error){
-    setConfigSaveResult('保存失敗: ' + error.message, 'error');
-  }
-}
-
-async function saveSectionsToGitHub(){
-  try{
-    setSectionsSaveResult('保存中です...', 'warn');
-    const prepared = sectionsData.map((section, index) => normalizeSectionBeforeSave(section, index));
-    sectionsData = ensureUniqueSectionAnchors(prepared);
-    await saveFileToGitHub(SECTIONS_PATH, JSON.stringify(sectionsData, null, 2));
-    renderSectionsEditor();
-    renderSectionsSortList();
-    setSectionsSaveResult('sections.json の保存に成功しました。数十秒後にLPへ反映されます。', 'success');
-  }catch(error){
-    setSectionsSaveResult('保存失敗: ' + error.message, 'error');
-  }
-}
-
-async function init(){
-  try{
-    loadGitHubSettings();
-    await loadConfig();
-    await loadSections();
-
-    if(window.AdminCollapse && typeof window.AdminCollapse.bindWithin === 'function'){
-      window.AdminCollapse.bindWithin(document);
-    }
-
-    setStatus('config.json / sections.json の読み込みに成功しました。', 'success');
-  }catch(error){
-    setStatus('読み込み失敗: ' + error.message, 'error');
-  }
-}
-
-init();
-</script>
-
-</body>
-</html>
+    text: '説明文
