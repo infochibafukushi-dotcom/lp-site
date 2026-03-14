@@ -19,17 +19,17 @@
     "items": [],
     "links": [
       {
-        "text": "テスト",
+        "text": "テスト1",
         "url": "#",
-        "visible": false
+        "visible": true
       },
       {
-        "text": "テスト",
+        "text": "テスト2",
         "url": "#",
-        "visible": false
+        "visible": true
       },
       {
-        "text": "テスト",
+        "text": "テスト3",
         "url": "#",
         "visible": true
       }
