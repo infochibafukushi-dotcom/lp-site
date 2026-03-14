@@ -820,7 +820,7 @@ function ensureUniqueSectionIds(sections){
       count++;
     }
     used.add(unique);
-    section.sectionId = unique;
+    section.sectionId = slugifySectionId(unique);
     return section;
   });
 }
