@@ -12,7 +12,7 @@
     "textSize": "medium",
     "bgColor": "#e87f00",
     "alignY": "middle",
-    "sectionId": "千葉市全域-24時間365日対応-介護タクシー-ちばケアタクシー",
+    "sectionId": "chiba-city-24h-365days-kaigo-taxi-chibakeatakushi",
     "image": "",
     "titleAlign": "center",
     "textAlign": "right",
@@ -46,7 +46,7 @@
     "textSize": "medium",
     "bgColor": "#e87f00",
     "alignY": "middle",
-    "sectionId": "千葉市全域-四街道市-市原市に対応",
+    "sectionId": "chiba-city-yotsukaido-city-ichihara-city-ni",
     "titleAlign": "left",
     "textAlign": "left",
     "images": [],
@@ -96,7 +96,7 @@
         "link": "#"
       }
     ],
-    "sectionId": "ちばケアタクシーが選ばれる理由",
+    "sectionId": "reason-chiba-care-taxi",
     "text": "",
     "image": "",
     "link": "#",
@@ -149,7 +149,7 @@
         "link": "#"
       }
     ],
-    "sectionId": "幅広いご利用シーン",
+    "sectionId": "usage-scenes",
     "text": "",
     "image": "",
     "link": "#",
@@ -208,7 +208,7 @@
         "link": "#"
       }
     ],
-    "sectionId": "安心の対応機材ラインナップ",
+    "sectionId": "equipment-line-up",
     "text": "",
     "image": "",
     "link": "#",
@@ -245,7 +245,7 @@
     "textSize": "medium",
     "bgColor": "#e87f00",
     "alignY": "middle",
-    "sectionId": "車両紹介-乗車定員について",
+    "sectionId": "vehicle-introduction-capacity",
     "titleAlign": "left",
     "textAlign": "left",
     "images": [],
@@ -301,7 +301,7 @@
         "link": "#"
       }
     ],
-    "sectionId": "ご利用料金の目安",
+    "sectionId": "goriyo-ryokin-no-meyasu",
     "text": "",
     "image": "",
     "link": "#",
@@ -354,7 +354,7 @@
         "link": "#"
       }
     ],
-    "sectionId": "ご利用者様-ご家族様の声",
+    "sectionId": "go-go-no",
     "text": "",
     "image": "",
     "link": "#",
@@ -382,7 +382,7 @@
   },
   {
     "id": "section-1773246586759",
-    "sectionId": "ご予約から当日までの流れ",
+    "sectionId": "go-yoyaku-kara-tojitsu-made-no-nagare",
     "type": "normal",
     "enabled": true,
     "title": "ご予約から当日までの流れ",
@@ -416,7 +416,7 @@
   },
   {
     "id": "section-1773246634089",
-    "sectionId": "ご予約から当日までの流れ-copy",
+    "sectionId": "go-yoyaku-kara-tojitsu-made-no-nagare-copy",
     "type": "normal",
     "enabled": true,
     "title": "よくあるご質問（Q&A）",
@@ -459,7 +459,7 @@
     "textSize": "medium",
     "bgColor": "#e87f00",
     "alignY": "middle",
-    "sectionId": "代表挨拶-サービスへの想い",
+    "sectionId": "service-heno-i",
     "titleAlign": "left",
     "textAlign": "left",
     "images": [],
@@ -493,7 +493,7 @@
     "textSize": "medium",
     "bgColor": "#e87f00",
     "alignY": "middle",
-    "sectionId": "事業所案内-最新の活動状況",
+    "sectionId": "annai-no-katsudo-jokyo",
     "titleAlign": "left",
     "textAlign": "left",
     "images": [],
@@ -518,7 +518,7 @@
   },
   {
     "id": "section-1773401444426",
-    "sectionId": "介護タクシー開業パートナー募集-年商1000万円以上を目指せる介護タクシー事業-地域の通院搬送需要により-継続的な利用が見込める安定した事業が期待できます",
+    "sectionId": "kaigo-taxi-kaigyo-partner-boshu-1000-wo-seru-kaigo-taxi-no-niyori-na-ga-meru-shita-ga-dekimasu",
     "type": "normal",
     "enabled": true,
     "title": "介護タクシー開業パートナー募集  【年商1000万円以上を目指せる介護タクシー事業 】 地域の通院搬送需要により、継続的な利用が見込める安定した事業が期待できます。",
@@ -549,5 +549,58 @@
         "visible": false
       }
     ]
+  },
+  {
+    "id": "section-1773578528623",
+    "sectionId": "yoku-aru-shitsumon",
+    "enabled": true,
+    "title": "よくある質問",
+    "textSize": "medium",
+    "bgColor": "#ffffff",
+    "alignY": "middle",
+    "titleAlign": "left",
+    "textAlign": "left",
+    "links": [
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ],
+    "type": "accordion",
+    "text": "",
+    "items": [
+      {
+        "title": "質問1",
+        "text": "回答を入力してください。",
+        "image": "",
+        "link": "#"
+      },
+      {
+        "title": "質問2",
+        "text": "回答を入力してください。",
+        "image": "",
+        "link": "#"
+      },
+      {
+        "title": "質問3",
+        "text": "回答を入力してください。",
+        "image": "",
+        "link": "#"
+      }
+    ],
+    "image": "",
+    "link": "#",
+    "images": []
   }
 ]
