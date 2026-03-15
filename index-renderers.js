@@ -157,20 +157,30 @@
     const rows = items.map((it, i) => {
       const t = nl2brSafe(it && it.title ? it.title : "");
       const tx = nl2brSafe(it && it.text ? it.text : "");
+
       return `
-        <div class="accordion-item">
+        <div class="accordion-item" style="margin:0 0 14px 0; background:#eef1f3; border-radius:10px; overflow:hidden; border:1px solid #e0e5e9;">
           <button
             type="button"
             class="accordion-header"
             data-acc-index="${i}"
             aria-expanded="false"
-            onclick="(function(btn){var body=btn.nextElementSibling;var icon=btn.querySelector('.accordion-icon');var isOpen=btn.getAttribute('aria-expanded')==='true';if(isOpen){body.hidden=true;body.style.display='none';btn.setAttribute('aria-expanded','false');if(icon){icon.textContent='＋';}}else{body.hidden=false;body.style.display='block';btn.setAttribute('aria-expanded','true');if(icon){icon.textContent='－';}}})(this)">
-            <span class="accordion-title">${t}</span>
-            <span class="accordion-icon">＋</span>
+            style="width:100%; border:none; background:#eef1f3; padding:18px 20px; display:flex; align-items:center; justify-content:space-between; gap:14px; cursor:pointer; text-align:left;"
+            onclick="(function(btn){var body=btn.nextElementSibling;var icon=btn.querySelector('.accordion-icon');var isOpen=btn.getAttribute('aria-expanded')==='true';if(isOpen){body.hidden=true;body.style.display='none';btn.setAttribute('aria-expanded','false');if(icon){icon.textContent='＋';}}else{body.hidden=false;body.style.display='block';btn.setAttribute('aria-expanded','true');if(icon){icon.textContent='×';}}})(this)">
+            <span style="display:flex; align-items:flex-start; gap:14px; min-width:0; flex:1;">
+              <span style="flex:0 0 auto; font-size:18px; line-height:1; font-weight:700; color:#1f2a44;">Q</span>
+              <span class="accordion-title" style="min-width:0; font-size:clamp(18px,2.4vw,22px); line-height:1.45; font-weight:700; color:#0b8da6; white-space:normal; word-break:break-word;">${t}</span>
+            </span>
+            <span class="accordion-icon" style="flex:0 0 auto; font-size:34px; line-height:1; color:#0b8da6; font-weight:400;">＋</span>
           </button>
-          <div class="accordion-body" hidden style="display:none;">
-            <div class="section-text text-${window.IndexUtils.escapeAttr(section.textSize || "medium")} text-${window.IndexUtils.escapeAttr(section.textAlign || "left")}">
-              ${tx}
+          <div class="accordion-body" hidden style="display:none; padding:0 16px 16px 16px; background:#eef1f3;">
+            <div style="background:#ffffff; padding:16px 18px; border-radius:0; border:none;">
+              <div style="display:flex; align-items:flex-start; gap:14px;">
+                <div style="flex:0 0 auto; font-size:18px; line-height:1; font-weight:700; color:#1f2a44; padding-top:2px;">A</div>
+                <div class="section-text text-${window.IndexUtils.escapeAttr(section.textSize || "medium")} text-${window.IndexUtils.escapeAttr(section.textAlign || "left")}" style="margin:0; white-space:normal; word-break:break-word; line-height:1.9;">
+                  ${tx}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -180,7 +190,7 @@
     return `
       <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#ffffff")}">
         <div class="section-inner">
-          <h2 class="section-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "left")}">${window.IndexUtils.escapeHtml(section.title || "")}</h2>
+          <h2 class="section-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "left")}" style="margin-bottom:22px;">${window.IndexUtils.escapeHtml(section.title || "")}</h2>
           <div class="accordion-list">
             ${rows}
           </div>
