@@ -515,5 +515,58 @@
         "visible": false
       }
     ]
+  },
+  {
+    "id": "section-1773579425987",
+    "sectionId": "tesuto",
+    "enabled": true,
+    "title": "テスト",
+    "textSize": "medium",
+    "bgColor": "#ffffff",
+    "alignY": "middle",
+    "titleAlign": "left",
+    "textAlign": "left",
+    "links": [
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ],
+    "type": "accordion",
+    "text": "",
+    "items": [
+      {
+        "title": "質問1",
+        "text": "回答を入力してください。",
+        "image": "",
+        "link": "#"
+      },
+      {
+        "title": "質問2",
+        "text": "回答を入力してください。",
+        "image": "",
+        "link": "#"
+      },
+      {
+        "title": "質問3",
+        "text": "回答を入力してください。",
+        "image": "",
+        "link": "#"
+      }
+    ],
+    "image": "",
+    "link": "#",
+    "images": []
   }
 ]
