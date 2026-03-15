@@ -143,17 +143,6 @@ button.linklike{
   gap:10px;
   flex-wrap:wrap;
 }
-.item-editor-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  flex-wrap:wrap;
-  margin-bottom:10px;
-}
-.item-editor-head h4{
-  margin:0;
-}
 .note{
   font-size:13px;
   color:#666;
@@ -550,6 +539,99 @@ button.linklike{
     grid-template-columns:1fr;
   }
 }
+
+body{
+  padding-bottom:96px;
+}
+.floating-save-bar{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:9999;
+  background:#ffffff;
+  border-top:1px solid #dbe2ea;
+  box-shadow:0 -6px 20px rgba(15,23,42,0.08);
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+}
+.floating-save-inner{
+  max-width:1180px;
+  margin:0 auto;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.floating-save-status{
+  flex:1 1 220px;
+  min-width:220px;
+  font-size:13px;
+  color:#475569;
+  background:#f8fafc;
+  border:1px solid #e2e8f0;
+  border-radius:999px;
+  padding:10px 14px;
+}
+.floating-save-status.is-dirty{
+  background:#fff7ed;
+  border-color:#fdba74;
+  color:#9a3412;
+}
+.floating-save-status.is-saving{
+  background:#eff6ff;
+  border-color:#93c5fd;
+  color:#1d4ed8;
+}
+.floating-save-status.is-success{
+  background:#ecfdf5;
+  border-color:#86efac;
+  color:#166534;
+}
+.floating-save-status.is-error{
+  background:#fef2f2;
+  border-color:#fca5a5;
+  color:#b91c1c;
+}
+.floating-save-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-left:auto;
+}
+.floating-save-actions button{
+  min-width:170px;
+  padding:12px 18px;
+  border-radius:999px;
+  font-weight:700;
+}
+.floating-save-actions .secondary{
+  background:#0f172a;
+}
+.floating-save-actions .secondary:hover{
+  background:#1e293b;
+}
+@media (max-width: 900px){
+  body{
+    padding-bottom:148px;
+  }
+  .floating-save-inner{
+    align-items:stretch;
+  }
+  .floating-save-status{
+    flex:1 1 100%;
+    min-width:0;
+  }
+  .floating-save-actions{
+    width:100%;
+    margin-left:0;
+  }
+  .floating-save-actions button{
+    flex:1 1 calc(50% - 10px);
+    min-width:0;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -819,7 +901,7 @@ button.linklike{
       <span class="toggle-state">閉じています</span>
     </button>
     <div class="card-body js-card-body">
-      <p class="note">8種類を簡単に追加できます。追加後に sections.json を保存してください。</p>
+      <p class="note">7種類を簡単に追加できます。追加後に sections.json を保存してください。</p>
 
       <div class="grid2">
         <div class="row">
@@ -832,7 +914,6 @@ button.linklike{
             <option value="card2">card2</option>
             <option value="card1-right">card1-right</option>
             <option value="card1-left">card1-left</option>
-            <option value="accordion">accordion</option>
           </select>
         </div>
         <div class="row">
@@ -897,7 +978,20 @@ button.linklike{
     </div>
   </div>
 
+
+  <div class="floating-save-bar">
+    <div class="floating-save-inner">
+      <div class="floating-save-status" id="floatingSaveStatus">未保存の変更はありません。</div>
+      <div class="floating-save-actions">
+        <button type="button" onclick="saveConfigToGitHub()">上部・下部設定を保存</button>
+        <button type="button" class="secondary" onclick="saveSectionsToGitHub()">セクションを保存</button>
+        <button type="button" onclick="saveAllToGitHub()">すべて保存</button>
+      </div>
+    </div>
+  </div>
+
 </main>
+
 
 <script src="./admin-collapse.js"></script>
 <script src="./admin-sections-sort.js"></script>
@@ -990,6 +1084,120 @@ const HIRAGANA_MAP = {
 
 let sectionsData = [];
 let sectionOpenState = {};
+let dirtyConfig = false;
+let dirtySections = false;
+let saveStateType = '';
+let saveStateMessage = '';
+
+function getFloatingSaveStatusBox(){
+  return document.getElementById('floatingSaveStatus');
+}
+
+function updateFloatingSaveStatus(message = '', type = ''){
+  const box = getFloatingSaveStatusBox();
+  if(!box) return;
+
+  let finalType = type || '';
+  let finalMessage = message || '';
+
+  if(!finalMessage){
+    if(finalType === 'saving'){
+      finalMessage = '保存中です...';
+    }else if(finalType === 'error'){
+      finalMessage = '保存に失敗しました。';
+    }else if(finalType === 'success'){
+      finalMessage = '保存が完了しました。';
+    }else if(dirtyConfig || dirtySections){
+      const labels = [];
+      if(dirtyConfig) labels.push('上部・下部設定');
+      if(dirtySections) labels.push('セクション');
+      finalType = 'dirty';
+      finalMessage = '未保存: ' + labels.join(' / ');
+    }else{
+      finalType = '';
+      finalMessage = '未保存の変更はありません。';
+    }
+  }
+
+  box.className = 'floating-save-status';
+  if(finalType){
+    box.classList.add('is-' + finalType);
+  }
+  box.innerText = finalMessage;
+  saveStateType = finalType;
+  saveStateMessage = finalMessage;
+}
+
+function markConfigDirty(){
+  dirtyConfig = true;
+  updateFloatingSaveStatus();
+}
+
+function markSectionsDirty(){
+  dirtySections = true;
+  updateFloatingSaveStatus();
+}
+
+function clearConfigDirty(){
+  dirtyConfig = false;
+  updateFloatingSaveStatus();
+}
+
+function clearSectionsDirty(){
+  dirtySections = false;
+  updateFloatingSaveStatus();
+}
+
+function bindDirtyTrackers(){
+  document.addEventListener('input', function(event){
+    const target = event.target;
+    if(!target) return;
+
+    if(target.closest('#card-top-settings') || target.closest('#card-bottom-settings')){
+      markConfigDirty();
+      return;
+    }
+
+    if(target.closest('#card-section-add') || target.closest('#card-sections-sort') || target.closest('#card-sections-list') || target.closest('#card-preview')){
+      markSectionsDirty();
+    }
+  });
+
+  document.addEventListener('change', function(event){
+    const target = event.target;
+    if(!target) return;
+
+    if(target.closest('#card-top-settings') || target.closest('#card-bottom-settings')){
+      markConfigDirty();
+      return;
+    }
+
+    if(target.closest('#card-section-add') || target.closest('#card-sections-sort') || target.closest('#card-sections-list') || target.closest('#card-preview')){
+      markSectionsDirty();
+    }
+  });
+
+  window.addEventListener('beforeunload', function(event){
+    if(!(dirtyConfig || dirtySections)) return;
+    event.preventDefault();
+    event.returnValue = '';
+  });
+}
+
+async function saveAllToGitHub(){
+  updateFloatingSaveStatus('すべて保存しています...', 'saving');
+
+  const configOk = await saveConfigToGitHub(true);
+  const sectionsOk = await saveSectionsToGitHub(true);
+
+  if(configOk && sectionsOk){
+    updateFloatingSaveStatus('すべて保存しました。数十秒後にLPへ反映されます。', 'success');
+    return true;
+  }
+
+  updateFloatingSaveStatus('一部または全部の保存に失敗しました。', 'error');
+  return false;
+}
 
 function setStatus(message, type = ''){
   const box = document.getElementById('statusBox');
@@ -1485,8 +1693,7 @@ function createDefaultSection(type, title){
     type === 'card3' ? '新しいカード3' :
     type === 'card2' ? '新しいカード2' :
     type === 'card1-right' ? '新しいカード1右' :
-    type === 'card1-left' ? '新しいカード1左' :
-    '新しい開閉'
+    '新しいカード1左'
   );
   const id = 'section-' + Date.now();
   const sectionId = slugifySectionId(baseTitle);
@@ -1574,32 +1781,9 @@ function createDefaultSection(type, title){
     };
   }
 
-  if(type === 'card1-left'){
-    return {
-      ...base,
-      type: 'card1-left',
-      text: '説明文を入力してください。',
-      image: '',
-      link: '#'
-    };
-  }
-
-  if(type === 'accordion'){
-    return {
-      ...base,
-      type: 'accordion',
-      text: '',
-      items: [
-        { title:'質問1', text:'回答を入力してください。', image:'', link:'#' },
-        { title:'質問2', text:'回答を入力してください。', image:'', link:'#' },
-        { title:'質問3', text:'回答を入力してください。', image:'', link:'#' }
-      ]
-    };
-  }
-
   return {
     ...base,
-    type: 'normal',
+    type: 'card1-left',
     text: '説明文を入力してください。',
     image: '',
     link: '#'
@@ -1698,86 +1882,6 @@ function updateSliderImages(index, value){
 }
 function updateCardItemField(sectionIndex, itemIndex, field, value){
   sectionsData[sectionIndex].items[itemIndex][field] = value;
-}
-function addAccordionItem(sectionIndex){
-  captureSectionOpenStates();
-
-  const section = sectionsData[sectionIndex];
-  if(!section || section.type !== 'accordion') return;
-  if(!Array.isArray(section.items)) section.items = [];
-
-  const nextNo = section.items.length + 1;
-  section.items.push({
-    title: '質問' + nextNo,
-    text: '回答を入力してください。',
-    image: '',
-    link: '#'
-  });
-
-  if(section.id){
-    sectionOpenState[section.id] = true;
-  }
-
-  renderSectionsEditor();
-  renderSectionsSortList();
-  setSectionsSaveResult('開閉項目を追加しました。最後に sections.json を保存してください。', 'success');
-}
-function removeAccordionItem(sectionIndex, itemIndex){
-  captureSectionOpenStates();
-
-  const section = sectionsData[sectionIndex];
-  if(!section || section.type !== 'accordion' || !Array.isArray(section.items)) return;
-  if(section.items.length <= 1){
-    setSectionsSaveResult('開閉項目は最低1件必要です。', 'warn');
-    return;
-  }
-
-  section.items.splice(itemIndex, 1);
-
-  if(section.id){
-    sectionOpenState[section.id] = true;
-  }
-
-  renderSectionsEditor();
-  renderSectionsSortList();
-  setSectionsSaveResult('開閉項目を削除しました。最後に sections.json を保存してください。', 'success');
-}
-function moveAccordionItemUp(sectionIndex, itemIndex){
-  if(itemIndex <= 0) return;
-
-  captureSectionOpenStates();
-
-  const section = sectionsData[sectionIndex];
-  if(!section || section.type !== 'accordion' || !Array.isArray(section.items)) return;
-
-  const temp = section.items[itemIndex - 1];
-  section.items[itemIndex - 1] = section.items[itemIndex];
-  section.items[itemIndex] = temp;
-
-  if(section.id){
-    sectionOpenState[section.id] = true;
-  }
-
-  renderSectionsEditor();
-  renderSectionsSortList();
-}
-function moveAccordionItemDown(sectionIndex, itemIndex){
-  captureSectionOpenStates();
-
-  const section = sectionsData[sectionIndex];
-  if(!section || section.type !== 'accordion' || !Array.isArray(section.items)) return;
-  if(itemIndex >= section.items.length - 1) return;
-
-  const temp = section.items[itemIndex + 1];
-  section.items[itemIndex + 1] = section.items[itemIndex];
-  section.items[itemIndex] = temp;
-
-  if(section.id){
-    sectionOpenState[section.id] = true;
-  }
-
-  renderSectionsEditor();
-  renderSectionsSortList();
 }
 function updateSectionLinkField(sectionIndex, linkIndex, field, value){
   ensureSectionLinks(sectionsData[sectionIndex]);
@@ -2131,50 +2235,31 @@ function renderSingleImageBlock(section, index){
   `;
 }
 
-function renderItemsEditor(section, sectionIndex){
+function renderCardItemsEditor(section, sectionIndex){
   const items = Array.isArray(section.items) ? section.items : [];
-  const isAccordion = section.type === 'accordion';
   if(items.length === 0){
-    return '<div class="small">項目データがありません。</div>';
+    return '<div class="small">カードデータがありません。</div>';
   }
 
-  const topActions = isAccordion ? `
-    <div class="actions" style="margin-bottom:12px;">
-      <button type="button" onclick="addAccordionItem(${sectionIndex})">開閉項目を追加</button>
-    </div>
-  ` : '';
-
-  return topActions + items.map((item, itemIndex) => `
+  return items.map((item, itemIndex) => `
     <div class="card-item-editor">
-      <div class="item-editor-head">
-        <h4>${isAccordion ? '開閉項目' : 'カード'} ${itemIndex + 1}</h4>
-        ${isAccordion ? `
-        <div class="actions">
-          <button type="button" class="secondary small-btn" onclick="moveAccordionItemUp(${sectionIndex}, ${itemIndex})">↑上へ</button>
-          <button type="button" class="secondary small-btn" onclick="moveAccordionItemDown(${sectionIndex}, ${itemIndex})">↓下へ</button>
-          <button type="button" class="danger small-btn" onclick="removeAccordionItem(${sectionIndex}, ${itemIndex})">削除</button>
-        </div>` : ''}
-      </div>
+      <h4>カード ${itemIndex + 1}</h4>
       <div class="grid2">
-        <div class="row" ${isAccordion ? 'style="grid-column:1 / -1;"' : ''}>
+        <div class="row">
           <label>タイトル</label>
-          ${isAccordion
-            ? `<textarea oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'title', this.value)">${escapeHtml(item.title || '')}</textarea>`
-            : `<input type="text" value="${escapeAttr(item.title || '')}" oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'title', this.value)">`}
+          <input type="text" value="${escapeAttr(item.title || '')}" oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'title', this.value)">
         </div>
 
-        ${!isAccordion ? `
         <div class="row">
           <label>リンク</label>
           <input type="text" value="${escapeAttr(item.link || '#')}" oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'link', this.value)">
-        </div>` : ''}
+        </div>
 
         <div class="row" style="grid-column:1 / -1;">
-          <label>${isAccordion ? '回答文' : '説明文'}</label>
+          <label>説明文</label>
           <textarea oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'text', this.value)">${escapeHtml(item.text || '')}</textarea>
         </div>
 
-        ${!isAccordion ? `
         <div class="row" style="grid-column:1 / -1;">
           <label>画像URL</label>
           <input type="text" value="${escapeAttr(item.image || '')}" oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'image', this.value)">
@@ -2184,7 +2269,7 @@ function renderItemsEditor(section, sectionIndex){
             <div class="small">選択すると GitHub の assets/cards にアップロードされます。</div>
             ${item.image ? `<img class="image-preview" src="${escapeAttr(item.image)}" alt="">` : ''}
           </div>
-        </div>` : ''}
+        </div>
       </div>
     </div>
   `).join('');
@@ -2204,8 +2289,6 @@ function renderSectionsEditor(){
   box.innerHTML = sectionsData.map((section, index) => {
     const isSlider = section.type === 'slider';
     const isCards = ['card4','card3','card2'].includes(section.type);
-    const isAccordion = section.type === 'accordion';
-    const hasItemsEditor = isCards || isAccordion;
     const hasSingleImage = ['normal','card1-right','card1-left'].includes(section.type);
     const fullAnchorUrl = buildFullAnchorUrl(section.sectionId || '');
 
@@ -2268,7 +2351,7 @@ function renderSectionsEditor(){
               </select>
             </div>
 
-            ${!hasItemsEditor ? `
+            ${!isCards ? `
             <div class="row" style="grid-column:1 / -1;">
               <label>説明文</label>
               <textarea oninput="updateSectionField(${index}, 'text', this.value)">${escapeHtml(section.text || '')}</textarea>
@@ -2328,10 +2411,10 @@ function renderSectionsEditor(){
               </div>
             </div>` : ''}
 
-            ${hasItemsEditor ? `
+            ${isCards ? `
             <div class="row" style="grid-column:1 / -1;">
-              <label>${isAccordion ? '開閉項目編集' : 'カード編集'}</label>
-              ${renderItemsEditor(section, index)}
+              <label>カード編集</label>
+              ${renderCardItemsEditor(section, index)}
             </div>` : ''}
 
             <div class="row" style="grid-column:1 / -1;">
@@ -2383,59 +2466,30 @@ function utf8ToBase64(str){
 async function saveFileToGitHub(path, contentString){
   const { owner, repo, branch, token } = getGitHubSettings();
   const contentBase64 = utf8ToBase64(contentString);
+  const sha = await getCurrentFileSha(owner, repo, branch, token, path);
   const apiUrl = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + path;
 
-  async function putWithSha(sha){
-    const res = await fetch(apiUrl, {
-      method: 'PUT',
-      headers: {
-        'Authorization': 'Bearer ' + token,
-        'Accept': 'application/vnd.github+json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        message: 'Update ' + path + ' from admin panel',
-        content: contentBase64,
-        branch: branch,
-        sha: sha
-      })
-    });
+  const res = await fetch(apiUrl, {
+    method: 'PUT',
+    headers: {
+      'Authorization': 'Bearer ' + token,
+      'Accept': 'application/vnd.github+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      message: 'Update ' + path + ' from admin panel',
+      content: contentBase64,
+      branch: branch,
+      sha: sha
+    })
+  });
 
-    let result = null;
-    try{
-      result = await res.json();
-    }catch(_error){
-      result = null;
-    }
-
-    return { res, result };
-  }
-
-  let sha = await getCurrentFileSha(owner, repo, branch, token, path);
-  let attempt = await putWithSha(sha);
-
-  if(!attempt.res.ok){
-    const message = attempt.result?.message || '';
-    const lower = String(message).toLowerCase();
-    const shouldRetry = (
-      lower.includes('does not match') ||
-      lower.includes('sha') ||
-      attempt.res.status === 409 ||
-      attempt.res.status === 422
-    );
-
-    if(shouldRetry){
-      sha = await getCurrentFileSha(owner, repo, branch, token, path);
-      attempt = await putWithSha(sha);
-    }
-  }
-
-  if(!attempt.res.ok){
-    const errText = attempt.result?.message ? attempt.result.message : (attempt.res.status + ' ' + attempt.res.statusText);
+  const result = await res.json();
+  if(!res.ok){
+    const errText = result?.message ? result.message : (res.status + ' ' + res.statusText);
     throw new Error(errText);
   }
-
-  return attempt.result;
+  return result;
 }
 
 function normalizeSectionBeforeSave(section, index){
@@ -2480,34 +2534,60 @@ function normalizeSectionBeforeSave(section, index){
   return normalized;
 }
 
-async function saveConfigToGitHub(){
+async function saveConfigToGitHub(isSilent = false){
   try{
     setConfigSaveResult('保存中です...', 'warn');
+    if(!isSilent){
+      updateFloatingSaveStatus('上部・下部設定を保存しています...', 'saving');
+    }
     const draft = buildConfigDraft();
     await saveFileToGitHub(CONFIG_PATH, JSON.stringify(draft, null, 2));
     setConfigSaveResult('config.json の保存に成功しました。数十秒後にLPへ反映されます。', 'success');
+    clearConfigDirty();
+    if(!isSilent){
+      updateFloatingSaveStatus('上部・下部設定を保存しました。', 'success');
+    }
+    return true;
   }catch(error){
     setConfigSaveResult('保存失敗: ' + error.message, 'error');
+    if(!isSilent){
+      updateFloatingSaveStatus('上部・下部設定の保存に失敗しました。', 'error');
+    }
+    return false;
   }
 }
 
-async function saveSectionsToGitHub(){
+async function saveSectionsToGitHub(isSilent = false){
   try{
     setSectionsSaveResult('保存中です...', 'warn');
+    if(!isSilent){
+      updateFloatingSaveStatus('セクションを保存しています...', 'saving');
+    }
     const prepared = sectionsData.map((section, index) => normalizeSectionBeforeSave(section, index));
     sectionsData = ensureUniqueSectionAnchors(prepared);
     await saveFileToGitHub(SECTIONS_PATH, JSON.stringify(sectionsData, null, 2));
     renderSectionsEditor();
     renderSectionsSortList();
     setSectionsSaveResult('sections.json の保存に成功しました。数十秒後にLPへ反映されます。', 'success');
+    clearSectionsDirty();
+    if(!isSilent){
+      updateFloatingSaveStatus('セクションを保存しました。', 'success');
+    }
+    return true;
   }catch(error){
     setSectionsSaveResult('保存失敗: ' + error.message, 'error');
+    if(!isSilent){
+      updateFloatingSaveStatus('セクションの保存に失敗しました。', 'error');
+    }
+    return false;
   }
 }
 
 async function init(){
   try{
     loadGitHubSettings();
+    bindDirtyTrackers();
+    updateFloatingSaveStatus();
     await loadConfig();
     await loadSections();
 
@@ -2515,8 +2595,10 @@ async function init(){
       window.AdminCollapse.bindWithin(document);
     }
 
+    updateFloatingSaveStatus();
     setStatus('config.json / sections.json の読み込みに成功しました。', 'success');
   }catch(error){
+    updateFloatingSaveStatus('読み込みに失敗しました。', 'error');
     setStatus('読み込み失敗: ' + error.message, 'error');
   }
 }
