@@ -449,6 +449,59 @@
     ]
   },
   {
+    "id": "section-1773578528623",
+    "sectionId": "yoku-aru-shitsumon",
+    "enabled": true,
+    "title": "よくある質問",
+    "textSize": "medium",
+    "bgColor": "#ffffff",
+    "alignY": "middle",
+    "titleAlign": "left",
+    "textAlign": "left",
+    "links": [
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ],
+    "type": "accordion",
+    "text": "",
+    "items": [
+      {
+        "title": "質問1",
+        "text": "回答を入力してください。",
+        "image": "",
+        "link": "#"
+      },
+      {
+        "title": "質問2",
+        "text": "回答を入力してください。",
+        "image": "",
+        "link": "#"
+      },
+      {
+        "title": "質問3",
+        "text": "回答を入力してください。",
+        "image": "",
+        "link": "#"
+      }
+    ],
+    "image": "",
+    "link": "#",
+    "images": []
+  },
+  {
     "id": "section-1773060504302",
     "type": "card1-right",
     "enabled": true,
@@ -549,58 +602,5 @@
         "visible": false
       }
     ]
-  },
-  {
-    "id": "section-1773578528623",
-    "sectionId": "yoku-aru-shitsumon",
-    "enabled": true,
-    "title": "よくある質問",
-    "textSize": "medium",
-    "bgColor": "#ffffff",
-    "alignY": "middle",
-    "titleAlign": "left",
-    "textAlign": "left",
-    "links": [
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      },
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      },
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      }
-    ],
-    "type": "accordion",
-    "text": "",
-    "items": [
-      {
-        "title": "質問1",
-        "text": "回答を入力してください。",
-        "image": "",
-        "link": "#"
-      },
-      {
-        "title": "質問2",
-        "text": "回答を入力してください。",
-        "image": "",
-        "link": "#"
-      },
-      {
-        "title": "質問3",
-        "text": "回答を入力してください。",
-        "image": "",
-        "link": "#"
-      }
-    ],
-    "image": "",
-    "link": "#",
-    "images": []
   }
 ]
