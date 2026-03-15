@@ -2156,9 +2156,11 @@ function renderItemsEditor(section, sectionIndex){
         </div>` : ''}
       </div>
       <div class="grid2">
-        <div class="row">
+        <div class="row" ${isAccordion ? 'style="grid-column:1 / -1;"' : ''}>
           <label>タイトル</label>
-          <input type="text" value="${escapeAttr(item.title || '')}" oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'title', this.value)">
+          ${isAccordion
+            ? `<textarea oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'title', this.value)">${escapeHtml(item.title || '')}</textarea>`
+            : `<input type="text" value="${escapeAttr(item.title || '')}" oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'title', this.value)">`}
         </div>
 
         ${!isAccordion ? `
