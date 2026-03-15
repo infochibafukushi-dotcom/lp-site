@@ -9,14 +9,18 @@
     trigger.onclick = function(){
       clickCount++;
       if(clickCount >= 5){
-        document.getElementById("adminPanel").style.display = "block";
+        const adminPanel = document.getElementById("adminPanel");
+        if(adminPanel){
+          adminPanel.style.display = "block";
+        }
         clickCount = 0;
       }
     };
   }
 
   function login(){
-    const input = document.getElementById("pass").value;
+    const passEl = document.getElementById("pass");
+    const input = passEl ? passEl.value : "";
     if(input === sitePassword){
       alert("管理画面ログイン成功");
       location.href = "./admin.html";
@@ -25,25 +29,62 @@
     }
   }
 
+  async function fetchJsonWithFallback(urls){
+    let lastError = null;
+
+    for(const rawUrl of urls){
+      try{
+        const url = rawUrl + (rawUrl.includes("?") ? "&" : "?") + "_ts=" + Date.now();
+        const res = await fetch(url, { cache: "no-store" });
+
+        if(!res.ok){
+          throw new Error("HTTP " + res.status + " " + res.statusText + " : " + rawUrl);
+        }
+
+        const text = await res.text();
+
+        if(!text || !text.trim()){
+          throw new Error("empty response : " + rawUrl);
+        }
+
+        return JSON.parse(text);
+      }catch(error){
+        lastError = error;
+      }
+    }
+
+    throw lastError || new Error("JSON fetch failed");
+  }
+
   async function loadConfig(){
-    const res = await fetch("./data/config.json?" + Date.now());
-    let config = await res.json();
-    config = window.IndexUtils.ensureConfigShape(config);
+    const configRaw = await fetchJsonWithFallback([
+      "./data/config.json",
+      "data/config.json",
+      "./config.json",
+      "config.json"
+    ]);
+
+    const config = window.IndexUtils.ensureConfigShape(configRaw || {});
 
     const logoTextEl = document.getElementById("logoTextView");
     const logoImgEl = document.getElementById("logoImg");
 
-    logoTextEl.innerText = config.logo || "";
-    if(config.logoImage){
-      logoImgEl.src = config.logoImage;
-      logoImgEl.style.display = "block";
-    }else{
-      logoImgEl.src = "";
-      logoImgEl.style.display = "none";
+    if(logoTextEl){
+      logoTextEl.innerText = config.logo || "";
     }
 
-    document.documentElement.style.setProperty("--header-bg", config.headerBgColor);
-    document.documentElement.style.setProperty("--footer-bg", config.footerBgColor);
+    if(logoImgEl){
+      if(config.logoImage){
+        logoImgEl.src = config.logoImage;
+        logoImgEl.style.display = "block";
+      }else{
+        logoImgEl.src = "";
+        logoImgEl.style.display = "none";
+      }
+    }
+
+    document.documentElement.style.setProperty("--header-bg", config.headerBgColor || "#ffffff");
+    document.documentElement.style.setProperty("--footer-bg", config.footerBgColor || "#ffffff");
 
     window.IndexUtils.applyTopButton(document.getElementById("btn1"), config.buttons[0], "ボタン1");
     window.IndexUtils.applyTopButton(document.getElementById("btn2"), config.buttons[1], "ボタン2");
@@ -76,10 +117,15 @@
 
   async function loadSections(){
     const container = document.getElementById("sectionsContainer");
+    if(!container) return;
 
     try{
-      const res = await fetch("./data/sections.json?" + Date.now());
-      let sections = await res.json();
+      let sections = await fetchJsonWithFallback([
+        "./data/sections.json",
+        "data/sections.json",
+        "./sections.json",
+        "sections.json"
+      ]);
 
       if(!Array.isArray(sections) || sections.length === 0){
         container.innerHTML = '<div class="empty-box">セクションがまだありません。</div>';
@@ -90,7 +136,10 @@
       sections = window.IndexUtils.ensureUniqueSectionIds(sections);
 
       container.innerHTML = sections.map((section, idx) => window.IndexRenderers.renderSection(section, idx)).join("");
-      window.IndexSlider.initSliders();
+
+      if(window.IndexSlider && typeof window.IndexSlider.initSliders === "function"){
+        window.IndexSlider.initSliders();
+      }
 
       if(location.hash){
         const target = document.querySelector(location.hash);
@@ -102,6 +151,9 @@
       }
     }catch(error){
       container.innerHTML = '<div class="empty-box">sections.json の読み込みに失敗しました。</div>';
+      try{
+        console.error(error);
+      }catch(e){}
     }
   }
 
@@ -117,10 +169,20 @@
   }
 
   async function init(){
-    bindLogoTrigger();
-    bindHashScroll();
-    await loadConfig();
-    await loadSections();
+    try{
+      bindLogoTrigger();
+      bindHashScroll();
+      await loadConfig();
+      await loadSections();
+    }catch(error){
+      const container = document.getElementById("sectionsContainer");
+      if(container){
+        container.innerHTML = '<div class="empty-box">初期化に失敗しました。</div>';
+      }
+      try{
+        console.error(error);
+      }catch(e){}
+    }
   }
 
   window.login = login;
