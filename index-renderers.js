@@ -153,14 +153,20 @@
     const items = Array.isArray(section.items) ? section.items : [];
     const rows = items.map((it, i) => {
       const t = it && it.title ? window.IndexUtils.escapeHtml(it.title) : "";
-      const tx = it && it.text ? window.IndexUtils.escapeHtml(it.text) : "";
+      const tx = it && it.text ? window.IndexUtils.escapeHtml(it.text).replace(/
+/g, "<br>") : "";
       return `
         <div class="accordion-item">
-          <div class="accordion-header" data-acc-index="${i}" onclick="this.nextElementSibling.classList.toggle('open')">
+          <button
+            type="button"
+            class="accordion-header"
+            data-acc-index="${i}"
+            aria-expanded="false"
+            onclick="(function(btn){var body=btn.nextElementSibling;var icon=btn.querySelector('.accordion-icon');var open=body.style.display==='block';body.style.display=open?'none':'block';btn.setAttribute('aria-expanded', open?'false':'true');if(icon){icon.textContent=open?'＋':'－';}})(this)">
             <span class="accordion-title">${t}</span>
             <span class="accordion-icon">＋</span>
-          </div>
-          <div class="accordion-body">
+          </button>
+          <div class="accordion-body" style="display:none;">
             <div class="section-text text-${window.IndexUtils.escapeAttr(section.textSize || "medium")} text-${window.IndexUtils.escapeAttr(section.textAlign || "left")}">
               ${tx}
             </div>
