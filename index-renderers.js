@@ -10,6 +10,10 @@
     return "";
   }
 
+  function nl2brSafe(text){
+    return window.IndexUtils.escapeHtml(text || "").replace(/\r?\n/g, "<br>");
+  }
+
   function renderNormal(section){
     const imageHtml = section.image
       ? `<img class="normal-image" src="${window.IndexUtils.escapeAttr(section.image)}" alt="${window.IndexUtils.escapeAttr(section.title || "")}">`
@@ -148,19 +152,23 @@
     `;
   }
 
-
   function renderAccordion(section){
     const items = Array.isArray(section.items) ? section.items : [];
     const rows = items.map((it, i) => {
-      const t = it && it.title ? window.IndexUtils.escapeHtml(it.title) : "";
-      const tx = it && it.text ? window.IndexUtils.escapeHtml(it.text) : "";
+      const t = nl2brSafe(it && it.title ? it.title : "");
+      const tx = nl2brSafe(it && it.text ? it.text : "");
       return `
         <div class="accordion-item">
-          <div class="accordion-header" data-acc-index="${i}" onclick="this.nextElementSibling.classList.toggle('open')">
+          <button
+            type="button"
+            class="accordion-header"
+            data-acc-index="${i}"
+            aria-expanded="false"
+            onclick="(function(btn){var body=btn.nextElementSibling;var icon=btn.querySelector('.accordion-icon');var isOpen=btn.getAttribute('aria-expanded')==='true';if(isOpen){body.hidden=true;body.style.display='none';btn.setAttribute('aria-expanded','false');if(icon){icon.textContent='＋';}}else{body.hidden=false;body.style.display='block';btn.setAttribute('aria-expanded','true');if(icon){icon.textContent='－';}}})(this)">
             <span class="accordion-title">${t}</span>
             <span class="accordion-icon">＋</span>
-          </div>
-          <div class="accordion-body">
+          </button>
+          <div class="accordion-body" hidden style="display:none;">
             <div class="section-text text-${window.IndexUtils.escapeAttr(section.textSize || "medium")} text-${window.IndexUtils.escapeAttr(section.textAlign || "left")}">
               ${tx}
             </div>
