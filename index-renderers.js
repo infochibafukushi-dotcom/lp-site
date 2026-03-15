@@ -148,6 +148,40 @@
     `;
   }
 
+
+  function renderAccordion(section){
+    const items = Array.isArray(section.items) ? section.items : [];
+    const rows = items.map((it, i) => {
+      const t = it && it.title ? window.IndexUtils.escapeHtml(it.title) : "";
+      const tx = it && it.text ? window.IndexUtils.escapeHtml(it.text) : "";
+      return `
+        <div class="accordion-item">
+          <div class="accordion-header" data-acc-index="${i}" onclick="this.nextElementSibling.classList.toggle('open')">
+            <span class="accordion-title">${t}</span>
+            <span class="accordion-icon">＋</span>
+          </div>
+          <div class="accordion-body">
+            <div class="section-text text-${window.IndexUtils.escapeAttr(section.textSize || "medium")} text-${window.IndexUtils.escapeAttr(section.textAlign || "left")}">
+              ${tx}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    return `
+      <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#ffffff")}">
+        <div class="section-inner">
+          <h2 class="section-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "left")}">${window.IndexUtils.escapeHtml(section.title || "")}</h2>
+          <div class="accordion-list">
+            ${rows}
+          </div>
+          ${renderSectionBottomLinks(section)}
+        </div>
+      </section>
+    `;
+  }
+
   function renderSection(section, idx){
     section = window.IndexUtils.ensureSectionShape(section, idx);
 
@@ -170,6 +204,8 @@
         return renderMedia(section, false);
       case "card1-left":
         return renderMedia(section, true);
+      case "accordion":
+        return renderAccordion(section);
       default:
         return `
           <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section" style="background:#fff3cd">
