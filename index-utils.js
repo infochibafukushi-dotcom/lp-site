@@ -93,42 +93,39 @@
       .replaceAll(">", "&gt;");
   }
 
+  function ensureTopButtons(list, defaults){
+    const items = Array.isArray(list) ? list.slice(0, 3) : [];
+    while(items.length < 3){
+      items.push({ text:"", link:"#", visible:true });
+    }
+    return items.map((item, i) => ({
+      text: item?.text || defaults[i] || `ボタン${i + 1}`,
+      link: item?.link || "#",
+      visible: item?.visible !== false
+    }));
+  }
+
+  function ensureFooterButtons(list, defaults){
+    const items = Array.isArray(list) ? list.slice(0, 3) : [];
+    while(items.length < 3){
+      items.push({ text:"", link:"#", visible:true, image:"" });
+    }
+    return items.map((item, i) => ({
+      text: item?.text || defaults[i] || "ボタン",
+      link: item?.link || "#",
+      visible: item?.visible !== false,
+      image: item?.image || ""
+    }));
+  }
+
   function ensureConfigShape(config){
-    if(!Array.isArray(config.buttons)){
-      config.buttons = [
-        { text:"ボタン1", link:"#", visible:true },
-        { text:"ボタン2", link:"#", visible:true },
-        { text:"ボタン3", link:"#", visible:true }
-      ];
-    }
-    while(config.buttons.length < 3){
-      config.buttons.push({ text:"ボタン", link:"#", visible:true });
-    }
-
-    if(!Array.isArray(config.footer)){
-      config.footer = [
-        { text:"電話", link:"#", visible:true, image:"" },
-        { text:"LINE", link:"#", visible:true, image:"" },
-        { text:"予約", link:"#", visible:true, image:"" }
-      ];
-    }
-    while(config.footer.length < 3){
-      config.footer.push({ text:"ボタン", link:"#", visible:true, image:"" });
-    }
-
-    config.buttons = config.buttons.map((b, i) => ({
-      text: b?.text || `ボタン${i + 1}`,
-      link: b?.link || "#",
-      visible: b?.visible !== false
-    }));
-
+    const topDefaults = ["ボタン1", "ボタン2", "ボタン3"];
     const footerDefaults = ["電話", "LINE", "予約"];
-    config.footer = config.footer.map((f, i) => ({
-      text: f?.text || footerDefaults[i] || "ボタン",
-      link: f?.link || "#",
-      visible: f?.visible !== false,
-      image: f?.image || ""
-    }));
+
+    config.buttons = ensureTopButtons(config.buttons, topDefaults);
+    config.buttonsPc = ensureTopButtons(config.buttonsPc || config.buttons, topDefaults);
+    config.footer = ensureFooterButtons(config.footer, footerDefaults);
+    config.footerPc = ensureFooterButtons(config.footerPc || config.footer, footerDefaults);
 
     config.logoImage = config.logoImage || "";
     config.headerBgColor = config.headerBgColor || "#ffffff";
