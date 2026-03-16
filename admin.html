@@ -292,6 +292,40 @@ button.linklike{
   margin:0 0 10px;
   font-size:16px;
 }
+
+.inner-collapsible{
+  overflow:hidden;
+}
+.inner-collapsible .inner-card-toggle{
+  width:100%;
+  border:none;
+  background:#fff;
+  color:#222;
+  text-align:left;
+  padding:14px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  cursor:pointer;
+  border-radius:10px 10px 0 0;
+}
+.inner-collapsible .inner-card-toggle:hover{
+  background:#f8fafc;
+}
+.inner-collapsible .inner-card-body{
+  padding:12px;
+  border-top:1px solid #e5e7eb;
+  display:none;
+}
+.inner-collapsible.is-open .inner-card-body{
+  display:block;
+}
+.inner-collapsible .toggle-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
 .checkline{
   display:flex;
   align-items:center;
@@ -726,8 +760,15 @@ body{
         </div>
 
         <div>
-          <div class="card-item-editor">
-            <h4>スマホ用 上部ボタン</h4>
+<div class="card-item-editor collapsible-card js-collapsible inner-collapsible" data-open="false">
+            <button type="button" class="inner-card-toggle js-card-toggle">
+              <span class="toggle-left">
+                <span class="toggle-icon">▶</span>
+                <span>スマホ用 上部ボタン</span>
+              </span>
+              <span class="toggle-state">閉じています</span>
+            </button>
+            <div class="inner-card-body js-card-body">
 
             <div class="row">
               <label>ボタン1 名称</label>
@@ -770,10 +811,19 @@ body{
               <label>ボタン3 表示</label>
               <label class="checkline"><input type="checkbox" id="btn3Visible"> 表示する</label>
             </div>
+
+            </div>
           </div>
 
-          <div class="card-item-editor">
-            <h4>PC用 上部ボタン</h4>
+<div class="card-item-editor collapsible-card js-collapsible inner-collapsible" data-open="false">
+            <button type="button" class="inner-card-toggle js-card-toggle">
+              <span class="toggle-left">
+                <span class="toggle-icon">▶</span>
+                <span>PC用 上部ボタン</span>
+              </span>
+              <span class="toggle-state">閉じています</span>
+            </button>
+            <div class="inner-card-body js-card-body">
 
             <div class="row">
               <label>ボタン1 名称</label>
@@ -813,10 +863,19 @@ body{
               <label>ボタン3 表示</label>
               <label class="checkline"><input type="checkbox" id="btnPc3Visible"> 表示する</label>
             </div>
+
+            </div>
           </div>
 
-          <div class="card-item-editor">
-            <h4>PCのみ 電話予約表示</h4>
+<div class="card-item-editor collapsible-card js-collapsible inner-collapsible" data-open="false">
+            <button type="button" class="inner-card-toggle js-card-toggle">
+              <span class="toggle-left">
+                <span class="toggle-icon">▶</span>
+                <span>PCのみ 電話予約表示</span>
+              </span>
+              <span class="toggle-state">閉じています</span>
+            </button>
+            <div class="inner-card-body js-card-body">
 
             <div class="row">
               <label>表示</label>
@@ -839,10 +898,9 @@ body{
               <input type="text" id="pcTopPhoneLink" placeholder="例: tel:09000000000">
               <div class="small">空欄でも保存できます。空欄時は電話番号から tel: を自動作成します。</div>
             </div>
-          </div>
-        </div>
-      </div>
 
+            </div>
+          </div>
       <div class="actions save-inline">
         <button type="button" onclick="saveConfigToGitHub()">上部設定を保存</button>
       </div>
@@ -860,8 +918,15 @@ body{
     <div class="card-body js-card-body">
       <div class="grid2">
         <div>
-          <div class="card-item-editor">
-            <h4>スマホ用 下部ボタン</h4>
+<div class="card-item-editor collapsible-card js-collapsible inner-collapsible" data-open="false">
+            <button type="button" class="inner-card-toggle js-card-toggle">
+              <span class="toggle-left">
+                <span class="toggle-icon">▶</span>
+                <span>スマホ用 下部ボタン</span>
+              </span>
+              <span class="toggle-state">閉じています</span>
+            </button>
+            <div class="inner-card-body js-card-body">
 
             <div class="row">
               <label>電話 名称</label>
@@ -925,18 +990,15 @@ body{
               <label>予約 画像URL</label>
               <input type="text" id="footer3Image" oninput="setFooterPreview(2, this.value)">
             </div>
-            <div class="upload-box">
-              <label>予約 画像ファイル選択</label>
-              <input type="file" accept="image/*" onchange="uploadFooterImage(2, this)">
-              <div class="small">選択すると GitHub の assets/footer にアップロードされます。</div>
-              <img id="footer3Preview" class="footer-image-preview" style="display:none;" alt="">
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <div class="card-item-editor">
-            <h4>PC用 下部ボタン</h4>
+            <div class="<div class="card-item-editor collapsible-card js-collapsible inner-collapsible" data-open="false">
+            <button type="button" class="inner-card-toggle js-card-toggle">
+              <span class="toggle-left">
+                <span class="toggle-icon">▶</span>
+                <span>PC用 下部ボタン</span>
+              </span>
+              <span class="toggle-state">閉じています</span>
+            </button>
+            <div class="inner-card-body js-card-body">
 
             <div class="row">
               <label>ボタン1 名称</label>
@@ -1006,6 +1068,32 @@ body{
               <div class="small">選択すると GitHub の assets/footer にアップロードされます。</div>
               <img id="footerPc3Preview" class="footer-image-preview" style="display:none;" alt="">
             </div>
+
+            </div>
+          </div>
+
+<div class="card-item-editor collapsible-card js-collapsible inner-collapsible" data-open="false">
+            <button type="button" class="inner-card-toggle js-card-toggle">
+              <span class="toggle-left">
+                <span class="toggle-icon">▶</span>
+                <span>共通設定</span>
+              </span>
+              <span class="toggle-state">閉じています</span>
+            </button>
+            <div class="inner-card-body js-card-body">
+
+            <div class="row">
+              <label>現在のパスワード</label>
+              <input type="text" id="passwordText">
+            </div>
+
+            <div class="row">
+              <label>下ベッター背景色</label>
+              <div id="footerBgColorField"></div>
+            </div>
+
+            </div>
+          </div>          </div>
           </div>
 
           <div class="card-item-editor">
