@@ -726,46 +726,93 @@ body{
         </div>
 
         <div>
-          <div class="row">
-            <label>ボタン1 名称</label>
-            <input type="text" id="btn1Text">
-          </div>
-          <div class="row">
-            <label>ボタン1 リンク</label>
-            <input type="text" id="btn1Link">
-            <div class="small">例: #service または https://example.com</div>
-          </div>
-          <div class="row">
-            <label>ボタン1 表示</label>
-            <label class="checkline"><input type="checkbox" id="btn1Visible"> 表示する</label>
+          <div class="card-item-editor">
+            <h4>スマホ用 上部ボタン</h4>
+
+            <div class="row">
+              <label>ボタン1 名称</label>
+              <input type="text" id="btn1Text">
+            </div>
+            <div class="row">
+              <label>ボタン1 リンク</label>
+              <input type="text" id="btn1Link">
+              <div class="small">例: #service または https://example.com</div>
+            </div>
+            <div class="row">
+              <label>ボタン1 表示</label>
+              <label class="checkline"><input type="checkbox" id="btn1Visible"> 表示する</label>
+            </div>
+
+            <div class="row">
+              <label>ボタン2 名称</label>
+              <input type="text" id="btn2Text">
+            </div>
+            <div class="row">
+              <label>ボタン2 リンク</label>
+              <input type="text" id="btn2Link">
+              <div class="small">例: #price</div>
+            </div>
+            <div class="row">
+              <label>ボタン2 表示</label>
+              <label class="checkline"><input type="checkbox" id="btn2Visible"> 表示する</label>
+            </div>
+
+            <div class="row">
+              <label>ボタン3 名称</label>
+              <input type="text" id="btn3Text">
+            </div>
+            <div class="row">
+              <label>ボタン3 リンク</label>
+              <input type="text" id="btn3Link">
+              <div class="small">例: #contact</div>
+            </div>
+            <div class="row">
+              <label>ボタン3 表示</label>
+              <label class="checkline"><input type="checkbox" id="btn3Visible"> 表示する</label>
+            </div>
           </div>
 
-          <div class="row">
-            <label>ボタン2 名称</label>
-            <input type="text" id="btn2Text">
-          </div>
-          <div class="row">
-            <label>ボタン2 リンク</label>
-            <input type="text" id="btn2Link">
-            <div class="small">例: #price</div>
-          </div>
-          <div class="row">
-            <label>ボタン2 表示</label>
-            <label class="checkline"><input type="checkbox" id="btn2Visible"> 表示する</label>
-          </div>
+          <div class="card-item-editor">
+            <h4>PC用 上部ボタン</h4>
 
-          <div class="row">
-            <label>ボタン3 名称</label>
-            <input type="text" id="btn3Text">
-          </div>
-          <div class="row">
-            <label>ボタン3 リンク</label>
-            <input type="text" id="btn3Link">
-            <div class="small">例: #contact</div>
-          </div>
-          <div class="row">
-            <label>ボタン3 表示</label>
-            <label class="checkline"><input type="checkbox" id="btn3Visible"> 表示する</label>
+            <div class="row">
+              <label>ボタン1 名称</label>
+              <input type="text" id="btnPc1Text">
+            </div>
+            <div class="row">
+              <label>ボタン1 リンク</label>
+              <input type="text" id="btnPc1Link">
+            </div>
+            <div class="row">
+              <label>ボタン1 表示</label>
+              <label class="checkline"><input type="checkbox" id="btnPc1Visible"> 表示する</label>
+            </div>
+
+            <div class="row">
+              <label>ボタン2 名称</label>
+              <input type="text" id="btnPc2Text">
+            </div>
+            <div class="row">
+              <label>ボタン2 リンク</label>
+              <input type="text" id="btnPc2Link">
+            </div>
+            <div class="row">
+              <label>ボタン2 表示</label>
+              <label class="checkline"><input type="checkbox" id="btnPc2Visible"> 表示する</label>
+            </div>
+
+            <div class="row">
+              <label>ボタン3 名称</label>
+              <input type="text" id="btnPc3Text">
+            </div>
+            <div class="row">
+              <label>ボタン3 リンク</label>
+              <input type="text" id="btnPc3Link">
+            </div>
+            <div class="row">
+              <label>ボタン3 表示</label>
+              <label class="checkline"><input type="checkbox" id="btnPc3Visible"> 表示する</label>
+            </div>
           </div>
         </div>
       </div>
@@ -787,89 +834,166 @@ body{
     <div class="card-body js-card-body">
       <div class="grid2">
         <div>
-          <div class="row">
-            <label>電話 名称</label>
-            <input type="text" id="footer1Text">
-          </div>
-          <div class="row">
-            <label>電話 リンク</label>
-            <input type="text" id="footer1Link">
-          </div>
-          <div class="row">
-            <label>電話 表示</label>
-            <label class="checkline"><input type="checkbox" id="footer1Visible"> 表示する</label>
-          </div>
-          <div class="row">
-            <label>電話 画像URL</label>
-            <input type="text" id="footer1Image" oninput="setFooterPreview(0, this.value)">
-          </div>
-          <div class="upload-box">
-            <label>電話 画像ファイル選択</label>
-            <input type="file" accept="image/*" onchange="uploadFooterImage(0, this)">
-            <div class="small">選択すると GitHub の assets/footer にアップロードされます。</div>
-            <img id="footer1Preview" class="footer-image-preview" style="display:none;" alt="">
+          <div class="card-item-editor">
+            <h4>スマホ用 下部ボタン</h4>
+
+            <div class="row">
+              <label>電話 名称</label>
+              <input type="text" id="footer1Text">
+            </div>
+            <div class="row">
+              <label>電話 リンク</label>
+              <input type="text" id="footer1Link">
+            </div>
+            <div class="row">
+              <label>電話 表示</label>
+              <label class="checkline"><input type="checkbox" id="footer1Visible"> 表示する</label>
+            </div>
+            <div class="row">
+              <label>電話 画像URL</label>
+              <input type="text" id="footer1Image" oninput="setFooterPreview(0, this.value)">
+            </div>
+            <div class="upload-box">
+              <label>電話 画像ファイル選択</label>
+              <input type="file" accept="image/*" onchange="uploadFooterImage(0, this)">
+              <div class="small">選択すると GitHub の assets/footer にアップロードされます。</div>
+              <img id="footer1Preview" class="footer-image-preview" style="display:none;" alt="">
+            </div>
+
+            <div class="row">
+              <label>LINE 名称</label>
+              <input type="text" id="footer2Text">
+            </div>
+            <div class="row">
+              <label>LINE リンク</label>
+              <input type="text" id="footer2Link">
+            </div>
+            <div class="row">
+              <label>LINE 表示</label>
+              <label class="checkline"><input type="checkbox" id="footer2Visible"> 表示する</label>
+            </div>
+            <div class="row">
+              <label>LINE 画像URL</label>
+              <input type="text" id="footer2Image" oninput="setFooterPreview(1, this.value)">
+            </div>
+            <div class="upload-box">
+              <label>LINE 画像ファイル選択</label>
+              <input type="file" accept="image/*" onchange="uploadFooterImage(1, this)">
+              <div class="small">選択すると GitHub の assets/footer にアップロードされます。</div>
+              <img id="footer2Preview" class="footer-image-preview" style="display:none;" alt="">
+            </div>
+
+            <div class="row">
+              <label>予約 名称</label>
+              <input type="text" id="footer3Text">
+            </div>
+            <div class="row">
+              <label>予約 リンク</label>
+              <input type="text" id="footer3Link">
+            </div>
+            <div class="row">
+              <label>予約 表示</label>
+              <label class="checkline"><input type="checkbox" id="footer3Visible"> 表示する</label>
+            </div>
+            <div class="row">
+              <label>予約 画像URL</label>
+              <input type="text" id="footer3Image" oninput="setFooterPreview(2, this.value)">
+            </div>
+            <div class="upload-box">
+              <label>予約 画像ファイル選択</label>
+              <input type="file" accept="image/*" onchange="uploadFooterImage(2, this)">
+              <div class="small">選択すると GitHub の assets/footer にアップロードされます。</div>
+              <img id="footer3Preview" class="footer-image-preview" style="display:none;" alt="">
+            </div>
           </div>
         </div>
 
         <div>
-          <div class="row">
-            <label>LINE 名称</label>
-            <input type="text" id="footer2Text">
-          </div>
-          <div class="row">
-            <label>LINE リンク</label>
-            <input type="text" id="footer2Link">
-          </div>
-          <div class="row">
-            <label>LINE 表示</label>
-            <label class="checkline"><input type="checkbox" id="footer2Visible"> 表示する</label>
-          </div>
-          <div class="row">
-            <label>LINE 画像URL</label>
-            <input type="text" id="footer2Image" oninput="setFooterPreview(1, this.value)">
-          </div>
-          <div class="upload-box">
-            <label>LINE 画像ファイル選択</label>
-            <input type="file" accept="image/*" onchange="uploadFooterImage(1, this)">
-            <div class="small">選択すると GitHub の assets/footer にアップロードされます。</div>
-            <img id="footer2Preview" class="footer-image-preview" style="display:none;" alt="">
-          </div>
-        </div>
+          <div class="card-item-editor">
+            <h4>PC用 下部ボタン</h4>
 
-        <div>
-          <div class="row">
-            <label>予約 名称</label>
-            <input type="text" id="footer3Text">
-          </div>
-          <div class="row">
-            <label>予約 リンク</label>
-            <input type="text" id="footer3Link">
-          </div>
-          <div class="row">
-            <label>予約 表示</label>
-            <label class="checkline"><input type="checkbox" id="footer3Visible"> 表示する</label>
-          </div>
-          <div class="row">
-            <label>予約 画像URL</label>
-            <input type="text" id="footer3Image" oninput="setFooterPreview(2, this.value)">
-          </div>
-          <div class="upload-box">
-            <label>予約 画像ファイル選択</label>
-            <input type="file" accept="image/*" onchange="uploadFooterImage(2, this)">
-            <div class="small">選択すると GitHub の assets/footer にアップロードされます。</div>
-            <img id="footer3Preview" class="footer-image-preview" style="display:none;" alt="">
-          </div>
-        </div>
+            <div class="row">
+              <label>ボタン1 名称</label>
+              <input type="text" id="footerPc1Text">
+            </div>
+            <div class="row">
+              <label>ボタン1 リンク</label>
+              <input type="text" id="footerPc1Link">
+            </div>
+            <div class="row">
+              <label>ボタン1 表示</label>
+              <label class="checkline"><input type="checkbox" id="footerPc1Visible"> 表示する</label>
+            </div>
+            <div class="row">
+              <label>ボタン1 画像URL</label>
+              <input type="text" id="footerPc1Image" oninput="setFooterPreviewById('footerPc1Preview', this.value)">
+            </div>
+            <div class="upload-box">
+              <label>ボタン1 画像ファイル選択</label>
+              <input type="file" accept="image/*" onchange="uploadFooterPcImage(0, this)">
+              <div class="small">選択すると GitHub の assets/footer にアップロードされます。</div>
+              <img id="footerPc1Preview" class="footer-image-preview" style="display:none;" alt="">
+            </div>
 
-        <div>
-          <div class="row">
-            <label>現在のパスワード</label>
-            <input type="text" id="passwordText">
+            <div class="row">
+              <label>ボタン2 名称</label>
+              <input type="text" id="footerPc2Text">
+            </div>
+            <div class="row">
+              <label>ボタン2 リンク</label>
+              <input type="text" id="footerPc2Link">
+            </div>
+            <div class="row">
+              <label>ボタン2 表示</label>
+              <label class="checkline"><input type="checkbox" id="footerPc2Visible"> 表示する</label>
+            </div>
+            <div class="row">
+              <label>ボタン2 画像URL</label>
+              <input type="text" id="footerPc2Image" oninput="setFooterPreviewById('footerPc2Preview', this.value)">
+            </div>
+            <div class="upload-box">
+              <label>ボタン2 画像ファイル選択</label>
+              <input type="file" accept="image/*" onchange="uploadFooterPcImage(1, this)">
+              <div class="small">選択すると GitHub の assets/footer にアップロードされます。</div>
+              <img id="footerPc2Preview" class="footer-image-preview" style="display:none;" alt="">
+            </div>
+
+            <div class="row">
+              <label>ボタン3 名称</label>
+              <input type="text" id="footerPc3Text">
+            </div>
+            <div class="row">
+              <label>ボタン3 リンク</label>
+              <input type="text" id="footerPc3Link">
+            </div>
+            <div class="row">
+              <label>ボタン3 表示</label>
+              <label class="checkline"><input type="checkbox" id="footerPc3Visible"> 表示する</label>
+            </div>
+            <div class="row">
+              <label>ボタン3 画像URL</label>
+              <input type="text" id="footerPc3Image" oninput="setFooterPreviewById('footerPc3Preview', this.value)">
+            </div>
+            <div class="upload-box">
+              <label>ボタン3 画像ファイル選択</label>
+              <input type="file" accept="image/*" onchange="uploadFooterPcImage(2, this)">
+              <div class="small">選択すると GitHub の assets/footer にアップロードされます。</div>
+              <img id="footerPc3Preview" class="footer-image-preview" style="display:none;" alt="">
+            </div>
           </div>
 
-          <div class="row">
-            <label>下ベッター背景色</label>
-            <div id="footerBgColorField"></div>
+          <div class="card-item-editor">
+            <h4>共通設定</h4>
+
+            <div class="row">
+              <label>現在のパスワード</label>
+              <input type="text" id="passwordText">
+            </div>
+
+            <div class="row">
+              <label>下ベッター背景色</label>
+              <div id="footerBgColorField"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -1243,42 +1367,39 @@ function loadGitHubSettings(){
   }
 }
 
+function ensureTopButtons(list, defaults){
+  const items = Array.isArray(list) ? list.slice(0, 3) : [];
+  while(items.length < 3){
+    items.push({ text:'', link:'#', visible:true });
+  }
+  return items.map((item, index) => ({
+    text: item?.text || defaults[index] || `ボタン${index + 1}`,
+    link: item?.link || '#',
+    visible: item?.visible !== false
+  }));
+}
+
+function ensureFooterButtons(list, defaults){
+  const items = Array.isArray(list) ? list.slice(0, 3) : [];
+  while(items.length < 3){
+    items.push({ text:'', link:'#', visible:true, image:'' });
+  }
+  return items.map((item, index) => ({
+    text: item?.text || defaults[index] || `ボタン${index + 1}`,
+    link: item?.link || '#',
+    visible: item?.visible !== false,
+    image: item?.image || ''
+  }));
+}
+
 function ensureConfigShape(config){
-  if(!Array.isArray(config.buttons)){
-    config.buttons = [
-      { text:'ボタン1', link:'#', visible:true },
-      { text:'ボタン2', link:'#', visible:true },
-      { text:'ボタン3', link:'#', visible:true }
-    ];
-  }
-  while(config.buttons.length < 3){
-    config.buttons.push({ text:'ボタン', link:'#', visible:true });
-  }
-
-  if(!Array.isArray(config.footer)){
-    config.footer = [
-      { text:'電話', link:'#', visible:true, image:'' },
-      { text:'LINE', link:'#', visible:true, image:'' },
-      { text:'予約', link:'#', visible:true, image:'' }
-    ];
-  }
-  while(config.footer.length < 3){
-    config.footer.push({ text:'ボタン', link:'#', visible:true, image:'' });
-  }
-
-  config.buttons = config.buttons.map((b, i) => ({
-    text: b?.text || `ボタン${i+1}`,
-    link: b?.link || '#',
-    visible: b?.visible !== false
-  }));
-
+  const topDefaults = ['ボタン1', 'ボタン2', 'ボタン3'];
   const footerDefaults = ['電話', 'LINE', '予約'];
-  config.footer = config.footer.map((f, i) => ({
-    text: f?.text || footerDefaults[i] || 'ボタン',
-    link: f?.link || '#',
-    visible: f?.visible !== false,
-    image: f?.image || ''
-  }));
+
+  config.buttons = ensureTopButtons(config.buttons, topDefaults);
+  config.buttonsPc = ensureTopButtons(config.buttonsPc || config.buttons, topDefaults);
+  config.footer = ensureFooterButtons(config.footer, footerDefaults);
+  config.footerPc = ensureFooterButtons(config.footerPc || config.footer, footerDefaults);
 
   config.logoImage = config.logoImage || '';
   config.headerBgColor = config.headerBgColor || '#ffffff';
@@ -1511,6 +1632,23 @@ function buildConfigDraft(){
         visible: document.getElementById('btn3Visible').checked
       }
     ],
+    buttonsPc: [
+      {
+        text: document.getElementById('btnPc1Text').value,
+        link: document.getElementById('btnPc1Link').value,
+        visible: document.getElementById('btnPc1Visible').checked
+      },
+      {
+        text: document.getElementById('btnPc2Text').value,
+        link: document.getElementById('btnPc2Link').value,
+        visible: document.getElementById('btnPc2Visible').checked
+      },
+      {
+        text: document.getElementById('btnPc3Text').value,
+        link: document.getElementById('btnPc3Link').value,
+        visible: document.getElementById('btnPc3Visible').checked
+      }
+    ],
     footer: [
       {
         text: document.getElementById('footer1Text').value,
@@ -1530,6 +1668,26 @@ function buildConfigDraft(){
         visible: document.getElementById('footer3Visible').checked,
         image: document.getElementById('footer3Image').value
       }
+    ],
+    footerPc: [
+      {
+        text: document.getElementById('footerPc1Text').value,
+        link: document.getElementById('footerPc1Link').value,
+        visible: document.getElementById('footerPc1Visible').checked,
+        image: document.getElementById('footerPc1Image').value
+      },
+      {
+        text: document.getElementById('footerPc2Text').value,
+        link: document.getElementById('footerPc2Link').value,
+        visible: document.getElementById('footerPc2Visible').checked,
+        image: document.getElementById('footerPc2Image').value
+      },
+      {
+        text: document.getElementById('footerPc3Text').value,
+        link: document.getElementById('footerPc3Link').value,
+        visible: document.getElementById('footerPc3Visible').checked,
+        image: document.getElementById('footerPc3Image').value
+      }
     ]
   };
 }
@@ -1542,8 +1700,9 @@ function showDrafts(){
   document.getElementById('draftBox').innerText = JSON.stringify(drafts, null, 2);
 }
 
-function setFooterPreview(index, url){
-  const el = document.getElementById(`footer${index + 1}Preview`);
+function setFooterPreviewById(previewId, url){
+  const el = document.getElementById(previewId);
+  if(!el) return;
   if(url){
     el.src = url;
     el.style.display = 'block';
@@ -1551,6 +1710,10 @@ function setFooterPreview(index, url){
     el.src = '';
     el.style.display = 'none';
   }
+}
+
+function setFooterPreview(index, url){
+  setFooterPreviewById(`footer${index + 1}Preview`, url);
 }
 
 function setLogoPreview(url){
@@ -1654,6 +1817,18 @@ async function loadConfig(){
   document.getElementById('btn3Link').value = config.buttons[2].link || '#';
   document.getElementById('btn3Visible').checked = config.buttons[2].visible !== false;
 
+  document.getElementById('btnPc1Text').value = config.buttonsPc[0].text || '';
+  document.getElementById('btnPc1Link').value = config.buttonsPc[0].link || '#';
+  document.getElementById('btnPc1Visible').checked = config.buttonsPc[0].visible !== false;
+
+  document.getElementById('btnPc2Text').value = config.buttonsPc[1].text || '';
+  document.getElementById('btnPc2Link').value = config.buttonsPc[1].link || '#';
+  document.getElementById('btnPc2Visible').checked = config.buttonsPc[1].visible !== false;
+
+  document.getElementById('btnPc3Text').value = config.buttonsPc[2].text || '';
+  document.getElementById('btnPc3Link').value = config.buttonsPc[2].link || '#';
+  document.getElementById('btnPc3Visible').checked = config.buttonsPc[2].visible !== false;
+
   document.getElementById('footer1Text').value = config.footer[0].text || '';
   document.getElementById('footer1Link').value = config.footer[0].link || '#';
   document.getElementById('footer1Visible').checked = config.footer[0].visible !== false;
@@ -1671,6 +1846,24 @@ async function loadConfig(){
   document.getElementById('footer3Visible').checked = config.footer[2].visible !== false;
   document.getElementById('footer3Image').value = config.footer[2].image || '';
   setFooterPreview(2, config.footer[2].image || '');
+
+  document.getElementById('footerPc1Text').value = config.footerPc[0].text || '';
+  document.getElementById('footerPc1Link').value = config.footerPc[0].link || '#';
+  document.getElementById('footerPc1Visible').checked = config.footerPc[0].visible !== false;
+  document.getElementById('footerPc1Image').value = config.footerPc[0].image || '';
+  setFooterPreviewById('footerPc1Preview', config.footerPc[0].image || '');
+
+  document.getElementById('footerPc2Text').value = config.footerPc[1].text || '';
+  document.getElementById('footerPc2Link').value = config.footerPc[1].link || '#';
+  document.getElementById('footerPc2Visible').checked = config.footerPc[1].visible !== false;
+  document.getElementById('footerPc2Image').value = config.footerPc[1].image || '';
+  setFooterPreviewById('footerPc2Preview', config.footerPc[1].image || '');
+
+  document.getElementById('footerPc3Text').value = config.footerPc[2].text || '';
+  document.getElementById('footerPc3Link').value = config.footerPc[2].link || '#';
+  document.getElementById('footerPc3Visible').checked = config.footerPc[2].visible !== false;
+  document.getElementById('footerPc3Image').value = config.footerPc[2].image || '';
+  setFooterPreviewById('footerPc3Preview', config.footerPc[2].image || '');
 
   document.getElementById('passwordText').value = config.password || '';
 }
@@ -2103,6 +2296,24 @@ async function uploadFooterImage(index, input){
     const imageInput = document.getElementById(`footer${index + 1}Image`);
     imageInput.value = url;
     setFooterPreview(index, url);
+    setConfigSaveResult('画像アップロードに成功しました。最後に config.json を保存してください。', 'success');
+  }catch(error){
+    setConfigSaveResult('画像アップロード失敗: ' + error.message, 'error');
+  }finally{
+    input.value = '';
+  }
+}
+
+async function uploadFooterPcImage(index, input){
+  try{
+    const file = input.files?.[0];
+    if(!file) return;
+
+    setConfigSaveResult('PC下部メニュー画像アップロード中です...', 'warn');
+    const url = await uploadAssetFile(file, 'footer');
+    const imageInput = document.getElementById(`footerPc${index + 1}Image`);
+    imageInput.value = url;
+    setFooterPreviewById(`footerPc${index + 1}Preview`, url);
     setConfigSaveResult('画像アップロードに成功しました。最後に config.json を保存してください。', 'success');
   }catch(error){
     setConfigSaveResult('画像アップロード失敗: ' + error.message, 'error');
