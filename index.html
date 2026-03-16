@@ -83,6 +83,30 @@ header{
   font-size:14px;
 }
 
+.pc-phone-inline{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  min-width:0;
+  padding:0 10px;
+}
+.pc-phone-inline a{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  color:#d64500;
+  font-size:18px;
+  font-weight:bold;
+  line-height:1.2;
+  white-space:nowrap;
+}
+.pc-phone-inline a:hover{
+  opacity:0.9;
+}
+
+
 main{
   padding:0 0 100px;
 }
@@ -382,6 +406,9 @@ footer{
   .logo-text{
     font-size:16px;
   }
+  .pc-phone-inline{
+    display:none !important;
+  }
   .top-buttons{
     gap:6px;
     max-width:none;
@@ -523,6 +550,10 @@ footer{
   <div class="logo" id="logoTrigger">
     <img id="logoImg" class="logo-img" alt="">
     <div class="logo-text" id="logoTextView">LOGO</div>
+  </div>
+
+  <div class="pc-phone-inline" id="pcPhoneInline">
+    <a id="pcPhoneInlineLink" href="#" aria-label="電話予約">📞 電話予約 090-0000-0000</a>
   </div>
 
   <div class="top-buttons" id="topButtons">
