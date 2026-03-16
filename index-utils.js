@@ -118,6 +118,50 @@
     }));
   }
 
+  function digitsOnlyPhone(value){
+    return String(value || "").replace(/[^0-9+]/g, "");
+  }
+
+  function formatPhoneNumberForDisplay(value){
+    const text = String(value || "").trim();
+    if(!text) return "";
+    const digits = text.replace(/[^0-9]/g, "");
+    if(/^0\d{9,10}$/.test(digits)){
+      if(digits.length === 10){
+        return digits.replace(/(\d{2,4})(\d{2,4})(\d{4})/, "$1-$2-$3");
+      }
+      if(digits.length === 11){
+        return digits.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
+      }
+    }
+    return text;
+  }
+
+  function buildPcTopPhoneFallback(config){
+    const phoneButton = config && Array.isArray(config.footer) ? config.footer[0] : null;
+    const rawLink = phoneButton && phoneButton.link ? String(phoneButton.link).trim() : "";
+    const fallbackDigits = digitsOnlyPhone(rawLink.replace(/^tel:/i, ""));
+    return {
+      enabled: !!(phoneButton && phoneButton.visible !== false && rawLink),
+      label: "📞 電話予約",
+      number: fallbackDigits ? formatPhoneNumberForDisplay(fallbackDigits) : "",
+      link: rawLink || (fallbackDigits ? ("tel:" + fallbackDigits) : "")
+    };
+  }
+
+  function ensurePcTopPhoneShape(config){
+    const fallback = buildPcTopPhoneFallback(config);
+    const current = config && config.pcTopPhone && typeof config.pcTopPhone === "object" ? config.pcTopPhone : {};
+    const numberValue = String(current.number || fallback.number || "").trim();
+    const linkValue = String(current.link || fallback.link || "").trim();
+    return {
+      enabled: current.enabled === true || (current.enabled == null && fallback.enabled === true),
+      label: String(current.label || fallback.label || "📞 電話予約").trim() || "📞 電話予約",
+      number: numberValue || formatPhoneNumberForDisplay(digitsOnlyPhone(linkValue.replace(/^tel:/i, ""))),
+      link: linkValue || (numberValue ? ("tel:" + digitsOnlyPhone(numberValue)) : fallback.link || "")
+    };
+  }
+
   function ensureConfigShape(config){
     const topDefaults = ["ボタン1", "ボタン2", "ボタン3"];
     const footerDefaults = ["電話", "LINE", "予約"];
@@ -126,6 +170,7 @@
     config.buttonsPc = ensureTopButtons(config.buttonsPc || config.buttons, topDefaults);
     config.footer = ensureFooterButtons(config.footer, footerDefaults);
     config.footerPc = ensureFooterButtons(config.footerPc || config.footer, footerDefaults);
+    config.pcTopPhone = ensurePcTopPhoneShape(config);
 
     config.logoImage = config.logoImage || "";
     config.headerBgColor = config.headerBgColor || "#ffffff";
@@ -351,6 +396,7 @@
     escapeHtml: escapeHtml,
     escapeAttr: escapeAttr,
     ensureConfigShape: ensureConfigShape,
+    formatPhoneNumberForDisplay: formatPhoneNumberForDisplay,
     ensureSectionLinks: ensureSectionLinks,
     slugifySectionId: slugifySectionId,
     ensureUniqueSectionIds: ensureUniqueSectionIds,
