@@ -98,8 +98,8 @@
     while(items.length < 3){
       items.push({ text:"", link:"#", visible:true });
     }
-    return items.map((item, i) => ({
-      text: item?.text || defaults[i] || `ボタン${i + 1}`,
+    return items.map((item, index) => ({
+      text: item?.text || defaults[index] || `ボタン${index + 1}`,
       link: item?.link || "#",
       visible: item?.visible !== false
     }));
@@ -110,8 +110,8 @@
     while(items.length < 3){
       items.push({ text:"", link:"#", visible:true, image:"" });
     }
-    return items.map((item, i) => ({
-      text: item?.text || defaults[i] || "ボタン",
+    return items.map((item, index) => ({
+      text: item?.text || defaults[index] || `ボタン${index + 1}`,
       link: item?.link || "#",
       visible: item?.visible !== false,
       image: item?.image || ""
@@ -396,7 +396,6 @@
     escapeHtml: escapeHtml,
     escapeAttr: escapeAttr,
     ensureConfigShape: ensureConfigShape,
-    formatPhoneNumberForDisplay: formatPhoneNumberForDisplay,
     ensureSectionLinks: ensureSectionLinks,
     slugifySectionId: slugifySectionId,
     ensureUniqueSectionIds: ensureUniqueSectionIds,
