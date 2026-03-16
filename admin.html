@@ -292,40 +292,6 @@ button.linklike{
   margin:0 0 10px;
   font-size:16px;
 }
-
-.inner-collapsible{
-  overflow:hidden;
-}
-.inner-collapsible .inner-card-toggle{
-  width:100%;
-  border:none;
-  background:#fff;
-  color:#222;
-  text-align:left;
-  padding:14px 16px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  cursor:pointer;
-  border-radius:10px 10px 0 0;
-}
-.inner-collapsible .inner-card-toggle:hover{
-  background:#f8fafc;
-}
-.inner-collapsible .inner-card-body{
-  padding:12px;
-  border-top:1px solid #e5e7eb;
-  display:none;
-}
-.inner-collapsible.is-open .inner-card-body{
-  display:block;
-}
-.inner-collapsible .toggle-left{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
 .checkline{
   display:flex;
   align-items:center;
@@ -541,6 +507,76 @@ button.linklike{
   white-space:pre-line;
   line-height:1.8;
 }
+
+.settings-two-col{
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) minmax(0, 1fr);
+  gap:14px;
+}
+.settings-stack{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.settings-panel{
+  border:1px solid #ddd;
+  border-radius:12px;
+  background:#fff;
+  padding:14px;
+}
+.subsettings-card{
+  border:1px solid #ddd;
+  border-radius:12px;
+  background:#fff;
+  overflow:hidden;
+}
+.subsettings-card .card-toggle{
+  width:100%;
+  border:none;
+  background:#fff;
+  color:#222;
+  text-align:left;
+  padding:16px 18px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.subsettings-card .card-toggle:hover{
+  background:#fafafa;
+}
+.subsettings-card .card-body{
+  padding:16px;
+  border-top:1px solid #eee;
+  display:none;
+}
+.subsettings-card.is-open .card-body{
+  display:block;
+}
+.subsettings-card .toggle-state{
+  font-size:12px;
+  color:#666;
+  font-weight:normal;
+  flex:0 0 auto;
+}
+.subsettings-card .toggle-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+.subsettings-card .toggle-icon{
+  width:24px;
+  text-align:center;
+  font-size:18px;
+  flex:0 0 auto;
+}
+.subsettings-card .toggle-title{
+  min-width:0;
+}
 @media (max-width: 1024px){
   .jump-menu{
     grid-template-columns:repeat(3, 1fr);
@@ -556,6 +592,7 @@ button.linklike{
 }
 @media (max-width: 768px){
   .grid2{grid-template-columns:1fr;}
+  .settings-two-col{grid-template-columns:1fr;}
   header{font-size:18px;}
   .card-static{padding:16px;}
   .collapsible-card .card-toggle{
@@ -736,8 +773,8 @@ body{
       <span class="toggle-state">閉じています</span>
     </button>
     <div class="card-body js-card-body">
-      <div class="grid2">
-        <div>
+      <div class="settings-two-col">
+        <div class="settings-panel">
           <div class="row">
             <label>ロゴ文字</label>
             <input type="text" id="logoText">
@@ -752,155 +789,148 @@ body{
             <div class="small">選択すると GitHub の assets/logo にアップロードされます。</div>
             <img id="logoPreview" class="logo-preview" style="display:none;" alt="">
           </div>
-
           <div class="row">
             <label>上ベッター背景色</label>
             <div id="headerBgColorField"></div>
           </div>
         </div>
 
-        <div>
-<div class="card-item-editor collapsible-card js-collapsible inner-collapsible" data-open="false">
-            <button type="button" class="inner-card-toggle js-card-toggle">
+        <div class="settings-stack">
+          <div class="subsettings-card js-collapsible" data-open="false">
+            <button type="button" class="card-toggle js-card-toggle">
               <span class="toggle-left">
                 <span class="toggle-icon">▶</span>
-                <span>スマホ用 上部ボタン</span>
+                <span class="toggle-title">スマホ用 上部ボタン</span>
               </span>
               <span class="toggle-state">閉じています</span>
             </button>
-            <div class="inner-card-body js-card-body">
+            <div class="card-body js-card-body">
+              <div class="row">
+                <label>ボタン1 名称</label>
+                <input type="text" id="btn1Text">
+              </div>
+              <div class="row">
+                <label>ボタン1 リンク</label>
+                <input type="text" id="btn1Link">
+                <div class="small">例: #service または https://example.com</div>
+              </div>
+              <div class="row">
+                <label>ボタン1 表示</label>
+                <label class="checkline"><input type="checkbox" id="btn1Visible"> 表示する</label>
+              </div>
 
-            <div class="row">
-              <label>ボタン1 名称</label>
-              <input type="text" id="btn1Text">
-            </div>
-            <div class="row">
-              <label>ボタン1 リンク</label>
-              <input type="text" id="btn1Link">
-              <div class="small">例: #service または https://example.com</div>
-            </div>
-            <div class="row">
-              <label>ボタン1 表示</label>
-              <label class="checkline"><input type="checkbox" id="btn1Visible"> 表示する</label>
-            </div>
+              <div class="row">
+                <label>ボタン2 名称</label>
+                <input type="text" id="btn2Text">
+              </div>
+              <div class="row">
+                <label>ボタン2 リンク</label>
+                <input type="text" id="btn2Link">
+                <div class="small">例: #price</div>
+              </div>
+              <div class="row">
+                <label>ボタン2 表示</label>
+                <label class="checkline"><input type="checkbox" id="btn2Visible"> 表示する</label>
+              </div>
 
-            <div class="row">
-              <label>ボタン2 名称</label>
-              <input type="text" id="btn2Text">
-            </div>
-            <div class="row">
-              <label>ボタン2 リンク</label>
-              <input type="text" id="btn2Link">
-              <div class="small">例: #price</div>
-            </div>
-            <div class="row">
-              <label>ボタン2 表示</label>
-              <label class="checkline"><input type="checkbox" id="btn2Visible"> 表示する</label>
-            </div>
-
-            <div class="row">
-              <label>ボタン3 名称</label>
-              <input type="text" id="btn3Text">
-            </div>
-            <div class="row">
-              <label>ボタン3 リンク</label>
-              <input type="text" id="btn3Link">
-              <div class="small">例: #contact</div>
-            </div>
-            <div class="row">
-              <label>ボタン3 表示</label>
-              <label class="checkline"><input type="checkbox" id="btn3Visible"> 表示する</label>
-            </div>
-
+              <div class="row">
+                <label>ボタン3 名称</label>
+                <input type="text" id="btn3Text">
+              </div>
+              <div class="row">
+                <label>ボタン3 リンク</label>
+                <input type="text" id="btn3Link">
+                <div class="small">例: #contact</div>
+              </div>
+              <div class="row">
+                <label>ボタン3 表示</label>
+                <label class="checkline"><input type="checkbox" id="btn3Visible"> 表示する</label>
+              </div>
             </div>
           </div>
 
-<div class="card-item-editor collapsible-card js-collapsible inner-collapsible" data-open="false">
-            <button type="button" class="inner-card-toggle js-card-toggle">
+          <div class="subsettings-card js-collapsible" data-open="false">
+            <button type="button" class="card-toggle js-card-toggle">
               <span class="toggle-left">
                 <span class="toggle-icon">▶</span>
-                <span>PC用 上部ボタン</span>
+                <span class="toggle-title">PC用 上部ボタン</span>
               </span>
               <span class="toggle-state">閉じています</span>
             </button>
-            <div class="inner-card-body js-card-body">
+            <div class="card-body js-card-body">
+              <div class="row">
+                <label>ボタン1 名称</label>
+                <input type="text" id="btnPc1Text">
+              </div>
+              <div class="row">
+                <label>ボタン1 リンク</label>
+                <input type="text" id="btnPc1Link">
+              </div>
+              <div class="row">
+                <label>ボタン1 表示</label>
+                <label class="checkline"><input type="checkbox" id="btnPc1Visible"> 表示する</label>
+              </div>
 
-            <div class="row">
-              <label>ボタン1 名称</label>
-              <input type="text" id="btnPc1Text">
-            </div>
-            <div class="row">
-              <label>ボタン1 リンク</label>
-              <input type="text" id="btnPc1Link">
-            </div>
-            <div class="row">
-              <label>ボタン1 表示</label>
-              <label class="checkline"><input type="checkbox" id="btnPc1Visible"> 表示する</label>
-            </div>
+              <div class="row">
+                <label>ボタン2 名称</label>
+                <input type="text" id="btnPc2Text">
+              </div>
+              <div class="row">
+                <label>ボタン2 リンク</label>
+                <input type="text" id="btnPc2Link">
+              </div>
+              <div class="row">
+                <label>ボタン2 表示</label>
+                <label class="checkline"><input type="checkbox" id="btnPc2Visible"> 表示する</label>
+              </div>
 
-            <div class="row">
-              <label>ボタン2 名称</label>
-              <input type="text" id="btnPc2Text">
-            </div>
-            <div class="row">
-              <label>ボタン2 リンク</label>
-              <input type="text" id="btnPc2Link">
-            </div>
-            <div class="row">
-              <label>ボタン2 表示</label>
-              <label class="checkline"><input type="checkbox" id="btnPc2Visible"> 表示する</label>
-            </div>
-
-            <div class="row">
-              <label>ボタン3 名称</label>
-              <input type="text" id="btnPc3Text">
-            </div>
-            <div class="row">
-              <label>ボタン3 リンク</label>
-              <input type="text" id="btnPc3Link">
-            </div>
-            <div class="row">
-              <label>ボタン3 表示</label>
-              <label class="checkline"><input type="checkbox" id="btnPc3Visible"> 表示する</label>
-            </div>
-
+              <div class="row">
+                <label>ボタン3 名称</label>
+                <input type="text" id="btnPc3Text">
+              </div>
+              <div class="row">
+                <label>ボタン3 リンク</label>
+                <input type="text" id="btnPc3Link">
+              </div>
+              <div class="row">
+                <label>ボタン3 表示</label>
+                <label class="checkline"><input type="checkbox" id="btnPc3Visible"> 表示する</label>
+              </div>
             </div>
           </div>
 
-<div class="card-item-editor collapsible-card js-collapsible inner-collapsible" data-open="false">
-            <button type="button" class="inner-card-toggle js-card-toggle">
+          <div class="subsettings-card js-collapsible" data-open="false">
+            <button type="button" class="card-toggle js-card-toggle">
               <span class="toggle-left">
                 <span class="toggle-icon">▶</span>
-                <span>PCのみ 電話予約表示</span>
+                <span class="toggle-title">PCのみ 電話予約表示</span>
               </span>
               <span class="toggle-state">閉じています</span>
             </button>
-            <div class="inner-card-body js-card-body">
-
-            <div class="row">
-              <label>表示</label>
-              <label class="checkline"><input type="checkbox" id="pcTopPhoneEnabled"> 表示する</label>
-            </div>
-
-            <div class="row">
-              <label>テキスト</label>
-              <input type="text" id="pcTopPhoneLabel" placeholder="例: 📞 電話予約">
-            </div>
-
-            <div class="row">
-              <label>電話番号</label>
-              <input type="text" id="pcTopPhoneNumber" placeholder="例: 090-0000-0000">
-              <div class="small">表示用の電話番号です。PC画面でロゴ横に表示されます。</div>
-            </div>
-
-            <div class="row">
-              <label>リンク</label>
-              <input type="text" id="pcTopPhoneLink" placeholder="例: tel:09000000000">
-              <div class="small">空欄でも保存できます。空欄時は電話番号から tel: を自動作成します。</div>
-            </div>
-
+            <div class="card-body js-card-body">
+              <div class="row">
+                <label>表示</label>
+                <label class="checkline"><input type="checkbox" id="pcTopPhoneEnabled"> 表示する</label>
+              </div>
+              <div class="row">
+                <label>テキスト</label>
+                <input type="text" id="pcTopPhoneLabel" placeholder="例: 📞 電話予約">
+              </div>
+              <div class="row">
+                <label>電話番号</label>
+                <input type="text" id="pcTopPhoneNumber" placeholder="例: 090-0000-0000">
+                <div class="small">表示用の電話番号です。PC画面でロゴ横に表示されます。</div>
+              </div>
+              <div class="row">
+                <label>リンク</label>
+                <input type="text" id="pcTopPhoneLink" placeholder="例: tel:09000000000">
+                <div class="small">空欄でも保存できます。空欄時は電話番号から tel: を自動作成します。</div>
+              </div>
             </div>
           </div>
+        </div>
+      </div>
+
       <div class="actions save-inline">
         <button type="button" onclick="saveConfigToGitHub()">上部設定を保存</button>
       </div>
@@ -916,18 +946,16 @@ body{
       <span class="toggle-state">閉じています</span>
     </button>
     <div class="card-body js-card-body">
-      <div class="grid2">
-        <div>
-<div class="card-item-editor collapsible-card js-collapsible inner-collapsible" data-open="false">
-            <button type="button" class="inner-card-toggle js-card-toggle">
-              <span class="toggle-left">
-                <span class="toggle-icon">▶</span>
-                <span>スマホ用 下部ボタン</span>
-              </span>
-              <span class="toggle-state">閉じています</span>
-            </button>
-            <div class="inner-card-body js-card-body">
-
+      <div class="settings-stack">
+        <div class="subsettings-card js-collapsible" data-open="false">
+          <button type="button" class="card-toggle js-card-toggle">
+            <span class="toggle-left">
+              <span class="toggle-icon">▶</span>
+              <span class="toggle-title">スマホ用 下部ボタン</span>
+            </span>
+            <span class="toggle-state">閉じています</span>
+          </button>
+          <div class="card-body js-card-body">
             <div class="row">
               <label>電話 名称</label>
               <input type="text" id="footer1Text">
@@ -990,16 +1018,24 @@ body{
               <label>予約 画像URL</label>
               <input type="text" id="footer3Image" oninput="setFooterPreview(2, this.value)">
             </div>
-            <div class="<div class="card-item-editor collapsible-card js-collapsible inner-collapsible" data-open="false">
-            <button type="button" class="inner-card-toggle js-card-toggle">
-              <span class="toggle-left">
-                <span class="toggle-icon">▶</span>
-                <span>PC用 下部ボタン</span>
-              </span>
-              <span class="toggle-state">閉じています</span>
-            </button>
-            <div class="inner-card-body js-card-body">
+            <div class="upload-box">
+              <label>予約 画像ファイル選択</label>
+              <input type="file" accept="image/*" onchange="uploadFooterImage(2, this)">
+              <div class="small">選択すると GitHub の assets/footer にアップロードされます。</div>
+              <img id="footer3Preview" class="footer-image-preview" style="display:none;" alt="">
+            </div>
+          </div>
+        </div>
 
+        <div class="subsettings-card js-collapsible" data-open="false">
+          <button type="button" class="card-toggle js-card-toggle">
+            <span class="toggle-left">
+              <span class="toggle-icon">▶</span>
+              <span class="toggle-title">PC用 下部ボタン</span>
+            </span>
+            <span class="toggle-state">閉じています</span>
+          </button>
+          <div class="card-body js-card-body">
             <div class="row">
               <label>ボタン1 名称</label>
               <input type="text" id="footerPc1Text">
@@ -1068,42 +1104,22 @@ body{
               <div class="small">選択すると GitHub の assets/footer にアップロードされます。</div>
               <img id="footerPc3Preview" class="footer-image-preview" style="display:none;" alt="">
             </div>
-
-            </div>
           </div>
+        </div>
 
-<div class="card-item-editor collapsible-card js-collapsible inner-collapsible" data-open="false">
-            <button type="button" class="inner-card-toggle js-card-toggle">
-              <span class="toggle-left">
-                <span class="toggle-icon">▶</span>
-                <span>共通設定</span>
-              </span>
-              <span class="toggle-state">閉じています</span>
-            </button>
-            <div class="inner-card-body js-card-body">
-
+        <div class="subsettings-card js-collapsible" data-open="false">
+          <button type="button" class="card-toggle js-card-toggle">
+            <span class="toggle-left">
+              <span class="toggle-icon">▶</span>
+              <span class="toggle-title">共通設定</span>
+            </span>
+            <span class="toggle-state">閉じています</span>
+          </button>
+          <div class="card-body js-card-body">
             <div class="row">
               <label>現在のパスワード</label>
               <input type="text" id="passwordText">
             </div>
-
-            <div class="row">
-              <label>下ベッター背景色</label>
-              <div id="footerBgColorField"></div>
-            </div>
-
-            </div>
-          </div>          </div>
-          </div>
-
-          <div class="card-item-editor">
-            <h4>共通設定</h4>
-
-            <div class="row">
-              <label>現在のパスワード</label>
-              <input type="text" id="passwordText">
-            </div>
-
             <div class="row">
               <label>下ベッター背景色</label>
               <div id="footerBgColorField"></div>
