@@ -115,18 +115,25 @@
     const pcPhoneInline = document.getElementById("pcPhoneInline");
     const pcPhoneInlineLink = document.getElementById("pcPhoneInlineLink");
     if(pcPhoneInline && pcPhoneInlineLink){
-      const phoneButton = config.footer && config.footer[0] ? config.footer[0] : null;
-      const rawLink = phoneButton && phoneButton.link ? String(phoneButton.link) : "";
-      const rawText = phoneButton && phoneButton.text ? String(phoneButton.text) : "電話予約";
-      const telNumber = rawLink.replace(/^tel:/i, "").replace(/[^0-9+]/g, "");
-      const displayNumber = telNumber ? telNumber.replace(/(\d{3})(\d{4})(\d{4})$/, "$1-$2-$3") : "";
+      const pcTopPhone = config.pcTopPhone || {};
+      const rawLabel = pcTopPhone.label ? String(pcTopPhone.label).trim() : "📞 電話予約";
+      const rawNumber = pcTopPhone.number ? String(pcTopPhone.number).trim() : "";
+      const rawLink = pcTopPhone.link ? String(pcTopPhone.link).trim() : "";
+      const normalizedNumber = rawNumber || window.IndexUtils.formatPhoneNumberForDisplay(
+        String(rawLink || "").replace(/^tel:/i, "").replace(/[^0-9+]/g, "")
+      );
+      const fallbackLink = rawNumber ? ("tel:" + String(rawNumber).replace(/[^0-9+]/g, "")) : "";
+      const finalLink = rawLink || fallbackLink;
+      const finalText = [rawLabel, normalizedNumber].filter(Boolean).join(" ").trim();
 
-      if(phoneButton && phoneButton.visible !== false && rawLink){
+      if(pcTopPhone.enabled === true && finalText){
         pcPhoneInline.style.display = "";
-        pcPhoneInlineLink.href = rawLink;
-        pcPhoneInlineLink.textContent = displayNumber ? "📞 " + rawText + " " + displayNumber : "📞 " + rawText;
+        pcPhoneInlineLink.href = finalLink || "#";
+        pcPhoneInlineLink.textContent = finalText;
       }else{
         pcPhoneInline.style.display = "none";
+        pcPhoneInlineLink.href = "#";
+        pcPhoneInlineLink.textContent = "";
       }
     }
 
