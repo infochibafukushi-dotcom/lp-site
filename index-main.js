@@ -86,54 +86,48 @@
     document.documentElement.style.setProperty("--header-bg", config.headerBgColor || "#ffffff");
     document.documentElement.style.setProperty("--footer-bg", config.footerBgColor || "#ffffff");
 
-    window.IndexUtils.applyTopButton(document.getElementById("btn1"), config.buttons[0], "ボタン1");
-    window.IndexUtils.applyTopButton(document.getElementById("btn2"), config.buttons[1], "ボタン2");
-    window.IndexUtils.applyTopButton(document.getElementById("btn3"), config.buttons[2], "ボタン3");
+    const isPc = window.matchMedia ? window.matchMedia("(min-width: 769px)").matches : window.innerWidth >= 769;
+    const topButtons = isPc ? config.buttonsPc : config.buttons;
+    const footerButtons = isPc ? config.footerPc : config.footer;
+
+    window.IndexUtils.applyTopButton(document.getElementById("btn1"), topButtons[0], "ボタン1");
+    window.IndexUtils.applyTopButton(document.getElementById("btn2"), topButtons[1], "ボタン2");
+    window.IndexUtils.applyTopButton(document.getElementById("btn3"), topButtons[2], "ボタン3");
 
     window.IndexUtils.applyFooterButton(
       document.getElementById("f1"),
       document.getElementById("f1img"),
       document.getElementById("f1text"),
-      config.footer[0],
+      footerButtons[0],
       "電話"
     );
     window.IndexUtils.applyFooterButton(
       document.getElementById("f2"),
       document.getElementById("f2img"),
       document.getElementById("f2text"),
-      config.footer[1],
+      footerButtons[1],
       "LINE"
     );
     window.IndexUtils.applyFooterButton(
       document.getElementById("f3"),
       document.getElementById("f3img"),
       document.getElementById("f3text"),
-      config.footer[2],
+      footerButtons[2],
       "予約"
     );
 
     const pcPhoneInline = document.getElementById("pcPhoneInline");
-    const pcPhoneInlineLink = document.getElementById("pcPhoneInlineLink");
-    if(pcPhoneInline && pcPhoneInlineLink){
+    if(pcPhoneInline){
       const pcTopPhone = config.pcTopPhone || {};
-      const rawLabel = pcTopPhone.label ? String(pcTopPhone.label).trim() : "📞 電話予約";
-      const rawNumber = pcTopPhone.number ? String(pcTopPhone.number).trim() : "";
-      const rawLink = pcTopPhone.link ? String(pcTopPhone.link).trim() : "";
-      const normalizedNumber = rawNumber || window.IndexUtils.formatPhoneNumberForDisplay(
-        String(rawLink || "").replace(/^tel:/i, "").replace(/[^0-9+]/g, "")
-      );
-      const fallbackLink = rawNumber ? ("tel:" + String(rawNumber).replace(/[^0-9+]/g, "")) : "";
-      const finalLink = rawLink || fallbackLink;
-      const finalText = [rawLabel, normalizedNumber].filter(Boolean).join(" ").trim();
-
-      if(pcTopPhone.enabled === true && finalText){
-        pcPhoneInline.style.display = "";
-        pcPhoneInlineLink.href = finalLink || "#";
-        pcPhoneInlineLink.textContent = finalText;
+      const label = String(pcTopPhone.label || "").trim();
+      const number = String(pcTopPhone.number || "").trim();
+      const link = String(pcTopPhone.link || "").trim() || (number ? ("tel:" + number.replace(/[^0-9+]/g, "")) : "#");
+      if(isPc && pcTopPhone.enabled === true && (label || number)){
+        pcPhoneInline.innerHTML = `<a href="${link}">${label}${label && number ? " " : ""}${number}</a>`;
+        pcPhoneInline.classList.remove("hidden");
       }else{
-        pcPhoneInline.style.display = "none";
-        pcPhoneInlineLink.href = "#";
-        pcPhoneInlineLink.textContent = "";
+        pcPhoneInline.innerHTML = "";
+        pcPhoneInline.classList.add("hidden");
       }
     }
 
@@ -182,6 +176,17 @@
     }
   }
 
+  function bindResponsiveReload(){
+    if(!window.matchMedia) return;
+    const mq = window.matchMedia("(min-width: 769px)");
+    const handler = function(){ loadConfig().catch(function(){}); };
+    if(typeof mq.addEventListener === "function"){
+      mq.addEventListener("change", handler);
+    }else if(typeof mq.addListener === "function"){
+      mq.addListener(handler);
+    }
+  }
+
   function bindHashScroll(){
     window.addEventListener("hashchange", () => {
       if(location.hash){
@@ -196,6 +201,7 @@
   async function init(){
     try{
       bindLogoTrigger();
+      bindResponsiveReload();
       bindHashScroll();
       await loadConfig();
       await loadSections();
