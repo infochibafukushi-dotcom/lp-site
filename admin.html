@@ -814,6 +814,32 @@ body{
               <label class="checkline"><input type="checkbox" id="btnPc3Visible"> 表示する</label>
             </div>
           </div>
+
+          <div class="card-item-editor">
+            <h4>PCのみ 電話予約表示</h4>
+
+            <div class="row">
+              <label>表示</label>
+              <label class="checkline"><input type="checkbox" id="pcTopPhoneEnabled"> 表示する</label>
+            </div>
+
+            <div class="row">
+              <label>テキスト</label>
+              <input type="text" id="pcTopPhoneLabel" placeholder="例: 📞 電話予約">
+            </div>
+
+            <div class="row">
+              <label>電話番号</label>
+              <input type="text" id="pcTopPhoneNumber" placeholder="例: 090-0000-0000">
+              <div class="small">表示用の電話番号です。PC画面でロゴ横に表示されます。</div>
+            </div>
+
+            <div class="row">
+              <label>リンク</label>
+              <input type="text" id="pcTopPhoneLink" placeholder="例: tel:09000000000">
+              <div class="small">空欄でも保存できます。空欄時は電話番号から tel: を自動作成します。</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1392,6 +1418,50 @@ function ensureFooterButtons(list, defaults){
   }));
 }
 
+function digitsOnlyPhone(value){
+  return String(value || '').replace(/[^0-9+]/g, '');
+}
+
+function formatPhoneNumberForDisplay(value){
+  const text = String(value || '').trim();
+  if(!text) return '';
+  const digits = text.replace(/[^0-9]/g, '');
+  if(/^0\d{9,10}$/.test(digits)){
+    if(digits.length === 10){
+      return digits.replace(/(\d{2,4})(\d{2,4})(\d{4})/, '$1-$2-$3');
+    }
+    if(digits.length === 11){
+      return digits.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+    }
+  }
+  return text;
+}
+
+function buildPcTopPhoneFallback(config){
+  const phoneButton = config && Array.isArray(config.footer) ? config.footer[0] : null;
+  const rawLink = phoneButton && phoneButton.link ? String(phoneButton.link).trim() : '';
+  const fallbackDigits = digitsOnlyPhone(rawLink.replace(/^tel:/i, ''));
+  return {
+    enabled: !!(phoneButton && phoneButton.visible !== false && rawLink),
+    label: '📞 電話予約',
+    number: fallbackDigits ? formatPhoneNumberForDisplay(fallbackDigits) : '',
+    link: rawLink || (fallbackDigits ? ('tel:' + fallbackDigits) : '')
+  };
+}
+
+function ensurePcTopPhoneShape(config){
+  const fallback = buildPcTopPhoneFallback(config);
+  const current = config && config.pcTopPhone && typeof config.pcTopPhone === 'object' ? config.pcTopPhone : {};
+  const numberValue = String(current.number || fallback.number || '').trim();
+  const linkValue = String(current.link || fallback.link || '').trim();
+  return {
+    enabled: current.enabled === true || (current.enabled == null && fallback.enabled === true),
+    label: String(current.label || fallback.label || '📞 電話予約').trim() || '📞 電話予約',
+    number: numberValue || formatPhoneNumberForDisplay(digitsOnlyPhone(linkValue.replace(/^tel:/i, ''))),
+    link: linkValue || (numberValue ? ('tel:' + digitsOnlyPhone(numberValue)) : fallback.link || '')
+  };
+}
+
 function ensureConfigShape(config){
   const topDefaults = ['ボタン1', 'ボタン2', 'ボタン3'];
   const footerDefaults = ['電話', 'LINE', '予約'];
@@ -1400,6 +1470,7 @@ function ensureConfigShape(config){
   config.buttonsPc = ensureTopButtons(config.buttonsPc || config.buttons, topDefaults);
   config.footer = ensureFooterButtons(config.footer, footerDefaults);
   config.footerPc = ensureFooterButtons(config.footerPc || config.footer, footerDefaults);
+  config.pcTopPhone = ensurePcTopPhoneShape(config);
 
   config.logoImage = config.logoImage || '';
   config.headerBgColor = config.headerBgColor || '#ffffff';
@@ -1688,7 +1759,13 @@ function buildConfigDraft(){
         visible: document.getElementById('footerPc3Visible').checked,
         image: document.getElementById('footerPc3Image').value
       }
-    ]
+    ],
+    pcTopPhone: {
+      enabled: document.getElementById('pcTopPhoneEnabled').checked,
+      label: document.getElementById('pcTopPhoneLabel').value,
+      number: document.getElementById('pcTopPhoneNumber').value,
+      link: document.getElementById('pcTopPhoneLink').value
+    }
   };
 }
 
@@ -1828,6 +1905,11 @@ async function loadConfig(){
   document.getElementById('btnPc3Text').value = config.buttonsPc[2].text || '';
   document.getElementById('btnPc3Link').value = config.buttonsPc[2].link || '#';
   document.getElementById('btnPc3Visible').checked = config.buttonsPc[2].visible !== false;
+
+  document.getElementById('pcTopPhoneEnabled').checked = config.pcTopPhone.enabled === true;
+  document.getElementById('pcTopPhoneLabel').value = config.pcTopPhone.label || '📞 電話予約';
+  document.getElementById('pcTopPhoneNumber').value = config.pcTopPhone.number || '';
+  document.getElementById('pcTopPhoneLink').value = config.pcTopPhone.link || '';
 
   document.getElementById('footer1Text').value = config.footer[0].text || '';
   document.getElementById('footer1Link').value = config.footer[0].link || '#';
