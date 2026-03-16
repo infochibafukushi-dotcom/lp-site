@@ -56,57 +56,6 @@
     throw lastError || new Error("JSON fetch failed");
   }
 
-  function isDesktopView(){
-    return window.matchMedia("(min-width: 769px)").matches;
-  }
-
-  function applyResponsiveMenuConfig(config){
-    const topButtons = isDesktopView() ? (config.buttonsPc || config.buttons) : config.buttons;
-    const footerButtons = isDesktopView() ? (config.footerPc || config.footer) : config.footer;
-
-    window.IndexUtils.applyTopButton(document.getElementById("btn1"), topButtons[0], "ボタン1");
-    window.IndexUtils.applyTopButton(document.getElementById("btn2"), topButtons[1], "ボタン2");
-    window.IndexUtils.applyTopButton(document.getElementById("btn3"), topButtons[2], "ボタン3");
-
-    window.IndexUtils.applyFooterButton(
-      document.getElementById("f1"),
-      document.getElementById("f1img"),
-      document.getElementById("f1text"),
-      footerButtons[0],
-      "電話"
-    );
-    window.IndexUtils.applyFooterButton(
-      document.getElementById("f2"),
-      document.getElementById("f2img"),
-      document.getElementById("f2text"),
-      footerButtons[1],
-      "LINE"
-    );
-    window.IndexUtils.applyFooterButton(
-      document.getElementById("f3"),
-      document.getElementById("f3img"),
-      document.getElementById("f3text"),
-      footerButtons[2],
-      "予約"
-    );
-  }
-
-  function bindResponsiveMenuReload(){
-    let lastDesktopState = isDesktopView();
-
-    window.addEventListener("resize", () => {
-      const nextDesktopState = isDesktopView();
-      if(nextDesktopState === lastDesktopState){
-        return;
-      }
-      lastDesktopState = nextDesktopState;
-
-      if(window.__lpConfigCache){
-        applyResponsiveMenuConfig(window.__lpConfigCache);
-      }
-    });
-  }
-
   async function loadConfig(){
     const configRaw = await fetchJsonWithFallback([
       "./data/config.json",
@@ -116,7 +65,6 @@
     ]);
 
     const config = window.IndexUtils.ensureConfigShape(configRaw || {});
-    window.__lpConfigCache = config;
 
     const logoTextEl = document.getElementById("logoTextView");
     const logoImgEl = document.getElementById("logoImg");
@@ -138,7 +86,49 @@
     document.documentElement.style.setProperty("--header-bg", config.headerBgColor || "#ffffff");
     document.documentElement.style.setProperty("--footer-bg", config.footerBgColor || "#ffffff");
 
-    applyResponsiveMenuConfig(config);
+    window.IndexUtils.applyTopButton(document.getElementById("btn1"), config.buttons[0], "ボタン1");
+    window.IndexUtils.applyTopButton(document.getElementById("btn2"), config.buttons[1], "ボタン2");
+    window.IndexUtils.applyTopButton(document.getElementById("btn3"), config.buttons[2], "ボタン3");
+
+    window.IndexUtils.applyFooterButton(
+      document.getElementById("f1"),
+      document.getElementById("f1img"),
+      document.getElementById("f1text"),
+      config.footer[0],
+      "電話"
+    );
+    window.IndexUtils.applyFooterButton(
+      document.getElementById("f2"),
+      document.getElementById("f2img"),
+      document.getElementById("f2text"),
+      config.footer[1],
+      "LINE"
+    );
+    window.IndexUtils.applyFooterButton(
+      document.getElementById("f3"),
+      document.getElementById("f3img"),
+      document.getElementById("f3text"),
+      config.footer[2],
+      "予約"
+    );
+
+    const pcPhoneInline = document.getElementById("pcPhoneInline");
+    const pcPhoneInlineLink = document.getElementById("pcPhoneInlineLink");
+    if(pcPhoneInline && pcPhoneInlineLink){
+      const phoneButton = config.footer && config.footer[0] ? config.footer[0] : null;
+      const rawLink = phoneButton && phoneButton.link ? String(phoneButton.link) : "";
+      const rawText = phoneButton && phoneButton.text ? String(phoneButton.text) : "電話予約";
+      const telNumber = rawLink.replace(/^tel:/i, "").replace(/[^0-9+]/g, "");
+      const displayNumber = telNumber ? telNumber.replace(/(\d{3})(\d{4})(\d{4})$/, "$1-$2-$3") : "";
+
+      if(phoneButton && phoneButton.visible !== false && rawLink){
+        pcPhoneInline.style.display = "";
+        pcPhoneInlineLink.href = rawLink;
+        pcPhoneInlineLink.textContent = displayNumber ? "📞 " + rawText + " " + displayNumber : "📞 " + rawText;
+      }else{
+        pcPhoneInline.style.display = "none";
+      }
+    }
 
     sitePassword = config.password || "95123";
   }
@@ -200,7 +190,6 @@
     try{
       bindLogoTrigger();
       bindHashScroll();
-      bindResponsiveMenuReload();
       await loadConfig();
       await loadSections();
     }catch(error){
