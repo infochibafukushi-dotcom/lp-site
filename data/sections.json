@@ -418,9 +418,9 @@
     "id": "section-1773579425987",
     "sectionId": "tesuto",
     "enabled": true,
-    "title": "Q＆A【よくある質問】",
+    "title": "テスト",
     "textSize": "medium",
-    "bgColor": "#ffffff",
+    "bgColor": "#dcfce7",
     "alignY": "middle",
     "titleAlign": "left",
     "textAlign": "left",
@@ -445,8 +445,8 @@
     "text": "",
     "items": [
       {
-        "title": "質問1",
-        "text": "回答を入力してください。",
+        "title": "〇〇〇〇〇〇〇〇〇〇〇〇？",
+        "text": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         "image": "",
         "link": "#"
       },
