@@ -1155,7 +1155,7 @@ body{
       <span class="toggle-state">閉じています</span>
     </button>
     <div class="card-body js-card-body">
-      <p class="note">7種類を簡単に追加できます。追加後に sections.json を保存してください。</p>
+      <p class="note">8種類を簡単に追加できます。追加後に sections.json を保存してください。</p>
 
       <div class="grid2">
         <div class="row">
@@ -1168,6 +1168,7 @@ body{
             <option value="card2">card2</option>
             <option value="card1-right">card1-right</option>
             <option value="card1-left">card1-left</option>
+            <option value="accordion">accordion</option>
           </select>
         </div>
         <div class="row">
@@ -2160,6 +2161,19 @@ function createDefaultSection(type, title){
     };
   }
 
+  if(type === 'accordion'){
+    return {
+      ...base,
+      type: 'accordion',
+      text: '',
+      items: [
+        { title:'質問1', text:'回答を入力してください。', image:'', link:'#' },
+        { title:'質問2', text:'回答を入力してください。', image:'', link:'#' },
+        { title:'質問3', text:'回答を入力してください。', image:'', link:'#' }
+      ]
+    };
+  }
+
   return {
     ...base,
     type: 'card1-left',
@@ -2261,6 +2275,71 @@ function updateSliderImages(index, value){
 }
 function updateCardItemField(sectionIndex, itemIndex, field, value){
   sectionsData[sectionIndex].items[itemIndex][field] = value;
+}
+function addAccordionItem(sectionIndex){
+  captureSectionOpenStates();
+
+  if(!Array.isArray(sectionsData[sectionIndex].items)){
+    sectionsData[sectionIndex].items = [];
+  }
+  sectionsData[sectionIndex].items.push({
+    title: `質問${sectionsData[sectionIndex].items.length + 1}`,
+    text: '回答を入力してください。',
+    image: '',
+    link: '#'
+  });
+
+  if(sectionsData[sectionIndex]?.id){
+    sectionOpenState[sectionsData[sectionIndex].id] = true;
+  }
+  renderSectionsEditor();
+  renderSectionsSortList();
+  setSectionsSaveResult('質問を追加しました。最後に sections.json を保存してください。', 'success');
+}
+function removeAccordionItem(sectionIndex, itemIndex){
+  captureSectionOpenStates();
+
+  if(!Array.isArray(sectionsData[sectionIndex].items)) return;
+  sectionsData[sectionIndex].items.splice(itemIndex, 1);
+
+  if(sectionsData[sectionIndex]?.id){
+    sectionOpenState[sectionsData[sectionIndex].id] = true;
+  }
+  renderSectionsEditor();
+  renderSectionsSortList();
+  setSectionsSaveResult('質問を削除しました。最後に sections.json を保存してください。', 'success');
+}
+function moveAccordionItemUp(sectionIndex, itemIndex){
+  if(itemIndex <= 0) return;
+
+  captureSectionOpenStates();
+
+  const items = sectionsData[sectionIndex].items;
+  const temp = items[itemIndex - 1];
+  items[itemIndex - 1] = items[itemIndex];
+  items[itemIndex] = temp;
+
+  if(sectionsData[sectionIndex]?.id){
+    sectionOpenState[sectionsData[sectionIndex].id] = true;
+  }
+  renderSectionsEditor();
+  renderSectionsSortList();
+}
+function moveAccordionItemDown(sectionIndex, itemIndex){
+  const items = sectionsData[sectionIndex].items;
+  if(!Array.isArray(items) || itemIndex >= items.length - 1) return;
+
+  captureSectionOpenStates();
+
+  const temp = items[itemIndex + 1];
+  items[itemIndex + 1] = items[itemIndex];
+  items[itemIndex] = temp;
+
+  if(sectionsData[sectionIndex]?.id){
+    sectionOpenState[sectionsData[sectionIndex].id] = true;
+  }
+  renderSectionsEditor();
+  renderSectionsSortList();
 }
 function updateSectionLinkField(sectionIndex, linkIndex, field, value){
   ensureSectionLinks(sectionsData[sectionIndex]);
@@ -2373,6 +2452,24 @@ function renderSectionLinksEditor(sectionIndex, section){
 function renderSectionPreview(section){
   const titleAlign = section.titleAlign || 'left';
   const textAlign = section.textAlign || 'left';
+
+  if(section.type === 'accordion'){
+    const items = Array.isArray(section.items) ? section.items : [];
+    return `
+      <div class="section-preview-box" style="background:${escapeAttr(section.bgColor || '#ffffff')}">
+        <h3 class="section-preview-title align-${escapeAttr(titleAlign)}">${escapeHtml(section.title || 'タイトル見本')}</h3>
+        <div class="section-preview-text text-${escapeAttr(section.textSize || 'medium')} align-${escapeAttr(textAlign)}">
+          ${items.length ? items.map((item, idx) => `
+            <div style="margin:0 0 10px 0; padding:10px 12px; background:#eef1f3; border-radius:10px;">
+              <div style="font-weight:bold; margin-bottom:6px;">Q${idx + 1} ${escapeHtml(item.title || '')}</div>
+              <div>A ${escapeHtml(item.text || '')}</div>
+            </div>
+          `).join('') : '質問がまだありません。'}
+        </div>
+      </div>
+    `;
+  }
+
   return `
     <div class="section-preview-box" style="background:${escapeAttr(section.bgColor || '#ffffff')}">
       <h3 class="section-preview-title align-${escapeAttr(titleAlign)}">${escapeHtml(section.title || 'タイトル見本')}</h3>
@@ -2672,6 +2769,38 @@ function renderCardItemsEditor(section, sectionIndex){
   `).join('');
 }
 
+function renderAccordionItemsEditor(section, sectionIndex){
+  const items = Array.isArray(section.items) ? section.items : [];
+
+  return `
+    <div class="actions" style="margin-bottom:10px;">
+      <button type="button" onclick="addAccordionItem(${sectionIndex})">質問を追加</button>
+    </div>
+    ${items.length === 0 ? '<div class="small">質問がまだありません。</div>' : ''}
+    ${items.map((item, itemIndex) => `
+      <div class="card-item-editor">
+        <div class="actions" style="margin-bottom:10px;">
+          <button type="button" class="secondary small-btn" onclick="moveAccordionItemUp(${sectionIndex}, ${itemIndex})">↑ 上へ</button>
+          <button type="button" class="secondary small-btn" onclick="moveAccordionItemDown(${sectionIndex}, ${itemIndex})">↓ 下へ</button>
+          <button type="button" class="danger small-btn" onclick="removeAccordionItem(${sectionIndex}, ${itemIndex})">削除</button>
+        </div>
+
+        <h4>質問 ${itemIndex + 1}</h4>
+
+        <div class="row">
+          <label>質問</label>
+          <textarea class="title-textarea" oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'title', this.value)">${escapeHtml(item.title || '')}</textarea>
+        </div>
+
+        <div class="row">
+          <label>回答</label>
+          <textarea oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'text', this.value)">${escapeHtml(item.text || '')}</textarea>
+        </div>
+      </div>
+    `).join('')}
+  `;
+}
+
 function renderSectionsEditor(){
   const box = document.getElementById('sectionsEditor');
 
@@ -2686,6 +2815,7 @@ function renderSectionsEditor(){
   box.innerHTML = sectionsData.map((section, index) => {
     const isSlider = section.type === 'slider';
     const isCards = ['card4','card3','card2'].includes(section.type);
+    const isAccordion = section.type === 'accordion';
     const hasSingleImage = ['normal','card1-right','card1-left'].includes(section.type);
     const fullAnchorUrl = buildFullAnchorUrl(section.sectionId || '');
 
@@ -2748,7 +2878,7 @@ function renderSectionsEditor(){
               </select>
             </div>
 
-            ${!isCards ? `
+            ${(!isCards && !isAccordion) ? `
             <div class="row" style="grid-column:1 / -1;">
               <label>説明文</label>
               <textarea oninput="updateSectionField(${index}, 'text', this.value)">${escapeHtml(section.text || '')}</textarea>
@@ -2812,6 +2942,12 @@ function renderSectionsEditor(){
             <div class="row" style="grid-column:1 / -1;">
               <label>カード編集</label>
               ${renderCardItemsEditor(section, index)}
+            </div>` : ''}
+
+            ${isAccordion ? `
+            <div class="row" style="grid-column:1 / -1;">
+              <label>質問編集</label>
+              ${renderAccordionItemsEditor(section, index)}
             </div>` : ''}
 
             <div class="row" style="grid-column:1 / -1;">
