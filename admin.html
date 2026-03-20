@@ -369,7 +369,7 @@ button.linklike{
 }
 .jump-menu{
   display:grid;
-  grid-template-columns:repeat(6, 1fr);
+  grid-template-columns:repeat(7, 1fr);
   gap:10px;
 }
 .jump-btn{
@@ -703,78 +703,6 @@ body{
   }
 }
 
-
-.menu-group-editor{
-  border:1px solid #dcdcdc;
-  border-radius:12px;
-  background:#fff;
-  margin-bottom:14px;
-  overflow:hidden;
-}
-.menu-group-toggle{
-  width:100%;
-  border:none;
-  background:#f7f7f7;
-  color:#222;
-  text-align:left;
-  padding:12px 14px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  cursor:pointer;
-}
-.menu-group-toggle:hover{
-  background:#f1f1f1;
-}
-.menu-group-toggle-left{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  min-width:0;
-}
-.menu-group-toggle-icon{
-  width:18px;
-  text-align:center;
-  font-size:14px;
-  flex:0 0 auto;
-}
-.menu-group-toggle-title{
-  font-weight:bold;
-  line-height:1.4;
-  word-break:break-word;
-}
-.menu-group-toggle-state{
-  font-size:12px;
-  color:#666;
-  flex:0 0 auto;
-}
-.menu-group-body{
-  padding:14px;
-  border-top:1px solid #ececec;
-  display:none;
-}
-.menu-group-editor.is-open .menu-group-body{
-  display:block;
-}
-.menu-item-editor{
-  border:1px solid #ececec;
-  border-radius:10px;
-  background:#fcfcfc;
-  padding:12px;
-  margin-bottom:12px;
-}
-.inline-check{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  font-size:13px;
-  font-weight:normal;
-}
-.inline-check input{
-  width:auto;
-}
-
 </style>
 </head>
 <body>
@@ -795,6 +723,7 @@ body{
       <a class="jump-btn" href="#card-github-settings">GitHub設定</a>
       <a class="jump-btn" href="#card-top-settings">上部設定</a>
       <a class="jump-btn" href="#card-bottom-settings">下部設定</a>
+      <a class="jump-btn" href="#card-popup-settings">POP設定</a>
       <a class="jump-btn" href="#card-section-add">セクション追加</a>
       <a class="jump-btn" href="#card-sections-sort">並び替え</a>
       <a class="jump-btn" href="#card-sections-list">セクション編集</a>
@@ -1218,6 +1147,186 @@ body{
     </div>
   </div>
 
+  <div class="card collapsible-card js-collapsible section-anchor" id="card-popup-settings" data-open="false">
+    <button type="button" class="card-toggle js-card-toggle">
+      <span class="toggle-left">
+        <span class="toggle-icon">▶</span>
+        <span class="toggle-title">POPアップ設定</span>
+      </span>
+      <span class="toggle-state">閉じています</span>
+    </button>
+    <div class="card-body js-card-body">
+      <p class="note">3パターンまで登録できます。使用するにチェックを入れた1パターンだけ表示されます。表示するがOFFのパターンは公開されません。POPアップは新しく開いた時だけ1回表示されます。</p>
+      <div class="settings-stack">
+        <div class="subsettings-card js-collapsible" data-open="true">
+          <button type="button" class="card-toggle js-card-toggle">
+            <span class="toggle-left">
+              <span class="toggle-icon">▼</span>
+              <span class="toggle-title">POPパターン1</span>
+            </span>
+            <span class="toggle-state">編集できます</span>
+          </button>
+          <div class="card-body js-card-body" style="display:block;">
+            <div class="grid2">
+              <div class="row">
+                <label>使用する</label>
+                <label class="checkline"><input type="checkbox" id="popup1Use" onchange="selectActivePopup(1, this.checked)"> このパターンを使う</label>
+              </div>
+              <div class="row">
+                <label>表示する</label>
+                <label class="checkline"><input type="checkbox" id="popup1Visible"> 公開ページに表示する</label>
+              </div>
+              <div class="row" style="grid-column:1 / -1;">
+                <label>タイトル（赤・太字）</label>
+                <input type="text" id="popup1Title" placeholder="例: ご利用前にご確認ください">
+              </div>
+              <div class="row" style="grid-column:1 / -1;">
+                <label>説明文</label>
+                <textarea id="popup1Text" placeholder="ご案内文を入力"></textarea>
+              </div>
+              <div class="row">
+                <label>ボタン1 表示</label>
+                <label class="checkline"><input type="checkbox" id="popup1Btn1Visible"> 表示する</label>
+              </div>
+              <div class="row">
+                <label>ボタン2 表示</label>
+                <label class="checkline"><input type="checkbox" id="popup1Btn2Visible"> 表示する</label>
+              </div>
+              <div class="row">
+                <label>ボタン1 文字</label>
+                <input type="text" id="popup1Btn1Text" placeholder="例: 予約する">
+              </div>
+              <div class="row">
+                <label>ボタン2 文字</label>
+                <input type="text" id="popup1Btn2Text" placeholder="例: 詳細を見る">
+              </div>
+              <div class="row">
+                <label>ボタン1 URL</label>
+                <input type="text" id="popup1Btn1Url" placeholder="例: #contact または https://example.com">
+              </div>
+              <div class="row">
+                <label>ボタン2 URL</label>
+                <input type="text" id="popup1Btn2Url" placeholder="例: #price または https://example.com">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsettings-card js-collapsible" data-open="false">
+          <button type="button" class="card-toggle js-card-toggle">
+            <span class="toggle-left">
+              <span class="toggle-icon">▶</span>
+              <span class="toggle-title">POPパターン2</span>
+            </span>
+            <span class="toggle-state">閉じています</span>
+          </button>
+          <div class="card-body js-card-body">
+            <div class="grid2">
+              <div class="row">
+                <label>使用する</label>
+                <label class="checkline"><input type="checkbox" id="popup2Use" onchange="selectActivePopup(2, this.checked)"> このパターンを使う</label>
+              </div>
+              <div class="row">
+                <label>表示する</label>
+                <label class="checkline"><input type="checkbox" id="popup2Visible"> 公開ページに表示する</label>
+              </div>
+              <div class="row" style="grid-column:1 / -1;">
+                <label>タイトル（赤・太字）</label>
+                <input type="text" id="popup2Title" placeholder="例: ご利用前にご確認ください">
+              </div>
+              <div class="row" style="grid-column:1 / -1;">
+                <label>説明文</label>
+                <textarea id="popup2Text" placeholder="ご案内文を入力"></textarea>
+              </div>
+              <div class="row">
+                <label>ボタン1 表示</label>
+                <label class="checkline"><input type="checkbox" id="popup2Btn1Visible"> 表示する</label>
+              </div>
+              <div class="row">
+                <label>ボタン2 表示</label>
+                <label class="checkline"><input type="checkbox" id="popup2Btn2Visible"> 表示する</label>
+              </div>
+              <div class="row">
+                <label>ボタン1 文字</label>
+                <input type="text" id="popup2Btn1Text" placeholder="例: 予約する">
+              </div>
+              <div class="row">
+                <label>ボタン2 文字</label>
+                <input type="text" id="popup2Btn2Text" placeholder="例: 詳細を見る">
+              </div>
+              <div class="row">
+                <label>ボタン1 URL</label>
+                <input type="text" id="popup2Btn1Url" placeholder="例: #contact または https://example.com">
+              </div>
+              <div class="row">
+                <label>ボタン2 URL</label>
+                <input type="text" id="popup2Btn2Url" placeholder="例: #price または https://example.com">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsettings-card js-collapsible" data-open="false">
+          <button type="button" class="card-toggle js-card-toggle">
+            <span class="toggle-left">
+              <span class="toggle-icon">▶</span>
+              <span class="toggle-title">POPパターン3</span>
+            </span>
+            <span class="toggle-state">閉じています</span>
+          </button>
+          <div class="card-body js-card-body">
+            <div class="grid2">
+              <div class="row">
+                <label>使用する</label>
+                <label class="checkline"><input type="checkbox" id="popup3Use" onchange="selectActivePopup(3, this.checked)"> このパターンを使う</label>
+              </div>
+              <div class="row">
+                <label>表示する</label>
+                <label class="checkline"><input type="checkbox" id="popup3Visible"> 公開ページに表示する</label>
+              </div>
+              <div class="row" style="grid-column:1 / -1;">
+                <label>タイトル（赤・太字）</label>
+                <input type="text" id="popup3Title" placeholder="例: ご利用前にご確認ください">
+              </div>
+              <div class="row" style="grid-column:1 / -1;">
+                <label>説明文</label>
+                <textarea id="popup3Text" placeholder="ご案内文を入力"></textarea>
+              </div>
+              <div class="row">
+                <label>ボタン1 表示</label>
+                <label class="checkline"><input type="checkbox" id="popup3Btn1Visible"> 表示する</label>
+              </div>
+              <div class="row">
+                <label>ボタン2 表示</label>
+                <label class="checkline"><input type="checkbox" id="popup3Btn2Visible"> 表示する</label>
+              </div>
+              <div class="row">
+                <label>ボタン1 文字</label>
+                <input type="text" id="popup3Btn1Text" placeholder="例: 予約する">
+              </div>
+              <div class="row">
+                <label>ボタン2 文字</label>
+                <input type="text" id="popup3Btn2Text" placeholder="例: 詳細を見る">
+              </div>
+              <div class="row">
+                <label>ボタン1 URL</label>
+                <input type="text" id="popup3Btn1Url" placeholder="例: #contact または https://example.com">
+              </div>
+              <div class="row">
+                <label>ボタン2 URL</label>
+                <input type="text" id="popup3Btn2Url" placeholder="例: #price または https://example.com">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions" style="margin-top:14px;">
+        <button type="button" onclick="saveConfigToGitHub()">POP設定を保存</button>
+      </div>
+    </div>
+  </div>
+
   <div class="card collapsible-card js-collapsible section-anchor" id="card-section-add" data-open="false">
     <button type="button" class="card-toggle js-card-toggle">
       <span class="toggle-left">
@@ -1227,7 +1336,7 @@ body{
       <span class="toggle-state">閉じています</span>
     </button>
     <div class="card-body js-card-body">
-      <p class="note">9種類を簡単に追加できます。追加後に sections.json を保存してください。</p>
+      <p class="note">8種類を簡単に追加できます。追加後に sections.json を保存してください。</p>
 
       <div class="grid2">
         <div class="row">
@@ -1241,7 +1350,6 @@ body{
             <option value="card1-right">card1-right</option>
             <option value="card1-left">card1-left</option>
             <option value="accordion">accordion</option>
-            <option value="menu-list">menu-list</option>
           </select>
         </div>
         <div class="row">
@@ -1411,7 +1519,6 @@ const HIRAGANA_MAP = {
 };
 
 let sectionsData = [];
-let menuGroupOpenState = {};
 let sectionOpenState = {};
 let dirtyConfig = false;
 let dirtySections = false;
@@ -1482,7 +1589,7 @@ function bindDirtyTrackers(){
     const target = event.target;
     if(!target) return;
 
-    if(target.closest('#card-top-settings') || target.closest('#card-bottom-settings')){
+    if(target.closest('#card-top-settings') || target.closest('#card-bottom-settings') || target.closest('#card-popup-settings')){
       markConfigDirty();
       return;
     }
@@ -1496,7 +1603,7 @@ function bindDirtyTrackers(){
     const target = event.target;
     if(!target) return;
 
-    if(target.closest('#card-top-settings') || target.closest('#card-bottom-settings')){
+    if(target.closest('#card-top-settings') || target.closest('#card-bottom-settings') || target.closest('#card-popup-settings')){
       markConfigDirty();
       return;
     }
@@ -1641,6 +1748,84 @@ function ensurePcTopPhoneShape(config){
   };
 }
 
+function ensurePopupPatternShape(pattern, index){
+  const fallbackIndex = index + 1;
+  return {
+    use: pattern?.use === true,
+    visible: pattern?.visible === true,
+    title: String(pattern?.title || '').trim(),
+    text: String(pattern?.text || '').trim(),
+    button1: {
+      visible: pattern?.button1?.visible === true,
+      text: String(pattern?.button1?.text || '').trim(),
+      url: String(pattern?.button1?.url || '#').trim() || '#'
+    },
+    button2: {
+      visible: pattern?.button2?.visible === true,
+      text: String(pattern?.button2?.text || '').trim(),
+      url: String(pattern?.button2?.url || '#').trim() || '#'
+    }
+  };
+}
+
+function ensurePopupSettingsShape(config){
+  const source = config && config.popupSettings && typeof config.popupSettings === 'object' ? config.popupSettings : {};
+  const patterns = Array.isArray(source.patterns) ? source.patterns.slice(0, 3) : [];
+  while(patterns.length < 3){
+    patterns.push({});
+  }
+  const normalizedPatterns = patterns.map((pattern, index) => ensurePopupPatternShape(pattern, index));
+  let hasActive = false;
+  normalizedPatterns.forEach((pattern) => {
+    if(pattern.use && !hasActive){
+      hasActive = true;
+    }else if(pattern.use && hasActive){
+      pattern.use = false;
+    }
+  });
+  return { patterns: normalizedPatterns };
+}
+
+function selectActivePopup(index, checked){
+  for(let i = 1; i <= 3; i++){
+    const el = document.getElementById(`popup${i}Use`);
+    if(!el) continue;
+    el.checked = checked ? i === index : (i === index ? false : el.checked);
+  }
+}
+
+function setPopupPatternInputs(index, pattern){
+  document.getElementById(`popup${index}Use`).checked = pattern.use === true;
+  document.getElementById(`popup${index}Visible`).checked = pattern.visible === true;
+  document.getElementById(`popup${index}Title`).value = pattern.title || '';
+  document.getElementById(`popup${index}Text`).value = pattern.text || '';
+  document.getElementById(`popup${index}Btn1Visible`).checked = pattern.button1?.visible === true;
+  document.getElementById(`popup${index}Btn1Text`).value = pattern.button1?.text || '';
+  document.getElementById(`popup${index}Btn1Url`).value = pattern.button1?.url || '#';
+  document.getElementById(`popup${index}Btn2Visible`).checked = pattern.button2?.visible === true;
+  document.getElementById(`popup${index}Btn2Text`).value = pattern.button2?.text || '';
+  document.getElementById(`popup${index}Btn2Url`).value = pattern.button2?.url || '#';
+}
+
+function readPopupPatternInputs(index){
+  return {
+    use: document.getElementById(`popup${index}Use`).checked,
+    visible: document.getElementById(`popup${index}Visible`).checked,
+    title: document.getElementById(`popup${index}Title`).value,
+    text: document.getElementById(`popup${index}Text`).value,
+    button1: {
+      visible: document.getElementById(`popup${index}Btn1Visible`).checked,
+      text: document.getElementById(`popup${index}Btn1Text`).value,
+      url: document.getElementById(`popup${index}Btn1Url`).value || '#'
+    },
+    button2: {
+      visible: document.getElementById(`popup${index}Btn2Visible`).checked,
+      text: document.getElementById(`popup${index}Btn2Text`).value,
+      url: document.getElementById(`popup${index}Btn2Url`).value || '#'
+    }
+  };
+}
+
 function ensureConfigShape(config){
   const topDefaults = ['ボタン1', 'ボタン2', 'ボタン3'];
   const footerDefaults = ['電話', 'LINE', '予約'];
@@ -1654,6 +1839,7 @@ function ensureConfigShape(config){
   config.logoImage = config.logoImage || '';
   config.headerBgColor = config.headerBgColor || '#ffffff';
   config.footerBgColor = config.footerBgColor || '#ffffff';
+  config.popupSettings = ensurePopupSettingsShape(config);
   return config;
 }
 
@@ -1795,7 +1981,6 @@ function ensureSectionShape(section, index){
 
   if(!Array.isArray(section.images)) section.images = [];
   if(!Array.isArray(section.items)) section.items = [];
-  if(!Array.isArray(section.menuGroups)) section.menuGroups = [];
 
   if(Array.isArray(section.items)){
     section.items = section.items.map((item) => ({
@@ -1805,27 +1990,6 @@ function ensureSectionShape(section, index){
       link: item?.link || '#'
     }));
   }
-
-  if(Array.isArray(section.menuGroups)){
-    section.menuGroups = section.menuGroups.map((group, groupIndex) => ({
-      title: group?.title || `カテゴリ${groupIndex + 1}`,
-      open: group?.open !== false,
-      items: Array.isArray(group?.items) ? group.items.map((item) => ({
-        name: item?.name || '',
-        price: item?.price || '',
-        description: item?.description || '',
-        visible: item?.visible !== false
-      })) : []
-    }));
-  }
-
-  section.menuBottomCard = {
-    visible: section.menuBottomCard?.visible === true,
-    title: section.menuBottomCard?.title || '',
-    text: section.menuBottomCard?.text || '',
-    buttonText: section.menuBottomCard?.buttonText || '',
-    buttonUrl: section.menuBottomCard?.buttonUrl || '#'
-  };
 
   ensureSectionLinks(section);
   return section;
@@ -1961,6 +2125,13 @@ function buildConfigDraft(){
         image: document.getElementById('footerPc3Image').value
       }
     ],
+    popupSettings: {
+      patterns: [
+        readPopupPatternInputs(1),
+        readPopupPatternInputs(2),
+        readPopupPatternInputs(3)
+      ]
+    },
     pcTopPhone: {
       enabled: document.getElementById('pcTopPhoneEnabled').checked,
       label: document.getElementById('pcTopPhoneLabel').value,
@@ -2149,6 +2320,11 @@ async function loadConfig(){
   setFooterPreviewById('footerPc3Preview', config.footerPc[2].image || '');
 
   document.getElementById('passwordText').value = config.password || '';
+
+  const popupSettings = ensurePopupSettingsShape(config);
+  setPopupPatternInputs(1, popupSettings.patterns[0]);
+  setPopupPatternInputs(2, popupSettings.patterns[1]);
+  setPopupPatternInputs(3, popupSettings.patterns[2]);
 }
 
 async function loadSections(){
@@ -2267,30 +2443,6 @@ function createDefaultSection(type, title){
         { title:'質問2', text:'回答を入力してください。', image:'', link:'#' },
         { title:'質問3', text:'回答を入力してください。', image:'', link:'#' }
       ]
-    };
-  }
-
-  if(type === 'menu-list'){
-    return {
-      ...base,
-      type: 'menu-list',
-      text: '',
-      menuGroups: [
-        {
-          title: 'カテゴリ1',
-          open: true,
-          items: [
-            { name:'メニュー名', price:'¥1,000', description:'説明文', visible:true }
-          ]
-        }
-      ],
-      menuBottomCard: {
-        visible: false,
-        title: '',
-        text: '',
-        buttonText: '',
-        buttonUrl: '#'
-      }
     };
   }
 
@@ -2569,328 +2721,6 @@ function renderSectionLinksEditor(sectionIndex, section){
   `;
 }
 
-
-function getMenuGroupStateKey(section, groupIndex){
-  const sectionId = section?.id || 'section';
-  return sectionId + '__group__' + groupIndex;
-}
-
-function toggleMenuGroupEditor(buttonEl, sectionIndex, groupIndex){
-  const section = sectionsData[sectionIndex];
-  if(!section) return;
-
-  const key = getMenuGroupStateKey(section, groupIndex);
-  const nextOpen = menuGroupOpenState[key] === true ? false : true;
-  menuGroupOpenState[key] = nextOpen;
-
-  const wrap = buttonEl && buttonEl.closest ? buttonEl.closest('.menu-group-editor') : null;
-  if(!wrap) return;
-
-  wrap.classList.toggle('is-open', nextOpen);
-
-  const iconEl = wrap.querySelector('.menu-group-toggle-icon');
-  if(iconEl){
-    iconEl.textContent = nextOpen ? '▼' : '▶';
-  }
-
-  const bodyEl = wrap.querySelector('.menu-group-body');
-  if(bodyEl){
-    bodyEl.style.display = nextOpen ? 'block' : 'none';
-  }
-}
-
-function updateMenuGroupField(sectionIndex, groupIndex, field, value){
-  const section = sectionsData[sectionIndex];
-  if(!section || !Array.isArray(section.menuGroups) || !section.menuGroups[groupIndex]) return;
-  section.menuGroups[groupIndex][field] = value;
-}
-
-function addMenuGroup(sectionIndex){
-  captureSectionOpenStates();
-  const section = sectionsData[sectionIndex];
-  if(!section) return;
-  if(!Array.isArray(section.menuGroups)) section.menuGroups = [];
-  section.menuGroups.push({
-    title: `カテゴリ${section.menuGroups.length + 1}`,
-    open: true,
-    items: [
-      { name:'', price:'', description:'', visible:true }
-    ]
-  });
-
-  if(section.id){
-    sectionOpenState[section.id] = true;
-    menuGroupOpenState[getMenuGroupStateKey(section, section.menuGroups.length - 1)] = true;
-  }
-
-  renderSectionsEditor();
-  renderSectionsSortList();
-  setSectionsSaveResult('カテゴリを追加しました。最後に sections.json を保存してください。', 'success');
-}
-
-function removeMenuGroup(sectionIndex, groupIndex){
-  captureSectionOpenStates();
-  const section = sectionsData[sectionIndex];
-  if(!section || !Array.isArray(section.menuGroups)) return;
-  section.menuGroups.splice(groupIndex, 1);
-  if(section.id){
-    sectionOpenState[section.id] = true;
-  }
-  renderSectionsEditor();
-  renderSectionsSortList();
-  setSectionsSaveResult('カテゴリを削除しました。最後に sections.json を保存してください。', 'success');
-}
-
-function moveMenuGroupUp(sectionIndex, groupIndex){
-  if(groupIndex <= 0) return;
-  captureSectionOpenStates();
-  const section = sectionsData[sectionIndex];
-  if(!section || !Array.isArray(section.menuGroups)) return;
-  const temp = section.menuGroups[groupIndex - 1];
-  section.menuGroups[groupIndex - 1] = section.menuGroups[groupIndex];
-  section.menuGroups[groupIndex] = temp;
-  if(section.id){
-    sectionOpenState[section.id] = true;
-  }
-  renderSectionsEditor();
-  renderSectionsSortList();
-}
-
-function moveMenuGroupDown(sectionIndex, groupIndex){
-  captureSectionOpenStates();
-  const section = sectionsData[sectionIndex];
-  if(!section || !Array.isArray(section.menuGroups) || groupIndex >= section.menuGroups.length - 1) return;
-  const temp = section.menuGroups[groupIndex + 1];
-  section.menuGroups[groupIndex + 1] = section.menuGroups[groupIndex];
-  section.menuGroups[groupIndex] = temp;
-  if(section.id){
-    sectionOpenState[section.id] = true;
-  }
-  renderSectionsEditor();
-  renderSectionsSortList();
-}
-
-function updateMenuListItemField(sectionIndex, groupIndex, itemIndex, field, value){
-  const section = sectionsData[sectionIndex];
-  if(!section || !Array.isArray(section.menuGroups)) return;
-  const group = section.menuGroups[groupIndex];
-  if(!group || !Array.isArray(group.items) || !group.items[itemIndex]) return;
-  group.items[itemIndex][field] = value;
-}
-
-function updateMenuListItemVisible(sectionIndex, groupIndex, itemIndex, checked){
-  const section = sectionsData[sectionIndex];
-  if(!section || !Array.isArray(section.menuGroups)) return;
-  const group = section.menuGroups[groupIndex];
-  if(!group || !Array.isArray(group.items) || !group.items[itemIndex]) return;
-  group.items[itemIndex].visible = checked;
-}
-
-function addMenuListItem(sectionIndex, groupIndex){
-  captureSectionOpenStates();
-  const section = sectionsData[sectionIndex];
-  if(!section || !Array.isArray(section.menuGroups)) return;
-  const group = section.menuGroups[groupIndex];
-  if(!group) return;
-  if(!Array.isArray(group.items)) group.items = [];
-  group.items.push({ name:'', price:'', description:'', visible:true });
-
-  if(section.id){
-    sectionOpenState[section.id] = true;
-    menuGroupOpenState[getMenuGroupStateKey(section, groupIndex)] = true;
-  }
-
-  renderSectionsEditor();
-  renderSectionsSortList();
-  setSectionsSaveResult('メニューを追加しました。最後に sections.json を保存してください。', 'success');
-}
-
-function removeMenuListItem(sectionIndex, groupIndex, itemIndex){
-  captureSectionOpenStates();
-  const section = sectionsData[sectionIndex];
-  if(!section || !Array.isArray(section.menuGroups)) return;
-  const group = section.menuGroups[groupIndex];
-  if(!group || !Array.isArray(group.items)) return;
-  group.items.splice(itemIndex, 1);
-
-  if(section.id){
-    sectionOpenState[section.id] = true;
-    menuGroupOpenState[getMenuGroupStateKey(section, groupIndex)] = true;
-  }
-
-  renderSectionsEditor();
-  renderSectionsSortList();
-  setSectionsSaveResult('メニューを削除しました。最後に sections.json を保存してください。', 'success');
-}
-
-function moveMenuListItemUp(sectionIndex, groupIndex, itemIndex){
-  if(itemIndex <= 0) return;
-  captureSectionOpenStates();
-  const section = sectionsData[sectionIndex];
-  if(!section || !Array.isArray(section.menuGroups)) return;
-  const group = section.menuGroups[groupIndex];
-  if(!group || !Array.isArray(group.items)) return;
-  const temp = group.items[itemIndex - 1];
-  group.items[itemIndex - 1] = group.items[itemIndex];
-  group.items[itemIndex] = temp;
-
-  if(section.id){
-    sectionOpenState[section.id] = true;
-    menuGroupOpenState[getMenuGroupStateKey(section, groupIndex)] = true;
-  }
-
-  renderSectionsEditor();
-  renderSectionsSortList();
-}
-
-function moveMenuListItemDown(sectionIndex, groupIndex, itemIndex){
-  captureSectionOpenStates();
-  const section = sectionsData[sectionIndex];
-  if(!section || !Array.isArray(section.menuGroups)) return;
-  const group = section.menuGroups[groupIndex];
-  if(!group || !Array.isArray(group.items) || itemIndex >= group.items.length - 1) return;
-  const temp = group.items[itemIndex + 1];
-  group.items[itemIndex + 1] = group.items[itemIndex];
-  group.items[itemIndex] = temp;
-
-  if(section.id){
-    sectionOpenState[section.id] = true;
-    menuGroupOpenState[getMenuGroupStateKey(section, groupIndex)] = true;
-  }
-
-  renderSectionsEditor();
-  renderSectionsSortList();
-}
-
-
-function updateMenuBottomCardField(sectionIndex, field, value){
-  const section = sectionsData[sectionIndex];
-  if(!section) return;
-  if(!section.menuBottomCard || typeof section.menuBottomCard !== 'object'){
-    section.menuBottomCard = {
-      visible: false,
-      title: '',
-      text: '',
-      buttonText: '',
-      buttonUrl: '#'
-    };
-  }
-  section.menuBottomCard[field] = value;
-}
-
-function updateMenuBottomCardVisible(sectionIndex, checked){
-  const section = sectionsData[sectionIndex];
-  if(!section) return;
-  if(!section.menuBottomCard || typeof section.menuBottomCard !== 'object'){
-    section.menuBottomCard = {
-      visible: false,
-      title: '',
-      text: '',
-      buttonText: '',
-      buttonUrl: '#'
-    };
-  }
-  section.menuBottomCard.visible = checked === true;
-}
-
-function renderMenuListGroupsEditor(section, sectionIndex){
-  const groups = Array.isArray(section.menuGroups) ? section.menuGroups : [];
-
-  return `
-    <div class="actions" style="margin-bottom:10px;">
-      <button type="button" onclick="addMenuGroup(${sectionIndex})">カテゴリ追加</button>
-    </div>
-    ${groups.length === 0 ? '<div class="small">カテゴリがまだありません。</div>' : ''}
-    ${groups.map((group, groupIndex) => {
-      const key = getMenuGroupStateKey(section, groupIndex);
-      const isOpen = menuGroupOpenState[key] === true;
-      const visibleCount = Array.isArray(group.items) ? group.items.filter(item => item.visible !== false).length : 0;
-      return `
-        <div class="menu-group-editor ${isOpen ? 'is-open' : ''}">
-          <button type="button" class="menu-group-toggle" onclick="toggleMenuGroupEditor(this, ${sectionIndex}, ${groupIndex})">
-            <span class="menu-group-toggle-left">
-              <span class="menu-group-toggle-icon">${isOpen ? '▼' : '▶'}</span>
-              <span class="menu-group-toggle-title">${escapeHtml(group.title || `カテゴリ${groupIndex + 1}`)}</span>
-            </span>
-            <span class="menu-group-toggle-state">${visibleCount}件表示 / ${Array.isArray(group.items) ? group.items.length : 0}件</span>
-          </button>
-          <div class="menu-group-body">
-            <div class="actions" style="margin-bottom:10px;">
-              <button type="button" class="secondary small-btn" onclick="moveMenuGroupUp(${sectionIndex}, ${groupIndex})">↑ 上へ</button>
-              <button type="button" class="secondary small-btn" onclick="moveMenuGroupDown(${sectionIndex}, ${groupIndex})">↓ 下へ</button>
-              <button type="button" class="danger small-btn" onclick="removeMenuGroup(${sectionIndex}, ${groupIndex})">カテゴリ削除</button>
-            </div>
-
-            <div class="row">
-              <label>カテゴリ名</label>
-              <input type="text" value="${escapeAttr(group.title || '')}" oninput="updateMenuGroupField(${sectionIndex}, ${groupIndex}, 'title', this.value)">
-            </div>
-
-            <div class="actions" style="margin-bottom:10px;">
-              <button type="button" onclick="addMenuListItem(${sectionIndex}, ${groupIndex})">このカテゴリにメニュー追加</button>
-            </div>
-
-            ${(Array.isArray(group.items) && group.items.length) ? group.items.map((item, itemIndex) => `
-              <div class="menu-item-editor">
-                <div class="actions" style="margin-bottom:10px;">
-                  <button type="button" class="secondary small-btn" onclick="moveMenuListItemUp(${sectionIndex}, ${groupIndex}, ${itemIndex})">↑ 上へ</button>
-                  <button type="button" class="secondary small-btn" onclick="moveMenuListItemDown(${sectionIndex}, ${groupIndex}, ${itemIndex})">↓ 下へ</button>
-                  <button type="button" class="danger small-btn" onclick="removeMenuListItem(${sectionIndex}, ${groupIndex}, ${itemIndex})">削除</button>
-                </div>
-
-                <h4>メニュー ${itemIndex + 1}</h4>
-
-                <div class="grid2">
-                  <div class="row">
-                    <label>メニュー名</label>
-                    <input type="text" value="${escapeAttr(item.name || '')}" oninput="updateMenuListItemField(${sectionIndex}, ${groupIndex}, ${itemIndex}, 'name', this.value)">
-                  </div>
-                  <div class="row">
-                    <label>価格</label>
-                    <input type="text" value="${escapeAttr(item.price || '')}" oninput="updateMenuListItemField(${sectionIndex}, ${groupIndex}, ${itemIndex}, 'price', this.value)">
-                  </div>
-                  <div class="row" style="grid-column:1 / -1;">
-                    <label>説明</label>
-                    <textarea oninput="updateMenuListItemField(${sectionIndex}, ${groupIndex}, ${itemIndex}, 'description', this.value)">${escapeHtml(item.description || '')}</textarea>
-                  </div>
-                  <div class="row" style="grid-column:1 / -1;">
-                    <label>表示設定</label>
-                    <label class="inline-check">
-                      <input type="checkbox" ${item.visible !== false ? 'checked' : ''} onchange="updateMenuListItemVisible(${sectionIndex}, ${groupIndex}, ${itemIndex}, this.checked)">
-                      公開ページに表示する
-                    </label>
-                  </div>
-                </div>
-              </div>
-            `).join('') : '<div class="small">メニューがまだありません。</div>'}
-          </div>
-        </div>
-      `;
-    }).join('')}
-
-    <div class="menu-bottom-card-editor" style="margin-top:14px; border:1px solid #dcdcdc; border-radius:12px; background:#fff; padding:14px;">
-      <div style="font-weight:bold; margin-bottom:10px;">メニュー下部カード</div>
-      <div class="grid2">
-        <div class="row" style="grid-column:1 / -1;">
-          <label>表示設定</label>
-          <label class="inline-check">
-            <input type="checkbox" ${section.menuBottomCard?.visible === true ? 'checked' : ''} onchange="updateMenuBottomCardVisible(${sectionIndex}, this.checked)">
-            公開ページに表示する
-          </label>
-        </div>
-        <div class="row" style="grid-column:1 / -1;">
-          <label>カードタイトル</label>
-          <input type="text" value="${escapeAttr(section.menuBottomCard?.title || '')}" oninput="updateMenuBottomCardField(${sectionIndex}, 'title', this.value)">
-        </div>
-        <div class="row" style="grid-column:1 / -1;">
-          <label>カード本文</label>
-          <textarea oninput="updateMenuBottomCardField(${sectionIndex}, 'text', this.value)">${escapeHtml(section.menuBottomCard?.text || '')}</textarea>
-        </div></div>
-    </div>
-  `;
-}
-
-
 function renderSectionPreview(section){
   const titleAlign = section.titleAlign || 'left';
   const textAlign = section.textAlign || 'left';
@@ -2907,45 +2737,6 @@ function renderSectionPreview(section){
               <div>A ${escapeHtml(item.text || '')}</div>
             </div>
           `).join('') : '質問がまだありません。'}
-        </div>
-      </div>
-    `;
-  }
-
-  if(section.type === 'menu-list'){
-    const groups = Array.isArray(section.menuGroups) ? section.menuGroups : [];
-    const bottomCard = section.menuBottomCard && typeof section.menuBottomCard === 'object'
-      ? section.menuBottomCard
-      : { visible:false, title:'', text:'', buttonText:'', buttonUrl:'#' };
-    return `
-      <div class="section-preview-box" style="background:${escapeAttr(section.bgColor || '#ffffff')}">
-        <h3 class="section-preview-title align-${escapeAttr(titleAlign)}">${escapeHtml(section.title || 'タイトル見本')}</h3>
-        <div class="section-preview-text text-${escapeAttr(section.textSize || 'medium')} align-${escapeAttr(textAlign)}">
-          ${groups.length ? groups.map((group) => {
-            const items = Array.isArray(group.items) ? group.items.filter(item => item.visible !== false) : [];
-            return `
-              <div style="margin:0 0 12px 0; border:1px solid #ececec; border-radius:10px; overflow:hidden;">
-                <div style="padding:10px 12px; background:#f5f5f5; font-weight:bold;">${escapeHtml(group.title || '')}</div>
-                <div style="padding:10px 12px;">
-                  ${items.length ? items.map((item) => `
-                    <div style="margin-bottom:10px;">
-                      <div style="display:flex; justify-content:space-between; gap:12px;">
-                        <strong>${escapeHtml(item.name || '')}</strong>
-                        <span>${escapeHtml(item.price || '')}</span>
-                      </div>
-                      ${item.description ? `<div style="font-size:12px; color:#666; margin-top:4px;">${escapeHtml(item.description || '')}</div>` : ''}
-                    </div>
-                  `).join('') : '<div>表示メニューがありません。</div>'}
-                </div>
-              </div>
-            `;
-          }).join('') : 'カテゴリがまだありません。'}
-          ${bottomCard.visible ? `
-            <div style="margin-top:14px; border:1px solid #ececec; border-radius:10px; background:#fff; padding:14px;">
-              ${bottomCard.title ? `<div style="font-weight:bold; margin-bottom:8px;">${escapeHtml(bottomCard.title)}</div>` : ''}
-              ${bottomCard.text ? `<div style="font-size:14px; line-height:1.8; color:#444;">${escapeHtml(bottomCard.text)}</div>` : ''}
-            </div>
-          ` : ''}
         </div>
       </div>
     `;
@@ -3297,7 +3088,6 @@ function renderSectionsEditor(){
     const isSlider = section.type === 'slider';
     const isCards = ['card4','card3','card2'].includes(section.type);
     const isAccordion = section.type === 'accordion';
-    const isMenuList = section.type === 'menu-list';
     const hasSingleImage = ['normal','card1-right','card1-left'].includes(section.type);
     const fullAnchorUrl = buildFullAnchorUrl(section.sectionId || '');
 
@@ -3360,7 +3150,7 @@ function renderSectionsEditor(){
               </select>
             </div>
 
-            ${(!isCards && !isAccordion && !isMenuList) ? `
+            ${(!isCards && !isAccordion) ? `
             <div class="row" style="grid-column:1 / -1;">
               <label>説明文</label>
               <textarea oninput="updateSectionField(${index}, 'text', this.value)">${escapeHtml(section.text || '')}</textarea>
@@ -3430,12 +3220,6 @@ function renderSectionsEditor(){
             <div class="row" style="grid-column:1 / -1;">
               <label>質問編集</label>
               ${renderAccordionItemsEditor(section, index)}
-            </div>` : ''}
-
-            ${isMenuList ? `
-            <div class="row" style="grid-column:1 / -1;">
-              <label>カテゴリ・メニュー編集</label>
-              ${renderMenuListGroupsEditor(section, index)}
             </div>` : ''}
 
             <div class="row" style="grid-column:1 / -1;">
@@ -3547,29 +3331,6 @@ function normalizeSectionBeforeSave(section, index){
       link: item?.link || '#'
     }));
   }
-
-  if(Array.isArray(normalized.menuGroups)){
-    normalized.menuGroups = normalized.menuGroups.map((group, groupIndex) => ({
-      title: String(group?.title || `カテゴリ${groupIndex + 1}`).trim(),
-      open: group?.open !== false,
-      items: Array.isArray(group?.items) ? group.items.map((item) => ({
-        name: item?.name || '',
-        price: item?.price || '',
-        description: item?.description || '',
-        visible: item?.visible !== false
-      })) : []
-    }));
-  }else{
-    normalized.menuGroups = [];
-  }
-
-  normalized.menuBottomCard = {
-    visible: normalized.menuBottomCard?.visible === true,
-    title: normalized.menuBottomCard?.title || '',
-    text: normalized.menuBottomCard?.text || '',
-    buttonText: normalized.menuBottomCard?.buttonText || '',
-    buttonUrl: normalized.menuBottomCard?.buttonUrl || '#'
-  };
 
   if(!Array.isArray(normalized.images)){
     normalized.images = [];

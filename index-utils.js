@@ -162,6 +162,43 @@
     };
   }
 
+  function ensurePopupPatternShape(pattern, index){
+    return {
+      use: pattern?.use === true,
+      visible: pattern?.visible === true,
+      title: String(pattern?.title || '').trim(),
+      text: String(pattern?.text || '').trim(),
+      button1: {
+        visible: pattern?.button1?.visible === true,
+        text: String(pattern?.button1?.text || '').trim(),
+        url: String(pattern?.button1?.url || '#').trim() || '#'
+      },
+      button2: {
+        visible: pattern?.button2?.visible === true,
+        text: String(pattern?.button2?.text || '').trim(),
+        url: String(pattern?.button2?.url || '#').trim() || '#'
+      }
+    };
+  }
+
+  function ensurePopupSettingsShape(config){
+    const source = config && config.popupSettings && typeof config.popupSettings === 'object' ? config.popupSettings : {};
+    const patterns = Array.isArray(source.patterns) ? source.patterns.slice(0, 3) : [];
+    while(patterns.length < 3){
+      patterns.push({});
+    }
+    const normalizedPatterns = patterns.map((pattern, index) => ensurePopupPatternShape(pattern, index));
+    let hasActive = false;
+    normalizedPatterns.forEach((pattern) => {
+      if(pattern.use && !hasActive){
+        hasActive = true;
+      }else if(pattern.use && hasActive){
+        pattern.use = false;
+      }
+    });
+    return { patterns: normalizedPatterns };
+  }
+
   function ensureConfigShape(config){
     const topDefaults = ["ボタン1", "ボタン2", "ボタン3"];
     const footerDefaults = ["電話", "LINE", "予約"];
@@ -175,6 +212,7 @@
     config.logoImage = config.logoImage || "";
     config.headerBgColor = config.headerBgColor || "#ffffff";
     config.footerBgColor = config.footerBgColor || "#ffffff";
+    config.popupSettings = ensurePopupSettingsShape(config);
     return config;
   }
 
@@ -315,8 +353,7 @@
         bgColor: "#ffffff",
         alignY: "middle",
         titleAlign: "left",
-        textAlign: "left",
-        menuGroups: []
+        textAlign: "left"
       };
     }
 
@@ -336,8 +373,6 @@
 
     if(!Array.isArray(section.images)) section.images = [];
     if(!Array.isArray(section.items)) section.items = [];
-    if(!Array.isArray(section.menuGroups)) section.menuGroups = [];
-    if(!section.menuBottomCard || typeof section.menuBottomCard !== 'object') section.menuBottomCard = {};
 
     if(Array.isArray(section.items)){
       section.items = section.items.map((item) => ({
@@ -347,27 +382,6 @@
         link: item?.link || "#"
       }));
     }
-
-    if(Array.isArray(section.menuGroups)){
-      section.menuGroups = section.menuGroups.map((group, groupIndex) => ({
-        title: group?.title || `カテゴリ${groupIndex + 1}`,
-        open: group?.open !== false,
-        items: Array.isArray(group?.items) ? group.items.map((item) => ({
-          name: item?.name || "",
-          price: item?.price || "",
-          description: item?.description || "",
-          visible: item?.visible !== false
-        })) : []
-      }));
-    }
-
-    section.menuBottomCard = {
-      visible: section.menuBottomCard?.visible === true,
-      title: section.menuBottomCard?.title || "",
-      text: section.menuBottomCard?.text || "",
-      buttonText: section.menuBottomCard?.buttonText || "",
-      buttonUrl: section.menuBottomCard?.buttonUrl || "#"
-    };
 
     ensureSectionLinks(section);
     return section;
@@ -420,6 +434,7 @@
     escapeHtml: escapeHtml,
     escapeAttr: escapeAttr,
     ensureConfigShape: ensureConfigShape,
+    ensurePopupSettingsShape: ensurePopupSettingsShape,
     ensureSectionLinks: ensureSectionLinks,
     slugifySectionId: slugifySectionId,
     ensureUniqueSectionIds: ensureUniqueSectionIds,
