@@ -370,7 +370,7 @@
         "items": [
           {
             "name": "初乗り運賃料",
-            "price": "730円～",
+            "price": "730～円",
             "description": "最初の基本料金です。",
             "visible": true
           },
@@ -382,7 +382,7 @@
           },
           {
             "name": "特殊車両使用料",
-            "price": "1,000円",
+            "price": "1000円",
             "description": "〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇",
             "visible": true
           }
@@ -394,13 +394,13 @@
         "items": [
           {
             "name": "乗降介助",
-            "price": "¥1,000",
+            "price": "1,000円",
             "description": "院内付き添い等に対応します。",
             "visible": true
           },
           {
             "name": "身体介助",
-            "price": "",
+            "price": "1,600円",
             "description": "〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇",
             "visible": true
           }
@@ -442,7 +442,7 @@
           },
           {
             "name": "付き添い",
-            "price": "1,600円～",
+            "price": "1600円～",
             "description": "〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇",
             "visible": true
           }
