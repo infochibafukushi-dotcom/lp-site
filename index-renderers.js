@@ -152,6 +152,57 @@
     `;
   }
 
+
+  function renderMenuList(section){
+    const groups = Array.isArray(section.menuGroups) ? section.menuGroups : [];
+    const introHtml = section.text
+      ? `<p style="margin:0 0 18px 0; color:#6b7280; line-height:1.8; text-align:${window.IndexUtils.escapeAttr(section.textAlign || "left")};">${nl2brSafe(section.text || "")}</p>`
+      : "";
+
+    return `
+      <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#f7f5f0")}">
+        <div class="section-inner" style="max-width:880px;">
+          <div style="background:linear-gradient(135deg,#2d2a26 0%,#3d3830 100%); border-radius:20px 20px 0 0; padding:28px 24px; text-align:center; color:#f0ebe0; box-shadow:0 10px 30px rgba(0,0,0,0.08);">
+            <h2 class="section-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "center")}" style="margin:0; color:#f0ebe0;">${window.IndexUtils.escapeHtml(section.title || "メニュー")}</h2>
+          </div>
+          <div style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#f7f5f0")}; border:1px solid #e7dfd2; border-top:none; border-radius:0 0 20px 20px; padding:20px 14px 18px 14px; box-shadow:0 10px 30px rgba(45,42,38,0.06);">
+            ${introHtml}
+            <div style="display:grid; gap:14px;">
+              ${groups.length ? groups.map((group, groupIndex) => {
+                const groupItems = (Array.isArray(group.items) ? group.items : []).filter((item) => item.visible !== false);
+                return `
+                <div style="background:#ffffff; border:1px solid #e9e2d8; border-radius:16px; overflow:hidden;">
+                  <button
+                    type="button"
+                    aria-expanded="true"
+                    style="width:100%; border:none; background:#ffffff; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:18px 18px; text-align:left;"
+                    onclick="(function(btn){var panel=btn.nextElementSibling;var icon=btn.querySelector('[data-menu-icon]');var isOpen=btn.getAttribute('aria-expanded')==='true';btn.setAttribute('aria-expanded', isOpen ? 'false' : 'true');panel.style.display=isOpen ? 'none' : 'block';if(icon){icon.style.transform=isOpen ? 'rotate(-90deg)' : 'rotate(0deg)';}})(this)">
+                    <span style="font-size:20px; font-weight:700; line-height:1.4; color:#2d2a26;">${window.IndexUtils.escapeHtml(group.title || `カテゴリ${groupIndex + 1}`)}</span>
+                    <span data-menu-icon style="font-size:22px; color:#8b8b8b; transition:transform 0.25s ease;">⌄</span>
+                  </button>
+                  <div style="display:block; border-top:1px solid #f2ede5; padding:0 18px 8px 18px;">
+                    ${groupItems.length ? groupItems.map((item, itemIndex) => `
+                      <div style="padding:14px 0;${itemIndex < groupItems.length - 1 ? 'border-bottom:1px solid #f4f1eb;' : ''}">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:14px;">
+                          <div style="flex:1 1 auto; min-width:0;">
+                            <div style="font-size:16px; font-weight:600; color:#2d2a26; line-height:1.5;">${window.IndexUtils.escapeHtml(item.name || '')}</div>
+                            ${item.description ? `<div style="margin-top:6px; font-size:13px; color:#7b7b7b; line-height:1.7;">${nl2brSafe(item.description || '')}</div>` : ''}
+                          </div>
+                          <div style="flex:0 0 auto; font-size:16px; font-weight:700; color:#c9a96e; white-space:nowrap;">${window.IndexUtils.escapeHtml(item.price || '')}</div>
+                        </div>
+                      </div>
+                    `).join('') : `<div style="padding:14px 0; color:#888;">項目がまだありません</div>`}
+                  </div>
+                </div>`;
+              }).join('') : `<div style="background:#ffffff; border:1px dashed #d6d0c4; border-radius:16px; padding:18px; color:#777;">カテゴリがまだありません</div>`}
+            </div>
+            ${renderSectionBottomLinks(section)}
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
   function renderAccordion(section){
     const items = Array.isArray(section.items) ? section.items : [];
     const rows = items.map((it, i) => {
@@ -224,6 +275,8 @@
         return renderMedia(section, true);
       case "accordion":
         return renderAccordion(section);
+      case "menu-list":
+        return renderMenuList(section);
       default:
         return `
           <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section" style="background:#fff3cd">
