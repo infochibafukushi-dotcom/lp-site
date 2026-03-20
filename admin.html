@@ -1797,6 +1797,14 @@ function ensureSectionShape(section, index){
   if(!Array.isArray(section.items)) section.items = [];
   if(!Array.isArray(section.menuGroups)) section.menuGroups = [];
 
+  section.menuBottomCard = {
+    visible: section.menuBottomCard?.visible === true,
+    title: section.menuBottomCard?.title || 'ご予約・ご相談はこちら',
+    text: section.menuBottomCard?.text || '料金の詳細やご不明点はお気軽にお問い合わせください。',
+    buttonText: section.menuBottomCard?.buttonText || 'お問い合わせ',
+    buttonUrl: section.menuBottomCard?.buttonUrl || '#'
+  };
+
   if(Array.isArray(section.items)){
     section.items = section.items.map((item) => ({
       title: item?.title || '',
@@ -2275,14 +2283,7 @@ function createDefaultSection(type, title){
             { name:'メニュー名', price:'¥1,000', description:'説明文', visible:true }
           ]
         }
-      ],
-      menuBottomCard: {
-        visible: false,
-        title: 'ご予約・ご相談はこちら',
-        text: '料金の詳細やご不明点はお気軽にお問い合わせください。',
-        buttonText: 'お問い合わせ',
-        buttonUrl: '#'
-      }
+      ]
     };
   }
 
@@ -2562,16 +2563,6 @@ function renderSectionLinksEditor(sectionIndex, section){
 }
 
 
-
-function rerenderSectionsEditorPreserveScroll(){
-  const currentY = window.scrollY || window.pageYOffset || 0;
-  renderSectionsEditor();
-  renderSectionsSortList();
-  requestAnimationFrame(() => {
-    window.scrollTo(0, currentY);
-  });
-}
-
 function getMenuGroupStateKey(section, groupIndex){
   const sectionId = section?.id || 'section';
   return sectionId + '__group__' + groupIndex;
@@ -2582,7 +2573,7 @@ function toggleMenuGroupEditor(sectionIndex, groupIndex){
   if(!section) return;
   const key = getMenuGroupStateKey(section, groupIndex);
   menuGroupOpenState[key] = menuGroupOpenState[key] === true ? false : true;
-  rerenderSectionsEditorPreserveScroll();
+  renderSectionsEditor();
 }
 
 function updateMenuGroupField(sectionIndex, groupIndex, field, value){
@@ -2609,7 +2600,8 @@ function addMenuGroup(sectionIndex){
     menuGroupOpenState[getMenuGroupStateKey(section, section.menuGroups.length - 1)] = true;
   }
 
-  rerenderSectionsEditorPreserveScroll();
+  renderSectionsEditor();
+  renderSectionsSortList();
   setSectionsSaveResult('カテゴリを追加しました。最後に sections.json を保存してください。', 'success');
 }
 
@@ -2621,7 +2613,8 @@ function removeMenuGroup(sectionIndex, groupIndex){
   if(section.id){
     sectionOpenState[section.id] = true;
   }
-  rerenderSectionsEditorPreserveScroll();
+  renderSectionsEditor();
+  renderSectionsSortList();
   setSectionsSaveResult('カテゴリを削除しました。最後に sections.json を保存してください。', 'success');
 }
 
@@ -2636,7 +2629,8 @@ function moveMenuGroupUp(sectionIndex, groupIndex){
   if(section.id){
     sectionOpenState[section.id] = true;
   }
-  rerenderSectionsEditorPreserveScroll();
+  renderSectionsEditor();
+  renderSectionsSortList();
 }
 
 function moveMenuGroupDown(sectionIndex, groupIndex){
@@ -2649,7 +2643,8 @@ function moveMenuGroupDown(sectionIndex, groupIndex){
   if(section.id){
     sectionOpenState[section.id] = true;
   }
-  rerenderSectionsEditorPreserveScroll();
+  renderSectionsEditor();
+  renderSectionsSortList();
 }
 
 function updateMenuListItemField(sectionIndex, groupIndex, itemIndex, field, value){
@@ -2682,7 +2677,8 @@ function addMenuListItem(sectionIndex, groupIndex){
     menuGroupOpenState[getMenuGroupStateKey(section, groupIndex)] = true;
   }
 
-  rerenderSectionsEditorPreserveScroll();
+  renderSectionsEditor();
+  renderSectionsSortList();
   setSectionsSaveResult('メニューを追加しました。最後に sections.json を保存してください。', 'success');
 }
 
@@ -2699,7 +2695,8 @@ function removeMenuListItem(sectionIndex, groupIndex, itemIndex){
     menuGroupOpenState[getMenuGroupStateKey(section, groupIndex)] = true;
   }
 
-  rerenderSectionsEditorPreserveScroll();
+  renderSectionsEditor();
+  renderSectionsSortList();
   setSectionsSaveResult('メニューを削除しました。最後に sections.json を保存してください。', 'success');
 }
 
@@ -2719,7 +2716,8 @@ function moveMenuListItemUp(sectionIndex, groupIndex, itemIndex){
     menuGroupOpenState[getMenuGroupStateKey(section, groupIndex)] = true;
   }
 
-  rerenderSectionsEditorPreserveScroll();
+  renderSectionsEditor();
+  renderSectionsSortList();
 }
 
 function moveMenuListItemDown(sectionIndex, groupIndex, itemIndex){
@@ -2737,7 +2735,8 @@ function moveMenuListItemDown(sectionIndex, groupIndex, itemIndex){
     menuGroupOpenState[getMenuGroupStateKey(section, groupIndex)] = true;
   }
 
-  rerenderSectionsEditorPreserveScroll();
+  renderSectionsEditor();
+  renderSectionsSortList();
 }
 
 function renderMenuListGroupsEditor(section, sectionIndex){
@@ -2814,38 +2813,40 @@ function renderMenuListGroupsEditor(section, sectionIndex){
         </div>
       `;
     }).join('')}
-
-    <div class="menu-bottom-card-editor" style="margin-top:14px; border:1px solid #e5e7eb; border-radius:12px; padding:14px; background:#fafafa;">
-      <div style="font-weight:700; margin-bottom:10px;">メニュー下部カード</div>
-      <div class="grid2">
-        <div class="row" style="grid-column:1 / -1;">
-          <label>表示設定</label>
-          <label class="inline-check">
-            <input type="checkbox" ${section.menuBottomCard?.visible === true ? 'checked' : ''} onchange="updateMenuBottomCardVisible(${sectionIndex}, this.checked)">
-            公開ページに表示する
-          </label>
-        </div>
-        <div class="row" style="grid-column:1 / -1;">
-          <label>カードタイトル</label>
-          <input type="text" value="${escapeAttr(section.menuBottomCard?.title || '')}" oninput="updateMenuBottomCardField(${sectionIndex}, 'title', this.value)">
-        </div>
-        <div class="row" style="grid-column:1 / -1;">
-          <label>カード本文</label>
-          <textarea oninput="updateMenuBottomCardField(${sectionIndex}, 'text', this.value)">${escapeHtml(section.menuBottomCard?.text || '')}</textarea>
-        </div>
-        <div class="row">
-          <label>ボタン文字</label>
-          <input type="text" value="${escapeAttr(section.menuBottomCard?.buttonText || '')}" oninput="updateMenuBottomCardField(${sectionIndex}, 'buttonText', this.value)">
-        </div>
-        <div class="row">
-          <label>ボタンリンク</label>
-          <input type="text" value="${escapeAttr(section.menuBottomCard?.buttonUrl || '#')}" oninput="updateMenuBottomCardField(${sectionIndex}, 'buttonUrl', this.value)">
-        </div>
-      </div>
-    </div>
   `;
 }
 
+
+
+function updateMenuBottomCardField(sectionIndex, field, value){
+  const section = sectionsData[sectionIndex];
+  if(!section) return;
+  if(!section.menuBottomCard || typeof section.menuBottomCard !== 'object'){
+    section.menuBottomCard = {
+      visible: false,
+      title: 'ご予約・ご相談はこちら',
+      text: '料金の詳細やご不明点はお気軽にお問い合わせください。',
+      buttonText: 'お問い合わせ',
+      buttonUrl: '#'
+    };
+  }
+  section.menuBottomCard[field] = value;
+}
+
+function updateMenuBottomCardVisible(sectionIndex, checked){
+  const section = sectionsData[sectionIndex];
+  if(!section) return;
+  if(!section.menuBottomCard || typeof section.menuBottomCard !== 'object'){
+    section.menuBottomCard = {
+      visible: false,
+      title: 'ご予約・ご相談はこちら',
+      text: '料金の詳細やご不明点はお気軽にお問い合わせください。',
+      buttonText: 'お問い合わせ',
+      buttonUrl: '#'
+    };
+  }
+  section.menuBottomCard.visible = checked === true;
+}
 
 function renderSectionPreview(section){
   const titleAlign = section.titleAlign || 'left';
@@ -2893,6 +2894,13 @@ function renderSectionPreview(section){
               </div>
             `;
           }).join('') : 'カテゴリがまだありません。'}
+          ${section.menuBottomCard?.visible === true ? `
+            <div style="margin-top:12px; padding:14px; border:1px solid #e5e7eb; border-radius:12px; background:#fff;">
+              <div style="font-weight:700; margin-bottom:6px;">${escapeHtml(section.menuBottomCard?.title || '')}</div>
+              ${section.menuBottomCard?.text ? `<div style="font-size:13px; color:#475569; margin-bottom:10px; line-height:1.7;">${escapeHtml(section.menuBottomCard?.text || '')}</div>` : ''}
+              ${section.menuBottomCard?.buttonText ? `<div style="display:inline-block; padding:8px 14px; border-radius:999px; background:#0f172a; color:#fff; font-size:13px; font-weight:700;">${escapeHtml(section.menuBottomCard?.buttonText || '')}</div>` : ''}
+            </div>
+          ` : ''}
         </div>
       </div>
     `;
@@ -3509,14 +3517,6 @@ function normalizeSectionBeforeSave(section, index){
   }else{
     normalized.menuGroups = [];
   }
-
-  normalized.menuBottomCard = {
-    visible: normalized.menuBottomCard?.visible === true,
-    title: normalized.menuBottomCard?.title || '',
-    text: normalized.menuBottomCard?.text || '',
-    buttonText: normalized.menuBottomCard?.buttonText || '',
-    buttonUrl: normalized.menuBottomCard?.buttonUrl || '#'
-  };
 
   if(!Array.isArray(normalized.images)){
     normalized.images = [];
