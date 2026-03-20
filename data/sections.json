@@ -366,6 +366,7 @@
     "menuGroups": [
       {
         "title": "基本料金",
+        "open": true,
         "items": [
           {
             "name": "初乗り運賃料",
@@ -389,6 +390,7 @@
       },
       {
         "title": "介助",
+        "open": true,
         "items": [
           {
             "name": "乗降介助",
