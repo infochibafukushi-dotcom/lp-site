@@ -389,7 +389,7 @@
         ]
       },
       {
-        "title": "介助",
+        "title": "介助料金",
         "open": true,
         "items": [
           {
@@ -402,6 +402,30 @@
             "name": "身体介助",
             "price": "",
             "description": "〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇",
+            "visible": true
+          }
+        ]
+      },
+      {
+        "title": "機材レンタル料",
+        "open": true,
+        "items": [
+          {
+            "name": "",
+            "price": "",
+            "description": "",
+            "visible": true
+          }
+        ]
+      },
+      {
+        "title": "その他",
+        "open": true,
+        "items": [
+          {
+            "name": "",
+            "price": "",
+            "description": "",
             "visible": true
           }
         ]
