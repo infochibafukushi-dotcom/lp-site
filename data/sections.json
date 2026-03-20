@@ -34,7 +34,14 @@
         "visible": false
       }
     ],
-    "menuGroups": []
+    "menuGroups": [],
+    "menuBottomCard": {
+      "visible": false,
+      "title": "",
+      "text": "",
+      "buttonText": "",
+      "buttonUrl": "#"
+    }
   },
   {
     "id": "section-001",
@@ -69,7 +76,14 @@
         "visible": false
       }
     ],
-    "menuGroups": []
+    "menuGroups": [],
+    "menuBottomCard": {
+      "visible": false,
+      "title": "",
+      "text": "",
+      "buttonText": "",
+      "buttonUrl": "#"
+    }
   },
   {
     "id": "section-1773049874928",
@@ -123,7 +137,14 @@
         "visible": false
       }
     ],
-    "menuGroups": []
+    "menuGroups": [],
+    "menuBottomCard": {
+      "visible": false,
+      "title": "",
+      "text": "",
+      "buttonText": "",
+      "buttonUrl": "#"
+    }
   },
   {
     "id": "section-1773231572547",
@@ -177,7 +198,14 @@
         "visible": false
       }
     ],
-    "menuGroups": []
+    "menuGroups": [],
+    "menuBottomCard": {
+      "visible": false,
+      "title": "",
+      "text": "",
+      "buttonText": "",
+      "buttonUrl": "#"
+    }
   },
   {
     "id": "section-1773062931061",
@@ -237,7 +265,14 @@
         "visible": false
       }
     ],
-    "menuGroups": []
+    "menuGroups": [],
+    "menuBottomCard": {
+      "visible": false,
+      "title": "",
+      "text": "",
+      "buttonText": "",
+      "buttonUrl": "#"
+    }
   },
   {
     "id": "section-1773231943645",
@@ -272,7 +307,14 @@
         "visible": false
       }
     ],
-    "menuGroups": []
+    "menuGroups": [],
+    "menuBottomCard": {
+      "visible": false,
+      "title": "",
+      "text": "",
+      "buttonText": "",
+      "buttonUrl": "#"
+    }
   },
   {
     "id": "section-1773246058130",
@@ -332,7 +374,14 @@
         "visible": false
       }
     ],
-    "menuGroups": []
+    "menuGroups": [],
+    "menuBottomCard": {
+      "visible": false,
+      "title": "",
+      "text": "",
+      "buttonText": "",
+      "buttonUrl": "#"
+    }
   },
   {
     "id": "section-1773980387814",
@@ -452,7 +501,14 @@
     "image": "",
     "link": "#",
     "images": [],
-    "items": []
+    "items": [],
+    "menuBottomCard": {
+      "visible": false,
+      "title": "",
+      "text": "",
+      "buttonText": "",
+      "buttonUrl": "#"
+    }
   },
   {
     "id": "section-1773246274578",
@@ -506,7 +562,14 @@
         "visible": false
       }
     ],
-    "menuGroups": []
+    "menuGroups": [],
+    "menuBottomCard": {
+      "visible": false,
+      "title": "",
+      "text": "",
+      "buttonText": "",
+      "buttonUrl": "#"
+    }
   },
   {
     "id": "section-1773246586759",
@@ -541,7 +604,14 @@
         "visible": false
       }
     ],
-    "menuGroups": []
+    "menuGroups": [],
+    "menuBottomCard": {
+      "visible": false,
+      "title": "",
+      "text": "",
+      "buttonText": "",
+      "buttonUrl": "#"
+    }
   },
   {
     "id": "section-1773579425987",
@@ -601,7 +671,14 @@
     "image": "",
     "link": "#",
     "images": [],
-    "menuGroups": []
+    "menuGroups": [],
+    "menuBottomCard": {
+      "visible": false,
+      "title": "",
+      "text": "",
+      "buttonText": "",
+      "buttonUrl": "#"
+    }
   },
   {
     "id": "section-1773060504302",
@@ -636,7 +713,14 @@
         "visible": false
       }
     ],
-    "menuGroups": []
+    "menuGroups": [],
+    "menuBottomCard": {
+      "visible": false,
+      "title": "",
+      "text": "",
+      "buttonText": "",
+      "buttonUrl": "#"
+    }
   },
   {
     "id": "section-1773060508054",
@@ -671,7 +755,14 @@
         "visible": false
       }
     ],
-    "menuGroups": []
+    "menuGroups": [],
+    "menuBottomCard": {
+      "visible": false,
+      "title": "",
+      "text": "",
+      "buttonText": "",
+      "buttonUrl": "#"
+    }
   },
   {
     "id": "section-1773401444426",
@@ -706,6 +797,13 @@
         "visible": false
       }
     ],
-    "menuGroups": []
+    "menuGroups": [],
+    "menuBottomCard": {
+      "visible": false,
+      "title": "",
+      "text": "",
+      "buttonText": "",
+      "buttonUrl": "#"
+    }
   }
 ]
