@@ -496,18 +496,6 @@
             "visible": true
           }
         ]
-      },
-      {
-        "title": "カテゴリ5",
-        "open": true,
-        "items": [
-          {
-            "name": "",
-            "price": "",
-            "description": "※〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇\n※〇〇〇〇〇〇\n※〇〇〇〇〇〇〇〇〇〇〇〇\n※〇〇〇〇〇〇",
-            "visible": true
-          }
-        ]
       }
     ],
     "image": "",
