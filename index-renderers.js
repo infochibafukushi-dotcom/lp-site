@@ -200,6 +200,59 @@
     `;
   }
 
+  function renderMenuList(section){
+    const groups = Array.isArray(section.menuGroups) ? section.menuGroups : [];
+
+    const catButtons = groups.length
+      ? `<div class="w-full" style="position:sticky;top:0;z-index:20;background:#f7f5f0;border-bottom:1px solid #e0dbd2;"><div class="max-w-lg mx-auto px-4 py-3" style="display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;">${groups.map((group, idx) => `<button type="button" style="scroll-snap-align:start;white-space:nowrap;padding:6px 16px;border-radius:9999px;font-size:12px;font-weight:500;transition:.2s;background:#2d2a26;color:#f0ebe0;border:none;cursor:pointer;" onclick="(function(){var el=document.getElementById('menu-list-cat-${idx}');if(el){el.scrollIntoView({behavior:'smooth',block:'start'});}})()">${window.IndexUtils.escapeHtml(group.category || `カテゴリ${idx + 1}`)}</button>`).join("")}</div></div>`
+      : "";
+
+    const body = groups.length
+      ? groups.map((group, idx) => {
+          const items = Array.isArray(group.items) ? group.items : [];
+          return `
+            <div id="menu-list-cat-${idx}" class="mb-5" style="border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06);background:#fff;">
+              <button
+                type="button"
+                style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:16px 20px;text-align:left;border:none;background:#fff;cursor:pointer;"
+                aria-expanded="true"
+                onclick="(function(btn){var body=btn.nextElementSibling;var icon=btn.querySelector('[data-menu-chevron]');var isOpen=btn.getAttribute('aria-expanded')==='true';if(isOpen){body.style.display='none';btn.setAttribute('aria-expanded','false');if(icon){icon.style.transform='rotate(-90deg)';}}else{body.style.display='block';btn.setAttribute('aria-expanded','true');if(icon){icon.style.transform='rotate(0deg)';}}})(this)">
+                <span style="font-family:'Noto Serif JP',serif;font-weight:700;font-size:16px;color:#2d2a26;">${window.IndexUtils.escapeHtml(group.category || `カテゴリ${idx + 1}`)}</span>
+                <span data-menu-chevron style="width:18px;height:18px;color:#999;display:inline-flex;align-items:center;justify-content:center;transition:transform .3s;">⌄</span>
+              </button>
+              <div style="display:block;">
+                <div style="padding:0 20px 16px 20px;border-top:1px solid #f0ebe0;">
+                  ${items.length ? items.map((item, itemIdx) => `
+                    <div style="padding:12px 0;${itemIdx < items.length - 1 ? 'border-bottom:1px solid #f5f3ee;' : ''}${item.visible === false ? 'opacity:.45;' : ''}">
+                      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+                        <span style="font-weight:500;font-size:14px;color:#2d2a26;">${window.IndexUtils.escapeHtml(item.name || '')}</span>
+                        <span style="font-weight:700;font-size:14px;white-space:nowrap;color:#c9a96e;">${window.IndexUtils.escapeHtml(item.price || '')}</span>
+                      </div>
+                      ${item.description ? `<p style="margin:6px 0 0 0;font-size:12px;line-height:1.6;color:#888;">${window.IndexUtils.escapeHtml(item.description || '')}</p>` : ''}
+                    </div>
+                  `).join("") : `<div style="padding:14px 0;font-size:13px;color:#999;">メニューはまだありません</div>`}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("")
+      : `<p class="section-text">メニューはまだ登録されていません</p>`;
+
+    return `
+      <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#f7f5f0")}">
+        <div class="section-inner" style="max-width:720px;">
+          <h2 class="section-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "left")}" style="margin-bottom:16px;">${window.IndexUtils.escapeHtml(section.title || "料金表")}</h2>
+          ${section.text ? `<p class="section-text text-${window.IndexUtils.escapeAttr(section.textSize || "medium")} text-${window.IndexUtils.escapeAttr(section.textAlign || "left")}" style="margin-bottom:18px;">${window.IndexUtils.escapeHtml(section.text || "")}</p>` : ""}
+        </div>
+        ${catButtons}
+        <div class="section-inner" style="max-width:720px;padding-top:24px;">
+          ${body}
+          ${renderSectionBottomLinks(section)}
+        </div>
+      </section>
+    `;
+  }
+
   function renderSection(section, idx){
     section = window.IndexUtils.ensureSectionShape(section, idx);
 
