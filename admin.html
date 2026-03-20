@@ -2570,12 +2570,37 @@ function getMenuGroupStateKey(section, groupIndex){
   return sectionId + '__group__' + groupIndex;
 }
 
-function toggleMenuGroupEditor(sectionIndex, groupIndex){
+function toggleMenuGroupEditor(sectionIndex, groupIndex, event){
+  if(event){
+    if(typeof event.preventDefault === 'function') event.preventDefault();
+    if(typeof event.stopPropagation === 'function') event.stopPropagation();
+  }
+  captureSectionOpenStates();
   const section = sectionsData[sectionIndex];
   if(!section) return;
+  if(section.id){
+    sectionOpenState[section.id] = true;
+  }
   const key = getMenuGroupStateKey(section, groupIndex);
   menuGroupOpenState[key] = menuGroupOpenState[key] === true ? false : true;
-  rerenderSectionsEditorPreserveScroll();
+
+  renderSectionsEditor();
+  renderSectionsSortList();
+
+  requestAnimationFrame(() => {
+    const selector = '[data-section-id="' + CSS.escape(section.id || '') + '"]';
+    const card = document.querySelector('#sectionsEditor ' + selector);
+    if(!card) return;
+    const body = card.querySelector('.section-body');
+    if(body && body.style.display === 'none' && window.AdminCollapse && typeof window.AdminCollapse.toggleCard === 'function'){
+      window.AdminCollapse.toggleCard(card, true);
+    }
+    const menuButtons = card.querySelectorAll('.menu-group-toggle');
+    const targetButton = menuButtons[groupIndex];
+    if(targetButton && typeof targetButton.scrollIntoView === 'function'){
+      targetButton.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    }
+  });
 }
 
 function updateMenuGroupField(sectionIndex, groupIndex, field, value){
@@ -2747,7 +2772,7 @@ function renderMenuListGroupsEditor(section, sectionIndex){
       const visibleCount = Array.isArray(group.items) ? group.items.filter(item => item.visible !== false).length : 0;
       return `
         <div class="menu-group-editor ${isOpen ? 'is-open' : ''}">
-          <button type="button" class="menu-group-toggle" onclick="toggleMenuGroupEditor(${sectionIndex}, ${groupIndex})">
+          <button type="button" class="menu-group-toggle" onclick="toggleMenuGroupEditor(${sectionIndex}, ${groupIndex}, event)">
             <span class="menu-group-toggle-left">
               <span class="menu-group-toggle-icon">${isOpen ? '▼' : '▶'}</span>
               <span class="menu-group-toggle-title">${escapeHtml(group.title || `カテゴリ${groupIndex + 1}`)}</span>
