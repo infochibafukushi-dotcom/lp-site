@@ -435,9 +435,15 @@
         "open": true,
         "items": [
           {
-            "name": "",
-            "price": "",
-            "description": "",
+            "name": "待機",
+            "price": "800～",
+            "description": "〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇",
+            "visible": true
+          },
+          {
+            "name": "付き添い",
+            "price": "1600～",
+            "description": "〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇",
             "visible": true
           }
         ]
