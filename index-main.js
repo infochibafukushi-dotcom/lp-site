@@ -53,7 +53,7 @@
     ].filter(Boolean).join("");
 
     overlay.innerHTML = `
-      <div style="width:min(100%, 420px);background:#ffffff;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,0.22);padding:18px 18px 16px;position:relative;">
+      <div style="width:min(100%, 420px);max-width:420px;background:#ffffff;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,0.22);padding:18px 18px 16px;position:relative;" class="site-popup-card">
         <button type="button" id="sitePopupClose" aria-label="閉じる" style="position:absolute;top:10px;right:10px;border:none;background:transparent;color:#666;font-size:28px;line-height:1;cursor:pointer;padding:4px 8px;">×</button>
         <div style="padding:6px 8px 4px;">
           <div style="font-size:22px;line-height:1.5;font-weight:700;color:#c62828;white-space:pre-line;word-break:break-word;">${window.IndexUtils.escapeHtml(pattern.title || "")}</div>
@@ -71,6 +71,9 @@
       .site-popup-btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 16px;border-radius:999px;text-decoration:none;font-weight:700;font-size:14px;}
       .site-popup-btn.primary{background:#0d47a1;color:#fff;}
       .site-popup-btn.secondary{background:#f5f5f5;color:#222;border:1px solid #ddd;}
+      @media (min-width: 769px){
+        .site-popup-card{width:520px !important;max-width:520px !important;}
+      }
       @media (max-width: 768px){
         .site-popup-btn{flex:1 1 100%;}
       }
