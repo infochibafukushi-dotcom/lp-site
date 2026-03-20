@@ -370,19 +370,19 @@
         "items": [
           {
             "name": "初乗り運賃料",
-            "price": "730～",
+            "price": "730円～",
             "description": "最初の基本料金です。",
             "visible": true
           },
           {
             "name": "予約配車料",
-            "price": "800",
+            "price": "800円",
             "description": "お迎え場所までの料金です。",
             "visible": true
           },
           {
             "name": "特殊車両使用料",
-            "price": "1000",
+            "price": "1,000円",
             "description": "〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇",
             "visible": true
           }
@@ -412,19 +412,19 @@
         "items": [
           {
             "name": "車いす",
-            "price": "0",
+            "price": "0円",
             "description": "〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇",
             "visible": true
           },
           {
             "name": "リクライニング車いす",
-            "price": "2500",
+            "price": "2,500円",
             "description": "〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇",
             "visible": true
           },
           {
             "name": "ストレッチャー",
-            "price": "5000",
+            "price": "5,000円",
             "description": "〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇",
             "visible": true
           }
@@ -436,13 +436,13 @@
         "items": [
           {
             "name": "待機",
-            "price": "800～",
+            "price": "800円～",
             "description": "〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇",
             "visible": true
           },
           {
             "name": "付き添い",
-            "price": "1600～",
+            "price": "1,600円～",
             "description": "〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇",
             "visible": true
           }
