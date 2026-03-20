@@ -37,9 +37,9 @@
     "menuGroups": [],
     "menuBottomCard": {
       "visible": false,
-      "title": "",
-      "text": "",
-      "buttonText": "",
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。",
+      "buttonText": "お問い合わせ",
       "buttonUrl": "#"
     }
   },
@@ -79,9 +79,9 @@
     "menuGroups": [],
     "menuBottomCard": {
       "visible": false,
-      "title": "",
-      "text": "",
-      "buttonText": "",
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。",
+      "buttonText": "お問い合わせ",
       "buttonUrl": "#"
     }
   },
@@ -140,9 +140,9 @@
     "menuGroups": [],
     "menuBottomCard": {
       "visible": false,
-      "title": "",
-      "text": "",
-      "buttonText": "",
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。",
+      "buttonText": "お問い合わせ",
       "buttonUrl": "#"
     }
   },
@@ -201,9 +201,9 @@
     "menuGroups": [],
     "menuBottomCard": {
       "visible": false,
-      "title": "",
-      "text": "",
-      "buttonText": "",
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。",
+      "buttonText": "お問い合わせ",
       "buttonUrl": "#"
     }
   },
@@ -268,9 +268,9 @@
     "menuGroups": [],
     "menuBottomCard": {
       "visible": false,
-      "title": "",
-      "text": "",
-      "buttonText": "",
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。",
+      "buttonText": "お問い合わせ",
       "buttonUrl": "#"
     }
   },
@@ -310,9 +310,9 @@
     "menuGroups": [],
     "menuBottomCard": {
       "visible": false,
-      "title": "",
-      "text": "",
-      "buttonText": "",
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。",
+      "buttonText": "お問い合わせ",
       "buttonUrl": "#"
     }
   },
@@ -377,9 +377,9 @@
     "menuGroups": [],
     "menuBottomCard": {
       "visible": false,
-      "title": "",
-      "text": "",
-      "buttonText": "",
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。",
+      "buttonText": "お問い合わせ",
       "buttonUrl": "#"
     }
   },
@@ -496,6 +496,18 @@
             "visible": true
           }
         ]
+      },
+      {
+        "title": "カテゴリ5",
+        "open": true,
+        "items": [
+          {
+            "name": "",
+            "price": "",
+            "description": "※〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇\n※〇〇〇〇〇〇\n※〇〇〇〇〇〇〇〇〇〇〇〇\n※〇〇〇〇〇〇",
+            "visible": true
+          }
+        ]
       }
     ],
     "image": "",
@@ -504,9 +516,9 @@
     "items": [],
     "menuBottomCard": {
       "visible": false,
-      "title": "",
-      "text": "",
-      "buttonText": "",
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。",
+      "buttonText": "お問い合わせ",
       "buttonUrl": "#"
     }
   },
@@ -565,9 +577,9 @@
     "menuGroups": [],
     "menuBottomCard": {
       "visible": false,
-      "title": "",
-      "text": "",
-      "buttonText": "",
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。",
+      "buttonText": "お問い合わせ",
       "buttonUrl": "#"
     }
   },
@@ -607,9 +619,9 @@
     "menuGroups": [],
     "menuBottomCard": {
       "visible": false,
-      "title": "",
-      "text": "",
-      "buttonText": "",
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。",
+      "buttonText": "お問い合わせ",
       "buttonUrl": "#"
     }
   },
@@ -674,9 +686,9 @@
     "menuGroups": [],
     "menuBottomCard": {
       "visible": false,
-      "title": "",
-      "text": "",
-      "buttonText": "",
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。",
+      "buttonText": "お問い合わせ",
       "buttonUrl": "#"
     }
   },
@@ -716,9 +728,9 @@
     "menuGroups": [],
     "menuBottomCard": {
       "visible": false,
-      "title": "",
-      "text": "",
-      "buttonText": "",
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。",
+      "buttonText": "お問い合わせ",
       "buttonUrl": "#"
     }
   },
@@ -758,9 +770,9 @@
     "menuGroups": [],
     "menuBottomCard": {
       "visible": false,
-      "title": "",
-      "text": "",
-      "buttonText": "",
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。",
+      "buttonText": "お問い合わせ",
       "buttonUrl": "#"
     }
   },
@@ -800,9 +812,9 @@
     "menuGroups": [],
     "menuBottomCard": {
       "visible": false,
-      "title": "",
-      "text": "",
-      "buttonText": "",
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。",
+      "buttonText": "お問い合わせ",
       "buttonUrl": "#"
     }
   }
