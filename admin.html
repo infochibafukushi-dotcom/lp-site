@@ -1155,7 +1155,7 @@ body{
       <span class="toggle-state">閉じています</span>
     </button>
     <div class="card-body js-card-body">
-      <p class="note">8種類を簡単に追加できます。追加後に sections.json を保存してください。</p>
+      <p class="note">9種類を簡単に追加できます。追加後に sections.json を保存してください。</p>
 
       <div class="grid2">
         <div class="row">
@@ -1169,6 +1169,7 @@ body{
             <option value="card1-right">card1-right</option>
             <option value="card1-left">card1-left</option>
             <option value="accordion">accordion</option>
+            <option value="menu-list">menu-list</option>
           </select>
         </div>
         <div class="row">
@@ -1731,6 +1732,19 @@ function ensureSectionShape(section, index){
     }));
   }
 
+  if(!Array.isArray(section.menuGroups)) section.menuGroups = [];
+  if(Array.isArray(section.menuGroups)){
+    section.menuGroups = section.menuGroups.map((group, groupIndex) => ({
+      title: group?.title || `カテゴリ${groupIndex + 1}`,
+      items: Array.isArray(group?.items) ? group.items.map((item) => ({
+        name: item?.name || '',
+        price: item?.price || '',
+        description: item?.description || '',
+        visible: item?.visible !== false
+      })) : []
+    }));
+  }
+
   ensureSectionLinks(section);
   return section;
 }
@@ -2073,6 +2087,8 @@ function createDefaultSection(type, title){
     type === 'card3' ? '新しいカード3' :
     type === 'card2' ? '新しいカード2' :
     type === 'card1-right' ? '新しいカード1右' :
+    type === 'accordion' ? '新しいアコーディオン' :
+    type === 'menu-list' ? '新しい料金メニュー' :
     '新しいカード1左'
   );
   const id = 'section-' + Date.now();
@@ -2170,6 +2186,30 @@ function createDefaultSection(type, title){
         { title:'質問1', text:'回答を入力してください。', image:'', link:'#' },
         { title:'質問2', text:'回答を入力してください。', image:'', link:'#' },
         { title:'質問3', text:'回答を入力してください。', image:'', link:'#' }
+      ]
+    };
+  }
+
+  if(type === 'menu-list'){
+    return {
+      ...base,
+      type: 'menu-list',
+      text: '料金やメニュー内容をカテゴリごとに掲載できます。',
+      bgColor: '#f7f5f0',
+      menuGroups: [
+        {
+          title: '基本料金',
+          items: [
+            { name:'初乗り', price:'¥500', description:'最初の基本料金です。', visible:true },
+            { name:'迎車料', price:'¥300', description:'お迎え場所までの料金です。', visible:true }
+          ]
+        },
+        {
+          title: 'オプション',
+          items: [
+            { name:'付き添い', price:'¥1,000', description:'院内付き添い等に対応します。', visible:true }
+          ]
+        }
       ]
     };
   }
@@ -2452,6 +2492,34 @@ function renderSectionLinksEditor(sectionIndex, section){
 function renderSectionPreview(section){
   const titleAlign = section.titleAlign || 'left';
   const textAlign = section.textAlign || 'left';
+
+  if(section.type === 'menu-list'){
+    const groups = Array.isArray(section.menuGroups) ? section.menuGroups : [];
+    return `
+      <div class="section-preview-box" style="background:${escapeAttr(section.bgColor || '#f7f5f0')}">
+        <h3 class="section-preview-title align-${escapeAttr(titleAlign)}">${escapeHtml(section.title || '料金メニュー')}</h3>
+        <p class="section-preview-text text-${escapeAttr(section.textSize || 'medium')} align-${escapeAttr(textAlign)}">${escapeHtml(section.text || '')}</p>
+        <div style="margin-top:14px; display:grid; gap:12px;">
+          ${groups.length ? groups.map((group) => `
+            <div style="background:#ffffff; border:1px solid #e5ddd0; border-radius:12px; overflow:hidden;">
+              <div style="padding:12px 14px; font-weight:700; background:#faf7f1;">${escapeHtml(group.title || 'カテゴリ')}</div>
+              <div style="padding:12px 14px; display:grid; gap:10px;">
+                ${(Array.isArray(group.items) ? group.items : []).filter((item) => item.visible !== false).map((item) => `
+                  <div style="padding-bottom:10px; border-bottom:1px solid #f0ebe0;">
+                    <div style="display:flex; justify-content:space-between; gap:10px; font-weight:700;">
+                      <span>${escapeHtml(item.name || '')}</span>
+                      <span style="color:#b7791f; white-space:nowrap;">${escapeHtml(item.price || '')}</span>
+                    </div>
+                    ${item.description ? `<div style="margin-top:6px; color:#666; font-size:13px;">${escapeHtml(item.description || '')}</div>` : ''}
+                  </div>
+                `).join('') || '<div class="small">項目がまだありません。</div>'}
+              </div>
+            </div>
+          `).join('') : '<div class="small">カテゴリがまだありません。</div>'}
+        </div>
+      </div>
+    `;
+  }
 
   if(section.type === 'accordion'){
     const items = Array.isArray(section.items) ? section.items : [];
@@ -2769,6 +2837,65 @@ function renderCardItemsEditor(section, sectionIndex){
   `).join('');
 }
 
+function renderMenuGroupsEditor(section, sectionIndex){
+  const groups = Array.isArray(section.menuGroups) ? section.menuGroups : [];
+
+  return `
+    <div class="actions" style="margin-bottom:10px;">
+      <button type="button" onclick="addMenuGroup(${sectionIndex})">カテゴリを追加</button>
+    </div>
+    ${groups.length === 0 ? '<div class="small">カテゴリがまだありません。</div>' : ''}
+    ${groups.map((group, groupIndex) => `
+      <div class="card-item-editor">
+        <div class="actions" style="margin-bottom:10px;">
+          <button type="button" class="secondary small-btn" onclick="moveMenuGroupUp(${sectionIndex}, ${groupIndex})">↑ 上へ</button>
+          <button type="button" class="secondary small-btn" onclick="moveMenuGroupDown(${sectionIndex}, ${groupIndex})">↓ 下へ</button>
+          <button type="button" class="danger small-btn" onclick="removeMenuGroup(${sectionIndex}, ${groupIndex})">削除</button>
+        </div>
+
+        <div class="row">
+          <label>カテゴリ名</label>
+          <input type="text" value="${escapeAttr(group.title || '')}" oninput="updateMenuGroupField(${sectionIndex}, ${groupIndex}, 'title', this.value)">
+        </div>
+
+        <div class="actions" style="margin-bottom:10px;">
+          <button type="button" onclick="addMenuItem(${sectionIndex}, ${groupIndex})">このカテゴリに項目を追加</button>
+        </div>
+
+        ${(Array.isArray(group.items) ? group.items : []).length === 0 ? '<div class="small">メニュー項目がまだありません。</div>' : ''}
+        ${(Array.isArray(group.items) ? group.items : []).map((item, itemIndex) => `
+          <div class="card-item-editor" style="margin-top:10px; background:#fafafa;">
+            <div class="actions" style="margin-bottom:10px;">
+              <button type="button" class="secondary small-btn" onclick="moveMenuItemUp(${sectionIndex}, ${groupIndex}, ${itemIndex})">↑ 上へ</button>
+              <button type="button" class="secondary small-btn" onclick="moveMenuItemDown(${sectionIndex}, ${groupIndex}, ${itemIndex})">↓ 下へ</button>
+              <button type="button" class="danger small-btn" onclick="removeMenuItem(${sectionIndex}, ${groupIndex}, ${itemIndex})">削除</button>
+            </div>
+
+            <div class="grid2">
+              <div class="row">
+                <label>項目名</label>
+                <input type="text" value="${escapeAttr(item.name || '')}" oninput="updateMenuItemField(${sectionIndex}, ${groupIndex}, ${itemIndex}, 'name', this.value)">
+              </div>
+              <div class="row">
+                <label>価格</label>
+                <input type="text" value="${escapeAttr(item.price || '')}" oninput="updateMenuItemField(${sectionIndex}, ${groupIndex}, ${itemIndex}, 'price', this.value)">
+              </div>
+              <div class="row" style="grid-column:1 / -1;">
+                <label>説明</label>
+                <textarea oninput="updateMenuItemField(${sectionIndex}, ${groupIndex}, ${itemIndex}, 'description', this.value)">${escapeHtml(item.description || '')}</textarea>
+              </div>
+              <div class="row">
+                <label>表示する</label>
+                <label class="checkline"><input type="checkbox" ${item.visible !== false ? 'checked' : ''} onchange="updateMenuItemVisible(${sectionIndex}, ${groupIndex}, ${itemIndex}, this.checked)"> 表示する</label>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `).join('')}
+  `;
+}
+
 function renderAccordionItemsEditor(section, sectionIndex){
   const items = Array.isArray(section.items) ? section.items : [];
 
@@ -2801,6 +2928,110 @@ function renderAccordionItemsEditor(section, sectionIndex){
   `;
 }
 
+
+function addMenuGroup(sectionIndex){
+  const section = sectionsData[sectionIndex];
+  if(!section) return;
+  if(!Array.isArray(section.menuGroups)) section.menuGroups = [];
+  section.menuGroups.push({
+    title: '新しいカテゴリ',
+    items: [
+      { name:'新しい項目', price:'', description:'', visible:true }
+    ]
+  });
+  markSectionsDirty();
+  renderSectionsEditor();
+}
+
+function removeMenuGroup(sectionIndex, groupIndex){
+  const section = sectionsData[sectionIndex];
+  if(!section || !Array.isArray(section.menuGroups)) return;
+  section.menuGroups.splice(groupIndex, 1);
+  markSectionsDirty();
+  renderSectionsEditor();
+}
+
+function moveMenuGroupUp(sectionIndex, groupIndex){
+  if(groupIndex <= 0) return;
+  const section = sectionsData[sectionIndex];
+  if(!section || !Array.isArray(section.menuGroups)) return;
+  const tmp = section.menuGroups[groupIndex - 1];
+  section.menuGroups[groupIndex - 1] = section.menuGroups[groupIndex];
+  section.menuGroups[groupIndex] = tmp;
+  markSectionsDirty();
+  renderSectionsEditor();
+}
+
+function moveMenuGroupDown(sectionIndex, groupIndex){
+  const section = sectionsData[sectionIndex];
+  if(!section || !Array.isArray(section.menuGroups)) return;
+  if(groupIndex >= section.menuGroups.length - 1) return;
+  const tmp = section.menuGroups[groupIndex + 1];
+  section.menuGroups[groupIndex + 1] = section.menuGroups[groupIndex];
+  section.menuGroups[groupIndex] = tmp;
+  markSectionsDirty();
+  renderSectionsEditor();
+}
+
+function updateMenuGroupField(sectionIndex, groupIndex, field, value){
+  const section = sectionsData[sectionIndex];
+  if(!section || !Array.isArray(section.menuGroups) || !section.menuGroups[groupIndex]) return;
+  section.menuGroups[groupIndex][field] = value;
+  markSectionsDirty();
+}
+
+function addMenuItem(sectionIndex, groupIndex){
+  const section = sectionsData[sectionIndex];
+  if(!section || !Array.isArray(section.menuGroups) || !section.menuGroups[groupIndex]) return;
+  if(!Array.isArray(section.menuGroups[groupIndex].items)) section.menuGroups[groupIndex].items = [];
+  section.menuGroups[groupIndex].items.push({ name:'', price:'', description:'', visible:true });
+  markSectionsDirty();
+  renderSectionsEditor();
+}
+
+function removeMenuItem(sectionIndex, groupIndex, itemIndex){
+  const section = sectionsData[sectionIndex];
+  if(!section || !Array.isArray(section.menuGroups) || !section.menuGroups[groupIndex] || !Array.isArray(section.menuGroups[groupIndex].items)) return;
+  section.menuGroups[groupIndex].items.splice(itemIndex, 1);
+  markSectionsDirty();
+  renderSectionsEditor();
+}
+
+function moveMenuItemUp(sectionIndex, groupIndex, itemIndex){
+  if(itemIndex <= 0) return;
+  const items = (((sectionsData[sectionIndex] || {}).menuGroups || [])[groupIndex] || {}).items;
+  if(!Array.isArray(items)) return;
+  const tmp = items[itemIndex - 1];
+  items[itemIndex - 1] = items[itemIndex];
+  items[itemIndex] = tmp;
+  markSectionsDirty();
+  renderSectionsEditor();
+}
+
+function moveMenuItemDown(sectionIndex, groupIndex, itemIndex){
+  const items = (((sectionsData[sectionIndex] || {}).menuGroups || [])[groupIndex] || {}).items;
+  if(!Array.isArray(items) || itemIndex >= items.length - 1) return;
+  const tmp = items[itemIndex + 1];
+  items[itemIndex + 1] = items[itemIndex];
+  items[itemIndex] = tmp;
+  markSectionsDirty();
+  renderSectionsEditor();
+}
+
+function updateMenuItemField(sectionIndex, groupIndex, itemIndex, field, value){
+  const items = (((sectionsData[sectionIndex] || {}).menuGroups || [])[groupIndex] || {}).items;
+  if(!Array.isArray(items) || !items[itemIndex]) return;
+  items[itemIndex][field] = value;
+  markSectionsDirty();
+}
+
+function updateMenuItemVisible(sectionIndex, groupIndex, itemIndex, checked){
+  const items = (((sectionsData[sectionIndex] || {}).menuGroups || [])[groupIndex] || {}).items;
+  if(!Array.isArray(items) || !items[itemIndex]) return;
+  items[itemIndex].visible = checked === true;
+  markSectionsDirty();
+}
+
 function renderSectionsEditor(){
   const box = document.getElementById('sectionsEditor');
 
@@ -2816,6 +3047,7 @@ function renderSectionsEditor(){
     const isSlider = section.type === 'slider';
     const isCards = ['card4','card3','card2'].includes(section.type);
     const isAccordion = section.type === 'accordion';
+    const isMenuList = section.type === 'menu-list';
     const hasSingleImage = ['normal','card1-right','card1-left'].includes(section.type);
     const fullAnchorUrl = buildFullAnchorUrl(section.sectionId || '');
 
@@ -2878,7 +3110,7 @@ function renderSectionsEditor(){
               </select>
             </div>
 
-            ${(!isCards && !isAccordion) ? `
+            ${(!isCards && !isAccordion && !isMenuList) ? `
             <div class="row" style="grid-column:1 / -1;">
               <label>説明文</label>
               <textarea oninput="updateSectionField(${index}, 'text', this.value)">${escapeHtml(section.text || '')}</textarea>
@@ -2948,6 +3180,12 @@ function renderSectionsEditor(){
             <div class="row" style="grid-column:1 / -1;">
               <label>質問編集</label>
               ${renderAccordionItemsEditor(section, index)}
+            </div>` : ''}
+
+            ${isMenuList ? `
+            <div class="row" style="grid-column:1 / -1;">
+              <label>料金カテゴリ編集</label>
+              ${renderMenuGroupsEditor(section, index)}
             </div>` : ''}
 
             <div class="row" style="grid-column:1 / -1;">
@@ -3062,6 +3300,20 @@ function normalizeSectionBeforeSave(section, index){
 
   if(!Array.isArray(normalized.images)){
     normalized.images = [];
+  }
+
+  if(Array.isArray(normalized.menuGroups)){
+    normalized.menuGroups = normalized.menuGroups.map((group, groupIndex) => ({
+      title: String(group?.title || `カテゴリ${groupIndex + 1}`).trim(),
+      items: Array.isArray(group?.items) ? group.items.map((item) => ({
+        name: item?.name || '',
+        price: item?.price || '',
+        description: item?.description || '',
+        visible: item?.visible !== false
+      })) : []
+    }));
+  }else{
+    normalized.menuGroups = [];
   }
 
   return normalized;
