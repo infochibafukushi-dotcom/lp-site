@@ -370,6 +370,65 @@
     }
   },
   {
+    "id": "section-1774045570866",
+    "sectionId": "go-price",
+    "enabled": true,
+    "title": "【ご利用料金例】",
+    "textSize": "medium",
+    "bgColor": "#ffffff",
+    "alignY": "middle",
+    "titleAlign": "center",
+    "textAlign": "left",
+    "links": [
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ],
+    "type": "card3",
+    "items": [
+      {
+        "title": "カード1",
+        "text": "説明",
+        "image": "",
+        "link": "#"
+      },
+      {
+        "title": "カード2",
+        "text": "説明",
+        "image": "",
+        "link": "#"
+      },
+      {
+        "title": "カード3",
+        "text": "説明",
+        "image": "",
+        "link": "#"
+      }
+    ],
+    "text": "",
+    "image": "",
+    "link": "#",
+    "images": [],
+    "menuGroups": [],
+    "menuBottomCard": {
+      "visible": false,
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
+    }
+  },
+  {
     "id": "section-1773980387814",
     "sectionId": "shii-price-menyu",
     "enabled": true,
