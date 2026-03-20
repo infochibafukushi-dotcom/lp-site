@@ -411,9 +411,21 @@
         "open": true,
         "items": [
           {
-            "name": "",
-            "price": "",
-            "description": "",
+            "name": "車いす",
+            "price": "0",
+            "description": "〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇",
+            "visible": true
+          },
+          {
+            "name": "リクライニング車いす",
+            "price": "2500",
+            "description": "〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇",
+            "visible": true
+          },
+          {
+            "name": "ストレッチャー",
+            "price": "5000",
+            "description": "〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇",
             "visible": true
           }
         ]
