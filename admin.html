@@ -1797,14 +1797,6 @@ function ensureSectionShape(section, index){
   if(!Array.isArray(section.items)) section.items = [];
   if(!Array.isArray(section.menuGroups)) section.menuGroups = [];
 
-  section.menuBottomCard = {
-    visible: section.menuBottomCard?.visible === true,
-    title: section.menuBottomCard?.title || 'ご予約・ご相談はこちら',
-    text: section.menuBottomCard?.text || '料金の詳細やご不明点はお気軽にお問い合わせください。',
-    buttonText: section.menuBottomCard?.buttonText || 'お問い合わせ',
-    buttonUrl: section.menuBottomCard?.buttonUrl || '#'
-  };
-
   if(Array.isArray(section.items)){
     section.items = section.items.map((item) => ({
       title: item?.title || '',
@@ -1826,6 +1818,14 @@ function ensureSectionShape(section, index){
       })) : []
     }));
   }
+
+  section.menuBottomCard = {
+    visible: section.menuBottomCard?.visible === true,
+    title: section.menuBottomCard?.title || 'ご予約・ご相談はこちら',
+    text: section.menuBottomCard?.text || '料金の詳細やご不明点はお気軽にお問い合わせください。',
+    buttonText: section.menuBottomCard?.buttonText || 'お問い合わせ',
+    buttonUrl: section.menuBottomCard?.buttonUrl || '#'
+  };
 
   ensureSectionLinks(section);
   return section;
@@ -2739,6 +2739,36 @@ function moveMenuListItemDown(sectionIndex, groupIndex, itemIndex){
   renderSectionsSortList();
 }
 
+function updateMenuBottomCardField(sectionIndex, field, value){
+  const section = sectionsData[sectionIndex];
+  if(!section) return;
+  if(!section.menuBottomCard || typeof section.menuBottomCard !== 'object'){
+    section.menuBottomCard = {
+      visible: false,
+      title: 'ご予約・ご相談はこちら',
+      text: '料金の詳細やご不明点はお気軽にお問い合わせください。',
+      buttonText: 'お問い合わせ',
+      buttonUrl: '#'
+    };
+  }
+  section.menuBottomCard[field] = value;
+}
+
+function updateMenuBottomCardVisible(sectionIndex, checked){
+  const section = sectionsData[sectionIndex];
+  if(!section) return;
+  if(!section.menuBottomCard || typeof section.menuBottomCard !== 'object'){
+    section.menuBottomCard = {
+      visible: false,
+      title: 'ご予約・ご相談はこちら',
+      text: '料金の詳細やご不明点はお気軽にお問い合わせください。',
+      buttonText: 'お問い合わせ',
+      buttonUrl: '#'
+    };
+  }
+  section.menuBottomCard.visible = checked === true;
+}
+
 function renderMenuListGroupsEditor(section, sectionIndex){
   const groups = Array.isArray(section.menuGroups) ? section.menuGroups : [];
 
@@ -2817,37 +2847,6 @@ function renderMenuListGroupsEditor(section, sectionIndex){
 }
 
 
-
-function updateMenuBottomCardField(sectionIndex, field, value){
-  const section = sectionsData[sectionIndex];
-  if(!section) return;
-  if(!section.menuBottomCard || typeof section.menuBottomCard !== 'object'){
-    section.menuBottomCard = {
-      visible: false,
-      title: 'ご予約・ご相談はこちら',
-      text: '料金の詳細やご不明点はお気軽にお問い合わせください。',
-      buttonText: 'お問い合わせ',
-      buttonUrl: '#'
-    };
-  }
-  section.menuBottomCard[field] = value;
-}
-
-function updateMenuBottomCardVisible(sectionIndex, checked){
-  const section = sectionsData[sectionIndex];
-  if(!section) return;
-  if(!section.menuBottomCard || typeof section.menuBottomCard !== 'object'){
-    section.menuBottomCard = {
-      visible: false,
-      title: 'ご予約・ご相談はこちら',
-      text: '料金の詳細やご不明点はお気軽にお問い合わせください。',
-      buttonText: 'お問い合わせ',
-      buttonUrl: '#'
-    };
-  }
-  section.menuBottomCard.visible = checked === true;
-}
-
 function renderSectionPreview(section){
   const titleAlign = section.titleAlign || 'left';
   const textAlign = section.textAlign || 'left';
@@ -2871,6 +2870,7 @@ function renderSectionPreview(section){
 
   if(section.type === 'menu-list'){
     const groups = Array.isArray(section.menuGroups) ? section.menuGroups : [];
+    const bottomCard = section.menuBottomCard || {};
     return `
       <div class="section-preview-box" style="background:${escapeAttr(section.bgColor || '#ffffff')}">
         <h3 class="section-preview-title align-${escapeAttr(titleAlign)}">${escapeHtml(section.title || 'タイトル見本')}</h3>
@@ -2894,11 +2894,13 @@ function renderSectionPreview(section){
               </div>
             `;
           }).join('') : 'カテゴリがまだありません。'}
-          ${section.menuBottomCard?.visible === true ? `
-            <div style="margin-top:12px; padding:14px; border:1px solid #e5e7eb; border-radius:12px; background:#fff;">
-              <div style="font-weight:700; margin-bottom:6px;">${escapeHtml(section.menuBottomCard?.title || '')}</div>
-              ${section.menuBottomCard?.text ? `<div style="font-size:13px; color:#475569; margin-bottom:10px; line-height:1.7;">${escapeHtml(section.menuBottomCard?.text || '')}</div>` : ''}
-              ${section.menuBottomCard?.buttonText ? `<div style="display:inline-block; padding:8px 14px; border-radius:999px; background:#0f172a; color:#fff; font-size:13px; font-weight:700;">${escapeHtml(section.menuBottomCard?.buttonText || '')}</div>` : ''}
+          ${bottomCard.visible === true ? `
+            <div style="margin-top:14px; padding:16px; border:1px solid #e5e7eb; border-radius:12px; background:#fafafa;">
+              <div style="font-weight:700; margin-bottom:8px;">${escapeHtml(bottomCard.title || '')}</div>
+              <div style="font-size:14px; line-height:1.7; margin-bottom:10px;">${escapeHtml(bottomCard.text || '')}</div>
+              <div style="display:inline-block; padding:10px 14px; background:#111827; color:#fff; border-radius:999px; font-size:13px; font-weight:700;">
+                ${escapeHtml(bottomCard.buttonText || '')}
+              </div>
             </div>
           ` : ''}
         </div>
