@@ -33,7 +33,8 @@
         "url": "#",
         "visible": false
       }
-    ]
+    ],
+    "menuGroups": []
   },
   {
     "id": "section-001",
@@ -67,7 +68,8 @@
         "url": "#",
         "visible": false
       }
-    ]
+    ],
+    "menuGroups": []
   },
   {
     "id": "section-1773049874928",
@@ -120,7 +122,8 @@
         "url": "#",
         "visible": false
       }
-    ]
+    ],
+    "menuGroups": []
   },
   {
     "id": "section-1773231572547",
@@ -173,7 +176,8 @@
         "url": "#",
         "visible": false
       }
-    ]
+    ],
+    "menuGroups": []
   },
   {
     "id": "section-1773062931061",
@@ -232,7 +236,8 @@
         "url": "#",
         "visible": false
       }
-    ]
+    ],
+    "menuGroups": []
   },
   {
     "id": "section-1773231943645",
@@ -266,7 +271,8 @@
         "url": "#",
         "visible": false
       }
-    ]
+    ],
+    "menuGroups": []
   },
   {
     "id": "section-1773246058130",
@@ -325,7 +331,8 @@
         "url": "#",
         "visible": false
       }
-    ]
+    ],
+    "menuGroups": []
   },
   {
     "id": "section-1773246274578",
@@ -378,7 +385,8 @@
         "url": "#",
         "visible": false
       }
-    ]
+    ],
+    "menuGroups": []
   },
   {
     "id": "section-1773246586759",
@@ -412,7 +420,8 @@
         "url": "#",
         "visible": false
       }
-    ]
+    ],
+    "menuGroups": []
   },
   {
     "id": "section-1773579425987",
@@ -471,7 +480,8 @@
     ],
     "image": "",
     "link": "#",
-    "images": []
+    "images": [],
+    "menuGroups": []
   },
   {
     "id": "section-1773060504302",
@@ -505,7 +515,8 @@
         "url": "#",
         "visible": false
       }
-    ]
+    ],
+    "menuGroups": []
   },
   {
     "id": "section-1773060508054",
@@ -539,7 +550,8 @@
         "url": "#",
         "visible": false
       }
-    ]
+    ],
+    "menuGroups": []
   },
   {
     "id": "section-1773401444426",
@@ -573,6 +585,71 @@
         "url": "#",
         "visible": false
       }
-    ]
+    ],
+    "menuGroups": []
+  },
+  {
+    "id": "section-1773980306781",
+    "sectionId": "shii-price-menyu",
+    "enabled": true,
+    "title": "新しい料金メニュー",
+    "textSize": "medium",
+    "bgColor": "#f7f5f0",
+    "alignY": "middle",
+    "titleAlign": "left",
+    "textAlign": "left",
+    "links": [
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ],
+    "type": "menu-list",
+    "text": "料金やメニュー内容をカテゴリごとに掲載できます。",
+    "menuGroups": [
+      {
+        "title": "基本料金",
+        "items": [
+          {
+            "name": "初乗り",
+            "price": "¥500",
+            "description": "最初の基本料金です。",
+            "visible": true
+          },
+          {
+            "name": "迎車料",
+            "price": "¥300",
+            "description": "お迎え場所までの料金です。",
+            "visible": true
+          }
+        ]
+      },
+      {
+        "title": "オプション",
+        "items": [
+          {
+            "name": "付き添い",
+            "price": "¥1,000",
+            "description": "院内付き添い等に対応します。",
+            "visible": true
+          }
+        ]
+      }
+    ],
+    "image": "",
+    "link": "#",
+    "images": [],
+    "items": []
   }
 ]
