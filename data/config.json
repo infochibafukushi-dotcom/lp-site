@@ -86,13 +86,13 @@
         "title": "開業準備中です｜ご相談は受付中",
         "text": "現在は正式オープン前の準備期間です。\n2026年12月頃の開始を目標に進めております。\nご利用に関するご質問、ご相談、開始時期のお問い合わせはお気軽にご連絡ください。",
         "button1": {
-          "visible": false,
-          "text": "",
+          "visible": true,
+          "text": "テスト",
           "url": "#"
         },
         "button2": {
-          "visible": false,
-          "text": "",
+          "visible": true,
+          "text": "テスト",
           "url": "#"
         }
       },
