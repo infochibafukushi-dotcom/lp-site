@@ -1821,9 +1821,9 @@ function ensureSectionShape(section, index){
 
   section.menuBottomCard = {
     visible: section.menuBottomCard?.visible === true,
-    title: section.menuBottomCard?.title || 'ご予約・ご相談はこちら',
-    text: section.menuBottomCard?.text || '料金の詳細やご不明点はお気軽にお問い合わせください。',
-    buttonText: section.menuBottomCard?.buttonText || 'お問い合わせ',
+    title: section.menuBottomCard?.title || '',
+    text: section.menuBottomCard?.text || '',
+    buttonText: section.menuBottomCard?.buttonText || '',
     buttonUrl: section.menuBottomCard?.buttonUrl || '#'
   };
 
@@ -2283,7 +2283,14 @@ function createDefaultSection(type, title){
             { name:'メニュー名', price:'¥1,000', description:'説明文', visible:true }
           ]
         }
-      ]
+      ],
+      menuBottomCard: {
+        visible: false,
+        title: '',
+        text: '',
+        buttonText: '',
+        buttonUrl: '#'
+      }
     };
   }
 
@@ -2568,26 +2575,12 @@ function getMenuGroupStateKey(section, groupIndex){
   return sectionId + '__group__' + groupIndex;
 }
 
-function rerenderSectionsEditorPreserveScroll(){
-  captureSectionOpenStates();
-  const currentY = window.scrollY || window.pageYOffset || 0;
-  renderSectionsEditor();
-  renderSectionsSortList();
-  requestAnimationFrame(() => {
-    window.scrollTo(0, currentY);
-  });
-}
-
 function toggleMenuGroupEditor(sectionIndex, groupIndex){
   const section = sectionsData[sectionIndex];
   if(!section) return;
-  captureSectionOpenStates();
-  if(section.id){
-    sectionOpenState[section.id] = true;
-  }
   const key = getMenuGroupStateKey(section, groupIndex);
   menuGroupOpenState[key] = menuGroupOpenState[key] === true ? false : true;
-  rerenderSectionsEditorPreserveScroll();
+  renderSectionsEditor();
 }
 
 function updateMenuGroupField(sectionIndex, groupIndex, field, value){
@@ -2753,15 +2746,16 @@ function moveMenuListItemDown(sectionIndex, groupIndex, itemIndex){
   renderSectionsSortList();
 }
 
+
 function updateMenuBottomCardField(sectionIndex, field, value){
   const section = sectionsData[sectionIndex];
   if(!section) return;
   if(!section.menuBottomCard || typeof section.menuBottomCard !== 'object'){
     section.menuBottomCard = {
       visible: false,
-      title: 'ご予約・ご相談はこちら',
-      text: '料金の詳細やご不明点はお気軽にお問い合わせください。',
-      buttonText: 'お問い合わせ',
+      title: '',
+      text: '',
+      buttonText: '',
       buttonUrl: '#'
     };
   }
@@ -2774,9 +2768,9 @@ function updateMenuBottomCardVisible(sectionIndex, checked){
   if(!section.menuBottomCard || typeof section.menuBottomCard !== 'object'){
     section.menuBottomCard = {
       visible: false,
-      title: 'ご予約・ご相談はこちら',
-      text: '料金の詳細やご不明点はお気軽にお問い合わせください。',
-      buttonText: 'お問い合わせ',
+      title: '',
+      text: '',
+      buttonText: '',
       buttonUrl: '#'
     };
   }
@@ -2857,6 +2851,35 @@ function renderMenuListGroupsEditor(section, sectionIndex){
         </div>
       `;
     }).join('')}
+
+    <div class="menu-bottom-card-editor" style="margin-top:14px; border:1px solid #dcdcdc; border-radius:12px; background:#fff; padding:14px;">
+      <div style="font-weight:bold; margin-bottom:10px;">メニュー下部カード</div>
+      <div class="grid2">
+        <div class="row" style="grid-column:1 / -1;">
+          <label>表示設定</label>
+          <label class="inline-check">
+            <input type="checkbox" ${section.menuBottomCard?.visible === true ? 'checked' : ''} onchange="updateMenuBottomCardVisible(${sectionIndex}, this.checked)">
+            公開ページに表示する
+          </label>
+        </div>
+        <div class="row" style="grid-column:1 / -1;">
+          <label>カードタイトル</label>
+          <input type="text" value="${escapeAttr(section.menuBottomCard?.title || '')}" oninput="updateMenuBottomCardField(${sectionIndex}, 'title', this.value)">
+        </div>
+        <div class="row" style="grid-column:1 / -1;">
+          <label>カード本文</label>
+          <textarea oninput="updateMenuBottomCardField(${sectionIndex}, 'text', this.value)">${escapeHtml(section.menuBottomCard?.text || '')}</textarea>
+        </div>
+        <div class="row">
+          <label>ボタン文字</label>
+          <input type="text" value="${escapeAttr(section.menuBottomCard?.buttonText || '')}" oninput="updateMenuBottomCardField(${sectionIndex}, 'buttonText', this.value)">
+        </div>
+        <div class="row">
+          <label>ボタンリンク</label>
+          <input type="text" value="${escapeAttr(section.menuBottomCard?.buttonUrl || '#')}" oninput="updateMenuBottomCardField(${sectionIndex}, 'buttonUrl', this.value)">
+        </div>
+      </div>
+    </div>
   `;
 }
 
@@ -2884,7 +2907,9 @@ function renderSectionPreview(section){
 
   if(section.type === 'menu-list'){
     const groups = Array.isArray(section.menuGroups) ? section.menuGroups : [];
-    const bottomCard = section.menuBottomCard || {};
+    const bottomCard = section.menuBottomCard && typeof section.menuBottomCard === 'object'
+      ? section.menuBottomCard
+      : { visible:false, title:'', text:'', buttonText:'', buttonUrl:'#' };
     return `
       <div class="section-preview-box" style="background:${escapeAttr(section.bgColor || '#ffffff')}">
         <h3 class="section-preview-title align-${escapeAttr(titleAlign)}">${escapeHtml(section.title || 'タイトル見本')}</h3>
@@ -2908,13 +2933,11 @@ function renderSectionPreview(section){
               </div>
             `;
           }).join('') : 'カテゴリがまだありません。'}
-          ${bottomCard.visible === true ? `
-            <div style="margin-top:14px; padding:16px; border:1px solid #e5e7eb; border-radius:12px; background:#fafafa;">
-              <div style="font-weight:700; margin-bottom:8px;">${escapeHtml(bottomCard.title || '')}</div>
-              <div style="font-size:14px; line-height:1.7; margin-bottom:10px;">${escapeHtml(bottomCard.text || '')}</div>
-              <div style="display:inline-block; padding:10px 14px; background:#111827; color:#fff; border-radius:999px; font-size:13px; font-weight:700;">
-                ${escapeHtml(bottomCard.buttonText || '')}
-              </div>
+          ${bottomCard.visible ? `
+            <div style="margin-top:14px; border:1px solid #ececec; border-radius:10px; background:#fff; padding:14px;">
+              ${bottomCard.title ? `<div style="font-weight:bold; margin-bottom:8px;">${escapeHtml(bottomCard.title)}</div>` : ''}
+              ${bottomCard.text ? `<div style="font-size:14px; line-height:1.8; color:#444; margin-bottom:${bottomCard.buttonText ? '12px' : '0'};">${escapeHtml(bottomCard.text)}</div>` : ''}
+              ${bottomCard.buttonText ? `<a href="${escapeAttr(bottomCard.buttonUrl || '#')}" style="display:inline-block; padding:10px 14px; border-radius:8px; background:#007bff; color:#fff; text-decoration:none; font-weight:bold;">${escapeHtml(bottomCard.buttonText)}</a>` : ''}
             </div>
           ` : ''}
         </div>
@@ -3533,6 +3556,14 @@ function normalizeSectionBeforeSave(section, index){
   }else{
     normalized.menuGroups = [];
   }
+
+  normalized.menuBottomCard = {
+    visible: normalized.menuBottomCard?.visible === true,
+    title: normalized.menuBottomCard?.title || '',
+    text: normalized.menuBottomCard?.text || '',
+    buttonText: normalized.menuBottomCard?.buttonText || '',
+    buttonUrl: normalized.menuBottomCard?.buttonUrl || '#'
+  };
 
   if(!Array.isArray(normalized.images)){
     normalized.images = [];
