@@ -369,7 +369,7 @@ button.linklike{
 }
 .jump-menu{
   display:grid;
-  grid-template-columns:repeat(7, 1fr);
+  grid-template-columns:repeat(6, 1fr);
   gap:10px;
 }
 .jump-btn{
@@ -723,7 +723,6 @@ body{
       <a class="jump-btn" href="#card-github-settings">GitHub設定</a>
       <a class="jump-btn" href="#card-top-settings">上部設定</a>
       <a class="jump-btn" href="#card-bottom-settings">下部設定</a>
-      <a class="jump-btn" href="#card-popup-settings">POP設定</a>
       <a class="jump-btn" href="#card-section-add">セクション追加</a>
       <a class="jump-btn" href="#card-sections-sort">並び替え</a>
       <a class="jump-btn" href="#card-sections-list">セクション編集</a>
@@ -1147,186 +1146,6 @@ body{
     </div>
   </div>
 
-  <div class="card collapsible-card js-collapsible section-anchor" id="card-popup-settings" data-open="false">
-    <button type="button" class="card-toggle js-card-toggle">
-      <span class="toggle-left">
-        <span class="toggle-icon">▶</span>
-        <span class="toggle-title">POPアップ設定</span>
-      </span>
-      <span class="toggle-state">閉じています</span>
-    </button>
-    <div class="card-body js-card-body">
-      <p class="note">3パターンまで登録できます。使用するにチェックを入れた1パターンだけ表示されます。表示するがOFFのパターンは公開されません。POPアップは新しく開いた時だけ1回表示されます。</p>
-      <div class="settings-stack">
-        <div class="subsettings-card js-collapsible" data-open="true">
-          <button type="button" class="card-toggle js-card-toggle">
-            <span class="toggle-left">
-              <span class="toggle-icon">▼</span>
-              <span class="toggle-title">POPパターン1</span>
-            </span>
-            <span class="toggle-state">編集できます</span>
-          </button>
-          <div class="card-body js-card-body" style="display:block;">
-            <div class="grid2">
-              <div class="row">
-                <label>使用する</label>
-                <label class="checkline"><input type="checkbox" id="popup1Use" onchange="selectActivePopup(1, this.checked)"> このパターンを使う</label>
-              </div>
-              <div class="row">
-                <label>表示する</label>
-                <label class="checkline"><input type="checkbox" id="popup1Visible"> 公開ページに表示する</label>
-              </div>
-              <div class="row" style="grid-column:1 / -1;">
-                <label>タイトル（赤・太字）</label>
-                <input type="text" id="popup1Title" placeholder="例: ご利用前にご確認ください">
-              </div>
-              <div class="row" style="grid-column:1 / -1;">
-                <label>説明文</label>
-                <textarea id="popup1Text" placeholder="ご案内文を入力"></textarea>
-              </div>
-              <div class="row">
-                <label>ボタン1 表示</label>
-                <label class="checkline"><input type="checkbox" id="popup1Btn1Visible"> 表示する</label>
-              </div>
-              <div class="row">
-                <label>ボタン2 表示</label>
-                <label class="checkline"><input type="checkbox" id="popup1Btn2Visible"> 表示する</label>
-              </div>
-              <div class="row">
-                <label>ボタン1 文字</label>
-                <input type="text" id="popup1Btn1Text" placeholder="例: 予約する">
-              </div>
-              <div class="row">
-                <label>ボタン2 文字</label>
-                <input type="text" id="popup1Btn2Text" placeholder="例: 詳細を見る">
-              </div>
-              <div class="row">
-                <label>ボタン1 URL</label>
-                <input type="text" id="popup1Btn1Url" placeholder="例: #contact または https://example.com">
-              </div>
-              <div class="row">
-                <label>ボタン2 URL</label>
-                <input type="text" id="popup1Btn2Url" placeholder="例: #price または https://example.com">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="subsettings-card js-collapsible" data-open="false">
-          <button type="button" class="card-toggle js-card-toggle">
-            <span class="toggle-left">
-              <span class="toggle-icon">▶</span>
-              <span class="toggle-title">POPパターン2</span>
-            </span>
-            <span class="toggle-state">閉じています</span>
-          </button>
-          <div class="card-body js-card-body">
-            <div class="grid2">
-              <div class="row">
-                <label>使用する</label>
-                <label class="checkline"><input type="checkbox" id="popup2Use" onchange="selectActivePopup(2, this.checked)"> このパターンを使う</label>
-              </div>
-              <div class="row">
-                <label>表示する</label>
-                <label class="checkline"><input type="checkbox" id="popup2Visible"> 公開ページに表示する</label>
-              </div>
-              <div class="row" style="grid-column:1 / -1;">
-                <label>タイトル（赤・太字）</label>
-                <input type="text" id="popup2Title" placeholder="例: ご利用前にご確認ください">
-              </div>
-              <div class="row" style="grid-column:1 / -1;">
-                <label>説明文</label>
-                <textarea id="popup2Text" placeholder="ご案内文を入力"></textarea>
-              </div>
-              <div class="row">
-                <label>ボタン1 表示</label>
-                <label class="checkline"><input type="checkbox" id="popup2Btn1Visible"> 表示する</label>
-              </div>
-              <div class="row">
-                <label>ボタン2 表示</label>
-                <label class="checkline"><input type="checkbox" id="popup2Btn2Visible"> 表示する</label>
-              </div>
-              <div class="row">
-                <label>ボタン1 文字</label>
-                <input type="text" id="popup2Btn1Text" placeholder="例: 予約する">
-              </div>
-              <div class="row">
-                <label>ボタン2 文字</label>
-                <input type="text" id="popup2Btn2Text" placeholder="例: 詳細を見る">
-              </div>
-              <div class="row">
-                <label>ボタン1 URL</label>
-                <input type="text" id="popup2Btn1Url" placeholder="例: #contact または https://example.com">
-              </div>
-              <div class="row">
-                <label>ボタン2 URL</label>
-                <input type="text" id="popup2Btn2Url" placeholder="例: #price または https://example.com">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="subsettings-card js-collapsible" data-open="false">
-          <button type="button" class="card-toggle js-card-toggle">
-            <span class="toggle-left">
-              <span class="toggle-icon">▶</span>
-              <span class="toggle-title">POPパターン3</span>
-            </span>
-            <span class="toggle-state">閉じています</span>
-          </button>
-          <div class="card-body js-card-body">
-            <div class="grid2">
-              <div class="row">
-                <label>使用する</label>
-                <label class="checkline"><input type="checkbox" id="popup3Use" onchange="selectActivePopup(3, this.checked)"> このパターンを使う</label>
-              </div>
-              <div class="row">
-                <label>表示する</label>
-                <label class="checkline"><input type="checkbox" id="popup3Visible"> 公開ページに表示する</label>
-              </div>
-              <div class="row" style="grid-column:1 / -1;">
-                <label>タイトル（赤・太字）</label>
-                <input type="text" id="popup3Title" placeholder="例: ご利用前にご確認ください">
-              </div>
-              <div class="row" style="grid-column:1 / -1;">
-                <label>説明文</label>
-                <textarea id="popup3Text" placeholder="ご案内文を入力"></textarea>
-              </div>
-              <div class="row">
-                <label>ボタン1 表示</label>
-                <label class="checkline"><input type="checkbox" id="popup3Btn1Visible"> 表示する</label>
-              </div>
-              <div class="row">
-                <label>ボタン2 表示</label>
-                <label class="checkline"><input type="checkbox" id="popup3Btn2Visible"> 表示する</label>
-              </div>
-              <div class="row">
-                <label>ボタン1 文字</label>
-                <input type="text" id="popup3Btn1Text" placeholder="例: 予約する">
-              </div>
-              <div class="row">
-                <label>ボタン2 文字</label>
-                <input type="text" id="popup3Btn2Text" placeholder="例: 詳細を見る">
-              </div>
-              <div class="row">
-                <label>ボタン1 URL</label>
-                <input type="text" id="popup3Btn1Url" placeholder="例: #contact または https://example.com">
-              </div>
-              <div class="row">
-                <label>ボタン2 URL</label>
-                <input type="text" id="popup3Btn2Url" placeholder="例: #price または https://example.com">
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="actions" style="margin-top:14px;">
-        <button type="button" onclick="saveConfigToGitHub()">POP設定を保存</button>
-      </div>
-    </div>
-  </div>
-
   <div class="card collapsible-card js-collapsible section-anchor" id="card-section-add" data-open="false">
     <button type="button" class="card-toggle js-card-toggle">
       <span class="toggle-left">
@@ -1411,6 +1230,24 @@ body{
         <button type="button" class="secondary" onclick="showDrafts()">config / sections を確認</button>
       </div>
       <div class="preview" id="draftBox">まだ確認していません。</div>
+    </div>
+  </div>
+
+
+  <div class="card collapsible-card js-collapsible section-anchor" id="card-popup-settings" data-open="false">
+    <button type="button" class="card-toggle js-card-toggle">
+      <span class="toggle-left">
+        <span class="toggle-icon">▶</span>
+        <span class="toggle-title">POPアップ設定</span>
+      </span>
+      <span class="toggle-state">閉じています</span>
+    </button>
+    <div class="card-body js-card-body">
+      <p class="note">3パターンまで登録できます。使用するにチェックを入れた1パターンだけ表示されます。表示するがOFFのパターンは公開されません。POPアップは新しく開いた時だけ1回表示されます。</p>
+      <div id="popupSettingsEditor">読み込み中...</div>
+      <div class="actions" style="margin-top:14px;">
+        <button type="button" onclick="saveConfigToGitHub()">POP設定を保存</button>
+      </div>
     </div>
   </div>
 
@@ -1748,82 +1585,118 @@ function ensurePcTopPhoneShape(config){
   };
 }
 
-function ensurePopupPatternShape(pattern, index){
-  const fallbackIndex = index + 1;
-  return {
-    use: pattern?.use === true,
-    visible: pattern?.visible === true,
-    title: String(pattern?.title || '').trim(),
-    text: String(pattern?.text || '').trim(),
-    button1: {
-      visible: pattern?.button1?.visible === true,
-      text: String(pattern?.button1?.text || '').trim(),
-      url: String(pattern?.button1?.url || '#').trim() || '#'
-    },
-    button2: {
-      visible: pattern?.button2?.visible === true,
-      text: String(pattern?.button2?.text || '').trim(),
-      url: String(pattern?.button2?.url || '#').trim() || '#'
-    }
-  };
-}
 
 function ensurePopupSettingsShape(config){
-  const source = config && config.popupSettings && typeof config.popupSettings === 'object' ? config.popupSettings : {};
-  const patterns = Array.isArray(source.patterns) ? source.patterns.slice(0, 3) : [];
+  const current = config && config.popupSettings && typeof config.popupSettings === 'object' ? config.popupSettings : {};
+  const patterns = Array.isArray(current.patterns) ? current.patterns.slice(0, 3) : [];
   while(patterns.length < 3){
     patterns.push({});
   }
-  const normalizedPatterns = patterns.map((pattern, index) => ensurePopupPatternShape(pattern, index));
-  let hasActive = false;
-  normalizedPatterns.forEach((pattern) => {
-    if(pattern.use && !hasActive){
-      hasActive = true;
-    }else if(pattern.use && hasActive){
-      pattern.use = false;
-    }
-  });
-  return { patterns: normalizedPatterns };
+  return {
+    patterns: patterns.map((pattern) => ({
+      use: pattern?.use === true,
+      visible: pattern?.visible === true,
+      title: String(pattern?.title || ''),
+      text: String(pattern?.text || ''),
+      button1Visible: pattern?.button1Visible === true,
+      button1Text: String(pattern?.button1Text || ''),
+      button1Url: String(pattern?.button1Url || '#') || '#',
+      button2Visible: pattern?.button2Visible === true,
+      button2Text: String(pattern?.button2Text || ''),
+      button2Url: String(pattern?.button2Url || '#') || '#'
+    }))
+  };
 }
 
-function selectActivePopup(index, checked){
-  for(let i = 1; i <= 3; i++){
-    const el = document.getElementById(`popup${i}Use`);
-    if(!el) continue;
-    el.checked = checked ? i === index : (i === index ? false : el.checked);
+function collectPopupSettingsDraft(){
+  const patterns = [];
+  for(let i = 0; i < 3; i++){
+    patterns.push({
+      use: document.getElementById(`popupUse${i}`)?.checked === true,
+      visible: document.getElementById(`popupVisible${i}`)?.checked === true,
+      title: document.getElementById(`popupTitle${i}`)?.value || '',
+      text: document.getElementById(`popupText${i}`)?.value || '',
+      button1Visible: document.getElementById(`popupBtn1Visible${i}`)?.checked === true,
+      button1Text: document.getElementById(`popupBtn1Text${i}`)?.value || '',
+      button1Url: document.getElementById(`popupBtn1Url${i}`)?.value || '#',
+      button2Visible: document.getElementById(`popupBtn2Visible${i}`)?.checked === true,
+      button2Text: document.getElementById(`popupBtn2Text${i}`)?.value || '',
+      button2Url: document.getElementById(`popupBtn2Url${i}`)?.value || '#'
+    });
+  }
+  return { patterns };
+}
+
+function renderPopupSettingsEditor(popupSettings){
+  const editor = document.getElementById('popupSettingsEditor');
+  if(!editor) return;
+  const patterns = (popupSettings && Array.isArray(popupSettings.patterns)) ? popupSettings.patterns : ensurePopupSettingsShape({}).patterns;
+  editor.innerHTML = patterns.map((pattern, index) => `
+    <div class="subsettings-card js-collapsible" data-open="${index === 0 ? 'true' : 'false'}" style="margin-bottom:14px;">
+      <button type="button" class="card-toggle js-card-toggle">
+        <span class="toggle-left">
+          <span class="toggle-icon">▶</span>
+          <span class="toggle-title">POPパターン${index + 1}</span>
+        </span>
+        <span class="toggle-state">閉じています</span>
+      </button>
+      <div class="card-body js-card-body">
+        <div class="grid2">
+          <div class="row">
+            <label>使用する</label>
+            <label class="checkline"><input type="checkbox" id="popupUse${index}" ${pattern.use ? 'checked' : ''} onchange="setPopupUseOnly(${index}, this.checked)"> このパターンを使う</label>
+          </div>
+          <div class="row">
+            <label>表示する</label>
+            <label class="checkline"><input type="checkbox" id="popupVisible${index}" ${pattern.visible ? 'checked' : ''}> 公開ページに表示する</label>
+          </div>
+          <div class="row" style="grid-column:1 / -1;">
+            <label>タイトル（赤・太字）</label>
+            <textarea class="title-textarea" id="popupTitle${index}" placeholder="タイトルを入力。改行できます。">${escapeHtml(pattern.title || '')}</textarea>
+          </div>
+          <div class="row" style="grid-column:1 / -1;">
+            <label>説明文</label>
+            <textarea id="popupText${index}" placeholder="ご案内文を入力">${escapeHtml(pattern.text || '')}</textarea>
+          </div>
+          <div class="row">
+            <label>ボタン1 表示</label>
+            <label class="checkline"><input type="checkbox" id="popupBtn1Visible${index}" ${pattern.button1Visible ? 'checked' : ''}> 表示する</label>
+          </div>
+          <div class="row">
+            <label>ボタン2 表示</label>
+            <label class="checkline"><input type="checkbox" id="popupBtn2Visible${index}" ${pattern.button2Visible ? 'checked' : ''}> 表示する</label>
+          </div>
+          <div class="row">
+            <label>ボタン1 文字</label>
+            <input type="text" id="popupBtn1Text${index}" value="${escapeAttr(pattern.button1Text || '')}" placeholder="例: 予約する">
+          </div>
+          <div class="row">
+            <label>ボタン2 文字</label>
+            <input type="text" id="popupBtn2Text${index}" value="${escapeAttr(pattern.button2Text || '')}" placeholder="例: 詳細を見る">
+          </div>
+          <div class="row">
+            <label>ボタン1 URL</label>
+            <input type="text" id="popupBtn1Url${index}" value="${escapeAttr(pattern.button1Url || '#')}" placeholder="#">
+          </div>
+          <div class="row">
+            <label>ボタン2 URL</label>
+            <input type="text" id="popupBtn2Url${index}" value="${escapeAttr(pattern.button2Url || '#')}" placeholder="#">
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  if(window.AdminCollapse && typeof window.AdminCollapse.bindWithin === 'function'){
+    window.AdminCollapse.bindWithin(editor);
   }
 }
 
-function setPopupPatternInputs(index, pattern){
-  document.getElementById(`popup${index}Use`).checked = pattern.use === true;
-  document.getElementById(`popup${index}Visible`).checked = pattern.visible === true;
-  document.getElementById(`popup${index}Title`).value = pattern.title || '';
-  document.getElementById(`popup${index}Text`).value = pattern.text || '';
-  document.getElementById(`popup${index}Btn1Visible`).checked = pattern.button1?.visible === true;
-  document.getElementById(`popup${index}Btn1Text`).value = pattern.button1?.text || '';
-  document.getElementById(`popup${index}Btn1Url`).value = pattern.button1?.url || '#';
-  document.getElementById(`popup${index}Btn2Visible`).checked = pattern.button2?.visible === true;
-  document.getElementById(`popup${index}Btn2Text`).value = pattern.button2?.text || '';
-  document.getElementById(`popup${index}Btn2Url`).value = pattern.button2?.url || '#';
-}
-
-function readPopupPatternInputs(index){
-  return {
-    use: document.getElementById(`popup${index}Use`).checked,
-    visible: document.getElementById(`popup${index}Visible`).checked,
-    title: document.getElementById(`popup${index}Title`).value,
-    text: document.getElementById(`popup${index}Text`).value,
-    button1: {
-      visible: document.getElementById(`popup${index}Btn1Visible`).checked,
-      text: document.getElementById(`popup${index}Btn1Text`).value,
-      url: document.getElementById(`popup${index}Btn1Url`).value || '#'
-    },
-    button2: {
-      visible: document.getElementById(`popup${index}Btn2Visible`).checked,
-      text: document.getElementById(`popup${index}Btn2Text`).value,
-      url: document.getElementById(`popup${index}Btn2Url`).value || '#'
-    }
-  };
+function setPopupUseOnly(activeIndex, checked){
+  for(let i = 0; i < 3; i++){
+    const el = document.getElementById(`popupUse${i}`);
+    if(!el) continue;
+    el.checked = checked ? i === activeIndex : false;
+  }
 }
 
 function ensureConfigShape(config){
@@ -1835,11 +1708,11 @@ function ensureConfigShape(config){
   config.footer = ensureFooterButtons(config.footer, footerDefaults);
   config.footerPc = ensureFooterButtons(config.footerPc || config.footer, footerDefaults);
   config.pcTopPhone = ensurePcTopPhoneShape(config);
+  config.popupSettings = ensurePopupSettingsShape(config);
 
   config.logoImage = config.logoImage || '';
   config.headerBgColor = config.headerBgColor || '#ffffff';
   config.footerBgColor = config.footerBgColor || '#ffffff';
-  config.popupSettings = ensurePopupSettingsShape(config);
   return config;
 }
 
@@ -2125,19 +1998,13 @@ function buildConfigDraft(){
         image: document.getElementById('footerPc3Image').value
       }
     ],
-    popupSettings: {
-      patterns: [
-        readPopupPatternInputs(1),
-        readPopupPatternInputs(2),
-        readPopupPatternInputs(3)
-      ]
-    },
     pcTopPhone: {
       enabled: document.getElementById('pcTopPhoneEnabled').checked,
       label: document.getElementById('pcTopPhoneLabel').value,
       number: document.getElementById('pcTopPhoneNumber').value,
       link: document.getElementById('pcTopPhoneLink').value
-    }
+    },
+    popupSettings: collectPopupSettingsDraft()
   };
 }
 
@@ -2320,11 +2187,7 @@ async function loadConfig(){
   setFooterPreviewById('footerPc3Preview', config.footerPc[2].image || '');
 
   document.getElementById('passwordText').value = config.password || '';
-
-  const popupSettings = ensurePopupSettingsShape(config);
-  setPopupPatternInputs(1, popupSettings.patterns[0]);
-  setPopupPatternInputs(2, popupSettings.patterns[1]);
-  setPopupPatternInputs(3, popupSettings.patterns[2]);
+  renderPopupSettingsEditor(config.popupSettings);
 }
 
 async function loadSections(){

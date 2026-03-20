@@ -1,98 +1,96 @@
 (function(){
   let clickCount = 0;
   let sitePassword = "95123";
-  const POPUP_SESSION_KEY = "lp_popup_dismissed";
 
-  function getActivePopupPattern(config){
-    const popupSettings = window.IndexUtils.ensurePopupSettingsShape(config || {});
-    const patterns = Array.isArray(popupSettings.patterns) ? popupSettings.patterns : [];
-    return patterns.find((pattern) => pattern.use === true) || null;
+  const POPUP_SESSION_KEY = 'lpPopupShown';
+  let currentPopupSettings = { patterns: [] };
+
+  function ensurePopupSettingsShape(config){
+    const current = config && config.popupSettings && typeof config.popupSettings === 'object' ? config.popupSettings : {};
+    const patterns = Array.isArray(current.patterns) ? current.patterns.slice(0, 3) : [];
+    while(patterns.length < 3){
+      patterns.push({});
+    }
+    return {
+      patterns: patterns.map((pattern) => ({
+        use: pattern?.use === true,
+        visible: pattern?.visible === true,
+        title: String(pattern?.title || ''),
+        text: String(pattern?.text || ''),
+        button1Visible: pattern?.button1Visible === true,
+        button1Text: String(pattern?.button1Text || ''),
+        button1Url: String(pattern?.button1Url || '#') || '#',
+        button2Visible: pattern?.button2Visible === true,
+        button2Text: String(pattern?.button2Text || ''),
+        button2Url: String(pattern?.button2Url || '#') || '#'
+      }))
+    };
   }
 
-  function shouldShowPopup(config){
-    try{
-      if(sessionStorage.getItem(POPUP_SESSION_KEY) === "1") return false;
-    }catch(error){}
-    const active = getActivePopupPattern(config);
-    return !!(active && active.visible === true && (active.title || active.text || active.button1?.visible === true || active.button2?.visible === true));
+  function getActivePopupPattern(){
+    const settings = currentPopupSettings || { patterns: [] };
+    const patterns = Array.isArray(settings.patterns) ? settings.patterns : [];
+    return patterns.find((pattern) => pattern.use === true && pattern.visible === true) || null;
+  }
+
+  function ensurePopupStyles(){
+    if(document.getElementById('lpPopupStyle')) return;
+    const style = document.createElement('style');
+    style.id = 'lpPopupStyle';
+    style.textContent = `
+      .lp-popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9998;display:flex;align-items:center;justify-content:center;padding:16px;}
+      .lp-popup-card{position:relative;background:#fff;border-radius:16px;box-shadow:0 20px 50px rgba(0,0,0,.22);width:90%;max-width:90%;padding:18px 18px 16px;z-index:9999;}
+      .lp-popup-close{position:absolute;top:10px;right:12px;border:none;background:transparent;color:#666;font-size:28px;line-height:1;padding:4px 8px;cursor:pointer;}
+      .lp-popup-title{margin:0 34px 12px 0;color:#d92d20;font-weight:800;font-size:24px;line-height:1.45;white-space:normal;word-break:break-word;}
+      .lp-popup-text{margin:0;color:#222;font-size:15px;line-height:1.8;white-space:pre-line;word-break:break-word;}
+      .lp-popup-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
+      .lp-popup-btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 16px;border-radius:999px;background:#1f2937;color:#fff;text-decoration:none;font-weight:700;font-size:14px;}
+      .lp-popup-btn.secondary{background:#2563eb;}
+      @media (min-width: 768px){ .lp-popup-card{width:520px;max-width:520px;padding:22px 22px 18px;} .lp-popup-title{font-size:30px;} .lp-popup-text{font-size:16px;} }
+    `;
+    document.head.appendChild(style);
   }
 
   function closePopup(){
-    const overlay = document.getElementById("sitePopupOverlay");
-    if(overlay){
-      overlay.remove();
-    }
-    try{
-      sessionStorage.setItem(POPUP_SESSION_KEY, "1");
-    }catch(error){}
+    const overlay = document.getElementById('lpPopupOverlay');
+    if(overlay) overlay.remove();
+    try{ sessionStorage.setItem(POPUP_SESSION_KEY, '1'); }catch(e){}
   }
 
-  function createPopupButton(data, fallbackText, className){
-    if(!data || data.visible !== true) return "";
-    const text = String(data.text || fallbackText || "").trim();
-    const url = String(data.url || "#").trim() || "#";
-    if(!text) return "";
-    return `<a href="${window.IndexUtils.escapeAttr(url)}" class="${window.IndexUtils.escapeAttr(className)}" data-popup-close="1">${window.IndexUtils.escapeHtml(text)}</a>`;
-  }
-
-  function renderPopup(config){
-    if(!shouldShowPopup(config)) return;
-    const pattern = getActivePopupPattern(config);
+  function showPopupIfNeeded(){
+    let alreadyShown = false;
+    try{ alreadyShown = sessionStorage.getItem(POPUP_SESSION_KEY) === '1'; }catch(e){}
+    if(alreadyShown) return;
+    const pattern = getActivePopupPattern();
     if(!pattern) return;
-
-    const existing = document.getElementById("sitePopupOverlay");
+    ensurePopupStyles();
+    const existing = document.getElementById('lpPopupOverlay');
     if(existing) existing.remove();
-
-    const overlay = document.createElement("div");
-    overlay.id = "sitePopupOverlay";
-    overlay.style.cssText = "position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;padding:16px;";
-
-    const buttons = [
-      createPopupButton(pattern.button1, "ボタン1", "site-popup-btn primary"),
-      createPopupButton(pattern.button2, "ボタン2", "site-popup-btn secondary")
-    ].filter(Boolean).join("");
-
+    const overlay = document.createElement('div');
+    overlay.id = 'lpPopupOverlay';
+    overlay.className = 'lp-popup-overlay';
+    const actions = [];
+    if(pattern.button1Visible && pattern.button1Text){
+      actions.push(`<a class="lp-popup-btn" href="${escapeAttr(pattern.button1Url || '#')}">${escapeHtml(pattern.button1Text || '')}</a>`);
+    }
+    if(pattern.button2Visible && pattern.button2Text){
+      actions.push(`<a class="lp-popup-btn secondary" href="${escapeAttr(pattern.button2Url || '#')}">${escapeHtml(pattern.button2Text || '')}</a>`);
+    }
     overlay.innerHTML = `
-      <div style="width:min(100%, 420px);background:#ffffff;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,0.22);padding:18px 18px 16px;position:relative;">
-        <button type="button" id="sitePopupClose" aria-label="閉じる" style="position:absolute;top:10px;right:10px;border:none;background:transparent;color:#666;font-size:28px;line-height:1;cursor:pointer;padding:4px 8px;">×</button>
-        <div style="padding:6px 8px 4px;">
-          <div style="font-size:22px;line-height:1.5;font-weight:700;color:#c62828;white-space:pre-line;word-break:break-word;">${window.IndexUtils.escapeHtml(pattern.title || "")}</div>
-          <div style="margin-top:10px;font-size:15px;line-height:1.9;color:#222;white-space:pre-line;word-break:break-word;">${window.IndexUtils.escapeHtml(pattern.text || "")}</div>
-          ${buttons ? `<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">${buttons}</div>` : ""}
-        </div>
+      <div class="lp-popup-card" role="dialog" aria-modal="true" aria-label="お知らせ">
+        <button type="button" class="lp-popup-close" aria-label="閉じる">×</button>
+        <h2 class="lp-popup-title">${escapeHtml(pattern.title || '').replace(/
+/g, '<br>')}</h2>
+        <div class="lp-popup-text">${escapeHtml(pattern.text || '')}</div>
+        ${actions.length ? `<div class="lp-popup-actions">${actions.join('')}</div>` : ''}
       </div>
     `;
-
     document.body.appendChild(overlay);
-
-    const style = document.createElement("style");
-    style.id = "sitePopupStyle";
-    style.textContent = `
-      .site-popup-btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 16px;border-radius:999px;text-decoration:none;font-weight:700;font-size:14px;}
-      .site-popup-btn.primary{background:#0d47a1;color:#fff;}
-      .site-popup-btn.secondary{background:#f5f5f5;color:#222;border:1px solid #ddd;}
-      @media (max-width: 768px){
-        .site-popup-btn{flex:1 1 100%;}
-      }
-    `;
-    const oldStyle = document.getElementById("sitePopupStyle");
-    if(oldStyle) oldStyle.remove();
-    document.head.appendChild(style);
-
-    const closeBtn = document.getElementById("sitePopupClose");
-    if(closeBtn){
-      closeBtn.addEventListener("click", closePopup);
-    }
-    overlay.addEventListener("click", function(event){
-      if(event.target === overlay){
-        closePopup();
-      }
+    overlay.addEventListener('click', function(event){
+      if(event.target === overlay) closePopup();
     });
-    overlay.querySelectorAll("[data-popup-close='1']").forEach((el) => {
-      el.addEventListener("click", function(){
-        closePopup();
-      });
-    });
+    const closeBtn = overlay.querySelector('.lp-popup-close');
+    if(closeBtn) closeBtn.addEventListener('click', closePopup);
   }
 
   function bindLogoTrigger(){
@@ -158,6 +156,7 @@
     ]);
 
     const config = window.IndexUtils.ensureConfigShape(configRaw || {});
+    currentPopupSettings = ensurePopupSettingsShape(config);
 
     const logoTextEl = document.getElementById("logoTextView");
     const logoImgEl = document.getElementById("logoImg");
@@ -225,7 +224,6 @@
     }
 
     sitePassword = config.password || "95123";
-    return config;
   }
 
   async function loadSections(){
@@ -292,14 +290,23 @@
     });
   }
 
+
+  function escapeHtml(text){
+    return String(text ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('\"','&quot;');
+  }
+
+  function escapeAttr(text){
+    return escapeHtml(text).replaceAll('\"','&quot;');
+  }
+
   async function init(){
     try{
       bindLogoTrigger();
       bindResponsiveReload();
       bindHashScroll();
-      const config = await loadConfig();
+      await loadConfig();
       await loadSections();
-      renderPopup(config || {});
+      showPopupIfNeeded();
     }catch(error){
       const container = document.getElementById("sectionsContainer");
       if(container){
