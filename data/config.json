@@ -87,11 +87,11 @@
         "text": "現在は正式オープン前の準備期間です。\n2026年12月頃の開始を目標に進めております。\nご利用に関するご質問、ご相談、開始時期のお問い合わせはお気軽にご連絡ください。",
         "button1": {
           "visible": true,
-          "text": "テスト",
-          "url": "#"
+          "text": "問合せ",
+          "url": "https://docs.google.com/forms/d/e/1FAIpQLSc2FZoU0Mz4IxiUQadXuc4rdiaqZn1iWmLhvc4jmj1uk2wF4g/viewform?usp=header"
         },
         "button2": {
-          "visible": true,
+          "visible": false,
           "text": "テスト",
           "url": "#"
         }
