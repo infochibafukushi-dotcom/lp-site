@@ -503,7 +503,7 @@
     "images": [],
     "items": [],
     "menuBottomCard": {
-      "visible": false,
+      "visible": true,
       "title": "ご予約・ご相談はこちら",
       "text": "料金の詳細やご不明点はお気軽にお問い合わせください。",
       "buttonText": "お問い合わせ",
