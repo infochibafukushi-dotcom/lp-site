@@ -2568,12 +2568,26 @@ function getMenuGroupStateKey(section, groupIndex){
   return sectionId + '__group__' + groupIndex;
 }
 
+function rerenderSectionsEditorPreserveScroll(){
+  captureSectionOpenStates();
+  const currentY = window.scrollY || window.pageYOffset || 0;
+  renderSectionsEditor();
+  renderSectionsSortList();
+  requestAnimationFrame(() => {
+    window.scrollTo(0, currentY);
+  });
+}
+
 function toggleMenuGroupEditor(sectionIndex, groupIndex){
   const section = sectionsData[sectionIndex];
   if(!section) return;
+  captureSectionOpenStates();
+  if(section.id){
+    sectionOpenState[section.id] = true;
+  }
   const key = getMenuGroupStateKey(section, groupIndex);
   menuGroupOpenState[key] = menuGroupOpenState[key] === true ? false : true;
-  renderSectionsEditor();
+  rerenderSectionsEditorPreserveScroll();
 }
 
 function updateMenuGroupField(sectionIndex, groupIndex, field, value){
