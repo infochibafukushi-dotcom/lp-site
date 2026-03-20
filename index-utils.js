@@ -345,6 +345,19 @@
       }));
     }
 
+    if(!Array.isArray(section.menuGroups)) section.menuGroups = [];
+    if(Array.isArray(section.menuGroups)){
+      section.menuGroups = section.menuGroups.map((group, groupIndex) => ({
+        title: group?.title || `カテゴリ${groupIndex + 1}`,
+        items: Array.isArray(group?.items) ? group.items.map((item) => ({
+          name: item?.name || "",
+          price: item?.price || "",
+          description: item?.description || "",
+          visible: item?.visible !== false
+        })) : []
+      }));
+    }
+
     ensureSectionLinks(section);
     return section;
   }
