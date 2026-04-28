@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>介護タクシーLP</title>
+<link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+<link rel="dns-prefetch" href="//raw.githubusercontent.com">
 <style>
 *{
   box-sizing:border-box;
@@ -548,7 +550,7 @@ footer{
 
 <header>
   <div class="logo" id="logoTrigger">
-    <img id="logoImg" class="logo-img" alt="">
+    <img id="logoImg" class="logo-img" alt="" loading="eager" fetchpriority="high" decoding="async">
     <div class="logo-text" id="logoTextView">LOGO</div>
   </div>
 
@@ -569,15 +571,15 @@ footer{
 
 <footer id="footerMenu">
   <a class="footerbtn" id="f1" href="#">
-    <img id="f1img" class="hidden" alt="">
+    <img id="f1img" class="hidden" alt="" loading="lazy" decoding="async">
     <span id="f1text">電話</span>
   </a>
   <a class="footerbtn" id="f2" href="#">
-    <img id="f2img" class="hidden" alt="">
+    <img id="f2img" class="hidden" alt="" loading="lazy" decoding="async">
     <span id="f2text">LINE</span>
   </a>
   <a class="footerbtn" id="f3" href="#">
-    <img id="f3img" class="hidden" alt="">
+    <img id="f3img" class="hidden" alt="" loading="lazy" decoding="async">
     <span id="f3text">予約</span>
   </a>
 </footer>
