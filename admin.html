@@ -933,7 +933,7 @@ body{
       </div>
 
       <div class="actions save-inline">
-        <button type="button" onclick="saveConfigToGitHub()">上部設定を保存</button>
+        <button type="button" onclick="saveAllToGitHub()">すべて保存</button>
       </div>
     </div>
   </div>
@@ -1141,7 +1141,7 @@ body{
       </div>
 
       <div class="actions" style="margin-top:14px;">
-        <button type="button" onclick="saveConfigToGitHub()">下部設定を保存</button>
+        <button type="button" onclick="saveAllToGitHub()">すべて保存</button>
       </div>
       <div class="preview" id="configSaveResult">まだ保存していません。</div>
     </div>
@@ -1161,7 +1161,7 @@ body{
       <p class="note">3パターンまで登録できます。使用するにチェックを入れた1パターンだけ表示されます。表示するがOFFのパターンは公開されません。POPアップは新しく開いた時だけ1回表示されます。</p>
       <div id="popupSettingsEditor"></div>
       <div class="actions" style="margin-top:14px;">
-        <button type="button" onclick="saveConfigToGitHub()">POP設定を保存</button>
+        <button type="button" onclick="saveAllToGitHub()">すべて保存</button>
       </div>
     </div>
   </div>
@@ -1216,7 +1216,7 @@ body{
       <p class="note">この一覧は並び替え専用です。タイトル順に確認しながら上下移動できます。</p>
       <div id="sectionsSortEditor">読み込み中...</div>
       <div class="actions" style="margin-top:14px;">
-        <button type="button" onclick="saveSectionsToGitHub()">sections.json を保存</button>
+        <button type="button" onclick="saveAllToGitHub()">すべて保存</button>
       </div>
     </div>
   </div>
@@ -1232,7 +1232,7 @@ body{
     <div class="card-body js-card-body">
       <div id="sectionsEditor">読み込み中...</div>
       <div class="actions">
-        <button type="button" onclick="saveSectionsToGitHub()">sections.json を保存</button>
+        <button type="button" onclick="saveAllToGitHub()">すべて保存</button>
       </div>
       <div class="preview" id="sectionsSaveResult">まだ保存していません。</div>
     </div>
@@ -1259,8 +1259,6 @@ body{
     <div class="floating-save-inner">
       <div class="floating-save-status" id="floatingSaveStatus">未保存の変更はありません。</div>
       <div class="floating-save-actions">
-        <button type="button" onclick="saveConfigToGitHub()">上部・下部設定を保存</button>
-        <button type="button" class="secondary" onclick="saveSectionsToGitHub()">セクションを保存</button>
         <button type="button" onclick="saveAllToGitHub()">すべて保存</button>
       </div>
     </div>
