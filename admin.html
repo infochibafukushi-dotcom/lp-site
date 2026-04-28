@@ -1856,91 +1856,95 @@ function buildAnchorPreviewHtml(anchor){
 }
 
 function buildConfigDraft(){
+  const getText = (id) => String(document.getElementById(id)?.value || '');
+  const getTrimmed = (id) => getText(id).trim();
+  const getChecked = (id) => document.getElementById(id)?.checked === true;
+
   return {
-    password: document.getElementById('passwordText').value,
-    logo: document.getElementById('logoText').value,
-    logoImage: document.getElementById('logoImage').value,
-    headerBgColor: document.getElementById('headerBgColorText').value || '#ffffff',
-    footerBgColor: document.getElementById('footerBgColorText').value || '#ffffff',
+    password: getText('passwordText'),
+    logo: getText('logoText'),
+    logoImage: getTrimmed('logoImage'),
+    headerBgColor: getTrimmed('headerBgColorText') || '#ffffff',
+    footerBgColor: getTrimmed('footerBgColorText') || '#ffffff',
     buttons: [
       {
-        text: document.getElementById('btn1Text').value,
-        link: document.getElementById('btn1Link').value,
-        visible: document.getElementById('btn1Visible').checked
+        text: getText('btn1Text'),
+        link: getTrimmed('btn1Link'),
+        visible: getChecked('btn1Visible')
       },
       {
-        text: document.getElementById('btn2Text').value,
-        link: document.getElementById('btn2Link').value,
-        visible: document.getElementById('btn2Visible').checked
+        text: getText('btn2Text'),
+        link: getTrimmed('btn2Link'),
+        visible: getChecked('btn2Visible')
       },
       {
-        text: document.getElementById('btn3Text').value,
-        link: document.getElementById('btn3Link').value,
-        visible: document.getElementById('btn3Visible').checked
+        text: getText('btn3Text'),
+        link: getTrimmed('btn3Link'),
+        visible: getChecked('btn3Visible')
       }
     ],
     buttonsPc: [
       {
-        text: document.getElementById('btnPc1Text').value,
-        link: document.getElementById('btnPc1Link').value,
-        visible: document.getElementById('btnPc1Visible').checked
+        text: getText('btnPc1Text'),
+        link: getTrimmed('btnPc1Link'),
+        visible: getChecked('btnPc1Visible')
       },
       {
-        text: document.getElementById('btnPc2Text').value,
-        link: document.getElementById('btnPc2Link').value,
-        visible: document.getElementById('btnPc2Visible').checked
+        text: getText('btnPc2Text'),
+        link: getTrimmed('btnPc2Link'),
+        visible: getChecked('btnPc2Visible')
       },
       {
-        text: document.getElementById('btnPc3Text').value,
-        link: document.getElementById('btnPc3Link').value,
-        visible: document.getElementById('btnPc3Visible').checked
+        text: getText('btnPc3Text'),
+        link: getTrimmed('btnPc3Link'),
+        visible: getChecked('btnPc3Visible')
       }
     ],
     footer: [
       {
-        text: document.getElementById('footer1Text').value,
-        link: document.getElementById('footer1Link').value,
-        visible: document.getElementById('footer1Visible').checked,
-        image: document.getElementById('footer1Image').value
+        text: getText('footer1Text'),
+        link: getTrimmed('footer1Link'),
+        visible: getChecked('footer1Visible'),
+        image: getTrimmed('footer1Image')
       },
       {
-        text: document.getElementById('footer2Text').value,
-        link: document.getElementById('footer2Link').value,
-        visible: document.getElementById('footer2Visible').checked,
-        image: document.getElementById('footer2Image').value
+        text: getText('footer2Text'),
+        link: getTrimmed('footer2Link'),
+        visible: getChecked('footer2Visible'),
+        image: getTrimmed('footer2Image')
       },
       {
-        text: document.getElementById('footer3Text').value,
-        link: document.getElementById('footer3Link').value,
-        visible: document.getElementById('footer3Visible').checked,
-        image: document.getElementById('footer3Image').value
+        text: getText('footer3Text'),
+        link: getTrimmed('footer3Link'),
+        visible: getChecked('footer3Visible'),
+        image: getTrimmed('footer3Image')
       }
     ],
     footerPc: [
       {
-        text: document.getElementById('footerPc1Text').value,
-        link: document.getElementById('footerPc1Link').value,
-        visible: document.getElementById('footerPc1Visible').checked,
-        image: document.getElementById('footerPc1Image').value
+        text: getText('footerPc1Text'),
+        link: getTrimmed('footerPc1Link'),
+        visible: getChecked('footerPc1Visible'),
+        image: getTrimmed('footerPc1Image')
       },
       {
-        text: document.getElementById('footerPc2Text').value,
-        link: document.getElementById('footerPc2Link').value,
-        visible: document.getElementById('footerPc2Visible').checked,
-        image: document.getElementById('footerPc2Image').value
+        text: getText('footerPc2Text'),
+        link: getTrimmed('footerPc2Link'),
+        visible: getChecked('footerPc2Visible'),
+        image: getTrimmed('footerPc2Image')
       },
       {
-        text: document.getElementById('footerPc3Text').value,
-        link: document.getElementById('footerPc3Link').value,
-        visible: document.getElementById('footerPc3Visible').checked,
-        image: document.getElementById('footerPc3Image').value
+        text: getText('footerPc3Text'),
+        link: getTrimmed('footerPc3Link'),
+        visible: getChecked('footerPc3Visible'),
+        image: getTrimmed('footerPc3Image')
       }
     ],
     pcTopPhone: {
-      enabled: document.getElementById('pcTopPhoneEnabled').checked,
-      label: document.getElementById('pcTopPhoneLabel').value,
-      number: document.getElementById('pcTopPhoneNumber').value,
-      link: document.getElementById('pcTopPhoneLink').value
+      enabled: getChecked('pcTopPhoneEnabled'),
+      label: getText('pcTopPhoneLabel'),
+      number: getText('pcTopPhoneNumber'),
+      link: getTrimmed('pcTopPhoneLink')
     },
     popupSettings: collectPopupSettingsDraft()
   };
@@ -2748,7 +2752,7 @@ async function uploadAssetFile(file, folder = 'sections'){
   const res = await fetch(apiUrl, {
     method: 'PUT',
     headers: {
-      'Authorization': 'Bearer ' + token,
+      'Authorization': 'token ' + token,
       'Accept': 'application/vnd.github+json',
       'Content-Type': 'application/json'
     },
@@ -3440,10 +3444,14 @@ async function getCurrentFileSha(owner, repo, branch, token, path){
   const url = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + path + '?ref=' + encodeURIComponent(branch);
   const res = await fetch(url, {
     headers: {
-      'Authorization': 'Bearer ' + token,
+      'Authorization': 'token ' + token,
       'Accept': 'application/vnd.github+json'
     }
   });
+
+  if(res.status === 404){
+    return null;
+  }
 
   if(!res.ok){
     throw new Error('SHA取得失敗: ' + res.status + ' ' + res.statusText);
@@ -3459,28 +3467,49 @@ function utf8ToBase64(str){
 async function saveFileToGitHub(path, contentString){
   const { owner, repo, branch, token } = getGitHubSettings();
   const contentBase64 = utf8ToBase64(contentString);
-  const sha = await getCurrentFileSha(owner, repo, branch, token, path);
   const apiUrl = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + path;
 
-  const res = await fetch(apiUrl, {
-    method: 'PUT',
-    headers: {
-      'Authorization': 'Bearer ' + token,
-      'Accept': 'application/vnd.github+json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
+  function extractGitHubErrorMessage(result, res){
+    const base = result?.message || (res.status + ' ' + res.statusText);
+    const details = Array.isArray(result?.errors)
+      ? result.errors.map((err) => err?.message || err?.code || '').filter(Boolean).join(' / ')
+      : '';
+    return details ? (base + ' (' + details + ')') : base;
+  }
+
+  async function putWithSha(sha){
+    const payload = {
       message: 'Update ' + path + ' from admin panel',
       content: contentBase64,
-      branch: branch,
-      sha: sha
-    })
-  });
+      branch: branch
+    };
+    if(sha){
+      payload.sha = sha;
+    }
 
-  const result = await res.json();
+    return fetch(apiUrl, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'token ' + token,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+  }
+
+  let sha = await getCurrentFileSha(owner, repo, branch, token, path);
+  let res = await putWithSha(sha);
+  let result = await res.json();
+
+  if(!res.ok && (res.status === 409 || res.status === 422)){
+    sha = await getCurrentFileSha(owner, repo, branch, token, path);
+    res = await putWithSha(sha);
+    result = await res.json();
+  }
+
   if(!res.ok){
-    const errText = result?.message ? result.message : (res.status + ' ' + res.statusText);
-    throw new Error(errText);
+    throw new Error(extractGitHubErrorMessage(result, res));
   }
   return result;
 }
