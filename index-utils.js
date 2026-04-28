@@ -94,7 +94,7 @@
   }
 
   function sanitizeUrl(value, fallback = "#"){
-    const raw = String(value ?? "").trim();
+    const raw = String(value ?? "").normalize("NFKC").trim();
     if(!raw) return fallback;
 
     const normalized = raw.replace(/[\u0000-\u001F\u007F\s]+/g, "");
