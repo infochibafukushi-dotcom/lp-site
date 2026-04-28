@@ -93,6 +93,20 @@
       .replaceAll(">", "&gt;");
   }
 
+  function sanitizeUrl(value, fallback = "#"){
+    const raw = String(value ?? "").trim();
+    if(!raw) return fallback;
+
+    const normalized = raw.replace(/[\u0000-\u001F\u007F\s]+/g, "");
+    if(!normalized) return fallback;
+
+    if(/^(javascript|data|vbscript):/i.test(normalized)){
+      return fallback;
+    }
+
+    return raw;
+  }
+
   function ensureTopButtons(list, defaults){
     const items = Array.isArray(list) ? list.slice(0, 3) : [];
     while(items.length < 3){
@@ -406,8 +420,9 @@
   }
 
   function applyTopButton(el, data, fallbackText){
+    if(!el) return;
     el.innerText = data?.text || fallbackText;
-    el.href = data?.link || "#";
+    el.href = sanitizeUrl(data?.link, "#");
     if(data?.visible === false){
       el.classList.add("hidden");
     }else{
@@ -416,8 +431,9 @@
   }
 
   function applyFooterButton(anchorEl, imgEl, textEl, data, fallbackText){
+    if(!anchorEl || !imgEl || !textEl) return;
     textEl.innerText = data?.text || fallbackText;
-    anchorEl.href = data?.link || "#";
+    anchorEl.href = sanitizeUrl(data?.link, "#");
 
     if(data?.visible === false){
       anchorEl.classList.add("hidden");
@@ -435,8 +451,9 @@
   }
 
   function wrapLink(link, innerHtml, className = ""){
-    if(link && link !== "#"){
-      return `<a href="${escapeAttr(link)}" target="_blank" rel="noopener noreferrer" class="${escapeAttr(className)}">${innerHtml}</a>`;
+    const safeLink = sanitizeUrl(link, "#");
+    if(safeLink && safeLink !== "#"){
+      return `<a href="${escapeAttr(safeLink)}" target="_blank" rel="noopener noreferrer" class="${escapeAttr(className)}">${innerHtml}</a>`;
     }
     return innerHtml;
   }
@@ -444,6 +461,7 @@
   window.IndexUtils = {
     escapeHtml: escapeHtml,
     escapeAttr: escapeAttr,
+    sanitizeUrl: sanitizeUrl,
     ensureConfigShape: ensureConfigShape,
     ensurePopupSettingsShape: ensurePopupSettingsShape,
     ensureSectionLinks: ensureSectionLinks,
