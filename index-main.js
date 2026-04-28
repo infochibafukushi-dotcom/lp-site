@@ -30,7 +30,7 @@
   function createPopupButton(data, fallbackText, className){
     if(!data || data.visible !== true) return "";
     const text = String(data.text || fallbackText || "").trim();
-    const url = String(data.url || "#").trim() || "#";
+    const url = window.IndexUtils.sanitizeUrl(data.url, "#");
     if(!text) return "";
     return `<a href="${window.IndexUtils.escapeAttr(url)}" class="${window.IndexUtils.escapeAttr(className)}" data-popup-close="1">${window.IndexUtils.escapeHtml(text)}</a>`;
   }
@@ -214,9 +214,10 @@
       const pcTopPhone = config.pcTopPhone || {};
       const label = String(pcTopPhone.label || "").trim();
       const number = String(pcTopPhone.number || "").trim();
-      const link = String(pcTopPhone.link || "").trim() || (number ? ("tel:" + number.replace(/[^0-9+]/g, "")) : "#");
+      const fallbackLink = number ? ("tel:" + number.replace(/[^0-9+]/g, "")) : "#";
+      const link = window.IndexUtils.sanitizeUrl(pcTopPhone.link || fallbackLink, "#");
       if(isPc && pcTopPhone.enabled === true && (label || number)){
-        pcPhoneInline.innerHTML = `<a href="${link}">${label}${label && number ? " " : ""}${number}</a>`;
+        pcPhoneInline.innerHTML = `<a href="${window.IndexUtils.escapeAttr(link)}">${window.IndexUtils.escapeHtml(label)}${label && number ? " " : ""}${window.IndexUtils.escapeHtml(number)}</a>`;
         pcPhoneInline.classList.remove("hidden");
       }else{
         pcPhoneInline.innerHTML = "";

@@ -3445,6 +3445,10 @@ async function getCurrentFileSha(owner, repo, branch, token, path){
     }
   });
 
+  if(res.status === 404){
+    return null;
+  }
+
   if(!res.ok){
     throw new Error('SHA取得失敗: ' + res.status + ' ' + res.statusText);
   }
@@ -3459,28 +3463,49 @@ function utf8ToBase64(str){
 async function saveFileToGitHub(path, contentString){
   const { owner, repo, branch, token } = getGitHubSettings();
   const contentBase64 = utf8ToBase64(contentString);
-  const sha = await getCurrentFileSha(owner, repo, branch, token, path);
   const apiUrl = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + path;
 
-  const res = await fetch(apiUrl, {
-    method: 'PUT',
-    headers: {
-      'Authorization': 'Bearer ' + token,
-      'Accept': 'application/vnd.github+json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
+  function extractGitHubErrorMessage(result, res){
+    const base = result?.message || (res.status + ' ' + res.statusText);
+    const details = Array.isArray(result?.errors)
+      ? result.errors.map((err) => err?.message || err?.code || '').filter(Boolean).join(' / ')
+      : '';
+    return details ? (base + ' (' + details + ')') : base;
+  }
+
+  async function putWithSha(sha){
+    const payload = {
       message: 'Update ' + path + ' from admin panel',
       content: contentBase64,
-      branch: branch,
-      sha: sha
-    })
-  });
+      branch: branch
+    };
+    if(sha){
+      payload.sha = sha;
+    }
 
-  const result = await res.json();
+    return fetch(apiUrl, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+  }
+
+  let sha = await getCurrentFileSha(owner, repo, branch, token, path);
+  let res = await putWithSha(sha);
+  let result = await res.json();
+
+  if(!res.ok && (res.status === 409 || res.status === 422)){
+    sha = await getCurrentFileSha(owner, repo, branch, token, path);
+    res = await putWithSha(sha);
+    result = await res.json();
+  }
+
   if(!res.ok){
-    const errText = result?.message ? result.message : (res.status + ' ' + res.statusText);
-    throw new Error(errText);
+    throw new Error(extractGitHubErrorMessage(result, res));
   }
   return result;
 }

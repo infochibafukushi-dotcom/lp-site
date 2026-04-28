@@ -1,4 +1,11 @@
 (function(){
+  function buildImageAttrs(priority = "lazy"){
+    if(priority === "high"){
+      return 'loading="eager" fetchpriority="high" decoding="async"';
+    }
+    return 'loading="lazy" fetchpriority="low" decoding="async"';
+  }
+
   function renderSectionBottomLinks(section){
     if(window.SectionBottomButtons && typeof window.SectionBottomButtons.render === "function"){
       return window.SectionBottomButtons.render(
@@ -15,8 +22,9 @@
   }
 
   function renderNormal(section){
+    const imageAttrs = buildImageAttrs(section?.__imagePriority);
     const imageHtml = section.image
-      ? `<img class="normal-image" src="${window.IndexUtils.escapeAttr(section.image)}" alt="${window.IndexUtils.escapeAttr(section.title || "")}">`
+      ? `<img class="normal-image" src="${window.IndexUtils.escapeAttr(section.image)}" alt="${window.IndexUtils.escapeAttr(section.title || "")}" ${imageAttrs}>`
       : "";
     const linkedImage = window.IndexUtils.wrapLink(section.link || "#", imageHtml, "");
 
@@ -33,10 +41,12 @@
   }
 
   function renderSlider(section, idx){
+    const imageAttrs = buildImageAttrs(section?.__imagePriority);
     const images = Array.isArray(section.images) ? section.images : [];
     const slides = images.length
-      ? images.map((src) => {
-          const image = `<img src="${window.IndexUtils.escapeAttr(src)}" alt="${window.IndexUtils.escapeAttr(section.title || "")}">`;
+      ? images.map((src, imageIndex) => {
+          const attrs = imageIndex === 0 ? imageAttrs : buildImageAttrs("lazy");
+          const image = `<img src="${window.IndexUtils.escapeAttr(src)}" alt="${window.IndexUtils.escapeAttr(section.title || "")}" ${attrs}>`;
           return `<div class="slider-slide">${window.IndexUtils.wrapLink(section.link || "#", image, "")}</div>`;
         }).join("")
       : `<div class="slider-empty">画像がまだありません</div>`;
@@ -76,7 +86,7 @@
       const link = item?.link || "#";
 
       const inner = `
-        ${image ? `<img src="${window.IndexUtils.escapeAttr(image)}" alt="${window.IndexUtils.escapeAttr(title)}">` : ""}
+        ${image ? `<img src="${window.IndexUtils.escapeAttr(image)}" alt="${window.IndexUtils.escapeAttr(title)}" ${buildImageAttrs("lazy")}>` : ""}
         ${title ? `<h3 class="card-item-title text-${window.IndexUtils.escapeAttr(textAlign || "left")}">${window.IndexUtils.escapeHtml(title)}</h3>` : ""}
         ${text ? `<div class="section-text text-${window.IndexUtils.escapeAttr(textSize || "medium")} text-${window.IndexUtils.escapeAttr(textAlign || "left")}">${window.IndexUtils.escapeHtml(text)}</div>` : ""}
       `;
@@ -131,7 +141,7 @@
     const image = section.image
       ? window.IndexUtils.wrapLink(
           section.link || "#",
-          `<img src="${window.IndexUtils.escapeAttr(section.image)}" alt="${window.IndexUtils.escapeAttr(section.title || "")}">`,
+          `<img src="${window.IndexUtils.escapeAttr(section.image)}" alt="${window.IndexUtils.escapeAttr(section.title || "")}" ${buildImageAttrs(section?.__imagePriority)}>`,
           ""
         )
       : "";
@@ -260,6 +270,7 @@
 
   function renderSection(section, idx){
     section = window.IndexUtils.ensureSectionShape(section, idx);
+    section.__imagePriority = idx === 0 ? "high" : "lazy";
 
     if(!section || section.enabled === false){
       return "";
