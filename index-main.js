@@ -145,6 +145,7 @@
     if(logoImgEl){
       if(config.logoImage){
         logoImgEl.src = config.logoImage;
+        logoImgEl.alt = (config.logo || "ちばケアタクシー") + " ロゴ";
         logoImgEl.style.display = "block";
       }else{
         logoImgEl.src = "";
