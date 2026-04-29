@@ -6,7 +6,7 @@
     "title": "千葉市全域｜24時間365日対応｜介護タクシー\n【ちばケアタクシー】",
     "text": "車いす・ストレッチャー対応\n｜病院の通院・転院・お買い物・\n自由な外出をサポート",
     "images": [
-      "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/slider/1773060459927-ChatGPT-Image-202627-21_47_56.png"
+      "https://infochibafukushi-dotcom.github.io/lp-site/assets/slider/1773060459927-ChatGPT-Image-202627-21_47_56.png"
     ],
     "link": "#",
     "textSize": "medium",
@@ -47,7 +47,7 @@
     "enabled": true,
     "title": "千葉市全域・四街道市・市原市に対応",
     "text": "千葉市（中央区・若葉区・緑区・稲毛区・花見川区・美浜区）を中心に、四街道市、市原市など近隣エリアの介護タクシー・福祉タクシー送迎を承ります。病院への通院や転院、お買い物など、24時間365日いつでもお気軽にご相談ください。",
-    "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773103736168-messageImage_1770383343976_0.jpg",
+    "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/sections/1773103736168-messageImage_1770383343976_0.jpg",
     "link": "#",
     "textSize": "medium",
     "bgColor": "#e87f00",
@@ -92,19 +92,19 @@
       {
         "title": "【24時間365日対応】",
         "text": "夜間の急な退院や早朝の通院など、お困りの際も柔軟にサポートいたします。",
-        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773103749339-messageImage_1770383272387_0.jpg",
+        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773103749339-messageImage_1770383272387_0.jpg",
         "link": "#"
       },
       {
         "title": "【安心の介助技術】",
         "text": "プロのドライバーがドア・ツー・ドアで安全にお運び。階段介助等もお任せください。",
-        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773103755526-messageImage_1770383194104.jpg",
+        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773103755526-messageImage_1770383194104.jpg",
         "link": "#"
       },
       {
         "title": "【充実の対応機材】",
         "text": "車いすはもちろん、寝たきりのまま移動できるストレッチャーも完備しています。",
-        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773103763810-messageImage_1770383486552_0.jpg",
+        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773103763810-messageImage_1770383486552_0.jpg",
         "link": "#"
       }
     ],
@@ -151,19 +151,19 @@
       {
         "title": "【通院・転院・退院】",
         "text": "定期的な通院や、病院間の転院、お迎えが必要な退院時などにご活用ください。",
-        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773103749339-messageImage_1770383272387_0.jpg",
+        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773103749339-messageImage_1770383272387_0.jpg",
         "link": "#"
       },
       {
         "title": " 【お買い物・銀行など】",
         "text": "日常のちょっとした外出や役所、銀行への付き添いなども丁寧に対応いたします。\n",
-        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773103755526-messageImage_1770383194104.jpg",
+        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773103755526-messageImage_1770383194104.jpg",
         "link": "#"
       },
       {
         "title": "【冠婚葬祭・お出かけ】",
         "text": "ご親戚の結婚式や法事、お墓参り、ご家族との旅行など大切な一日を支えます。",
-        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773103763810-messageImage_1770383486552_0.jpg",
+        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773103763810-messageImage_1770383486552_0.jpg",
         "link": "#"
       }
     ],
@@ -210,25 +210,25 @@
       {
         "title": "【車いす】",
         "text": "標準的な自走式・介助式車いすのまま、安全にご乗車いただけます。\n",
-        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773062960486-messageImage_1770383251537.jpg",
+        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062960486-messageImage_1770383251537.jpg",
         "link": "#"
       },
       {
         "title": "【リクライニング車いす】",
         "text": "長距離の移動でも疲れにくい、背もたれが倒れるタイプも完備。\n",
-        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773062967741-messageImage_1770383272387_0.jpg",
+        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062967741-messageImage_1770383272387_0.jpg",
         "link": "#"
       },
       {
         "title": "【ストレッチャー】",
         "text": "寝たきりの状態でも、横になったまま安全に搬送可能です。\n",
-        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773062973797-messageImage_1770383486552_0.jpg",
+        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062973797-messageImage_1770383486552_0.jpg",
         "link": "#"
       },
       {
         "title": "【安心の介助用品】",
         "text": "布担架やスロープなど、あらゆる段差や状況に対応する機材を完備。\n",
-        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773062985662-messageImage_1770383194104.jpg",
+        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062985662-messageImage_1770383194104.jpg",
         "link": "#"
       }
     ],
@@ -270,7 +270,7 @@
     "enabled": true,
     "title": "車両紹介・乗車定員について",
     "text": "ちばケアタクシーの車両は、最大で「車いす1台～3台 ＋ 付き添い様5名」まで同時にご乗車可能です。\n広々とした室内空間で、ご家族や介助者の方もゆったりとご同乗いただけます。\n※ストレッチャー利用時の同乗人数については、事前にお電話にてご相談ください。\n",
-    "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773103736168-messageImage_1770383343976_0.jpg",
+    "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/sections/1773103736168-messageImage_1770383343976_0.jpg",
     "link": "#",
     "textSize": "medium",
     "bgColor": "#e87f00",
@@ -333,7 +333,7 @@
     ],
     "type": "normal",
     "text": "【片道送迎】\n通院・施設利用・デイサービス・お買い物・外出など、さまざまな場面でご利用いただけます。\nご自宅内（ベッド・玄関）から車いすへの移乗介助、車両への乗降（リフト対応）まで対応し、目的地まで安全に送迎いたします。\n車いすのままご乗車可能で、安心してご利用いただけます。\n\n料金目安：〇〇〇円～\n※距離・介助内容により変動します",
-    "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1774053609914-.png",
+    "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/sections/1774053609914-.png",
     "link": "#",
     "images": [],
     "items": [],
@@ -373,7 +373,7 @@
     ],
     "type": "normal",
     "text": "【往復送迎（待機あり）】\n通院・施設利用・デイサービス・お買い物・外出など、行き帰りをまとめてご利用いただけます。\nご自宅から目的地まで安全に送迎し、現地での待機にも対応しております。\n診察やお買い物後もスムーズにご帰宅いただけます。\n\n料金目安：〇〇〇円～\n※待機時間・距離・介助内容により変動します",
-    "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1774053216767-ChatGPT-Image-2026321-09_30_23.png",
+    "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/sections/1774053216767-ChatGPT-Image-2026321-09_30_23.png",
     "link": "#",
     "images": [],
     "items": [],
@@ -413,7 +413,7 @@
     ],
     "type": "normal",
     "text": "【貸切・長時間利用】\n外出・お買い物・冠婚葬祭など、幅広い用途でご利用いただけます。\n複数箇所の移動や長時間のご利用にも対応しております。\n\n料金目安：〇〇〇円～\n※利用時間・距離・介助内容により変動します",
-    "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1774053851724-.png",
+    "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/sections/1774053851724-.png",
     "link": "#",
     "images": [],
     "items": [],
@@ -560,19 +560,19 @@
       {
         "title": "【丁寧な介助で安心】",
         "text": "「初めての利用で不安でしたが、電話から当日の介助まで親切で助かりました」\n",
-        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773103749339-messageImage_1770383272387_0.jpg",
+        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773103749339-messageImage_1770383272387_0.jpg",
         "link": "#"
       },
       {
         "title": "【機材が清潔で快適】",
         "text": "「ストレッチャーでの転院でしたが、車両も機材も綺麗で心地よく移動できました」\n",
-        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773103755526-messageImage_1770383194104.jpg",
+        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773103755526-messageImage_1770383194104.jpg",
         "link": "#"
       },
       {
         "title": "【急な退院にも対応】",
         "text": "「24時間対応なので、夜間の急な退院時にもすぐ駆けつけてくれ心強かったです」",
-        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1773103763810-messageImage_1770383486552_0.jpg",
+        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773103763810-messageImage_1770383486552_0.jpg",
         "link": "#"
       }
     ],
@@ -719,7 +719,7 @@
     "enabled": true,
     "title": "代表挨拶・サービスへの想い",
     "text": "代表の笑顔の写真とともに、「安心・安全な外出を全力でサポートします」という一言を添えます。",
-    "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773103782069-messageImage_1770383436537_0.jpg",
+    "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/sections/1773103782069-messageImage_1770383436537_0.jpg",
     "link": "#",
     "textSize": "medium",
     "bgColor": "#e87f00",
@@ -759,7 +759,7 @@
     "enabled": true,
     "title": "事業所案内・最新の活動状況",
     "text": " 会社名、住所、営業許可番号。\n右（画像）： TikTokやインスタのQRコード、または活動中の写真。",
-    "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/sections/1773103788406-messageImage_1770383251537.jpg",
+    "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/sections/1773103788406-messageImage_1770383251537.jpg",
     "link": "#",
     "textSize": "medium",
     "bgColor": "#e87f00",
