@@ -1,5 +1,4 @@
 (function(){
-  let clickCount = 0;
   let sitePassword = "95123";
   const POPUP_SESSION_KEY = "lp_popup_dismissed";
 
@@ -95,32 +94,9 @@
     });
   }
 
-  function bindLogoTrigger(){
-    const trigger = document.getElementById("logoTrigger");
-    if(!trigger) return;
+  function bindLogoTrigger(){}
 
-    trigger.onclick = function(){
-      clickCount++;
-      if(clickCount >= 5){
-        const adminPanel = document.getElementById("adminPanel");
-        if(adminPanel){
-          adminPanel.style.display = "block";
-        }
-        clickCount = 0;
-      }
-    };
-  }
-
-  function login(){
-    const passEl = document.getElementById("pass");
-    const input = passEl ? passEl.value : "";
-    if(input === sitePassword){
-      alert("管理画面ログイン成功");
-      location.href = "./admin.html";
-    }else{
-      alert("パスワード違います");
-    }
-  }
+  function login(){}
 
   async function fetchJsonWithFallback(urls){
     let lastError = null;
