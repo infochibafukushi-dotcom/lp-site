@@ -460,7 +460,7 @@
         "items": [
           {
             "name": "初乗り運賃料",
-            "price": "730～円",
+            "price": "730円～",
             "description": "最初の基本料金です。",
             "visible": true
           },
