@@ -91,6 +91,7 @@
         "visible": true,
         "title": "開業準備中です。\nご相談は受付中",
         "text": "現在は正式オープン前の準備期間です。\n2026年12月頃の開始を目標に進めております。\nご利用に関するご質問、ご相談、開始時期のお問い合わせはお気軽にご連絡ください。",
+        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/popup/1777440061364-ChatGPT-Image-2026429-14_06_51.webp",
         "button1": {
           "visible": false,
           "text": "問合せ",
@@ -107,6 +108,7 @@
         "visible": false,
         "title": "",
         "text": "",
+        "image": "",
         "button1": {
           "visible": false,
           "text": "ボタン1",
@@ -123,6 +125,7 @@
         "visible": false,
         "title": "",
         "text": "",
+        "image": "",
         "button1": {
           "visible": false,
           "text": "ボタン1",
