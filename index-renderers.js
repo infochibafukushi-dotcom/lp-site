@@ -235,7 +235,7 @@
                   <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
                     <div style="min-width:0;flex:1 1 auto;">
                       <div style="font-size:clamp(18px, 1.8vw, 20px);font-weight:700;line-height:1.5;color:#2d2a26;">${window.IndexUtils.escapeHtml(item.name || '')}</div>
-                      ${item.description ? `<div style="margin-top:6px;font-size:13px;line-height:1.8;color:#777;white-space:pre-line;word-break:break-word;">${window.IndexUtils.escapeHtml(item.description || '')}</div>` : ''}
+                      ${item.description ? `<div style="margin-top:6px;font-size:13px;line-height:1.8;color:#555;white-space:pre-line;word-break:break-word;">${window.IndexUtils.escapeHtml(item.description || '')}</div>` : ''}
                     </div>
                     <div style="flex:0 0 auto;font-size:clamp(20px, 2.2vw, 24px);font-weight:800;line-height:1.2;color:#9a6b16;white-space:nowrap;padding-left:12px;letter-spacing:0.01em;">${window.IndexUtils.escapeHtml(item.price || '')}</div>
                   </div>
