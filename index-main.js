@@ -52,8 +52,8 @@
     ].filter(Boolean).join("");
 
     const popupImage = pattern.image ? `
-      <div style="margin:0 0 12px;">
-        <img src="${window.IndexUtils.escapeAttr(pattern.image)}" alt="${window.IndexUtils.escapeAttr(pattern.title || 'お知らせ画像')}" loading="eager" decoding="async" style="width:100%;max-height:220px;object-fit:cover;border-radius:12px;display:block;background:#f2f2f2;">
+      <div style="margin:0 0 12px;padding:8px;background:#f8f8f8;border-radius:12px;display:flex;align-items:center;justify-content:center;">
+        <img src="${window.IndexUtils.escapeAttr(pattern.image)}" alt="${window.IndexUtils.escapeAttr(pattern.title || 'お知らせ画像')}" loading="eager" decoding="async" style="max-width:100%;max-height:min(42vh,280px);width:auto;height:auto;object-fit:contain;border-radius:10px;display:block;background:#f2f2f2;">
       </div>
     ` : "";
 
