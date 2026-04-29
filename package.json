@@ -1,0 +1,10 @@
+{
+  "name": "lp-site",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "validate:json": "node scripts/validate-json.mjs",
+    "check:links": "node scripts/check-links.mjs",
+    "quality": "npm run validate:json && npm run check:links"
+  }
+}

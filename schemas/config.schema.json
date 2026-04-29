@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["password", "buttons", "footer", "popupSettings"],
+  "properties": {
+    "password": {"type": "string"},
+    "logo": {"type": "string"},
+    "logoImage": {"type": "string"},
+    "buttons": {"type": "array", "minItems": 3},
+    "buttonsPc": {"type": "array", "minItems": 3},
+    "footer": {"type": "array", "minItems": 3},
+    "footerPc": {"type": "array", "minItems": 3},
+    "popupSettings": {"type": "object"}
+  }
+}

@@ -5,8 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="千葉市全域・四街道市・市原市対応の介護タクシーLP。通院・退院・転院などの移動を24時間365日サポートし、電話・LINE・予約導線からお問い合わせいただけます。">
 <title>介護タクシーLP</title>
-<link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
-<link rel="dns-prefetch" href="//raw.githubusercontent.com">
+<meta property="og:type" content="website">
+<meta property="og:title" content="介護タクシーLP">
+<meta property="og:description" content="千葉市全域・四街道市・市原市対応の介護タクシーLP。">
+<meta property="og:url" content="https://infochibafukushi-dotcom.github.io/lp-site/">
+<meta property="og:image" content="https://infochibafukushi-dotcom.github.io/lp-site/assets/logo/1773058066605-image-1.png">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "ちばケアタクシー",
+  "url": "https://infochibafukushi-dotcom.github.io/lp-site/",
+  "areaServed": ["千葉市", "四街道市", "市原市"],
+  "serviceType": "介護タクシー"
+}
+</script>
+
 <style>
 *{
   box-sizing:border-box;
@@ -72,7 +87,7 @@ header{
 }
 .topbtn{
   padding:8px 12px;
-  background:#007bff;
+  background:#0057b8;
   color:#fff;
   border-radius:8px;
   text-decoration:none;
@@ -375,7 +390,7 @@ footer{
 }
 .adminPanel button{
   padding:10px 15px;
-  background:#007bff;
+  background:#0057b8;
   color:#fff;
   border:none;
   cursor:pointer;
@@ -551,7 +566,7 @@ footer{
 
 <header>
   <div class="logo" id="logoTrigger">
-    <img id="logoImg" class="logo-img" alt="" loading="eager" fetchpriority="high" decoding="async">
+    <img id="logoImg" class="logo-img" alt="ちばケアタクシー ロゴ" loading="eager" fetchpriority="high" decoding="async">
     <div class="logo-text" id="logoTextView">LOGO</div>
   </div>
 
@@ -585,18 +600,33 @@ footer{
   </a>
 </footer>
 
-<div class="adminPanel" id="adminPanel">
-  <h3>管理ログイン</h3>
-  <input type="password" id="pass" placeholder="パスワード">
-  <br>
-  <button onclick="login()">ログイン</button>
-</div>
 
+<script src="./index-utils.js" defer></script>
+<script src="./index-sections-buttons.js" defer></script>
+<script src="./index-renderers.js" defer></script>
+<script src="./index-slider.js" defer></script>
+<script src="./index-main.js" defer></script>
 
-<script src="./index-utils.js"></script>
-<script src="./index-sections-buttons.js"></script>
-<script src="./index-renderers.js"></script>
-<script src="./index-slider.js"></script>
-<script src="./index-main.js"></script>
+<script>
+(function(){
+  function trackCv(type, href){
+    const payload = { event: 'lp_cv_click', cv_type: type, href: href || '', ts: Date.now() };
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push(payload);
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', 'lp_cv_click', { cv_type: type, href: href || '' });
+    }
+  }
+  document.addEventListener('click', function(event){
+    const link = event.target.closest('a');
+    if(!link) return;
+    const href = String(link.getAttribute('href') || '');
+    if(/^tel:/i.test(href)) return trackCv('phone', href);
+    if(/lin\.ee|line\.me/i.test(href)) return trackCv('line', href);
+    if(/reserve|reservation|予約/i.test((link.textContent||'') + ' ' + href)) return trackCv('reservation', href);
+  });
+})();
+</script>
+
 </body>
 </html>
