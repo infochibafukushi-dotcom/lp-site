@@ -1,6 +1,15 @@
 (function(){
   let sitePassword = "95123";
   const POPUP_SESSION_KEY = "lp_popup_dismissed";
+  const POPUP_IMAGE_BUST_KEY = Date.now();
+
+  function withCacheBust(url){
+    const raw = String(url || "").trim();
+    if(!raw) return "";
+    if(raw.startsWith("data:")) return raw;
+    const sep = raw.includes("?") ? "&" : "?";
+    return raw + sep + "_popupv=" + POPUP_IMAGE_BUST_KEY;
+  }
 
   function getActivePopupPattern(config){
     const popupSettings = window.IndexUtils.ensurePopupSettingsShape(config || {});
@@ -51,9 +60,10 @@
       createPopupButton(pattern.button2, "ボタン2", "site-popup-btn secondary")
     ].filter(Boolean).join("");
 
-    const popupImage = pattern.image ? `
+    const popupImageUrl = pattern.image ? withCacheBust(pattern.image) : "";
+    const popupImage = popupImageUrl ? `
       <div style="margin:0 0 12px;padding:8px;background:#f8f8f8;border-radius:12px;display:flex;align-items:center;justify-content:center;">
-        <img src="${window.IndexUtils.escapeAttr(pattern.image)}" alt="${window.IndexUtils.escapeAttr(pattern.title || 'お知らせ画像')}" loading="eager" decoding="async" style="max-width:100%;max-height:min(42vh,280px);width:auto;height:auto;object-fit:contain;border-radius:10px;display:block;background:#f2f2f2;">
+        <img src="${window.IndexUtils.escapeAttr(popupImageUrl)}" alt="${window.IndexUtils.escapeAttr(pattern.title || 'お知らせ画像')}" loading="eager" decoding="async" style="max-width:100%;max-height:min(42vh,280px);width:auto;height:auto;object-fit:contain;border-radius:10px;display:block;background:#f2f2f2;">
       </div>
     ` : "";
 
