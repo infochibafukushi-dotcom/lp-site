@@ -1956,6 +1956,7 @@ function collectPopupSettingsDraft(){
       visible: document.getElementById(`popupVisible_${index}`)?.checked === true,
       title: document.getElementById(`popupTitle_${index}`)?.value || '',
       text: document.getElementById(`popupText_${index}`)?.value || '',
+      image: document.getElementById(`popupImage_${index}`)?.value || '',
       button1: {
         visible: document.getElementById(`popupBtn1Visible_${index}`)?.checked === true,
         text: document.getElementById(`popupBtn1Text_${index}`)?.value || '',
@@ -2001,6 +2002,18 @@ function renderPopupSettingsEditor(config){
           <div class="row" style="grid-column:1 / -1;">
             <label>説明文</label>
             <textarea id="popupText_${index}">${escapeHtml(pattern.text || '')}</textarea>
+          </div>
+          <div class="row" style="grid-column:1 / -1;">
+            <label>POP画像URL</label>
+            <input type="text" id="popupImage_${index}" value="${escapeAttr(pattern.image || '')}" oninput="setPopupImagePreview(${index}, this.value)">
+          </div>
+          <div class="row" style="grid-column:1 / -1;">
+            <div class="upload-box">
+              <label>POP画像ファイル選択</label>
+              <input type="file" accept="image/*" onchange="uploadPopupImage(${index}, this)">
+              <div class="small">選択すると GitHub の assets/popup にアップロードされます。</div>
+              <img id="popupImagePreview_${index}" class="footer-image-preview" style="display:${pattern.image ? 'block' : 'none'};max-width:220px;" src="${escapeAttr(pattern.image || '')}" alt="">
+            </div>
           </div>
           <div class="row">
             <label>ボタン1 表示</label>
@@ -2054,6 +2067,10 @@ function setFooterPreviewById(previewId, url){
 
 function setFooterPreview(index, url){
   setFooterPreviewById(`footer${index + 1}Preview`, url);
+}
+
+function setPopupImagePreview(index, url){
+  setFooterPreviewById(`popupImagePreview_${index}`, url);
 }
 
 function setLogoPreview(url){
@@ -2726,6 +2743,48 @@ function getGitHubSettings(){
   return { owner, repo, branch, token };
 }
 
+
+function loadImageFromFile(file){
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(img);
+    };
+    img.onerror = (error) => {
+      URL.revokeObjectURL(objectUrl);
+      reject(error);
+    };
+    img.src = objectUrl;
+  });
+}
+
+async function resizeImageFile(file, maxEdge = 1600, quality = 0.9){
+  if(!file || !file.type || !file.type.startsWith('image/')) return file;
+  const img = await loadImageFromFile(file);
+  const srcW = img.naturalWidth || img.width;
+  const srcH = img.naturalHeight || img.height;
+  if(!srcW || !srcH) return file;
+
+  const scale = Math.min(1, maxEdge / Math.max(srcW, srcH));
+  if(scale >= 1 && file.size <= 900 * 1024) return file;
+
+  const dstW = Math.max(1, Math.round(srcW * scale));
+  const dstH = Math.max(1, Math.round(srcH * scale));
+
+  const canvas = document.createElement('canvas');
+  canvas.width = dstW;
+  canvas.height = dstH;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, dstW, dstH);
+
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/webp', quality));
+  if(!blob) return file;
+  const nameBase = (file.name || 'popup-image').replace(/\.[^.]+$/, '');
+  return new File([blob], `${nameBase}.webp`, { type: 'image/webp' });
+}
+
 async function fileToBase64(file){
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -2798,6 +2857,25 @@ async function uploadFooterImage(index, input){
     imageInput.value = url;
     setFooterPreview(index, url);
     setConfigSaveResult('画像アップロードに成功しました。最後に config.json を保存してください。', 'success');
+  }catch(error){
+    setConfigSaveResult('画像アップロード失敗: ' + error.message, 'error');
+  }finally{
+    input.value = '';
+  }
+}
+
+async function uploadPopupImage(index, input){
+  try{
+    const originalFile = input.files?.[0];
+    if(!originalFile) return;
+
+    setConfigSaveResult('POP画像を最適化してアップロード中です...', 'warn');
+    const file = await resizeImageFile(originalFile, 1400, 0.88);
+    const url = await uploadAssetFile(file, 'popup');
+    const imageInput = document.getElementById(`popupImage_${index}`);
+    if(imageInput) imageInput.value = url;
+    setPopupImagePreview(index, url);
+    setConfigSaveResult('POP画像アップロードに成功しました。最後に config.json を保存してください。', 'success');
   }catch(error){
     setConfigSaveResult('画像アップロード失敗: ' + error.message, 'error');
   }finally{

@@ -191,6 +191,7 @@
       visible: pattern?.visible !== false,
       title: pattern?.title || "",
       text: pattern?.text || "",
+      image: pattern?.image || "",
       button1: ensurePopupButtonShape(pattern?.button1, "ボタン1"),
       button2: ensurePopupButtonShape(pattern?.button2, "ボタン2")
     };
