@@ -51,10 +51,17 @@
       createPopupButton(pattern.button2, "ボタン2", "site-popup-btn secondary")
     ].filter(Boolean).join("");
 
+    const popupImage = pattern.image ? `
+      <div style="margin:0 0 12px;">
+        <img src="${window.IndexUtils.escapeAttr(pattern.image)}" alt="${window.IndexUtils.escapeAttr(pattern.title || 'お知らせ画像')}" loading="eager" decoding="async" style="width:100%;max-height:220px;object-fit:cover;border-radius:12px;display:block;background:#f2f2f2;">
+      </div>
+    ` : "";
+
     overlay.innerHTML = `
       <div style="width:min(100%, 420px);background:#ffffff;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,0.22);padding:18px 18px 16px;position:relative;">
         <button type="button" id="sitePopupClose" aria-label="閉じる" style="position:absolute;top:10px;right:10px;border:none;background:transparent;color:#666;font-size:28px;line-height:1;cursor:pointer;padding:4px 8px;">×</button>
         <div style="padding:6px 8px 4px;">
+          ${popupImage}
           <div style="font-size:22px;line-height:1.5;font-weight:700;color:#c62828;white-space:pre-line;word-break:break-word;">${window.IndexUtils.escapeHtml(pattern.title || "")}</div>
           <div style="margin-top:10px;font-size:15px;line-height:1.9;color:#222;white-space:pre-line;word-break:break-word;">${window.IndexUtils.escapeHtml(pattern.text || "")}</div>
           ${buttons ? `<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">${buttons}</div>` : ""}
