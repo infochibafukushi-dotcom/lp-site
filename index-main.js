@@ -1,7 +1,15 @@
 (function(){
-  let clickCount = 0;
   let sitePassword = "95123";
   const POPUP_SESSION_KEY = "lp_popup_dismissed";
+  const POPUP_IMAGE_BUST_KEY = Date.now();
+
+  function withCacheBust(url){
+    const raw = String(url || "").trim();
+    if(!raw) return "";
+    if(raw.startsWith("data:")) return raw;
+    const sep = raw.includes("?") ? "&" : "?";
+    return raw + sep + "_popupv=" + POPUP_IMAGE_BUST_KEY;
+  }
 
   function getActivePopupPattern(config){
     const popupSettings = window.IndexUtils.ensurePopupSettingsShape(config || {});
@@ -52,10 +60,18 @@
       createPopupButton(pattern.button2, "ボタン2", "site-popup-btn secondary")
     ].filter(Boolean).join("");
 
+    const popupImageUrl = pattern.image ? withCacheBust(pattern.image) : "";
+    const popupImage = popupImageUrl ? `
+      <div style="margin:0 0 12px;padding:8px;background:#f8f8f8;border-radius:12px;display:flex;align-items:center;justify-content:center;">
+        <img src="${window.IndexUtils.escapeAttr(popupImageUrl)}" alt="${window.IndexUtils.escapeAttr(pattern.title || 'お知らせ画像')}" loading="eager" decoding="async" style="max-width:100%;max-height:min(42vh,280px);width:auto;height:auto;object-fit:contain;border-radius:10px;display:block;background:#f2f2f2;">
+      </div>
+    ` : "";
+
     overlay.innerHTML = `
       <div style="width:min(100%, 420px);background:#ffffff;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,0.22);padding:18px 18px 16px;position:relative;">
         <button type="button" id="sitePopupClose" aria-label="閉じる" style="position:absolute;top:10px;right:10px;border:none;background:transparent;color:#666;font-size:28px;line-height:1;cursor:pointer;padding:4px 8px;">×</button>
         <div style="padding:6px 8px 4px;">
+          ${popupImage}
           <div style="font-size:22px;line-height:1.5;font-weight:700;color:#c62828;white-space:pre-line;word-break:break-word;">${window.IndexUtils.escapeHtml(pattern.title || "")}</div>
           <div style="margin-top:10px;font-size:15px;line-height:1.9;color:#222;white-space:pre-line;word-break:break-word;">${window.IndexUtils.escapeHtml(pattern.text || "")}</div>
           ${buttons ? `<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">${buttons}</div>` : ""}
@@ -95,32 +111,9 @@
     });
   }
 
-  function bindLogoTrigger(){
-    const trigger = document.getElementById("logoTrigger");
-    if(!trigger) return;
+  function bindLogoTrigger(){}
 
-    trigger.onclick = function(){
-      clickCount++;
-      if(clickCount >= 5){
-        const adminPanel = document.getElementById("adminPanel");
-        if(adminPanel){
-          adminPanel.style.display = "block";
-        }
-        clickCount = 0;
-      }
-    };
-  }
-
-  function login(){
-    const passEl = document.getElementById("pass");
-    const input = passEl ? passEl.value : "";
-    if(input === sitePassword){
-      alert("管理画面ログイン成功");
-      location.href = "./admin.html";
-    }else{
-      alert("パスワード違います");
-    }
-  }
+  function login(){}
 
   async function fetchJsonWithFallback(urls){
     let lastError = null;
@@ -169,6 +162,7 @@
     if(logoImgEl){
       if(config.logoImage){
         logoImgEl.src = config.logoImage;
+        logoImgEl.alt = (config.logo || "ちばケアタクシー") + " ロゴ";
         logoImgEl.style.display = "block";
       }else{
         logoImgEl.src = "";
