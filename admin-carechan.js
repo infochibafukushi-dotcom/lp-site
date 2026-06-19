@@ -196,24 +196,39 @@
   }
 
   async function fetchLpConfigUrls(){
+    if(window.CarechanCtaDefaults){
+      return window.CarechanCtaDefaults.fetchConfigUrls();
+    }
     const res = await fetch("./data/config.json?" + Date.now());
     if(!res.ok) throw new Error("config.json 読込失敗");
     const config = await res.json();
     const footer = Array.isArray(config.footer) ? config.footer : [];
     const buttons = Array.isArray(config.buttons) ? config.buttons : [];
-    const buttonsPc = Array.isArray(config.buttonsPc) ? config.buttonsPc : [];
     return {
-      phone: String(footer[0]?.link || config.pcTopPhone?.link || "").trim(),
+      phone: String(footer[0]?.link || "").trim(),
       line: String(footer[1]?.link || "").trim(),
-      reservation: String(footer[2]?.link || buttonsPc[0]?.link || "").trim(),
+      reservation: String(footer[2]?.link || "").trim(),
       contact: String(buttons[0]?.link || "").trim()
     };
+  }
+
+  async function hydrateDefaultCtasFromConfig(){
+    if(!carechanDraft || !window.CarechanCtaDefaults) return 0;
+    const urls = await window.CarechanCtaDefaults.fetchConfigUrls();
+    return window.CarechanCtaDefaults.applyDefaultCtasToQuestions(carechanDraft.questions, urls);
   }
 
   async function loadCarechanDraft(){
     const res = await fetch("./" + CARECHAN_PATH + "?" + Date.now());
     if(!res.ok) throw new Error("carechan.json 読込失敗");
     carechanDraft = ensureCarechanDraft(await res.json());
+    try{
+      await hydrateDefaultCtasFromConfig();
+    }catch(error){
+      setCarechanStatus("carechan.json を読み込みました（CTA自動設定はスキップ: " + error.message + "）", "warn");
+      renderCarechanEditor();
+      return;
+    }
     renderCarechanEditor();
     setCarechanStatus("carechan.json を読み込みました。", "success");
   }
@@ -406,28 +421,10 @@
       const ctx = getNodeContext(parsePath(pathStr));
       if(!ctx || !ctx.node) return;
       const urls = await fetchLpConfigUrls();
-      const templates = [
-        { label: "電話する", url: urls.phone, key: "phone" },
-        { label: "LINE相談はこちら", url: urls.line, key: "line" },
-        { label: "ネット予約はこちら", url: urls.reservation, key: "reservation" },
-        { label: "お問い合わせはこちら", url: urls.contact, key: "contact" }
-      ];
       let added = 0;
-      templates.forEach(function(t){
-        if(!t.url) return;
-        const exists = ctx.node.ctas.some(function(c){
-          return c.url === t.url || c.label === t.label;
-        });
-        if(exists) return;
-        ctx.node.ctas.push({
-          id: "cta-" + t.key + "-" + Date.now(),
-          label: t.label,
-          url: t.url,
-          order: ctx.node.ctas.length + 1,
-          visible: true
-        });
-        added++;
-      });
+      if(window.CarechanCtaDefaults){
+        added = window.CarechanCtaDefaults.applyManualCtasToNode(ctx.node, urls);
+      }
       normalizeQuestionTree(carechanDraft);
       renderCarechanEditor();
       setCarechanStatus(
@@ -559,6 +556,7 @@
       setCarechanStatus("保存中...", "warn");
       collectCarechanDraftFromForm();
       syncQuestionsFromDom();
+      await hydrateDefaultCtasFromConfig();
       normalizeQuestionTree(carechanDraft);
       await saveFileToGitHub(CARECHAN_PATH, JSON.stringify(carechanDraft, null, 2));
       setCarechanStatus("carechan.json の保存が完了しました。", "success");
@@ -584,6 +582,9 @@
       await loadCarechanDraft();
     }catch(error){
       carechanDraft = ensureCarechanDraft({ enabled: false, questions: [] });
+      try{
+        await hydrateDefaultCtasFromConfig();
+      }catch(hydrateError){}
       renderCarechanEditor();
       setCarechanStatus("carechan.json が未作成の可能性があります。保存で新規作成できます。", "warn");
     }

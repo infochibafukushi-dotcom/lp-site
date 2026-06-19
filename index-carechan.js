@@ -467,6 +467,14 @@
   async function init(){
     try{
       carechanData = ensureCarechanShape(await fetchCarechanJson());
+      if(window.CarechanCtaDefaults){
+        try{
+          const urls = await window.CarechanCtaDefaults.fetchConfigUrls();
+          window.CarechanCtaDefaults.applyDefaultCtasToQuestions(carechanData.questions, urls);
+        }catch(ctaError){
+          try{ console.warn("[carechan] default CTA hydrate failed", ctaError); }catch(e){}
+        }
+      }
       renderWidget(carechanData);
       bindResponsivePosition();
     }catch(error){
