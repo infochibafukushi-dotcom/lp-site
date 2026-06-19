@@ -2,6 +2,17 @@ import fs from 'node:fs';
 const config = JSON.parse(fs.readFileSync('data/config.json','utf8'));
 const sections = JSON.parse(fs.readFileSync('data/sections.json','utf8'));
 const carechan = JSON.parse(fs.readFileSync('data/carechan.json','utf8'));
+
+function validateCarechanNodes(nodes, label){
+  if(!Array.isArray(nodes)) throw new Error('carechan questions must be array: ' + label);
+  for (const q of nodes) {
+    if (!q.id || !q.title) throw new Error('invalid carechan node: ' + JSON.stringify(q));
+    if (!Array.isArray(q.ctas)) throw new Error('carechan ctas must be array: ' + q.id);
+    if (q.children != null && !Array.isArray(q.children)) throw new Error('carechan children must be array: ' + q.id);
+    if (Array.isArray(q.children) && q.children.length) validateCarechanNodes(q.children, q.id);
+  }
+}
+
 if (typeof config !== 'object') throw new Error('config must be object');
 if (!Array.isArray(config.buttons) || config.buttons.length < 3) throw new Error('config.buttons invalid');
 if (!Array.isArray(config.footer) || config.footer.length < 3) throw new Error('config.footer invalid');
@@ -11,9 +22,5 @@ for (const s of sections) {
 }
 if (typeof carechan !== 'object') throw new Error('carechan must be object');
 if (typeof carechan.enabled !== 'boolean') throw new Error('carechan.enabled invalid');
-if (!Array.isArray(carechan.questions)) throw new Error('carechan.questions must be array');
-for (const q of carechan.questions) {
-  if (!q.id || !q.title) throw new Error('invalid carechan question: '+JSON.stringify(q));
-  if (!Array.isArray(q.ctas)) throw new Error('carechan ctas must be array: '+q.id);
-}
+validateCarechanNodes(carechan.questions, 'root');
 console.log('JSON validation passed');

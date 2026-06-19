@@ -1,6 +1,6 @@
 {
   "enabled": true,
-  "version": 1,
+  "version": 2,
   "character": {
     "image": "./assets/carechan/carechan-default.svg",
     "alt": "ケアちゃん"
@@ -36,14 +36,70 @@
       "enabled": true,
       "order": 1,
       "title": "予約について",
-      "answer": "（サンプル）管理画面から回答文を入力してください。",
-      "ctas": [
+      "menuPrompt": "何をしたいですか？",
+      "answer": "",
+      "ctas": [],
+      "children": [
         {
-          "id": "cta-reserve-sample",
-          "label": "ネット予約はこちら",
-          "url": "#",
-          "order": 1,
-          "visible": true
+          "id": "reserve-booking",
+          "enabled": true,
+          "title": "空き状況の確認・予約をする",
+          "menuPrompt": "",
+          "answer": "（サンプル）管理画面から回答文を入力してください。",
+          "ctas": [
+            {
+              "id": "cta-reserve-line",
+              "label": "LINE相談はこちら",
+              "url": "#",
+              "order": 1,
+              "visible": true
+            },
+            {
+              "id": "cta-reserve-web",
+              "label": "ネット予約はこちら",
+              "url": "#",
+              "order": 2,
+              "visible": true
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "reserve-hours",
+          "enabled": true,
+          "title": "営業時間",
+          "menuPrompt": "",
+          "answer": "24時間365日ご予約を承っております。",
+          "ctas": [],
+          "children": []
+        },
+        {
+          "id": "reserve-cancel",
+          "enabled": true,
+          "title": "予約キャンセル",
+          "menuPrompt": "どちらのキャンセルですか？",
+          "answer": "",
+          "ctas": [],
+          "children": [
+            {
+              "id": "cancel-same-day",
+              "enabled": true,
+              "title": "当日キャンセル",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "cancel-future",
+              "enabled": true,
+              "title": "翌日以降キャンセル",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            }
+          ]
         }
       ]
     },
@@ -52,6 +108,7 @@
       "enabled": true,
       "order": 2,
       "title": "料金について",
+      "menuPrompt": "",
       "answer": "（サンプル）管理画面から回答文を入力してください。",
       "ctas": [
         {
@@ -61,47 +118,58 @@
           "order": 1,
           "visible": true
         }
-      ]
+      ],
+      "children": []
     },
     {
       "id": "q-usage",
       "enabled": true,
       "order": 3,
       "title": "どんな時に利用できる？",
+      "menuPrompt": "",
       "answer": "（サンプル）管理画面から回答文を入力してください。",
-      "ctas": []
+      "ctas": [],
+      "children": []
     },
     {
       "id": "q-area",
       "enabled": true,
       "order": 4,
       "title": "対応エリア",
+      "menuPrompt": "",
       "answer": "（サンプル）管理画面から回答文を入力してください。",
-      "ctas": []
+      "ctas": [],
+      "children": []
     },
     {
       "id": "q-vehicle",
       "enabled": true,
       "order": 5,
       "title": "車両について",
+      "menuPrompt": "",
       "answer": "（サンプル）管理画面から回答文を入力してください。",
-      "ctas": []
+      "ctas": [],
+      "children": []
     },
     {
       "id": "q-equipment",
       "enabled": true,
       "order": 6,
       "title": "機材について",
+      "menuPrompt": "",
       "answer": "（サンプル）管理画面から回答文を入力してください。",
-      "ctas": []
+      "ctas": [],
+      "children": []
     },
     {
       "id": "q-faq",
       "enabled": true,
       "order": 7,
       "title": "よくある質問",
+      "menuPrompt": "",
       "answer": "（サンプル）管理画面から回答文を入力してください。",
-      "ctas": []
+      "ctas": [],
+      "children": []
     }
   ],
   "meta": {

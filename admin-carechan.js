@@ -22,6 +22,29 @@
     box.textContent = message || "";
   }
 
+  function parsePath(pathStr){
+    return String(pathStr || "").split(".").filter(function(p){ return p !== ""; }).map(Number);
+  }
+
+  function pathToString(pathArr){
+    return pathArr.join(".");
+  }
+
+  function getNodeContext(pathArr){
+    if(!carechanDraft || !Array.isArray(pathArr)) return null;
+    let list = carechanDraft.questions;
+    let node = null;
+    for(let i = 0; i < pathArr.length; i++){
+      node = list[pathArr[i]];
+      if(!node) return null;
+      if(i < pathArr.length - 1){
+        if(!Array.isArray(node.children)) node.children = [];
+        list = node.children;
+      }
+    }
+    return { node: node, list: list, index: pathArr[pathArr.length - 1] };
+  }
+
   function getGitHubSettings(){
     const owner = document.getElementById("githubOwner")?.value.trim() || "";
     const repo = document.getElementById("githubRepo")?.value.trim() || "";
@@ -40,15 +63,11 @@
   async function getCurrentFileSha(owner, repo, branch, token, path){
     const url = "https://api.github.com/repos/" + owner + "/" + repo + "/contents/" + path + "?ref=" + encodeURIComponent(branch);
     const res = await fetch(url, {
-      headers: {
-        Authorization: "token " + token,
-        Accept: "application/vnd.github+json"
-      }
+      headers: { Authorization: "token " + token, Accept: "application/vnd.github+json" }
     });
     if(res.status === 404) return null;
     if(!res.ok) throw new Error("SHA取得失敗: " + res.status);
-    const data = await res.json();
-    return data.sha;
+    return (await res.json()).sha;
   }
 
   async function saveFileToGitHub(path, contentString){
@@ -82,9 +101,7 @@
       res = await putWithSha(sha);
       result = await res.json();
     }
-    if(!res.ok){
-      throw new Error(result?.message || (res.status + " " + res.statusText));
-    }
+    if(!res.ok) throw new Error(result?.message || (res.status + " " + res.statusText));
     return result;
   }
 
@@ -96,8 +113,7 @@
     return new Promise(function(resolve, reject){
       const reader = new FileReader();
       reader.onload = function(){
-        const result = String(reader.result || "");
-        resolve(result.split(",")[1] || "");
+        resolve(String(reader.result || "").split(",")[1] || "");
       };
       reader.onerror = reject;
       reader.readAsDataURL(file);
@@ -106,11 +122,8 @@
 
   async function uploadCarechanAsset(file){
     const { owner, repo, branch, token } = getGitHubSettings();
-    const safeName = sanitizeFileName(file.name);
-    const path = "assets/carechan/" + Date.now() + "-" + safeName;
-    const contentBase64 = await fileToBase64(file);
-    const apiUrl = "https://api.github.com/repos/" + owner + "/" + repo + "/contents/" + path;
-    const res = await fetch(apiUrl, {
+    const path = "assets/carechan/" + Date.now() + "-" + sanitizeFileName(file.name);
+    const res = await fetch("https://api.github.com/repos/" + owner + "/" + repo + "/contents/" + path, {
       method: "PUT",
       headers: {
         Authorization: "token " + token,
@@ -119,7 +132,7 @@
       },
       body: JSON.stringify({
         message: "Upload " + path + " from admin panel (carechan)",
-        content: contentBase64,
+        content: await fileToBase64(file),
         branch: branch
       })
     });
@@ -128,18 +141,45 @@
     return "https://raw.githubusercontent.com/" + owner + "/" + repo + "/" + branch + "/" + path;
   }
 
+  function normalizeNode(node, idx, isRoot){
+    node.id = node.id || ("q-" + Date.now() + "-" + idx);
+    node.enabled = node.enabled !== false;
+    if(isRoot) node.order = idx + 1;
+    node.title = node.title || "";
+    node.menuPrompt = node.menuPrompt || "";
+    node.answer = node.answer || "";
+    node.ctas = Array.isArray(node.ctas) ? node.ctas : [];
+    node.children = Array.isArray(node.children) ? node.children : [];
+    node.ctas.forEach(function(c, cIdx){
+      c.id = c.id || ("cta-" + node.id + "-" + cIdx);
+      c.label = c.label || "";
+      c.url = c.url || "#";
+      c.order = cIdx + 1;
+      c.visible = c.visible !== false;
+    });
+    node.children.forEach(function(child, cIdx){
+      normalizeNode(child, cIdx, false);
+    });
+  }
+
+  function normalizeQuestionTree(data){
+    if(!data || !Array.isArray(data.questions)) return;
+    data.questions.forEach(function(q, idx){
+      normalizeNode(q, idx, true);
+    });
+  }
+
   function ensureCarechanDraft(raw){
     const data = raw && typeof raw === "object" ? deepClone(raw) : {};
     data.enabled = data.enabled === true;
-    data.version = data.version || 1;
+    data.version = data.version || 2;
     data.character = data.character || {};
     data.character.image = data.character.image || "./assets/carechan/carechan-default.svg";
     data.character.alt = data.character.alt || "ケアちゃん";
     data.speechBubbles = data.speechBubbles || {};
     data.speechBubbles.mode = data.speechBubbles.mode === "fixed" ? "fixed" : "random";
     data.speechBubbles.items = Array.isArray(data.speechBubbles.items) && data.speechBubbles.items.length
-      ? data.speechBubbles.items.map(String)
-      : ["質問してね♪"];
+      ? data.speechBubbles.items.map(String) : ["質問してね♪"];
     data.speechBubbles.fixedIndex = Number(data.speechBubbles.fixedIndex) || 0;
     data.greeting = data.greeting || {};
     data.greeting.title = data.greeting.title || "こんにちは！";
@@ -151,28 +191,21 @@
     data.questions = Array.isArray(data.questions) ? data.questions : [];
     data.meta = data.meta || { storeId: "default" };
     data.extensions = data.extensions || { ai: { enabled: false } };
-    normalizeQuestionOrders(data);
+    normalizeQuestionTree(data);
     return data;
   }
 
-  function normalizeQuestionOrders(data){
-    const target = data || carechanDraft;
-    if(!target || !Array.isArray(target.questions)) return;
-    target.questions.forEach(function(q, idx){
-      q.id = q.id || ("q-" + Date.now() + "-" + idx);
-      q.enabled = q.enabled !== false;
-      q.order = idx + 1;
-      q.title = q.title || "";
-      q.answer = q.answer || "";
-      q.ctas = Array.isArray(q.ctas) ? q.ctas : [];
-      q.ctas.forEach(function(c, cIdx){
-        c.id = c.id || ("cta-" + q.id + "-" + cIdx);
-        c.label = c.label || "";
-        c.url = c.url || "#";
-        c.order = cIdx + 1;
-        c.visible = c.visible !== false;
-      });
-    });
+  async function fetchLpConfigUrls(){
+    const res = await fetch("./data/config.json?" + Date.now());
+    if(!res.ok) throw new Error("config.json 読込失敗");
+    const config = await res.json();
+    const footer = Array.isArray(config.footer) ? config.footer : [];
+    const buttonsPc = Array.isArray(config.buttonsPc) ? config.buttonsPc : [];
+    return {
+      phone: String(footer[0]?.link || config.pcTopPhone?.link || "").trim(),
+      line: String(footer[1]?.link || "").trim(),
+      reservation: String(footer[2]?.link || buttonsPc[0]?.link || "").trim()
+    };
   }
 
   async function loadCarechanDraft(){
@@ -185,97 +218,227 @@
 
   function collectCarechanDraftFromForm(){
     if(!carechanDraft) carechanDraft = ensureCarechanDraft({});
-
     carechanDraft.enabled = document.getElementById("carechanEnabled")?.checked === true;
     carechanDraft.character.image = document.getElementById("carechanCharacterImage")?.value.trim() || "./assets/carechan/carechan-default.svg";
     carechanDraft.character.alt = document.getElementById("carechanCharacterAlt")?.value.trim() || "ケアちゃん";
     carechanDraft.speechBubbles.mode = document.getElementById("carechanBubbleMode")?.value === "fixed" ? "fixed" : "random";
     carechanDraft.speechBubbles.fixedIndex = Number(document.getElementById("carechanBubbleFixedIndex")?.value) || 0;
-
     const bubbleRaw = document.getElementById("carechanBubbleItems")?.value || "";
     carechanDraft.speechBubbles.items = bubbleRaw.split("\n").map(function(s){ return s.trim(); }).filter(Boolean);
-    if(!carechanDraft.speechBubbles.items.length){
-      carechanDraft.speechBubbles.items = ["質問してね♪"];
-    }
-
+    if(!carechanDraft.speechBubbles.items.length) carechanDraft.speechBubbles.items = ["質問してね♪"];
     carechanDraft.greeting.title = document.getElementById("carechanGreetingTitle")?.value.trim() || "";
     carechanDraft.greeting.subtitle = document.getElementById("carechanGreetingSubtitle")?.value.trim() || "";
     carechanDraft.greeting.prompt = document.getElementById("carechanGreetingPrompt")?.value.trim() || "";
-
     carechanDraft.position.mobile.bottomOffsetFromFooter = Number(document.getElementById("carechanMobileOffset")?.value) || 60;
     carechanDraft.position.mobile.right = Number(document.getElementById("carechanMobileRight")?.value) || 14;
     carechanDraft.position.desktop.bottom = Number(document.getElementById("carechanDesktopBottom")?.value) || 24;
     carechanDraft.position.desktop.right = Number(document.getElementById("carechanDesktopRight")?.value) || 24;
-
     return carechanDraft;
   }
 
-  function renderCtaEditor(question, qIndex){
-    return question.ctas.map(function(cta, cIndex){
+  function syncNodeFromDom(pathStr){
+    const ctx = getNodeContext(parsePath(pathStr));
+    if(!ctx || !ctx.node) return;
+    const node = ctx.node;
+    node.enabled = document.querySelector('[data-q-enabled="' + pathStr + '"]')?.checked !== false;
+    node.title = document.querySelector('[data-q-title="' + pathStr + '"]')?.value || "";
+    node.menuPrompt = document.querySelector('[data-q-menu-prompt="' + pathStr + '"]')?.value || "";
+    node.answer = document.querySelector('[data-q-answer="' + pathStr + '"]')?.value || "";
+    node.ctas.forEach(function(c, cIdx){
+      c.label = document.querySelector('[data-cta-label="' + pathStr + '"][data-cta-index="' + cIdx + '"]')?.value || "";
+      c.url = document.querySelector('[data-cta-url="' + pathStr + '"][data-cta-index="' + cIdx + '"]')?.value || "#";
+      c.visible = document.querySelector('[data-cta-visible="' + pathStr + '"][data-cta-index="' + cIdx + '"]')?.checked !== false;
+    });
+  }
+
+  function syncQuestionsFromDom(){
+    if(!carechanDraft) return;
+    document.querySelectorAll("[data-q-title]").forEach(function(el){
+      syncNodeFromDom(el.getAttribute("data-q-title"));
+    });
+  }
+
+  function renderCtaEditor(node, pathStr){
+    return node.ctas.map(function(cta, cIndex){
       return (
         '<div class="card-item-editor" style="margin-top:8px;padding:10px;background:#fff;border:1px dashed #ccc;border-radius:8px;">' +
-          '<div class="row"><label>ボタン表示名</label>' +
-          '<input type="text" data-carechan-cta-label="' + qIndex + '" data-cta-index="' + cIndex + '" value="' + escapeHtml(cta.label) + '"></div>' +
+          '<div class="row"><label>表示名</label>' +
+          '<input type="text" data-cta-label="' + pathStr + '" data-cta-index="' + cIndex + '" value="' + escapeHtml(cta.label) + '"></div>' +
           '<div class="row"><label>URL</label>' +
-          '<input type="text" data-carechan-cta-url="' + qIndex + '" data-cta-index="' + cIndex + '" value="' + escapeHtml(cta.url) + '"></div>' +
+          '<input type="text" data-cta-url="' + pathStr + '" data-cta-index="' + cIndex + '" value="' + escapeHtml(cta.url) + '"></div>' +
           '<div class="actions">' +
-            '<label><input type="checkbox" data-carechan-cta-visible="' + qIndex + '" data-cta-index="' + cIndex + '"' + (cta.visible !== false ? " checked" : "") + '> 表示</label>' +
-            '<button type="button" class="secondary small-btn" data-carechan-cta-up="' + qIndex + '" data-cta-index="' + cIndex + '">↑</button>' +
-            '<button type="button" class="secondary small-btn" data-carechan-cta-down="' + qIndex + '" data-cta-index="' + cIndex + '">↓</button>' +
-            '<button type="button" class="danger small-btn" data-carechan-cta-remove="' + qIndex + '" data-cta-index="' + cIndex + '">削除</button>' +
+            '<label><input type="checkbox" data-cta-visible="' + pathStr + '" data-cta-index="' + cIndex + '"' + (cta.visible !== false ? " checked" : "") + '> 表示</label>' +
+            '<button type="button" class="secondary small-btn" data-cta-up="' + pathStr + '" data-cta-index="' + cIndex + '">↑</button>' +
+            '<button type="button" class="secondary small-btn" data-cta-down="' + pathStr + '" data-cta-index="' + cIndex + '">↓</button>' +
+            '<button type="button" class="danger small-btn" data-cta-remove="' + pathStr + '" data-cta-index="' + cIndex + '">削除</button>' +
           '</div>' +
         '</div>'
       );
     }).join("");
   }
 
+  function renderTreeNode(node, pathArr, depth){
+    const pathStr = pathToString(pathArr);
+    const depthLabel = depth === 0 ? ("Q" + (pathArr[0] + 1)) : ("└ " + node.title);
+    const moveButtons = depth === 0
+      ? '<button type="button" class="secondary small-btn" data-q-up="' + pathStr + '">↑</button>' +
+        '<button type="button" class="secondary small-btn" data-q-down="' + pathStr + '">↓</button>'
+      : '<button type="button" class="secondary small-btn" data-child-up="' + pathStr + '">↑</button>' +
+        '<button type="button" class="secondary small-btn" data-child-down="' + pathStr + '">↓</button>';
+
+    const childrenHtml = (node.children || []).map(function(child, cIdx){
+      return renderTreeNode(child, pathArr.concat([cIdx]), depth + 1);
+    }).join("");
+
+    return (
+      '<div class="carechan-tree-node" style="margin-left:' + (depth * 18) + 'px;margin-bottom:12px;border-left:2px solid #e87f00;padding-left:12px;">' +
+        '<div style="padding:14px 16px;background:#fcfcfc;border:1px solid #ddd;border-radius:12px;">' +
+          '<div class="actions" style="margin-bottom:10px;flex-wrap:wrap;">' +
+            '<strong>' + escapeHtml(depth === 0 ? depthLabel : ("子: " + (node.title || "無題"))) + '</strong>' +
+            moveButtons +
+            '<button type="button" class="danger small-btn" data-q-remove="' + pathStr + '">削除</button>' +
+          '</div>' +
+          '<div class="row"><label>有効</label>' +
+          '<label><input type="checkbox" data-q-enabled="' + pathStr + '"' + (node.enabled !== false ? " checked" : "") + '> 表示する</label></div>' +
+          '<div class="row"><label>タイトル</label>' +
+          '<input type="text" data-q-title="' + pathStr + '" value="' + escapeHtml(node.title) + '"></div>' +
+          '<div class="row"><label>サブメニュー文言（子がある場合）</label>' +
+          '<input type="text" data-q-menu-prompt="' + pathStr + '" value="' + escapeHtml(node.menuPrompt) + '" placeholder="例: 何をしたいですか？"></div>' +
+          '<div class="row"><label>回答文（末端項目）</label>' +
+          '<textarea data-q-answer="' + pathStr + '" rows="4">' + escapeHtml(node.answer) + '</textarea></div>' +
+          '<div class="row"><label>CTAボタン</label>' +
+          '<div class="actions">' +
+            '<button type="button" class="linklike small-btn" data-cta-add="' + pathStr + '">+ CTA追加</button>' +
+            '<button type="button" class="linklike small-btn" data-cta-load-config="' + pathStr + '">既存設定から読み込む</button>' +
+          '</div></div>' +
+          '<div data-cta-box="' + pathStr + '">' + renderCtaEditor(node, pathStr) + '</div>' +
+          '<div class="actions" style="margin-top:10px;">' +
+            '<button type="button" class="secondary small-btn" data-child-add="' + pathStr + '">+ 子質問を追加</button>' +
+          '</div>' +
+          (childrenHtml ? '<div class="carechan-tree-children" style="margin-top:12px;">' + childrenHtml + '</div>' : '') +
+        '</div>' +
+      '</div>'
+    );
+  }
+
   function renderQuestionEditor(){
     const box = document.getElementById("carechanQuestionsEditor");
     if(!box || !carechanDraft) return;
-
-    box.innerHTML = carechanDraft.questions.map(function(q, qIndex){
-      return (
-        '<div class="section-item" style="margin-bottom:12px;">' +
-          '<div style="padding:14px 16px;background:#fcfcfc;border:1px solid #ddd;border-radius:12px;">' +
-            '<div class="actions" style="margin-bottom:10px;">' +
-              '<strong>Q' + (qIndex + 1) + '</strong>' +
-              '<button type="button" class="secondary small-btn" data-carechan-q-up="' + qIndex + '">↑</button>' +
-              '<button type="button" class="secondary small-btn" data-carechan-q-down="' + qIndex + '">↓</button>' +
-              '<button type="button" class="danger small-btn" data-carechan-q-remove="' + qIndex + '">削除</button>' +
-            '</div>' +
-            '<div class="row"><label>有効</label>' +
-            '<label><input type="checkbox" data-carechan-q-enabled="' + qIndex + '"' + (q.enabled !== false ? " checked" : "") + '> 表示する</label></div>' +
-            '<div class="row"><label>質問タイトル</label>' +
-            '<input type="text" data-carechan-q-title="' + qIndex + '" value="' + escapeHtml(q.title) + '"></div>' +
-            '<div class="row"><label>回答文</label>' +
-            '<textarea data-carechan-q-answer="' + qIndex + '" rows="5">' + escapeHtml(q.answer) + '</textarea></div>' +
-            '<div class="row"><label>CTAボタン</label>' +
-            '<button type="button" class="linklike small-btn" data-carechan-cta-add="' + qIndex + '">+ CTA追加</button></div>' +
-            '<div data-carechan-cta-box="' + qIndex + '">' + renderCtaEditor(q, qIndex) + '</div>' +
-          '</div>' +
-        '</div>'
-      );
+    box.innerHTML = carechanDraft.questions.map(function(q, idx){
+      return renderTreeNode(q, [idx], 0);
     }).join("") || '<p class="note">質問がありません。「質問を追加」から追加してください。</p>';
   }
 
-  function syncQuestionsFromDom(){
-    if(!carechanDraft) return;
-    carechanDraft.questions.forEach(function(q, qIndex){
-      q.enabled = document.querySelector('[data-carechan-q-enabled="' + qIndex + '"]')?.checked !== false;
-      q.title = document.querySelector('[data-carechan-q-title="' + qIndex + '"]')?.value || "";
-      q.answer = document.querySelector('[data-carechan-q-answer="' + qIndex + '"]')?.value || "";
-      q.ctas.forEach(function(c, cIndex){
-        c.label = document.querySelector('[data-carechan-cta-label="' + qIndex + '"][data-cta-index="' + cIndex + '"]')?.value || "";
-        c.url = document.querySelector('[data-carechan-cta-url="' + qIndex + '"][data-cta-index="' + cIndex + '"]')?.value || "#";
-        c.visible = document.querySelector('[data-carechan-cta-visible="' + qIndex + '"][data-cta-index="' + cIndex + '"]')?.checked !== false;
-      });
+  function moveSibling(pathArr, dir){
+    syncQuestionsFromDom();
+    const ctx = getNodeContext(pathArr);
+    if(!ctx) return;
+    const next = ctx.index + dir;
+    if(next < 0 || next >= ctx.list.length) return;
+    const tmp = ctx.list[ctx.index];
+    ctx.list[ctx.index] = ctx.list[next];
+    ctx.list[next] = tmp;
+    normalizeQuestionTree(carechanDraft);
+    renderCarechanEditor();
+  }
+
+  function removeNode(pathArr){
+    syncQuestionsFromDom();
+    const ctx = getNodeContext(pathArr);
+    if(!ctx) return;
+    ctx.list.splice(ctx.index, 1);
+    normalizeQuestionTree(carechanDraft);
+    renderCarechanEditor();
+  }
+
+  function addChildNode(pathStr){
+    syncQuestionsFromDom();
+    const ctx = getNodeContext(parsePath(pathStr));
+    if(!ctx || !ctx.node) return;
+    if(!Array.isArray(ctx.node.children)) ctx.node.children = [];
+    ctx.node.children.push({
+      id: "q-" + Date.now(),
+      enabled: true,
+      title: "新しい子質問",
+      menuPrompt: "",
+      answer: "（回答を入力してください）",
+      ctas: [],
+      children: []
     });
+    normalizeQuestionTree(carechanDraft);
+    renderCarechanEditor();
+  }
+
+  function addCta(pathStr){
+    syncQuestionsFromDom();
+    const ctx = getNodeContext(parsePath(pathStr));
+    if(!ctx || !ctx.node) return;
+    ctx.node.ctas.push({
+      id: "cta-" + Date.now(),
+      label: "ボタン",
+      url: "#",
+      order: ctx.node.ctas.length + 1,
+      visible: true
+    });
+    normalizeQuestionTree(carechanDraft);
+    renderCarechanEditor();
+  }
+
+  function moveCta(pathStr, cIndex, dir){
+    syncQuestionsFromDom();
+    const ctx = getNodeContext(parsePath(pathStr));
+    if(!ctx || !ctx.node) return;
+    const ctas = ctx.node.ctas;
+    const next = cIndex + dir;
+    if(next < 0 || next >= ctas.length) return;
+    const tmp = ctas[cIndex];
+    ctas[cIndex] = ctas[next];
+    ctas[next] = tmp;
+    normalizeQuestionTree(carechanDraft);
+    renderCarechanEditor();
+  }
+
+  async function loadCtasFromLpConfig(pathStr){
+    try{
+      syncQuestionsFromDom();
+      const ctx = getNodeContext(parsePath(pathStr));
+      if(!ctx || !ctx.node) return;
+      const urls = await fetchLpConfigUrls();
+      const templates = [
+        { label: "LINE相談はこちら", url: urls.line, key: "line" },
+        { label: "ネット予約はこちら", url: urls.reservation, key: "reservation" },
+        { label: "電話する", url: urls.phone, key: "phone" }
+      ];
+      let added = 0;
+      templates.forEach(function(t){
+        if(!t.url) return;
+        const exists = ctx.node.ctas.some(function(c){
+          return c.url === t.url || c.label === t.label;
+        });
+        if(exists) return;
+        ctx.node.ctas.push({
+          id: "cta-" + t.key + "-" + Date.now(),
+          label: t.label,
+          url: t.url,
+          order: ctx.node.ctas.length + 1,
+          visible: true
+        });
+        added++;
+      });
+      normalizeQuestionTree(carechanDraft);
+      renderCarechanEditor();
+      setCarechanStatus(
+        added ? ("既存LP設定からCTAを " + added + " 件追加しました。") : "追加可能なCTAは既に登録済み、またはURLが空です。",
+        added ? "success" : "warn"
+      );
+    }catch(error){
+      setCarechanStatus("既存設定の読込失敗: " + error.message, "error");
+    }
   }
 
   function renderCarechanEditor(){
     if(!carechanDraft) return;
     const d = carechanDraft;
-
     document.getElementById("carechanEnabled").checked = d.enabled === true;
     document.getElementById("carechanCharacterImage").value = d.character.image || "";
     document.getElementById("carechanCharacterAlt").value = d.character.alt || "";
@@ -289,13 +452,11 @@
     document.getElementById("carechanMobileRight").value = d.position.mobile.right || 14;
     document.getElementById("carechanDesktopBottom").value = d.position.desktop.bottom || 24;
     document.getElementById("carechanDesktopRight").value = d.position.desktop.right || 24;
-
     const preview = document.getElementById("carechanCharacterPreview");
     if(preview){
       const url = d.character.image || "";
       preview.innerHTML = url ? '<img src="' + escapeHtml(url) + '" alt="preview" style="max-width:80px;max-height:80px;">' : "未設定";
     }
-
     renderQuestionEditor();
     bindCarechanEditorEvents();
     if(window.AdminCollapse && typeof window.AdminCollapse.bindWithin === "function"){
@@ -303,76 +464,55 @@
     }
   }
 
-  function moveQuestion(index, dir){
-    syncQuestionsFromDom();
-    const next = index + dir;
-    if(next < 0 || next >= carechanDraft.questions.length) return;
-    const tmp = carechanDraft.questions[index];
-    carechanDraft.questions[index] = carechanDraft.questions[next];
-    carechanDraft.questions[next] = tmp;
-    normalizeQuestionOrders(carechanDraft);
-    renderCarechanEditor();
-  }
-
-  function moveCta(qIndex, cIndex, dir){
-    syncQuestionsFromDom();
-    const ctas = carechanDraft.questions[qIndex].ctas;
-    const next = cIndex + dir;
-    if(next < 0 || next >= ctas.length) return;
-    const tmp = ctas[cIndex];
-    ctas[cIndex] = ctas[next];
-    ctas[next] = tmp;
-    normalizeQuestionOrders(carechanDraft);
-    renderCarechanEditor();
-  }
-
   function bindCarechanEditorEvents(){
     const root = document.getElementById("carechanQuestionsEditor");
     if(!root) return;
 
     root.onclick = function(event){
-      const t = event.target.closest("[data-carechan-q-up]");
-      if(t){ moveQuestion(Number(t.getAttribute("data-carechan-q-up")), -1); return; }
-      const t2 = event.target.closest("[data-carechan-q-down]");
-      if(t2){ moveQuestion(Number(t2.getAttribute("data-carechan-q-down")), 1); return; }
-      const t3 = event.target.closest("[data-carechan-q-remove]");
-      if(t3){
-        if(!confirm("この質問を削除しますか？")) return;
+      const up = event.target.closest("[data-q-up]");
+      if(up){ moveSibling(parsePath(up.getAttribute("data-q-up")), -1); return; }
+      const down = event.target.closest("[data-q-down]");
+      if(down){ moveSibling(parsePath(down.getAttribute("data-q-down")), 1); return; }
+      const cup = event.target.closest("[data-child-up]");
+      if(cup){ moveSibling(parsePath(cup.getAttribute("data-child-up")), -1); return; }
+      const cdown = event.target.closest("[data-child-down]");
+      if(cdown){ moveSibling(parsePath(cdown.getAttribute("data-child-down")), 1); return; }
+
+      const remove = event.target.closest("[data-q-remove]");
+      if(remove){
+        if(!confirm("この項目を削除しますか？（子質問も削除されます）")) return;
+        removeNode(parsePath(remove.getAttribute("data-q-remove")));
+        return;
+      }
+
+      const childAdd = event.target.closest("[data-child-add]");
+      if(childAdd){ addChildNode(childAdd.getAttribute("data-child-add")); return; }
+
+      const ctaAdd = event.target.closest("[data-cta-add]");
+      if(ctaAdd){ addCta(ctaAdd.getAttribute("data-cta-add")); return; }
+
+      const ctaLoad = event.target.closest("[data-cta-load-config]");
+      if(ctaLoad){
+        loadCtasFromLpConfig(ctaLoad.getAttribute("data-cta-load-config"));
+        return;
+      }
+
+      const ctaRemove = event.target.closest("[data-cta-remove]");
+      if(ctaRemove){
         syncQuestionsFromDom();
-        carechanDraft.questions.splice(Number(t3.getAttribute("data-carechan-q-remove")), 1);
-        normalizeQuestionOrders(carechanDraft);
+        const pathStr = ctaRemove.getAttribute("data-cta-remove");
+        const cIdx = Number(ctaRemove.getAttribute("data-cta-index"));
+        const ctx = getNodeContext(parsePath(pathStr));
+        if(ctx && ctx.node) ctx.node.ctas.splice(cIdx, 1);
+        normalizeQuestionTree(carechanDraft);
         renderCarechanEditor();
         return;
       }
-      const t4 = event.target.closest("[data-carechan-cta-add]");
-      if(t4){
-        syncQuestionsFromDom();
-        const qi = Number(t4.getAttribute("data-carechan-cta-add"));
-        carechanDraft.questions[qi].ctas.push({
-          id: "cta-" + Date.now(),
-          label: "ボタン",
-          url: "#",
-          order: carechanDraft.questions[qi].ctas.length + 1,
-          visible: true
-        });
-        normalizeQuestionOrders(carechanDraft);
-        renderCarechanEditor();
-        return;
-      }
-      const t5 = event.target.closest("[data-carechan-cta-remove]");
-      if(t5){
-        syncQuestionsFromDom();
-        const qi = Number(t5.getAttribute("data-carechan-cta-remove"));
-        const ci = Number(t5.getAttribute("data-cta-index"));
-        carechanDraft.questions[qi].ctas.splice(ci, 1);
-        normalizeQuestionOrders(carechanDraft);
-        renderCarechanEditor();
-        return;
-      }
-      const t6 = event.target.closest("[data-carechan-cta-up]");
-      if(t6){ moveCta(Number(t6.getAttribute("data-carechan-cta-up")), Number(t6.getAttribute("data-cta-index")), -1); return; }
-      const t7 = event.target.closest("[data-carechan-cta-down]");
-      if(t7){ moveCta(Number(t7.getAttribute("data-carechan-cta-down")), Number(t7.getAttribute("data-cta-index")), 1); }
+
+      const ctaUp = event.target.closest("[data-cta-up]");
+      if(ctaUp){ moveCta(ctaUp.getAttribute("data-cta-up"), Number(ctaUp.getAttribute("data-cta-index")), -1); return; }
+      const ctaDown = event.target.closest("[data-cta-down]");
+      if(ctaDown){ moveCta(ctaDown.getAttribute("data-cta-down"), Number(ctaDown.getAttribute("data-cta-index")), 1); }
     };
   }
 
@@ -381,8 +521,7 @@
       const file = input.files?.[0];
       if(!file) return;
       setCarechanStatus("キャラクター画像をアップロード中...", "warn");
-      const url = await uploadCarechanAsset(file);
-      document.getElementById("carechanCharacterImage").value = url;
+      document.getElementById("carechanCharacterImage").value = await uploadCarechanAsset(file);
       collectCarechanDraftFromForm();
       renderCarechanEditor();
       setCarechanStatus("画像アップロード成功。carechan.json を保存してください。", "success");
@@ -401,10 +540,12 @@
       enabled: true,
       order: carechanDraft.questions.length + 1,
       title: "新しい質問",
+      menuPrompt: "",
       answer: "（回答を入力してください）",
-      ctas: []
+      ctas: [],
+      children: []
     });
-    normalizeQuestionOrders(carechanDraft);
+    normalizeQuestionTree(carechanDraft);
     renderCarechanEditor();
   }
 
@@ -413,7 +554,7 @@
       setCarechanStatus("保存中...", "warn");
       collectCarechanDraftFromForm();
       syncQuestionsFromDom();
-      normalizeQuestionOrders(carechanDraft);
+      normalizeQuestionTree(carechanDraft);
       await saveFileToGitHub(CARECHAN_PATH, JSON.stringify(carechanDraft, null, 2));
       setCarechanStatus("carechan.json の保存が完了しました。", "success");
     }catch(error){

@@ -4,8 +4,9 @@
 
   let carechanData = null;
   let modalOpen = false;
-  let modalView = "list";
-  let activeQuestionId = null;
+  let modalView = "menu";
+  let navStack = [];
+  let answerPath = null;
 
   function escapeHtml(text){
     return String(text ?? "")
@@ -43,20 +44,17 @@
     }
   }
 
-  function trackCtaClick(questionId, href, label){
+  function trackCtaClick(nodeId, href, label){
     trackCarechan("lp_cv_click", {
       cv_type: "carechan",
-      question_id: questionId || "",
+      question_id: nodeId || "",
       href: href || "",
       label: label || ""
     });
   }
 
   async function fetchCarechanJson(){
-    const urls = [
-      "./data/carechan.json",
-      "data/carechan.json"
-    ];
+    const urls = ["./data/carechan.json", "data/carechan.json"];
     let lastError = null;
     for(const rawUrl of urls){
       try{
@@ -73,6 +71,40 @@
     throw lastError || new Error("carechan.json fetch failed");
   }
 
+  function normalizeCtas(ctas, prefix){
+    const list = Array.isArray(ctas) ? ctas.map(function(c, cIdx){
+      return {
+        id: String(c?.id || ("cta-" + prefix + "-" + cIdx)),
+        label: String(c?.label || ""),
+        url: String(c?.url || "#"),
+        order: Number(c?.order) || (cIdx + 1),
+        visible: c?.visible !== false
+      };
+    }).filter(function(c){ return c.label; }) : [];
+    list.sort(function(a, b){ return a.order - b.order; });
+    return list;
+  }
+
+  function normalizeNode(raw, idx, prefix){
+    const node = raw && typeof raw === "object" ? raw : {};
+    const id = String(node.id || ("q-" + prefix + "-" + idx));
+    const childrenRaw = Array.isArray(node.children) ? node.children : [];
+    const children = childrenRaw.map(function(child, cIdx){
+      return normalizeNode(child, cIdx, id);
+    }).filter(function(child){ return child.title; });
+
+    return {
+      id: id,
+      enabled: node.enabled !== false,
+      order: Number(node.order) || (idx + 1),
+      title: String(node.title || ""),
+      menuPrompt: String(node.menuPrompt || ""),
+      answer: String(node.answer || ""),
+      ctas: normalizeCtas(node.ctas, id),
+      children: children
+    };
+  }
+
   function ensureCarechanShape(raw){
     const data = raw && typeof raw === "object" ? raw : {};
     const bubbles = data.speechBubbles && typeof data.speechBubbles === "object" ? data.speechBubbles : {};
@@ -82,27 +114,9 @@
     const mobile = pos.mobile && typeof pos.mobile === "object" ? pos.mobile : {};
     const desktop = pos.desktop && typeof pos.desktop === "object" ? pos.desktop : {};
 
-    const questions = Array.isArray(data.questions) ? data.questions.map(function(q, idx){
-      const ctas = Array.isArray(q?.ctas) ? q.ctas.map(function(c, cIdx){
-        return {
-          id: String(c?.id || ("cta-" + idx + "-" + cIdx)),
-          label: String(c?.label || ""),
-          url: String(c?.url || "#"),
-          order: Number(c?.order) || (cIdx + 1),
-          visible: c?.visible !== false
-        };
-      }).filter(function(c){ return c.label; }) : [];
-      ctas.sort(function(a, b){ return a.order - b.order; });
-      return {
-        id: String(q?.id || ("q-" + idx)),
-        enabled: q?.enabled !== false,
-        order: Number(q?.order) || (idx + 1),
-        title: String(q?.title || ""),
-        answer: String(q?.answer || ""),
-        ctas: ctas
-      };
-    }).filter(function(q){ return q.title; }) : [];
-
+    const questions = Array.isArray(data.questions)
+      ? data.questions.map(function(q, idx){ return normalizeNode(q, idx, "root"); }).filter(function(q){ return q.title; })
+      : [];
     questions.sort(function(a, b){ return a.order - b.order; });
 
     return {
@@ -136,6 +150,43 @@
     };
   }
 
+  function findNodeByIds(ids){
+    if(!carechanData || !Array.isArray(ids) || !ids.length) return null;
+    let nodes = carechanData.questions;
+    let node = null;
+    for(let i = 0; i < ids.length; i++){
+      node = nodes.find(function(n){ return n.id === ids[i]; });
+      if(!node) return null;
+      nodes = node.children || [];
+    }
+    return node;
+  }
+
+  function hasSubmenu(node){
+    return (node.children || []).some(function(c){ return c.enabled !== false && c.title; });
+  }
+
+  function getMenuContext(){
+    if(!navStack.length){
+      return {
+        parent: null,
+        nodes: carechanData.questions.filter(function(q){ return q.enabled !== false; }),
+        prompt: "",
+        showGreeting: true
+      };
+    }
+    const parent = findNodeByIds(navStack);
+    if(!parent){
+      return { parent: null, nodes: [], prompt: "", showGreeting: true };
+    }
+    return {
+      parent: parent,
+      nodes: (parent.children || []).filter(function(c){ return c.enabled !== false; }),
+      prompt: parent.menuPrompt || "何をしたいですか？",
+      showGreeting: false
+    };
+  }
+
   function pickBubbleText(data){
     const bubbles = data.speechBubbles;
     if(!bubbles.items.length) return "質問してね♪";
@@ -143,8 +194,7 @@
       const idx = Math.min(bubbles.fixedIndex, bubbles.items.length - 1);
       return bubbles.items[idx];
     }
-    const idx = Math.floor(Math.random() * bubbles.items.length);
-    return bubbles.items[idx];
+    return bubbles.items[Math.floor(Math.random() * bubbles.items.length)];
   }
 
   function applyWidgetPosition(widget, data){
@@ -163,48 +213,51 @@
     const raw = String(url || "").trim();
     if(!raw) return "./assets/carechan/carechan-default.svg";
     if(/^https?:\/\//i.test(raw) || raw.startsWith("data:")) return raw;
-    if(raw.startsWith("./")) return raw;
-    if(raw.startsWith("/")) return raw;
+    if(raw.startsWith("./") || raw.startsWith("/")) return raw;
     return "./" + raw.replace(/^\.\//, "");
   }
 
   function renderCharacterImage(data){
     const src = resolveImageUrl(data.character.image);
-    if(/\.svg(\?|$)/i.test(src)){
-      return '<img src="' + escapeAttr(src) + '" alt="' + escapeAttr(data.character.alt) + '" width="64" height="74" decoding="async">';
-    }
-    return '<img src="' + escapeAttr(src) + '" alt="' + escapeAttr(data.character.alt) + '" width="64" height="64" decoding="async">';
+    return '<img src="' + escapeAttr(src) + '" alt="' + escapeAttr(data.character.alt) + '" width="64" height="74" decoding="async">';
   }
 
-  function getActiveQuestion(){
-    if(!carechanData || !activeQuestionId) return null;
-    return carechanData.questions.find(function(q){ return q.id === activeQuestionId; }) || null;
+  function renderMenuButtons(nodes, pathPrefix){
+    return nodes.map(function(node){
+      const nextPath = pathPrefix.concat([node.id]);
+      const pathAttr = escapeAttr(nextPath.join("/"));
+      return (
+        '<button type="button" class="carechan-question-btn" data-node-path="' + pathAttr + '">' +
+          '<span>' + escapeHtml(node.title) + '</span>' +
+          '<span aria-hidden="true">›</span>' +
+        '</button>'
+      );
+    }).join("");
   }
 
-  function renderListView(){
+  function renderMenuView(){
+    const ctx = getMenuContext();
     const g = carechanData.greeting;
-    const items = carechanData.questions.filter(function(q){ return q.enabled; });
-    return (
-      '<div class="carechan-greeting">' +
-        '<p class="carechan-greeting-title">' + escapeHtml(g.title) + '</p>' +
-        '<p class="carechan-greeting-sub">' + escapeHtml(g.subtitle) + '</p>' +
-        '<p class="carechan-greeting-prompt">' + escapeHtml(g.prompt) + '</p>' +
-      '</div>' +
-      '<div class="carechan-question-list">' +
-        items.map(function(q){
-          return (
-            '<button type="button" class="carechan-question-btn" data-question-id="' + escapeAttr(q.id) + '">' +
-              '<span>' + escapeHtml(q.title) + '</span>' +
-              '<span aria-hidden="true">›</span>' +
-            '</button>'
-          );
-        }).join("") +
-      '</div>'
-    );
+    let html = "";
+
+    if(ctx.showGreeting){
+      html += (
+        '<div class="carechan-greeting">' +
+          '<p class="carechan-greeting-title">' + escapeHtml(g.title) + '</p>' +
+          '<p class="carechan-greeting-sub">' + escapeHtml(g.subtitle) + '</p>' +
+          '<p class="carechan-greeting-prompt">' + escapeHtml(g.prompt) + '</p>' +
+        '</div>'
+      );
+    }else if(ctx.prompt){
+      html += '<p class="carechan-submenu-prompt">' + escapeHtml(ctx.prompt) + '</p>';
+    }
+
+    html += '<div class="carechan-question-list">' + renderMenuButtons(ctx.nodes, navStack) + '</div>';
+    return html;
   }
 
-  function renderAnswerView(question){
-    const ctas = (question.ctas || []).filter(function(c){ return c.visible !== false && c.label; });
+  function renderAnswerView(node){
+    const ctas = (node.ctas || []).filter(function(c){ return c.visible !== false && c.label; });
     const ctaHtml = ctas.length ? (
       '<div class="carechan-cta-list">' +
         ctas.map(function(c){
@@ -213,7 +266,7 @@
           const extra = external ? ' target="_blank" rel="noopener noreferrer"' : "";
           return (
             '<a class="carechan-cta-link" href="' + escapeAttr(href) + '"' + extra +
-            ' data-carechan-cta="1" data-question-id="' + escapeAttr(question.id) + '"' +
+            ' data-carechan-cta="1" data-node-id="' + escapeAttr(node.id) + '"' +
             ' data-label="' + escapeAttr(c.label) + '">' +
             escapeHtml(c.label) +
             '</a>'
@@ -221,58 +274,107 @@
         }).join("") +
       '</div>'
     ) : "";
+    const answerHtml = node.answer
+      ? '<div class="carechan-answer-text">' + escapeHtml(node.answer) + '</div>'
+      : '<div class="carechan-answer-text carechan-answer-empty">回答は準備中です。</div>';
     return (
-      '<h3 class="carechan-answer-title">' + escapeHtml(question.title) + '</h3>' +
-      '<div class="carechan-answer-text">' + escapeHtml(question.answer) + '</div>' +
+      '<h3 class="carechan-answer-title">' + escapeHtml(node.title) + '</h3>' +
+      answerHtml +
       ctaHtml
     );
   }
 
-  function renderModalBody(){
-    const body = document.getElementById("carechanModalBody");
+  function updateModalHeader(){
     const headTitle = document.getElementById("carechanModalTitle");
     const backBtn = document.getElementById("carechanModalBack");
+    if(!headTitle || !backBtn) return;
+
+    if(modalView === "answer"){
+      const node = findNodeByIds(answerPath || []);
+      headTitle.textContent = node ? node.title : "回答";
+      backBtn.classList.remove("is-hidden");
+      return;
+    }
+
+    if(navStack.length){
+      const parent = findNodeByIds(navStack);
+      headTitle.textContent = parent ? parent.title : "メニュー";
+      backBtn.classList.remove("is-hidden");
+      return;
+    }
+
+    headTitle.textContent = "ケアちゃん FAQ";
+    backBtn.classList.add("is-hidden");
+  }
+
+  function renderModalBody(){
+    const body = document.getElementById("carechanModalBody");
     if(!body) return;
 
     if(modalView === "answer"){
-      const question = getActiveQuestion();
-      if(backBtn) backBtn.classList.remove("is-hidden");
-      if(headTitle) headTitle.textContent = question ? question.title : "回答";
-      body.innerHTML = question ? renderAnswerView(question) : '<p>質問が見つかりません。</p>';
-      if(question){
-        trackCarechan("carechan_question_view", { question_id: question.id });
+      const node = findNodeByIds(answerPath || []);
+      body.innerHTML = node ? renderAnswerView(node) : '<p>項目が見つかりません。</p>';
+      if(node){
+        trackCarechan("carechan_question_view", { question_id: node.id });
       }
     }else{
-      if(backBtn) backBtn.classList.add("is-hidden");
-      if(headTitle) headTitle.textContent = "ケアちゃん FAQ";
-      body.innerHTML = renderListView();
+      body.innerHTML = renderMenuView();
     }
+    updateModalHeader();
   }
 
   function openModal(){
     const overlay = document.getElementById("carechanOverlay");
     if(!overlay) return;
     modalOpen = true;
-    modalView = "list";
-    activeQuestionId = null;
+    modalView = "menu";
+    navStack = [];
+    answerPath = null;
     overlay.classList.remove("is-hidden");
     overlay.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
     renderModalBody();
     trackCarechan("carechan_open", {});
-    const closeBtn = document.getElementById("carechanModalClose");
-    if(closeBtn) closeBtn.focus();
+    document.getElementById("carechanModalClose")?.focus();
   }
 
   function closeModal(){
     const overlay = document.getElementById("carechanOverlay");
     if(!overlay) return;
     modalOpen = false;
-    modalView = "list";
-    activeQuestionId = null;
+    modalView = "menu";
+    navStack = [];
+    answerPath = null;
     overlay.classList.add("is-hidden");
     overlay.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
+  }
+
+  function goBackOneLevel(){
+    if(modalView === "answer"){
+      modalView = "menu";
+      answerPath = null;
+    }else if(navStack.length){
+      navStack = navStack.slice(0, -1);
+    }
+    renderModalBody();
+  }
+
+  function handleMenuClick(pathStr){
+    const ids = String(pathStr || "").split("/").filter(Boolean);
+    if(!ids.length) return;
+    const node = findNodeByIds(ids);
+    if(!node) return;
+
+    if(hasSubmenu(node)){
+      navStack = ids;
+      modalView = "menu";
+      answerPath = null;
+    }else{
+      answerPath = ids;
+      modalView = "answer";
+    }
+    renderModalBody();
   }
 
   function bindModalEvents(){
@@ -280,30 +382,22 @@
     if(!overlay) return;
 
     overlay.addEventListener("click", function(event){
-      if(event.target === overlay){
-        closeModal();
-      }
+      if(event.target === overlay) closeModal();
     });
 
     document.getElementById("carechanModalClose")?.addEventListener("click", closeModal);
-    document.getElementById("carechanModalBack")?.addEventListener("click", function(){
-      modalView = "list";
-      activeQuestionId = null;
-      renderModalBody();
-    });
+    document.getElementById("carechanModalBack")?.addEventListener("click", goBackOneLevel);
 
     overlay.addEventListener("click", function(event){
-      const qBtn = event.target.closest("[data-question-id].carechan-question-btn");
-      if(qBtn){
-        activeQuestionId = qBtn.getAttribute("data-question-id");
-        modalView = "answer";
-        renderModalBody();
+      const menuBtn = event.target.closest("[data-node-path].carechan-question-btn");
+      if(menuBtn){
+        handleMenuClick(menuBtn.getAttribute("data-node-path"));
         return;
       }
       const cta = event.target.closest("[data-carechan-cta]");
       if(cta){
         trackCtaClick(
-          cta.getAttribute("data-question-id"),
+          cta.getAttribute("data-node-id"),
           cta.getAttribute("href"),
           cta.getAttribute("data-label")
         );
@@ -312,9 +406,7 @@
 
     document.addEventListener("keydown", function(event){
       if(!modalOpen) return;
-      if(event.key === "Escape"){
-        closeModal();
-      }
+      if(event.key === "Escape") closeModal();
     });
   }
 
@@ -354,7 +446,6 @@
     root.setAttribute("aria-hidden", "false");
     const widget = document.getElementById("carechanWidget");
     if(widget) applyWidgetPosition(widget, data);
-
     document.getElementById("carechanTrigger")?.addEventListener("click", openModal);
     bindModalEvents();
   }
@@ -375,8 +466,7 @@
 
   async function init(){
     try{
-      const raw = await fetchCarechanJson();
-      carechanData = ensureCarechanShape(raw);
+      carechanData = ensureCarechanShape(await fetchCarechanJson());
       renderWidget(carechanData);
       bindResponsivePosition();
     }catch(error){
