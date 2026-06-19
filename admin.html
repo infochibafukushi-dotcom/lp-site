@@ -728,6 +728,7 @@ body{
       <a class="jump-btn" href="#card-sections-sort">並び替え</a>
       <a class="jump-btn" href="#card-sections-list">セクション編集</a>
       <a class="jump-btn" href="#card-preview">保存前プレビュー</a>
+      <a class="jump-btn" href="#card-carechan-settings">ケアちゃん設定</a>
     </div>
   </div>
 
@@ -1254,6 +1255,101 @@ body{
     </div>
   </div>
 
+  <div class="card collapsible-card js-collapsible section-anchor" id="card-carechan-settings" data-open="false">
+    <button type="button" class="card-toggle js-card-toggle">
+      <span class="toggle-left">
+        <span class="toggle-icon">▶</span>
+        <span class="toggle-title">ケアちゃん設定</span>
+      </span>
+      <span class="toggle-state">閉じています</span>
+    </button>
+    <div class="card-body js-card-body">
+      <p class="note">ケアちゃん FAQ ナビの設定です。保存は carechan.json のみ更新します（既存セクションには影響しません）。</p>
+
+      <div class="row">
+        <label><input type="checkbox" id="carechanEnabled"> ケアちゃんを表示する</label>
+      </div>
+
+      <div class="grid2">
+        <div class="row">
+          <label>キャラクター画像 URL</label>
+          <input type="text" id="carechanCharacterImage">
+          <input type="file" id="carechanCharacterUpload" accept="image/*,.svg">
+          <div class="small">選択すると GitHub の assets/carechan にアップロードされます。</div>
+          <div class="preview" id="carechanCharacterPreview">未設定</div>
+        </div>
+        <div class="row">
+          <label>キャラクター alt</label>
+          <input type="text" id="carechanCharacterAlt" placeholder="ケアちゃん">
+        </div>
+      </div>
+
+      <div class="row">
+        <label>吹き出し文言（1行1件）</label>
+        <textarea id="carechanBubbleItems" rows="4" placeholder="質問してね♪"></textarea>
+      </div>
+      <div class="grid2">
+        <div class="row">
+          <label>吹き出し表示方式</label>
+          <select id="carechanBubbleMode">
+            <option value="random">random（ランダム）</option>
+            <option value="fixed">fixed（固定）</option>
+          </select>
+        </div>
+        <div class="row">
+          <label>固定時インデックス（0始まり）</label>
+          <input type="number" id="carechanBubbleFixedIndex" min="0" value="0">
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="row">
+          <label>初回メッセージ（1行目）</label>
+          <input type="text" id="carechanGreetingTitle">
+        </div>
+        <div class="row">
+          <label>初回メッセージ（2行目）</label>
+          <input type="text" id="carechanGreetingSubtitle">
+        </div>
+      </div>
+      <div class="row">
+        <label>初回メッセージ（3行目）</label>
+        <input type="text" id="carechanGreetingPrompt">
+      </div>
+
+      <div class="grid2">
+        <div class="row">
+          <label>SP: フッターからの上方向オフセット（px）</label>
+          <input type="number" id="carechanMobileOffset" min="0" value="60">
+        </div>
+        <div class="row">
+          <label>SP: 右端（px）</label>
+          <input type="number" id="carechanMobileRight" min="0" value="14">
+        </div>
+        <div class="row">
+          <label>PC: 下（px）</label>
+          <input type="number" id="carechanDesktopBottom" min="0" value="24">
+        </div>
+        <div class="row">
+          <label>PC: 右（px）</label>
+          <input type="number" id="carechanDesktopRight" min="0" value="24">
+        </div>
+      </div>
+
+      <h3 style="margin-top:20px;">質問管理</h3>
+      <div class="actions">
+        <button type="button" id="carechanAddQuestionBtn">質問を追加</button>
+        <button type="button" class="secondary" id="carechanReloadBtn">再読込</button>
+      </div>
+      <div id="carechanQuestionsEditor">読み込み中...</div>
+
+      <div class="actions" style="margin-top:16px;">
+        <button type="button" id="carechanSaveBtn">ケアちゃん設定を保存</button>
+      </div>
+      <div class="preview" id="carechanSaveResult">まだ保存していません。</div>
+    </div>
+  </div>
+
 
   <div class="floating-save-bar">
     <div class="floating-save-inner">
@@ -1269,6 +1365,7 @@ body{
 
 <script src="./admin-collapse.js"></script>
 <script src="./admin-sections-sort.js"></script>
+<script src="./admin-carechan.js"></script>
 <script>
 const CONFIG_PATH = 'data/config.json';
 const SECTIONS_PATH = 'data/sections.json';

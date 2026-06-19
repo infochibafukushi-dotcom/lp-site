@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140" width="120" height="140" aria-hidden="true">
+  <ellipse cx="60" cy="118" rx="38" ry="8" fill="rgba(0,0,0,0.08)"/>
+  <ellipse cx="60" cy="88" rx="34" ry="30" fill="#ffffff" stroke="#ddd" stroke-width="1.5"/>
+  <circle cx="60" cy="52" r="28" fill="#ffffff" stroke="#ddd" stroke-width="1.5"/>
+  <polygon points="34,30 28,8 42,22" fill="#ffffff" stroke="#ddd" stroke-width="1.5" stroke-linejoin="round"/>
+  <polygon points="86,30 92,8 78,22" fill="#ffffff" stroke="#ddd" stroke-width="1.5" stroke-linejoin="round"/>
+  <circle cx="50" cy="50" r="3" fill="#333"/>
+  <circle cx="70" cy="50" r="3" fill="#333"/>
+  <path d="M54 58 Q60 63 66 58" fill="none" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M38 88 Q60 98 82 88" fill="none" stroke="#c62828" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="60" cy="92" r="5" fill="#f9a825" stroke="#e65100" stroke-width="1"/>
+  <g class="carechan-arm-svg" style="transform-origin:78px 78px">
+    <ellipse cx="88" cy="78" rx="10" ry="8" fill="#ffffff" stroke="#ddd" stroke-width="1.5"/>
+    <ellipse cx="98" cy="68" rx="8" ry="7" fill="#ffffff" stroke="#ddd" stroke-width="1.5"/>
+  </g>
+</svg>

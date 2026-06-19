@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["enabled", "questions"],
+  "properties": {
+    "enabled": { "type": "boolean" },
+    "version": { "type": "integer" },
+    "character": {
+      "type": "object",
+      "properties": {
+        "image": { "type": "string" },
+        "alt": { "type": "string" }
+      }
+    },
+    "speechBubbles": { "type": "object" },
+    "greeting": { "type": "object" },
+    "position": { "type": "object" },
+    "questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "answer"],
+        "properties": {
+          "id": { "type": "string" },
+          "enabled": { "type": "boolean" },
+          "order": { "type": "integer" },
+          "title": { "type": "string" },
+          "answer": { "type": "string" },
+          "ctas": { "type": "array" }
+        }
+      }
+    }
+  }
+}

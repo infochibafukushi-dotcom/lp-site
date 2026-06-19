@@ -1,0 +1,392 @@
+(function(){
+  const FOOTER_HEIGHT_MOBILE = 90;
+  const MOBILE_MQ = "(min-width: 769px)";
+
+  let carechanData = null;
+  let modalOpen = false;
+  let modalView = "list";
+  let activeQuestionId = null;
+
+  function escapeHtml(text){
+    return String(text ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function escapeAttr(text){
+    return String(text ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;");
+  }
+
+  function sanitizeUrl(value, fallback){
+    fallback = fallback || "#";
+    const raw = String(value ?? "").normalize("NFKC").trim();
+    if(!raw) return fallback;
+    const normalized = raw.replace(/[\u0000-\u001F\u007F\s]+/g, "");
+    if(!normalized) return fallback;
+    if(/^(javascript|data|vbscript):/i.test(normalized)) return fallback;
+    return raw;
+  }
+
+  function trackCarechan(eventName, extra){
+    const payload = Object.assign({ event: eventName, ts: Date.now() }, extra || {});
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push(payload);
+    if(typeof window.gtag === "function"){
+      window.gtag("event", eventName, extra || {});
+    }
+  }
+
+  function trackCtaClick(questionId, href, label){
+    trackCarechan("lp_cv_click", {
+      cv_type: "carechan",
+      question_id: questionId || "",
+      href: href || "",
+      label: label || ""
+    });
+  }
+
+  async function fetchCarechanJson(){
+    const urls = [
+      "./data/carechan.json",
+      "data/carechan.json"
+    ];
+    let lastError = null;
+    for(const rawUrl of urls){
+      try{
+        const url = rawUrl + (rawUrl.includes("?") ? "&" : "?") + "_ts=" + Date.now();
+        const res = await fetch(url, { cache: "no-store" });
+        if(!res.ok) throw new Error("HTTP " + res.status);
+        const text = await res.text();
+        if(!text || !text.trim()) throw new Error("empty");
+        return JSON.parse(text);
+      }catch(error){
+        lastError = error;
+      }
+    }
+    throw lastError || new Error("carechan.json fetch failed");
+  }
+
+  function ensureCarechanShape(raw){
+    const data = raw && typeof raw === "object" ? raw : {};
+    const bubbles = data.speechBubbles && typeof data.speechBubbles === "object" ? data.speechBubbles : {};
+    const items = Array.isArray(bubbles.items) ? bubbles.items.filter(Boolean) : ["質問してね♪"];
+    const greeting = data.greeting && typeof data.greeting === "object" ? data.greeting : {};
+    const pos = data.position && typeof data.position === "object" ? data.position : {};
+    const mobile = pos.mobile && typeof pos.mobile === "object" ? pos.mobile : {};
+    const desktop = pos.desktop && typeof pos.desktop === "object" ? pos.desktop : {};
+
+    const questions = Array.isArray(data.questions) ? data.questions.map(function(q, idx){
+      const ctas = Array.isArray(q?.ctas) ? q.ctas.map(function(c, cIdx){
+        return {
+          id: String(c?.id || ("cta-" + idx + "-" + cIdx)),
+          label: String(c?.label || ""),
+          url: String(c?.url || "#"),
+          order: Number(c?.order) || (cIdx + 1),
+          visible: c?.visible !== false
+        };
+      }).filter(function(c){ return c.label; }) : [];
+      ctas.sort(function(a, b){ return a.order - b.order; });
+      return {
+        id: String(q?.id || ("q-" + idx)),
+        enabled: q?.enabled !== false,
+        order: Number(q?.order) || (idx + 1),
+        title: String(q?.title || ""),
+        answer: String(q?.answer || ""),
+        ctas: ctas
+      };
+    }).filter(function(q){ return q.title; }) : [];
+
+    questions.sort(function(a, b){ return a.order - b.order; });
+
+    return {
+      enabled: data.enabled === true,
+      version: data.version || 1,
+      character: {
+        image: String(data.character?.image || "./assets/carechan/carechan-default.svg"),
+        alt: String(data.character?.alt || "ケアちゃん")
+      },
+      speechBubbles: {
+        mode: bubbles.mode === "fixed" ? "fixed" : "random",
+        items: items.length ? items : ["質問してね♪"],
+        fixedIndex: Math.max(0, Number(bubbles.fixedIndex) || 0)
+      },
+      greeting: {
+        title: String(greeting.title || "こんにちは！"),
+        subtitle: String(greeting.subtitle || "ケアちゃんです♪"),
+        prompt: String(greeting.prompt || "何について知りたいですか？")
+      },
+      position: {
+        mobile: {
+          bottomOffsetFromFooter: Number(mobile.bottomOffsetFromFooter) || 60,
+          right: Number(mobile.right) || 14
+        },
+        desktop: {
+          bottom: Number(desktop.bottom) || 24,
+          right: Number(desktop.right) || 24
+        }
+      },
+      questions: questions
+    };
+  }
+
+  function pickBubbleText(data){
+    const bubbles = data.speechBubbles;
+    if(!bubbles.items.length) return "質問してね♪";
+    if(bubbles.mode === "fixed"){
+      const idx = Math.min(bubbles.fixedIndex, bubbles.items.length - 1);
+      return bubbles.items[idx];
+    }
+    const idx = Math.floor(Math.random() * bubbles.items.length);
+    return bubbles.items[idx];
+  }
+
+  function applyWidgetPosition(widget, data){
+    const isPc = window.matchMedia && window.matchMedia(MOBILE_MQ).matches;
+    if(isPc){
+      widget.style.bottom = (data.position.desktop.bottom || 24) + "px";
+      widget.style.right = (data.position.desktop.right || 24) + "px";
+    }else{
+      const offset = data.position.mobile.bottomOffsetFromFooter || 60;
+      widget.style.bottom = (FOOTER_HEIGHT_MOBILE + offset) + "px";
+      widget.style.right = (data.position.mobile.right || 14) + "px";
+    }
+  }
+
+  function resolveImageUrl(url){
+    const raw = String(url || "").trim();
+    if(!raw) return "./assets/carechan/carechan-default.svg";
+    if(/^https?:\/\//i.test(raw) || raw.startsWith("data:")) return raw;
+    if(raw.startsWith("./")) return raw;
+    if(raw.startsWith("/")) return raw;
+    return "./" + raw.replace(/^\.\//, "");
+  }
+
+  function renderCharacterImage(data){
+    const src = resolveImageUrl(data.character.image);
+    if(/\.svg(\?|$)/i.test(src)){
+      return '<img src="' + escapeAttr(src) + '" alt="' + escapeAttr(data.character.alt) + '" width="64" height="74" decoding="async">';
+    }
+    return '<img src="' + escapeAttr(src) + '" alt="' + escapeAttr(data.character.alt) + '" width="64" height="64" decoding="async">';
+  }
+
+  function getActiveQuestion(){
+    if(!carechanData || !activeQuestionId) return null;
+    return carechanData.questions.find(function(q){ return q.id === activeQuestionId; }) || null;
+  }
+
+  function renderListView(){
+    const g = carechanData.greeting;
+    const items = carechanData.questions.filter(function(q){ return q.enabled; });
+    return (
+      '<div class="carechan-greeting">' +
+        '<p class="carechan-greeting-title">' + escapeHtml(g.title) + '</p>' +
+        '<p class="carechan-greeting-sub">' + escapeHtml(g.subtitle) + '</p>' +
+        '<p class="carechan-greeting-prompt">' + escapeHtml(g.prompt) + '</p>' +
+      '</div>' +
+      '<div class="carechan-question-list">' +
+        items.map(function(q){
+          return (
+            '<button type="button" class="carechan-question-btn" data-question-id="' + escapeAttr(q.id) + '">' +
+              '<span>' + escapeHtml(q.title) + '</span>' +
+              '<span aria-hidden="true">›</span>' +
+            '</button>'
+          );
+        }).join("") +
+      '</div>'
+    );
+  }
+
+  function renderAnswerView(question){
+    const ctas = (question.ctas || []).filter(function(c){ return c.visible !== false && c.label; });
+    const ctaHtml = ctas.length ? (
+      '<div class="carechan-cta-list">' +
+        ctas.map(function(c){
+          const href = sanitizeUrl(c.url, "#");
+          const external = /^(https?:|tel:|mailto:)/i.test(href);
+          const extra = external ? ' target="_blank" rel="noopener noreferrer"' : "";
+          return (
+            '<a class="carechan-cta-link" href="' + escapeAttr(href) + '"' + extra +
+            ' data-carechan-cta="1" data-question-id="' + escapeAttr(question.id) + '"' +
+            ' data-label="' + escapeAttr(c.label) + '">' +
+            escapeHtml(c.label) +
+            '</a>'
+          );
+        }).join("") +
+      '</div>'
+    ) : "";
+    return (
+      '<h3 class="carechan-answer-title">' + escapeHtml(question.title) + '</h3>' +
+      '<div class="carechan-answer-text">' + escapeHtml(question.answer) + '</div>' +
+      ctaHtml
+    );
+  }
+
+  function renderModalBody(){
+    const body = document.getElementById("carechanModalBody");
+    const headTitle = document.getElementById("carechanModalTitle");
+    const backBtn = document.getElementById("carechanModalBack");
+    if(!body) return;
+
+    if(modalView === "answer"){
+      const question = getActiveQuestion();
+      if(backBtn) backBtn.classList.remove("is-hidden");
+      if(headTitle) headTitle.textContent = question ? question.title : "回答";
+      body.innerHTML = question ? renderAnswerView(question) : '<p>質問が見つかりません。</p>';
+      if(question){
+        trackCarechan("carechan_question_view", { question_id: question.id });
+      }
+    }else{
+      if(backBtn) backBtn.classList.add("is-hidden");
+      if(headTitle) headTitle.textContent = "ケアちゃん FAQ";
+      body.innerHTML = renderListView();
+    }
+  }
+
+  function openModal(){
+    const overlay = document.getElementById("carechanOverlay");
+    if(!overlay) return;
+    modalOpen = true;
+    modalView = "list";
+    activeQuestionId = null;
+    overlay.classList.remove("is-hidden");
+    overlay.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    renderModalBody();
+    trackCarechan("carechan_open", {});
+    const closeBtn = document.getElementById("carechanModalClose");
+    if(closeBtn) closeBtn.focus();
+  }
+
+  function closeModal(){
+    const overlay = document.getElementById("carechanOverlay");
+    if(!overlay) return;
+    modalOpen = false;
+    modalView = "list";
+    activeQuestionId = null;
+    overlay.classList.add("is-hidden");
+    overlay.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+
+  function bindModalEvents(){
+    const overlay = document.getElementById("carechanOverlay");
+    if(!overlay) return;
+
+    overlay.addEventListener("click", function(event){
+      if(event.target === overlay){
+        closeModal();
+      }
+    });
+
+    document.getElementById("carechanModalClose")?.addEventListener("click", closeModal);
+    document.getElementById("carechanModalBack")?.addEventListener("click", function(){
+      modalView = "list";
+      activeQuestionId = null;
+      renderModalBody();
+    });
+
+    overlay.addEventListener("click", function(event){
+      const qBtn = event.target.closest("[data-question-id].carechan-question-btn");
+      if(qBtn){
+        activeQuestionId = qBtn.getAttribute("data-question-id");
+        modalView = "answer";
+        renderModalBody();
+        return;
+      }
+      const cta = event.target.closest("[data-carechan-cta]");
+      if(cta){
+        trackCtaClick(
+          cta.getAttribute("data-question-id"),
+          cta.getAttribute("href"),
+          cta.getAttribute("data-label")
+        );
+      }
+    });
+
+    document.addEventListener("keydown", function(event){
+      if(!modalOpen) return;
+      if(event.key === "Escape"){
+        closeModal();
+      }
+    });
+  }
+
+  function renderWidget(data){
+    const root = document.getElementById("carechanRoot");
+    if(!root) return;
+
+    if(!data.enabled){
+      root.innerHTML = "";
+      root.setAttribute("aria-hidden", "true");
+      return;
+    }
+
+    const bubbleText = pickBubbleText(data);
+    root.innerHTML =
+      '<div class="carechan-widget" id="carechanWidget">' +
+        '<div class="carechan-bubble-wrap">' +
+          '<div class="carechan-bubble" id="carechanBubble">' + escapeHtml(bubbleText) + '</div>' +
+        '</div>' +
+        '<button type="button" class="carechan-trigger" id="carechanTrigger" aria-label="ケアちゃん FAQ を開く">' +
+          renderCharacterImage(data) +
+        '</button>' +
+      '</div>' +
+      '<div class="carechan-overlay is-hidden" id="carechanOverlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="carechanModalTitle">' +
+        '<div class="carechan-modal">' +
+          '<div class="carechan-modal-head">' +
+            '<div class="carechan-modal-head-left">' +
+              '<button type="button" class="carechan-modal-back is-hidden" id="carechanModalBack" aria-label="戻る">←</button>' +
+              '<h2 id="carechanModalTitle">ケアちゃん FAQ</h2>' +
+            '</div>' +
+            '<button type="button" class="carechan-modal-close" id="carechanModalClose" aria-label="閉じる">×</button>' +
+          '</div>' +
+          '<div class="carechan-modal-body" id="carechanModalBody"></div>' +
+        '</div>' +
+      '</div>';
+
+    root.setAttribute("aria-hidden", "false");
+    const widget = document.getElementById("carechanWidget");
+    if(widget) applyWidgetPosition(widget, data);
+
+    document.getElementById("carechanTrigger")?.addEventListener("click", openModal);
+    bindModalEvents();
+  }
+
+  function bindResponsivePosition(){
+    if(!window.matchMedia) return;
+    const mq = window.matchMedia(MOBILE_MQ);
+    const handler = function(){
+      const widget = document.getElementById("carechanWidget");
+      if(widget && carechanData) applyWidgetPosition(widget, carechanData);
+    };
+    if(typeof mq.addEventListener === "function"){
+      mq.addEventListener("change", handler);
+    }else if(typeof mq.addListener === "function"){
+      mq.addListener(handler);
+    }
+  }
+
+  async function init(){
+    try{
+      const raw = await fetchCarechanJson();
+      carechanData = ensureCarechanShape(raw);
+      renderWidget(carechanData);
+      bindResponsivePosition();
+    }catch(error){
+      try{ console.error("[carechan]", error); }catch(e){}
+    }
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", init);
+  }else{
+    init();
+  }
+})();

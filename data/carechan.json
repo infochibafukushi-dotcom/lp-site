@@ -1,0 +1,115 @@
+{
+  "enabled": true,
+  "version": 1,
+  "character": {
+    "image": "./assets/carechan/carechan-default.svg",
+    "alt": "ケアちゃん"
+  },
+  "speechBubbles": {
+    "mode": "random",
+    "items": [
+      "質問してね♪",
+      "介護タクシーについてご案内します♪",
+      "お気軽にどうぞ♪",
+      "料金はこちら♪"
+    ],
+    "fixedIndex": 0
+  },
+  "greeting": {
+    "title": "こんにちは！",
+    "subtitle": "ケアちゃんです♪",
+    "prompt": "何について知りたいですか？"
+  },
+  "position": {
+    "mobile": {
+      "bottomOffsetFromFooter": 60,
+      "right": 14
+    },
+    "desktop": {
+      "bottom": 24,
+      "right": 24
+    }
+  },
+  "questions": [
+    {
+      "id": "q-reserve",
+      "enabled": true,
+      "order": 1,
+      "title": "予約について",
+      "answer": "（サンプル）管理画面から回答文を入力してください。",
+      "ctas": [
+        {
+          "id": "cta-reserve-sample",
+          "label": "ネット予約はこちら",
+          "url": "#",
+          "order": 1,
+          "visible": true
+        }
+      ]
+    },
+    {
+      "id": "q-price",
+      "enabled": true,
+      "order": 2,
+      "title": "料金について",
+      "answer": "（サンプル）管理画面から回答文を入力してください。",
+      "ctas": [
+        {
+          "id": "cta-price-sample",
+          "label": "料金表を見る",
+          "url": "#shii-price-menyu",
+          "order": 1,
+          "visible": true
+        }
+      ]
+    },
+    {
+      "id": "q-usage",
+      "enabled": true,
+      "order": 3,
+      "title": "どんな時に利用できる？",
+      "answer": "（サンプル）管理画面から回答文を入力してください。",
+      "ctas": []
+    },
+    {
+      "id": "q-area",
+      "enabled": true,
+      "order": 4,
+      "title": "対応エリア",
+      "answer": "（サンプル）管理画面から回答文を入力してください。",
+      "ctas": []
+    },
+    {
+      "id": "q-vehicle",
+      "enabled": true,
+      "order": 5,
+      "title": "車両について",
+      "answer": "（サンプル）管理画面から回答文を入力してください。",
+      "ctas": []
+    },
+    {
+      "id": "q-equipment",
+      "enabled": true,
+      "order": 6,
+      "title": "機材について",
+      "answer": "（サンプル）管理画面から回答文を入力してください。",
+      "ctas": []
+    },
+    {
+      "id": "q-faq",
+      "enabled": true,
+      "order": 7,
+      "title": "よくある質問",
+      "answer": "（サンプル）管理画面から回答文を入力してください。",
+      "ctas": []
+    }
+  ],
+  "meta": {
+    "storeId": "default"
+  },
+  "extensions": {
+    "ai": {
+      "enabled": false
+    }
+  }
+}

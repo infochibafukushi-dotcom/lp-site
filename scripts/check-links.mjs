@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-const files = ['data/config.json','data/sections.json'];
+const files = ['data/config.json','data/sections.json','data/carechan.json'];
 const bad = [];
 for (const f of files){
   const text=fs.readFileSync(f,'utf8');
