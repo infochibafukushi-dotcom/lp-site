@@ -200,11 +200,13 @@
     if(!res.ok) throw new Error("config.json 読込失敗");
     const config = await res.json();
     const footer = Array.isArray(config.footer) ? config.footer : [];
+    const buttons = Array.isArray(config.buttons) ? config.buttons : [];
     const buttonsPc = Array.isArray(config.buttonsPc) ? config.buttonsPc : [];
     return {
       phone: String(footer[0]?.link || config.pcTopPhone?.link || "").trim(),
       line: String(footer[1]?.link || "").trim(),
-      reservation: String(footer[2]?.link || buttonsPc[0]?.link || "").trim()
+      reservation: String(footer[2]?.link || buttonsPc[0]?.link || "").trim(),
+      contact: String(buttons[0]?.link || "").trim()
     };
   }
 
@@ -405,9 +407,10 @@
       if(!ctx || !ctx.node) return;
       const urls = await fetchLpConfigUrls();
       const templates = [
+        { label: "電話する", url: urls.phone, key: "phone" },
         { label: "LINE相談はこちら", url: urls.line, key: "line" },
         { label: "ネット予約はこちら", url: urls.reservation, key: "reservation" },
-        { label: "電話する", url: urls.phone, key: "phone" }
+        { label: "お問い合わせはこちら", url: urls.contact, key: "contact" }
       ];
       let added = 0;
       templates.forEach(function(t){
@@ -428,7 +431,9 @@
       normalizeQuestionTree(carechanDraft);
       renderCarechanEditor();
       setCarechanStatus(
-        added ? ("既存LP設定からCTAを " + added + " 件追加しました。") : "追加可能なCTAは既に登録済み、またはURLが空です。",
+        added
+          ? "電話・LINE・ネット予約・お問い合わせのCTAを追加しました"
+          : "追加可能なCTAはありませんでした",
         added ? "success" : "warn"
       );
     }catch(error){
