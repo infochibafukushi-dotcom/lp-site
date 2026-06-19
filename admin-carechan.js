@@ -151,12 +151,14 @@
     data.questions = Array.isArray(data.questions) ? data.questions : [];
     data.meta = data.meta || { storeId: "default" };
     data.extensions = data.extensions || { ai: { enabled: false } };
-    normalizeQuestionOrders();
+    normalizeQuestionOrders(data);
     return data;
   }
 
-  function normalizeQuestionOrders(){
-    carechanDraft.questions.forEach(function(q, idx){
+  function normalizeQuestionOrders(data){
+    const target = data || carechanDraft;
+    if(!target || !Array.isArray(target.questions)) return;
+    target.questions.forEach(function(q, idx){
       q.id = q.id || ("q-" + Date.now() + "-" + idx);
       q.enabled = q.enabled !== false;
       q.order = idx + 1;
@@ -308,7 +310,7 @@
     const tmp = carechanDraft.questions[index];
     carechanDraft.questions[index] = carechanDraft.questions[next];
     carechanDraft.questions[next] = tmp;
-    normalizeQuestionOrders();
+    normalizeQuestionOrders(carechanDraft);
     renderCarechanEditor();
   }
 
@@ -320,7 +322,7 @@
     const tmp = ctas[cIndex];
     ctas[cIndex] = ctas[next];
     ctas[next] = tmp;
-    normalizeQuestionOrders();
+    normalizeQuestionOrders(carechanDraft);
     renderCarechanEditor();
   }
 
@@ -338,7 +340,7 @@
         if(!confirm("この質問を削除しますか？")) return;
         syncQuestionsFromDom();
         carechanDraft.questions.splice(Number(t3.getAttribute("data-carechan-q-remove")), 1);
-        normalizeQuestionOrders();
+        normalizeQuestionOrders(carechanDraft);
         renderCarechanEditor();
         return;
       }
@@ -353,7 +355,7 @@
           order: carechanDraft.questions[qi].ctas.length + 1,
           visible: true
         });
-        normalizeQuestionOrders();
+        normalizeQuestionOrders(carechanDraft);
         renderCarechanEditor();
         return;
       }
@@ -363,7 +365,7 @@
         const qi = Number(t5.getAttribute("data-carechan-cta-remove"));
         const ci = Number(t5.getAttribute("data-cta-index"));
         carechanDraft.questions[qi].ctas.splice(ci, 1);
-        normalizeQuestionOrders();
+        normalizeQuestionOrders(carechanDraft);
         renderCarechanEditor();
         return;
       }
@@ -402,7 +404,7 @@
       answer: "（回答を入力してください）",
       ctas: []
     });
-    normalizeQuestionOrders();
+    normalizeQuestionOrders(carechanDraft);
     renderCarechanEditor();
   }
 
@@ -411,7 +413,7 @@
       setCarechanStatus("保存中...", "warn");
       collectCarechanDraftFromForm();
       syncQuestionsFromDom();
-      normalizeQuestionOrders();
+      normalizeQuestionOrders(carechanDraft);
       await saveFileToGitHub(CARECHAN_PATH, JSON.stringify(carechanDraft, null, 2));
       setCarechanStatus("carechan.json の保存が完了しました。", "success");
     }catch(error){
