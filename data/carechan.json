@@ -186,9 +186,411 @@
       "order": 3,
       "title": "どんな時に利用できる？",
       "menuPrompt": "",
-      "answer": "（サンプル）管理画面から回答文を入力してください。",
+      "answer": "",
       "ctas": [],
-      "children": []
+      "children": [
+        {
+          "id": "usage-eligibility",
+          "enabled": true,
+          "title": "私でも利用できますか？",
+          "menuPrompt": "",
+          "answer": "",
+          "ctas": [],
+          "children": [
+            {
+              "id": "usage-eligibility-alone",
+              "enabled": true,
+              "title": "一人でも利用できますか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-eligibility-no-family",
+              "enabled": true,
+              "title": "家族の付き添いなしでも大丈夫ですか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-eligibility-non-elderly",
+              "enabled": true,
+              "title": "高齢者以外でも利用できますか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-eligibility-injury",
+              "enabled": true,
+              "title": "ケガをしているのですが利用できますか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-eligibility-cane",
+              "enabled": true,
+              "title": "杖歩行でも利用できますか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-eligibility-wheelchair",
+              "enabled": true,
+              "title": "車いすでも利用できますか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-eligibility-mental",
+              "enabled": true,
+              "title": "精神障害がありますが利用できますか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-eligibility-pregnant",
+              "enabled": true,
+              "title": "妊婦でも利用できますか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-eligibility-dementia",
+              "enabled": true,
+              "title": "認知症でも利用できますか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-eligibility-dialysis",
+              "enabled": true,
+              "title": "人工透析を受けていますが利用できますか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-eligibility-oxygen",
+              "enabled": true,
+              "title": "酸素を使用していますが利用できますか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-eligibility-disability-cert",
+              "enabled": true,
+              "title": "障害者手帳を持っていますが利用できますか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "usage-purpose",
+          "enabled": true,
+          "title": "どんな移動に使えますか？",
+          "menuPrompt": "",
+          "answer": "",
+          "ctas": [],
+          "children": [
+            {
+              "id": "usage-purpose-hospital",
+              "enabled": true,
+              "title": "通院・受診",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-purpose-dialysis",
+              "enabled": true,
+              "title": "透析送迎",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-purpose-admission",
+              "enabled": true,
+              "title": "入退院",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-purpose-transfer",
+              "enabled": true,
+              "title": "転院",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-purpose-shopping",
+              "enabled": true,
+              "title": "買い物",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-purpose-grave",
+              "enabled": true,
+              "title": "お墓参り",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-purpose-ceremony",
+              "enabled": true,
+              "title": "冠婚葬祭",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-purpose-travel",
+              "enabled": true,
+              "title": "旅行・観光",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-purpose-bank",
+              "enabled": true,
+              "title": "銀行や役所",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-purpose-facility-tour",
+              "enabled": true,
+              "title": "施設見学",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-purpose-dining",
+              "enabled": true,
+              "title": "外食",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-purpose-other",
+              "enabled": true,
+              "title": "その他の外出",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "usage-distance",
+          "enabled": true,
+          "title": "どこまで行けますか？",
+          "menuPrompt": "",
+          "answer": "",
+          "ctas": [],
+          "children": [
+            {
+              "id": "usage-distance-short",
+              "enabled": true,
+              "title": "近距離でも利用できますか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-distance-long",
+              "enabled": true,
+              "title": "遠方への送迎は可能ですか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-distance-prefecture",
+              "enabled": true,
+              "title": "県外でも利用できますか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-distance-roundtrip",
+              "enabled": true,
+              "title": "病院まで往復利用できますか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "usage-capacity",
+          "enabled": true,
+          "title": "何人まで乗れますか？",
+          "menuPrompt": "",
+          "answer": "",
+          "ctas": [],
+          "children": [
+            {
+              "id": "usage-capacity-family",
+              "enabled": true,
+              "title": "家族も同乗できますか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-capacity-attendant",
+              "enabled": true,
+              "title": "付き添いの方も乗れますか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-capacity-wheelchair",
+              "enabled": true,
+              "title": "車いすのまま乗れますか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-capacity-number",
+              "enabled": true,
+              "title": "何人まで乗れますか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-capacity-luggage",
+              "enabled": true,
+              "title": "荷物も積めますか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "usage-assistance",
+          "enabled": true,
+          "title": "介助はお願いできますか？",
+          "menuPrompt": "",
+          "answer": "",
+          "ctas": [],
+          "children": [
+            {
+              "id": "usage-assistance-hospital",
+              "enabled": true,
+              "title": "病院内の付き添いはできますか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-assistance-shopping",
+              "enabled": true,
+              "title": "買い物の付き添いはできますか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-assistance-anxious",
+              "enabled": true,
+              "title": "一人で乗車が不安です",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-assistance-entrance",
+              "enabled": true,
+              "title": "玄関から介助してもらえますか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-assistance-bed-transfer",
+              "enabled": true,
+              "title": "ベッドから車いすへの移乗はできますか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            },
+            {
+              "id": "usage-assistance-in-hospital",
+              "enabled": true,
+              "title": "院内介助は可能ですか？",
+              "menuPrompt": "",
+              "answer": "（サンプル）管理画面から回答文を入力してください。",
+              "ctas": [],
+              "children": []
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "q-area",
