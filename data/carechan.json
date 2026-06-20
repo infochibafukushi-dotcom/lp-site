@@ -176,9 +176,31 @@
           "url": "#shii-price-menyu",
           "order": 1,
           "visible": true
+        },
+        {
+          "id": "cta-line-1781963373667-m7o87",
+          "label": "LINE相談",
+          "url": "https://lin.ee/XA05KN5",
+          "order": 2,
+          "visible": true
+        },
+        {
+          "id": "cta-reservation-1781963373667-dy01p",
+          "label": "見積・予約・空き確認",
+          "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+          "order": 3,
+          "visible": true
+        },
+        {
+          "id": "cta-phone-1781963373667-aftnv",
+          "label": "電話予約・質問",
+          "url": "tel:09063314289",
+          "order": 4,
+          "visible": true
         }
       ],
-      "children": []
+      "children": [],
+      "ctaHeading": "ご相談・ご予約はこちら"
     },
     {
       "id": "q-usage",
@@ -195,8 +217,31 @@
           "title": "一人でも利用できますか？",
           "menuPrompt": "",
           "answer": "はい、ご利用いただけます。\nお一人での通院や退院、お買い物、お出かけなど、さまざまな目的でご利用可能です。必要に応じて乗降時のサポートも行いますので、安心してご利用ください。",
-          "ctas": [],
-          "children": []
+          "ctas": [
+            {
+              "id": "cta-line-1781963373667-3ldg5",
+              "label": "LINE相談",
+              "url": "https://lin.ee/XA05KN5",
+              "order": 1,
+              "visible": true
+            },
+            {
+              "id": "cta-reservation-1781963373667-sa7n5",
+              "label": "見積・予約・空き確認",
+              "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+              "order": 2,
+              "visible": true
+            },
+            {
+              "id": "cta-phone-1781963373667-dftk5",
+              "label": "電話予約・質問",
+              "url": "tel:09063314289",
+              "order": 3,
+              "visible": true
+            }
+          ],
+          "children": [],
+          "ctaHeading": "ご相談・ご予約はこちら"
         },
         {
           "id": "usage-eligibility-no-family",
@@ -204,8 +249,31 @@
           "title": "家族の付き添いなしでも大丈夫ですか？",
           "menuPrompt": "",
           "answer": "はい、問題ございません。\nお一人での通院や退院、施設間の移動などにも対応しております。必要に応じて、ご自宅の寝室からお車までの移動や、お車への乗車介助もお手伝いいたします。詳しい介助内容については、ご予約時にご相談ください。",
-          "ctas": [],
-          "children": []
+          "ctas": [
+            {
+              "id": "cta-line-1781963373667-y2oau",
+              "label": "LINE相談",
+              "url": "https://lin.ee/XA05KN5",
+              "order": 1,
+              "visible": true
+            },
+            {
+              "id": "cta-reservation-1781963373667-dw08q",
+              "label": "見積・予約・空き確認",
+              "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+              "order": 2,
+              "visible": true
+            },
+            {
+              "id": "cta-phone-1781963373667-o5mzf",
+              "label": "電話予約・質問",
+              "url": "tel:09063314289",
+              "order": 3,
+              "visible": true
+            }
+          ],
+          "children": [],
+          "ctaHeading": "ご相談・ご予約はこちら"
         },
         {
           "id": "usage-eligibility-non-elderly",
@@ -213,8 +281,31 @@
           "title": "高齢者以外でも利用できますか？",
           "menuPrompt": "",
           "answer": "はい、年齢制限なくどなたでもご利用いただけます。\n高齢の方に限らず、障害をお持ちの方、ケガや病気で移動に不安がある方、妊娠中の方など、公共交通機関の利用が難しい方はどなたでもご利用可能です。",
-          "ctas": [],
-          "children": []
+          "ctas": [
+            {
+              "id": "cta-line-1781963373667-78a6o",
+              "label": "LINE相談",
+              "url": "https://lin.ee/XA05KN5",
+              "order": 1,
+              "visible": true
+            },
+            {
+              "id": "cta-reservation-1781963373667-6jzqf",
+              "label": "見積・予約・空き確認",
+              "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+              "order": 2,
+              "visible": true
+            },
+            {
+              "id": "cta-phone-1781963373667-hmsfd",
+              "label": "電話予約・質問",
+              "url": "tel:09063314289",
+              "order": 3,
+              "visible": true
+            }
+          ],
+          "children": [],
+          "ctaHeading": "ご相談・ご予約はこちら"
         },
         {
           "id": "usage-eligibility-care-insurance",
@@ -222,8 +313,31 @@
           "title": "介護認定を受けていなくても利用できますか？",
           "menuPrompt": "",
           "answer": "はい、ご利用いただけます。\n介護保険の認定を受けていない方でも、移動に不安がある方や公共交通機関の利用が難しい方であればご利用可能です。まずはお気軽にご相談ください。",
-          "ctas": [],
-          "children": []
+          "ctas": [
+            {
+              "id": "cta-line-1781963373667-tkegd",
+              "label": "LINE相談",
+              "url": "https://lin.ee/XA05KN5",
+              "order": 1,
+              "visible": true
+            },
+            {
+              "id": "cta-reservation-1781963373667-it8ar",
+              "label": "見積・予約・空き確認",
+              "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+              "order": 2,
+              "visible": true
+            },
+            {
+              "id": "cta-phone-1781963373667-uh5qa",
+              "label": "電話予約・質問",
+              "url": "tel:09063314289",
+              "order": 3,
+              "visible": true
+            }
+          ],
+          "children": [],
+          "ctaHeading": "ご相談・ご予約はこちら"
         },
         {
           "id": "usage-eligibility-injury",
@@ -231,8 +345,31 @@
           "title": "ケガをしているのですが利用できますか？",
           "menuPrompt": "",
           "answer": "はい、ご利用いただけます。\n骨折や捻挫、手術後の通院など、一時的に歩行が困難な方もご利用可能です。松葉杖や歩行器をご利用の方も安心してご相談ください。",
-          "ctas": [],
-          "children": []
+          "ctas": [
+            {
+              "id": "cta-line-1781963373667-ropnh",
+              "label": "LINE相談",
+              "url": "https://lin.ee/XA05KN5",
+              "order": 1,
+              "visible": true
+            },
+            {
+              "id": "cta-reservation-1781963373667-2wb35",
+              "label": "見積・予約・空き確認",
+              "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+              "order": 2,
+              "visible": true
+            },
+            {
+              "id": "cta-phone-1781963373667-jmnya",
+              "label": "電話予約・質問",
+              "url": "tel:09063314289",
+              "order": 3,
+              "visible": true
+            }
+          ],
+          "children": [],
+          "ctaHeading": "ご相談・ご予約はこちら"
         },
         {
           "id": "usage-eligibility-cane",
@@ -240,8 +377,31 @@
           "title": "杖歩行でも利用できますか？",
           "menuPrompt": "",
           "answer": "はい、ご利用いただけます。\n車いすをご利用でない方でも、歩行に不安がある場合はご利用可能です。乗り降りの際もしっかりとサポートいたします。",
-          "ctas": [],
-          "children": []
+          "ctas": [
+            {
+              "id": "cta-line-1781963373667-fisu0",
+              "label": "LINE相談",
+              "url": "https://lin.ee/XA05KN5",
+              "order": 1,
+              "visible": true
+            },
+            {
+              "id": "cta-reservation-1781963373667-83plr",
+              "label": "見積・予約・空き確認",
+              "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+              "order": 2,
+              "visible": true
+            },
+            {
+              "id": "cta-phone-1781963373667-m167c",
+              "label": "電話予約・質問",
+              "url": "tel:09063314289",
+              "order": 3,
+              "visible": true
+            }
+          ],
+          "children": [],
+          "ctaHeading": "ご相談・ご予約はこちら"
         },
         {
           "id": "usage-eligibility-wheelchair",
@@ -249,8 +409,31 @@
           "title": "車いすでも利用できますか？",
           "menuPrompt": "",
           "answer": "はい、ご利用いただけます。\n車いすにお乗りのままご乗車いただけます。お持ちの車いすの種類（自走式・介助式・リクライニング式など）やサイズを、ご予約時にお知らせください。",
-          "ctas": [],
-          "children": []
+          "ctas": [
+            {
+              "id": "cta-line-1781963373667-bjdxl",
+              "label": "LINE相談",
+              "url": "https://lin.ee/XA05KN5",
+              "order": 1,
+              "visible": true
+            },
+            {
+              "id": "cta-reservation-1781963373667-ce23c",
+              "label": "見積・予約・空き確認",
+              "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+              "order": 2,
+              "visible": true
+            },
+            {
+              "id": "cta-phone-1781963373667-h9jm7",
+              "label": "電話予約・質問",
+              "url": "tel:09063314289",
+              "order": 3,
+              "visible": true
+            }
+          ],
+          "children": [],
+          "ctaHeading": "ご相談・ご予約はこちら"
         },
         {
           "id": "usage-eligibility-mental",
@@ -258,8 +441,31 @@
           "title": "精神障害がありますが利用できますか？",
           "menuPrompt": "",
           "answer": "はい、ご利用いただけます。\n精神障害をお持ちの方も安心してご利用ください。安全な運行のため、ご利用状況や必要なサポート内容について事前に確認させていただく場合があります。",
-          "ctas": [],
-          "children": []
+          "ctas": [
+            {
+              "id": "cta-line-1781963373667-r36yq",
+              "label": "LINE相談",
+              "url": "https://lin.ee/XA05KN5",
+              "order": 1,
+              "visible": true
+            },
+            {
+              "id": "cta-reservation-1781963373667-cbwaf",
+              "label": "見積・予約・空き確認",
+              "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+              "order": 2,
+              "visible": true
+            },
+            {
+              "id": "cta-phone-1781963373667-4yos3",
+              "label": "電話予約・質問",
+              "url": "tel:09063314289",
+              "order": 3,
+              "visible": true
+            }
+          ],
+          "children": [],
+          "ctaHeading": "ご相談・ご予約はこちら"
         },
         {
           "id": "usage-eligibility-pregnant",
@@ -267,8 +473,31 @@
           "title": "妊婦でも利用できますか？",
           "menuPrompt": "",
           "answer": "はい、ご利用いただけます。\n妊婦健診や通院、お買い物などの移動にご利用ください。ただし、陣痛や破水など緊急性が高い場合は、119番への連絡を優先してください。",
-          "ctas": [],
-          "children": []
+          "ctas": [
+            {
+              "id": "cta-line-1781963373667-kzza2",
+              "label": "LINE相談",
+              "url": "https://lin.ee/XA05KN5",
+              "order": 1,
+              "visible": true
+            },
+            {
+              "id": "cta-reservation-1781963373667-9tiky",
+              "label": "見積・予約・空き確認",
+              "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+              "order": 2,
+              "visible": true
+            },
+            {
+              "id": "cta-phone-1781963373667-ufd0a",
+              "label": "電話予約・質問",
+              "url": "tel:09063314289",
+              "order": 3,
+              "visible": true
+            }
+          ],
+          "children": [],
+          "ctaHeading": "ご相談・ご予約はこちら"
         },
         {
           "id": "usage-eligibility-dementia",
@@ -276,8 +505,31 @@
           "title": "認知症でも利用できますか？",
           "menuPrompt": "",
           "answer": "はい、ご利用いただけます。\n認知症の方もご利用いただけます。安全を第一に考え、ご家族や施設職員の方と連携を取りながら対応させていただく場合があります。",
-          "ctas": [],
-          "children": []
+          "ctas": [
+            {
+              "id": "cta-line-1781963373667-8tajj",
+              "label": "LINE相談",
+              "url": "https://lin.ee/XA05KN5",
+              "order": 1,
+              "visible": true
+            },
+            {
+              "id": "cta-reservation-1781963373667-n09kr",
+              "label": "見積・予約・空き確認",
+              "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+              "order": 2,
+              "visible": true
+            },
+            {
+              "id": "cta-phone-1781963373667-jg5ng",
+              "label": "電話予約・質問",
+              "url": "tel:09063314289",
+              "order": 3,
+              "visible": true
+            }
+          ],
+          "children": [],
+          "ctaHeading": "ご相談・ご予約はこちら"
         },
         {
           "id": "usage-eligibility-dialysis",
@@ -285,8 +537,31 @@
           "title": "人工透析を受けていますが利用できますか？",
           "menuPrompt": "",
           "answer": "はい、ご利用いただけます。\n人工透析のための定期的な通院でご利用される方も多くいらっしゃいます。曜日や時間が決まっている場合は、定期予約のご相談も承ります。",
-          "ctas": [],
-          "children": []
+          "ctas": [
+            {
+              "id": "cta-line-1781963373667-0p760",
+              "label": "LINE相談",
+              "url": "https://lin.ee/XA05KN5",
+              "order": 1,
+              "visible": true
+            },
+            {
+              "id": "cta-reservation-1781963373667-2f4pg",
+              "label": "見積・予約・空き確認",
+              "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+              "order": 2,
+              "visible": true
+            },
+            {
+              "id": "cta-phone-1781963373667-tktct",
+              "label": "電話予約・質問",
+              "url": "tel:09063314289",
+              "order": 3,
+              "visible": true
+            }
+          ],
+          "children": [],
+          "ctaHeading": "ご相談・ご予約はこちら"
         },
         {
           "id": "usage-eligibility-oxygen",
@@ -294,8 +569,31 @@
           "title": "酸素を使用していますが利用できますか？",
           "menuPrompt": "",
           "answer": "はい、ご利用いただけます。\n在宅酸素療法を受けている方や、酸素ボンベ・酸素濃縮器をご使用の方もご乗車可能です。機器の種類や大きさを事前にお知らせください。なお、ドライバーによる医療行為は行えませんのでご了承ください。",
-          "ctas": [],
-          "children": []
+          "ctas": [
+            {
+              "id": "cta-line-1781963373667-8hjj4",
+              "label": "LINE相談",
+              "url": "https://lin.ee/XA05KN5",
+              "order": 1,
+              "visible": true
+            },
+            {
+              "id": "cta-reservation-1781963373667-cvwb3",
+              "label": "見積・予約・空き確認",
+              "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+              "order": 2,
+              "visible": true
+            },
+            {
+              "id": "cta-phone-1781963373667-ro3aq",
+              "label": "電話予約・質問",
+              "url": "tel:09063314289",
+              "order": 3,
+              "visible": true
+            }
+          ],
+          "children": [],
+          "ctaHeading": "ご相談・ご予約はこちら"
         },
         {
           "id": "usage-eligibility-disability-cert",
@@ -303,8 +601,31 @@
           "title": "障害者手帳を持っていますが利用できますか？",
           "menuPrompt": "",
           "answer": "はい、ご利用いただけます。\n身体障害者手帳、療育手帳、精神障害者保健福祉手帳をお持ちの方もご利用可能です。\n\n介護タクシーは基本的に自費サービスとなるため、ご利用料金はお客様負担となります。ただし、障害者手帳による運賃割引や、お住まいの自治体が発行する福祉タクシー券・助成制度をご利用いただける場合があります。適用条件は自治体や制度によって異なりますので、詳しくはご予約時にご相談ください。",
-          "ctas": [],
-          "children": []
+          "ctas": [
+            {
+              "id": "cta-line-1781963373667-egufx",
+              "label": "LINE相談",
+              "url": "https://lin.ee/XA05KN5",
+              "order": 1,
+              "visible": true
+            },
+            {
+              "id": "cta-reservation-1781963373667-i26dg",
+              "label": "見積・予約・空き確認",
+              "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+              "order": 2,
+              "visible": true
+            },
+            {
+              "id": "cta-phone-1781963373667-w1wej",
+              "label": "電話予約・質問",
+              "url": "tel:09063314289",
+              "order": 3,
+              "visible": true
+            }
+          ],
+          "children": [],
+          "ctaHeading": "ご相談・ご予約はこちら"
         },
         {
           "id": "usage-eligibility-hospital-escort",
@@ -312,8 +633,31 @@
           "title": "病院の中まで付き添ってもらえますか？",
           "menuPrompt": "",
           "answer": "はい、ご相談ください。\n病院の受付や会計、診察室までの付き添いなど、必要な介助内容に応じて対応いたします。詳しくはご予約時にご相談ください。",
-          "ctas": [],
-          "children": []
+          "ctas": [
+            {
+              "id": "cta-line-1781963373667-28usi",
+              "label": "LINE相談",
+              "url": "https://lin.ee/XA05KN5",
+              "order": 1,
+              "visible": true
+            },
+            {
+              "id": "cta-reservation-1781963373667-7noed",
+              "label": "見積・予約・空き確認",
+              "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+              "order": 2,
+              "visible": true
+            },
+            {
+              "id": "cta-phone-1781963373667-j3x1u",
+              "label": "電話予約・質問",
+              "url": "tel:09063314289",
+              "order": 3,
+              "visible": true
+            }
+          ],
+          "children": [],
+          "ctaHeading": "ご相談・ご予約はこちら"
         },
         {
           "id": "usage-eligibility-shopping-grave",
@@ -321,8 +665,31 @@
           "title": "買い物やお墓参りでも利用できますか？",
           "menuPrompt": "",
           "answer": "はい、ご利用いただけます。\n通院だけでなく、お買い物、お食事、お墓参り、ご親族宅への訪問、冠婚葬祭、旅行やお出かけなどにもご利用いただけます。お気軽にご相談ください。",
-          "ctas": [],
-          "children": []
+          "ctas": [
+            {
+              "id": "cta-line-1781963373667-qt0lx",
+              "label": "LINE相談",
+              "url": "https://lin.ee/XA05KN5",
+              "order": 1,
+              "visible": true
+            },
+            {
+              "id": "cta-reservation-1781963373667-fw40x",
+              "label": "見積・予約・空き確認",
+              "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+              "order": 2,
+              "visible": true
+            },
+            {
+              "id": "cta-phone-1781963373667-q0t76",
+              "label": "電話予約・質問",
+              "url": "tel:09063314289",
+              "order": 3,
+              "visible": true
+            }
+          ],
+          "children": [],
+          "ctaHeading": "ご相談・ご予約はこちら"
         }
       ]
     },
@@ -333,8 +700,31 @@
       "title": "対応エリア",
       "menuPrompt": "",
       "answer": "千葉市を中心に近隣エリアへ対応しております。\n\nまた、通院・退院・転院・お出かけなどで千葉県内全域への送迎も可能です。\n\n出発地または目的地のいずれかが千葉県内であれば対応可能です。まずはお気軽にご相談ください。",
-      "ctas": [],
-      "children": []
+      "ctas": [
+        {
+          "id": "cta-line-1781963373667-rkrwv",
+          "label": "LINE相談",
+          "url": "https://lin.ee/XA05KN5",
+          "order": 1,
+          "visible": true
+        },
+        {
+          "id": "cta-reservation-1781963373667-hdzs5",
+          "label": "見積・予約・空き確認",
+          "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+          "order": 2,
+          "visible": true
+        },
+        {
+          "id": "cta-phone-1781963373667-82mhb",
+          "label": "電話予約・質問",
+          "url": "tel:09063314289",
+          "order": 3,
+          "visible": true
+        }
+      ],
+      "children": [],
+      "ctaHeading": "ご相談・ご予約はこちら"
     },
     {
       "id": "q-vehicle",
@@ -343,8 +733,31 @@
       "title": "車両について",
       "menuPrompt": "",
       "answer": "車いすのままご乗車いただける福祉車両で運行しております。\n\n車いすは最大4台まで搭載可能で、ご利用者様に加え介助者の方も最大4名まで同乗できます。\n\nまた、リクライニング車いすやストレッチャーにも対応しておりますので、長距離の移動や退院・転院時にもご利用いただけます。\n\n酸素ボンベや酸素濃縮器などの医療機器を使用されている方もご乗車いただけます。その他の医療機器についても対応できる場合がありますので事前にご相談ください。\n\nAED、パルスオキシメーター（血中酸素濃度測定器）、吸引器などの機器もご用意可能です。ご利用内容に応じて準備いたしますので、ご予約時にご相談ください。\n\nなお、ドライバーによる医療行為は行えませんのでご了承ください。",
-      "ctas": [],
-      "children": []
+      "ctas": [
+        {
+          "id": "cta-line-1781963373667-j4yom",
+          "label": "LINE相談",
+          "url": "https://lin.ee/XA05KN5",
+          "order": 1,
+          "visible": true
+        },
+        {
+          "id": "cta-reservation-1781963373667-kslpt",
+          "label": "見積・予約・空き確認",
+          "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+          "order": 2,
+          "visible": true
+        },
+        {
+          "id": "cta-phone-1781963373667-hy526",
+          "label": "電話予約・質問",
+          "url": "tel:09063314289",
+          "order": 3,
+          "visible": true
+        }
+      ],
+      "children": [],
+      "ctaHeading": "ご相談・ご予約はこちら"
     },
     {
       "id": "q-equipment",
@@ -353,8 +766,31 @@
       "title": "機材について",
       "menuPrompt": "",
       "answer": "車いすやリクライニング車いす、ストレッチャーなどの機材をご利用いただけます。\n\nまた、酸素ボンベや酸素濃縮器をご利用中の方もご乗車いただけます。\n\nAED、パルスオキシメーター（血中酸素濃度測定器）、吸引器などの機器もご用意可能です。ご利用内容に応じて準備いたしますので、ご予約時にご相談ください。\n\n必要な機材がある場合は、ご予約時にお気軽にご相談ください。\n\nなお、ドライバーによる医療行為は行えませんのでご了承ください。",
-      "ctas": [],
-      "children": []
+      "ctas": [
+        {
+          "id": "cta-line-1781963373667-lc1rq",
+          "label": "LINE相談",
+          "url": "https://lin.ee/XA05KN5",
+          "order": 1,
+          "visible": true
+        },
+        {
+          "id": "cta-reservation-1781963373667-83vg9",
+          "label": "見積・予約・空き確認",
+          "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+          "order": 2,
+          "visible": true
+        },
+        {
+          "id": "cta-phone-1781963373667-omqb2",
+          "label": "電話予約・質問",
+          "url": "tel:09063314289",
+          "order": 3,
+          "visible": true
+        }
+      ],
+      "children": [],
+      "ctaHeading": "ご相談・ご予約はこちら"
     },
     {
       "id": "q-faq",
@@ -363,8 +799,31 @@
       "title": "よくある質問",
       "menuPrompt": "",
       "answer": "（サンプル）管理画面から回答文を入力してください。",
-      "ctas": [],
-      "children": []
+      "ctas": [
+        {
+          "id": "cta-line-1781963373667-feky1",
+          "label": "LINE相談",
+          "url": "https://lin.ee/XA05KN5",
+          "order": 1,
+          "visible": true
+        },
+        {
+          "id": "cta-reservation-1781963373667-upelz",
+          "label": "見積・予約・空き確認",
+          "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+          "order": 2,
+          "visible": true
+        },
+        {
+          "id": "cta-phone-1781963373667-m4vxh",
+          "label": "電話予約・質問",
+          "url": "tel:09063314289",
+          "order": 3,
+          "visible": true
+        }
+      ],
+      "children": [],
+      "ctaHeading": "ご相談・ご予約はこちら"
     }
   ],
   "meta": {
