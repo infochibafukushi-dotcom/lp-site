@@ -332,9 +332,19 @@
       "order": 4,
       "title": "対応エリア",
       "menuPrompt": "",
-      "answer": "（サンプル）管理画面から回答文を入力してください。",
+      "answer": "",
       "ctas": [],
-      "children": []
+      "children": [
+        {
+          "id": "area-coverage",
+          "enabled": true,
+          "title": "対応エリアを教えてください",
+          "menuPrompt": "",
+          "answer": "千葉市を中心に近隣エリアへ対応しております。\n\nまた、通院・退院・転院・お出かけなどで千葉県内全域への送迎も可能です。\n\n出発地または目的地のいずれかが千葉県内であれば対応可能です。まずはお気軽にご相談ください。",
+          "ctas": [],
+          "children": []
+        }
+      ]
     },
     {
       "id": "q-vehicle",

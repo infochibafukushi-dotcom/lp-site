@@ -50,6 +50,9 @@
     NODE_CTA_HEADINGS[nodeId] = "ご相談・ご予約はこちら";
   });
 
+  NODE_CTA_SPECS["area-coverage"] = USAGE_ELIGIBILITY_CTA_SPEC;
+  NODE_CTA_HEADINGS["area-coverage"] = "ご相談・ご予約はこちら";
+
   const ALL_TEMPLATE_CTAS = [
     { key: "phone", label: "電話する" },
     { key: "line", label: "LINE相談はこちら" },
