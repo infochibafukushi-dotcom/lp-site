@@ -53,8 +53,8 @@
   NODE_CTA_SPECS["q-area"] = USAGE_ELIGIBILITY_CTA_SPEC;
   NODE_CTA_HEADINGS["q-area"] = "ご相談・ご予約はこちら";
 
-  NODE_CTA_SPECS["vehicle-overview"] = USAGE_ELIGIBILITY_CTA_SPEC;
-  NODE_CTA_HEADINGS["vehicle-overview"] = "ご相談・ご予約はこちら";
+  NODE_CTA_SPECS["q-vehicle"] = USAGE_ELIGIBILITY_CTA_SPEC;
+  NODE_CTA_HEADINGS["q-vehicle"] = "ご相談・ご予約はこちら";
 
   const ALL_TEMPLATE_CTAS = [
     { key: "phone", label: "電話する" },
