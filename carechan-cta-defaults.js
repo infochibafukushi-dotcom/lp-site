@@ -50,8 +50,8 @@
     NODE_CTA_HEADINGS[nodeId] = "ご相談・ご予約はこちら";
   });
 
-  NODE_CTA_SPECS["area-coverage"] = USAGE_ELIGIBILITY_CTA_SPEC;
-  NODE_CTA_HEADINGS["area-coverage"] = "ご相談・ご予約はこちら";
+  NODE_CTA_SPECS["q-area"] = USAGE_ELIGIBILITY_CTA_SPEC;
+  NODE_CTA_HEADINGS["q-area"] = "ご相談・ご予約はこちら";
 
   NODE_CTA_SPECS["vehicle-overview"] = USAGE_ELIGIBILITY_CTA_SPEC;
   NODE_CTA_HEADINGS["vehicle-overview"] = "ご相談・ご予約はこちら";
