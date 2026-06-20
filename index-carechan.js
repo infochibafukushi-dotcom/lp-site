@@ -3,6 +3,9 @@
   const MOBILE_MQ = "(min-width: 769px)";
 
   let carechanData = null;
+  let contactCtaUrls = null;
+  let contactCtaUrlsLoading = false;
+  let contactCtaUrlsFailed = false;
   let modalOpen = false;
   let modalView = "menu";
   let navStack = [];
@@ -258,6 +261,9 @@
   }
 
   function renderAnswerView(node){
+    if(window.CarechanCtaDefaults && contactCtaUrls){
+      window.CarechanCtaDefaults.ensureNodeAnswerCtas(node, contactCtaUrls);
+    }
     const ctas = (node.ctas || []).filter(function(c){ return c.visible !== false && c.label; });
     const ctaHeadingHtml = node.ctaHeading
       ? '<p class="carechan-cta-heading">' + escapeHtml(node.ctaHeading) + '</p>'
@@ -319,6 +325,11 @@
     if(!body) return;
 
     if(modalView === "answer"){
+      if(!contactCtaUrls && !contactCtaUrlsFailed && !contactCtaUrlsLoading && window.CarechanCtaDefaults){
+        ensureContactCtaUrls().then(function(){
+          if(modalOpen && modalView === "answer") renderModalBody();
+        });
+      }
       const node = findNodeByIds(answerPath || []);
       body.innerHTML = node ? renderAnswerView(node) : '<p>項目が見つかりません。</p>';
       if(node){
@@ -328,6 +339,24 @@
       body.innerHTML = renderMenuView();
     }
     updateModalHeader();
+  }
+
+  async function ensureContactCtaUrls(){
+    if(contactCtaUrls || contactCtaUrlsFailed) return contactCtaUrls;
+    if(!window.CarechanCtaDefaults || !carechanData) return null;
+    if(contactCtaUrlsLoading) return null;
+    contactCtaUrlsLoading = true;
+    try{
+      contactCtaUrls = await window.CarechanCtaDefaults.fetchConfigUrls();
+      window.CarechanCtaDefaults.applyDefaultCtasToQuestions(carechanData.questions, contactCtaUrls);
+    }catch(error){
+      contactCtaUrlsFailed = true;
+      contactCtaUrls = null;
+      try{ console.warn("[carechan] contact CTA hydrate failed", error); }catch(e){}
+    }finally{
+      contactCtaUrlsLoading = false;
+    }
+    return contactCtaUrls;
   }
 
   function openModal(){
@@ -474,14 +503,7 @@
   async function init(){
     try{
       carechanData = ensureCarechanShape(await fetchCarechanJson());
-      if(window.CarechanCtaDefaults){
-        try{
-          const urls = await window.CarechanCtaDefaults.fetchConfigUrls();
-          window.CarechanCtaDefaults.applyDefaultCtasToQuestions(carechanData.questions, urls);
-        }catch(ctaError){
-          try{ console.warn("[carechan] default CTA hydrate failed", ctaError); }catch(e){}
-        }
-      }
+      await ensureContactCtaUrls();
       renderWidget(carechanData);
       bindResponsivePosition();
     }catch(error){
