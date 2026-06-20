@@ -241,6 +241,17 @@
   white-space:pre-line;
   word-break:break-word;
 }
+.carechan-cta-block{
+  margin-top:4px;
+}
+.carechan-cta-heading{
+  font-size:15px;
+  font-weight:bold;
+  line-height:1.5;
+  margin:0 0 12px;
+  text-align:center;
+  color:#222;
+}
 .carechan-cta-list{
   display:flex;
   flex-direction:column;

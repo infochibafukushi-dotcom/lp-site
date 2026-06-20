@@ -100,6 +100,7 @@
       title: String(node.title || ""),
       menuPrompt: String(node.menuPrompt || ""),
       answer: String(node.answer || ""),
+      ctaHeading: String(node.ctaHeading || ""),
       ctas: normalizeCtas(node.ctas, id),
       children: children
     };
@@ -258,20 +259,26 @@
 
   function renderAnswerView(node){
     const ctas = (node.ctas || []).filter(function(c){ return c.visible !== false && c.label; });
+    const ctaHeadingHtml = node.ctaHeading
+      ? '<p class="carechan-cta-heading">' + escapeHtml(node.ctaHeading) + '</p>'
+      : "";
     const ctaHtml = ctas.length ? (
-      '<div class="carechan-cta-list">' +
-        ctas.map(function(c){
-          const href = sanitizeUrl(c.url, "#");
-          const external = /^(https?:|tel:|mailto:)/i.test(href);
-          const extra = external ? ' target="_blank" rel="noopener noreferrer"' : "";
-          return (
-            '<a class="carechan-cta-link" href="' + escapeAttr(href) + '"' + extra +
-            ' data-carechan-cta="1" data-node-id="' + escapeAttr(node.id) + '"' +
-            ' data-label="' + escapeAttr(c.label) + '">' +
-            escapeHtml(c.label) +
-            '</a>'
-          );
-        }).join("") +
+      '<div class="carechan-cta-block">' +
+        ctaHeadingHtml +
+        '<div class="carechan-cta-list">' +
+          ctas.map(function(c){
+            const href = sanitizeUrl(c.url, "#");
+            const external = /^(https?:|tel:|mailto:)/i.test(href);
+            const extra = external ? ' target="_blank" rel="noopener noreferrer"' : "";
+            return (
+              '<a class="carechan-cta-link" href="' + escapeAttr(href) + '"' + extra +
+              ' data-carechan-cta="1" data-node-id="' + escapeAttr(node.id) + '"' +
+              ' data-label="' + escapeAttr(c.label) + '">' +
+              escapeHtml(c.label) +
+              '</a>'
+            );
+          }).join("") +
+        '</div>' +
       '</div>'
     ) : "";
     const answerHtml = node.answer

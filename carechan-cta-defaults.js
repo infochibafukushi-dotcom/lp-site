@@ -1,4 +1,29 @@
 (function(global){
+  const USAGE_ELIGIBILITY_CTA_SPEC = [
+    { key: "line", label: "LINE相談" },
+    { key: "reservation", label: "見積・予約・空き確認" },
+    { key: "phone", label: "電話予約・質問" }
+  ];
+
+  const USAGE_ELIGIBILITY_NODE_IDS = [
+    "usage-eligibility-alone",
+    "usage-eligibility-no-family",
+    "usage-eligibility-non-elderly",
+    "usage-eligibility-care-insurance",
+    "usage-eligibility-injury",
+    "usage-eligibility-cane",
+    "usage-eligibility-wheelchair",
+    "usage-eligibility-mental",
+    "usage-eligibility-pregnant",
+    "usage-eligibility-dementia",
+    "usage-eligibility-dialysis",
+    "usage-eligibility-oxygen",
+    "usage-eligibility-disability-cert",
+    "usage-eligibility-hospital-escort",
+    "usage-eligibility-shopping-grave"
+  ];
+
+  const NODE_CTA_HEADINGS = {};
   const NODE_CTA_SPECS = {
     "reserve-booking": [
       { key: "reservation", label: "ネット予約はこちら" },
@@ -19,6 +44,11 @@
       { key: "contact", label: "お問い合わせはこちら" }
     ]
   };
+
+  USAGE_ELIGIBILITY_NODE_IDS.forEach(function(nodeId){
+    NODE_CTA_SPECS[nodeId] = USAGE_ELIGIBILITY_CTA_SPEC;
+    NODE_CTA_HEADINGS[nodeId] = "ご相談・ご予約はこちら";
+  });
 
   const ALL_TEMPLATE_CTAS = [
     { key: "phone", label: "電話する" },
@@ -87,8 +117,10 @@
   function applyDefaultCtasToQuestions(questions, urls){
     return walkQuestions(questions, function(node){
       const specs = NODE_CTA_SPECS[node.id];
-      if(!specs) return 0;
-      return applySpecsToNode(node, urls, specs);
+      let added = 0;
+      if(specs) added = applySpecsToNode(node, urls, specs);
+      if(NODE_CTA_HEADINGS[node.id]) node.ctaHeading = NODE_CTA_HEADINGS[node.id];
+      return added;
     });
   }
 

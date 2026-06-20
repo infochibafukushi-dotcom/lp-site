@@ -184,411 +184,145 @@
       "id": "q-usage",
       "enabled": true,
       "order": 3,
-      "title": "どんな時に利用できる？",
+      "title": "私でも利用できますか？",
       "menuPrompt": "",
       "answer": "",
       "ctas": [],
       "children": [
         {
-          "id": "usage-eligibility",
+          "id": "usage-eligibility-alone",
           "enabled": true,
-          "title": "私でも利用できますか？",
+          "title": "一人でも利用できますか？",
           "menuPrompt": "",
-          "answer": "",
+          "answer": "はい、ご利用いただけます。\nお一人での通院や退院、お買い物、お出かけなど、さまざまな目的でご利用可能です。必要に応じて乗降時のサポートも行いますので、安心してご利用ください。",
           "ctas": [],
-          "children": [
-            {
-              "id": "usage-eligibility-alone",
-              "enabled": true,
-              "title": "一人でも利用できますか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-eligibility-no-family",
-              "enabled": true,
-              "title": "家族の付き添いなしでも大丈夫ですか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-eligibility-non-elderly",
-              "enabled": true,
-              "title": "高齢者以外でも利用できますか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-eligibility-injury",
-              "enabled": true,
-              "title": "ケガをしているのですが利用できますか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-eligibility-cane",
-              "enabled": true,
-              "title": "杖歩行でも利用できますか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-eligibility-wheelchair",
-              "enabled": true,
-              "title": "車いすでも利用できますか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-eligibility-mental",
-              "enabled": true,
-              "title": "精神障害がありますが利用できますか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-eligibility-pregnant",
-              "enabled": true,
-              "title": "妊婦でも利用できますか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-eligibility-dementia",
-              "enabled": true,
-              "title": "認知症でも利用できますか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-eligibility-dialysis",
-              "enabled": true,
-              "title": "人工透析を受けていますが利用できますか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-eligibility-oxygen",
-              "enabled": true,
-              "title": "酸素を使用していますが利用できますか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-eligibility-disability-cert",
-              "enabled": true,
-              "title": "障害者手帳を持っていますが利用できますか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            }
-          ]
+          "children": []
         },
         {
-          "id": "usage-purpose",
+          "id": "usage-eligibility-no-family",
           "enabled": true,
-          "title": "どんな移動に使えますか？",
+          "title": "家族の付き添いなしでも大丈夫ですか？",
           "menuPrompt": "",
-          "answer": "",
+          "answer": "はい、問題ございません。\nお一人での通院や退院、施設間の移動などにも対応しております。必要に応じて、ご自宅の寝室からお車までの移動や、お車への乗車介助もお手伝いいたします。詳しい介助内容については、ご予約時にご相談ください。",
           "ctas": [],
-          "children": [
-            {
-              "id": "usage-purpose-hospital",
-              "enabled": true,
-              "title": "通院・受診",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-purpose-dialysis",
-              "enabled": true,
-              "title": "透析送迎",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-purpose-admission",
-              "enabled": true,
-              "title": "入退院",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-purpose-transfer",
-              "enabled": true,
-              "title": "転院",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-purpose-shopping",
-              "enabled": true,
-              "title": "買い物",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-purpose-grave",
-              "enabled": true,
-              "title": "お墓参り",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-purpose-ceremony",
-              "enabled": true,
-              "title": "冠婚葬祭",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-purpose-travel",
-              "enabled": true,
-              "title": "旅行・観光",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-purpose-bank",
-              "enabled": true,
-              "title": "銀行や役所",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-purpose-facility-tour",
-              "enabled": true,
-              "title": "施設見学",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-purpose-dining",
-              "enabled": true,
-              "title": "外食",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-purpose-other",
-              "enabled": true,
-              "title": "その他の外出",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            }
-          ]
+          "children": []
         },
         {
-          "id": "usage-distance",
+          "id": "usage-eligibility-non-elderly",
           "enabled": true,
-          "title": "どこまで行けますか？",
+          "title": "高齢者以外でも利用できますか？",
           "menuPrompt": "",
-          "answer": "",
+          "answer": "はい、年齢制限なくどなたでもご利用いただけます。\n高齢の方に限らず、障害をお持ちの方、ケガや病気で移動に不安がある方、妊娠中の方など、公共交通機関の利用が難しい方はどなたでもご利用可能です。",
           "ctas": [],
-          "children": [
-            {
-              "id": "usage-distance-short",
-              "enabled": true,
-              "title": "近距離でも利用できますか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-distance-long",
-              "enabled": true,
-              "title": "遠方への送迎は可能ですか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-distance-prefecture",
-              "enabled": true,
-              "title": "県外でも利用できますか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-distance-roundtrip",
-              "enabled": true,
-              "title": "病院まで往復利用できますか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            }
-          ]
+          "children": []
         },
         {
-          "id": "usage-capacity",
+          "id": "usage-eligibility-care-insurance",
           "enabled": true,
-          "title": "何人まで乗れますか？",
+          "title": "介護認定を受けていなくても利用できますか？",
           "menuPrompt": "",
-          "answer": "",
+          "answer": "はい、ご利用いただけます。\n介護保険の認定を受けていない方でも、移動に不安がある方や公共交通機関の利用が難しい方であればご利用可能です。まずはお気軽にご相談ください。",
           "ctas": [],
-          "children": [
-            {
-              "id": "usage-capacity-family",
-              "enabled": true,
-              "title": "家族も同乗できますか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-capacity-attendant",
-              "enabled": true,
-              "title": "付き添いの方も乗れますか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-capacity-wheelchair",
-              "enabled": true,
-              "title": "車いすのまま乗れますか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-capacity-number",
-              "enabled": true,
-              "title": "何人まで乗れますか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-capacity-luggage",
-              "enabled": true,
-              "title": "荷物も積めますか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            }
-          ]
+          "children": []
         },
         {
-          "id": "usage-assistance",
+          "id": "usage-eligibility-injury",
           "enabled": true,
-          "title": "介助はお願いできますか？",
+          "title": "ケガをしているのですが利用できますか？",
           "menuPrompt": "",
-          "answer": "",
+          "answer": "はい、ご利用いただけます。\n骨折や捻挫、手術後の通院など、一時的に歩行が困難な方もご利用可能です。松葉杖や歩行器をご利用の方も安心してご相談ください。",
           "ctas": [],
-          "children": [
-            {
-              "id": "usage-assistance-hospital",
-              "enabled": true,
-              "title": "病院内の付き添いはできますか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-assistance-shopping",
-              "enabled": true,
-              "title": "買い物の付き添いはできますか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-assistance-anxious",
-              "enabled": true,
-              "title": "一人で乗車が不安です",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-assistance-entrance",
-              "enabled": true,
-              "title": "玄関から介助してもらえますか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-assistance-bed-transfer",
-              "enabled": true,
-              "title": "ベッドから車いすへの移乗はできますか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            },
-            {
-              "id": "usage-assistance-in-hospital",
-              "enabled": true,
-              "title": "院内介助は可能ですか？",
-              "menuPrompt": "",
-              "answer": "（サンプル）管理画面から回答文を入力してください。",
-              "ctas": [],
-              "children": []
-            }
-          ]
+          "children": []
+        },
+        {
+          "id": "usage-eligibility-cane",
+          "enabled": true,
+          "title": "杖歩行でも利用できますか？",
+          "menuPrompt": "",
+          "answer": "はい、ご利用いただけます。\n車いすをご利用でない方でも、歩行に不安がある場合はご利用可能です。乗り降りの際もしっかりとサポートいたします。",
+          "ctas": [],
+          "children": []
+        },
+        {
+          "id": "usage-eligibility-wheelchair",
+          "enabled": true,
+          "title": "車いすでも利用できますか？",
+          "menuPrompt": "",
+          "answer": "はい、ご利用いただけます。\n車いすにお乗りのままご乗車いただけます。お持ちの車いすの種類（自走式・介助式・リクライニング式など）やサイズを、ご予約時にお知らせください。",
+          "ctas": [],
+          "children": []
+        },
+        {
+          "id": "usage-eligibility-mental",
+          "enabled": true,
+          "title": "精神障害がありますが利用できますか？",
+          "menuPrompt": "",
+          "answer": "はい、ご利用いただけます。\n精神障害をお持ちの方も安心してご利用ください。安全な運行のため、ご利用状況や必要なサポート内容について事前に確認させていただく場合があります。",
+          "ctas": [],
+          "children": []
+        },
+        {
+          "id": "usage-eligibility-pregnant",
+          "enabled": true,
+          "title": "妊婦でも利用できますか？",
+          "menuPrompt": "",
+          "answer": "はい、ご利用いただけます。\n妊婦健診や通院、お買い物などの移動にご利用ください。ただし、陣痛や破水など緊急性が高い場合は、119番への連絡を優先してください。",
+          "ctas": [],
+          "children": []
+        },
+        {
+          "id": "usage-eligibility-dementia",
+          "enabled": true,
+          "title": "認知症でも利用できますか？",
+          "menuPrompt": "",
+          "answer": "はい、ご利用いただけます。\n認知症の方もご利用いただけます。安全を第一に考え、ご家族や施設職員の方と連携を取りながら対応させていただく場合があります。",
+          "ctas": [],
+          "children": []
+        },
+        {
+          "id": "usage-eligibility-dialysis",
+          "enabled": true,
+          "title": "人工透析を受けていますが利用できますか？",
+          "menuPrompt": "",
+          "answer": "はい、ご利用いただけます。\n人工透析のための定期的な通院でご利用される方も多くいらっしゃいます。曜日や時間が決まっている場合は、定期予約のご相談も承ります。",
+          "ctas": [],
+          "children": []
+        },
+        {
+          "id": "usage-eligibility-oxygen",
+          "enabled": true,
+          "title": "酸素を使用していますが利用できますか？",
+          "menuPrompt": "",
+          "answer": "はい、ご利用いただけます。\n在宅酸素療法を受けている方や、酸素ボンベ・酸素濃縮器をご使用の方もご乗車可能です。機器の種類や大きさを事前にお知らせください。なお、ドライバーによる医療行為は行えませんのでご了承ください。",
+          "ctas": [],
+          "children": []
+        },
+        {
+          "id": "usage-eligibility-disability-cert",
+          "enabled": true,
+          "title": "障害者手帳を持っていますが利用できますか？",
+          "menuPrompt": "",
+          "answer": "はい、ご利用いただけます。\n身体障害者手帳、療育手帳、精神障害者保健福祉手帳をお持ちの方もご利用可能です。\n\n介護タクシーは基本的に自費サービスとなるため、ご利用料金はお客様負担となります。ただし、障害者手帳による運賃割引や、お住まいの自治体が発行する福祉タクシー券・助成制度をご利用いただける場合があります。適用条件は自治体や制度によって異なりますので、詳しくはご予約時にご相談ください。",
+          "ctas": [],
+          "children": []
+        },
+        {
+          "id": "usage-eligibility-hospital-escort",
+          "enabled": true,
+          "title": "病院の中まで付き添ってもらえますか？",
+          "menuPrompt": "",
+          "answer": "はい、ご相談ください。\n病院の受付や会計、診察室までの付き添いなど、必要な介助内容に応じて対応いたします。詳しくはご予約時にご相談ください。",
+          "ctas": [],
+          "children": []
+        },
+        {
+          "id": "usage-eligibility-shopping-grave",
+          "enabled": true,
+          "title": "買い物やお墓参りでも利用できますか？",
+          "menuPrompt": "",
+          "answer": "はい、ご利用いただけます。\n通院だけでなく、お買い物、お食事、お墓参り、ご親族宅への訪問、冠婚葬祭、旅行やお出かけなどにもご利用いただけます。お気軽にご相談ください。",
+          "ctas": [],
+          "children": []
         }
       ]
     },
