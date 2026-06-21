@@ -238,23 +238,12 @@
       "label": "待機・付き添い",
       "items": [
         {
-          "id": "addon-none",
-          "label": "待機なし",
-          "description": "往復送迎のみで、待機・付き添いは不要です。",
-          "amount": 0,
-          "visible": true,
-          "order": 1,
-          "waitingFeeRef": "",
-          "escortFeeRef": "",
-          "distanceMultiplier": 1
-        },
-        {
           "id": "addon-waiting",
           "label": "待機（30分）",
           "description": "目的地での待機中、車両と乗務員が待機するサービスです。\n表示料金は30分を基準とした概算です。",
           "amount": 0,
           "visible": true,
-          "order": 2,
+          "order": 1,
           "waitingFeeRef": "waiting30min",
           "escortFeeRef": "",
           "distanceMultiplier": 1
@@ -265,7 +254,7 @@
           "description": "受付、施設内移動、会計などをお手伝いします。\n表示料金は30分を基準とした概算です。",
           "amount": 0,
           "visible": true,
-          "order": 3,
+          "order": 2,
           "waitingFeeRef": "",
           "escortFeeRef": "escort30min",
           "distanceMultiplier": 1

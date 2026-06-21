@@ -97,9 +97,8 @@
         roundTripAddon: {
           label: "待機・付き添い",
           items: [
-            addonItem("addon-none", "待機なし", "往復送迎のみで、待機・付き添いは不要です。", 1, {}),
-            addonItem("addon-waiting", "待機（30分）", "目的地での待機中、車両と乗務員が待機するサービスです。\n表示料金は30分を基準とした概算です。", 2, { waitingFeeRef: "waiting30min" }),
-            addonItem("addon-escort", "付き添い（30分）", "受付、施設内移動、会計などをお手伝いします。\n表示料金は30分を基準とした概算です。", 3, { escortFeeRef: "escort30min" })
+            addonItem("addon-waiting", "待機（30分）", "目的地での待機中、車両と乗務員が待機するサービスです。\n表示料金は30分を基準とした概算です。", 1, { waitingFeeRef: "waiting30min" }),
+            addonItem("addon-escort", "付き添い（30分）", "受付、施設内移動、会計などをお手伝いします。\n表示料金は30分を基準とした概算です。", 2, { escortFeeRef: "escort30min" })
           ]
         }
       },

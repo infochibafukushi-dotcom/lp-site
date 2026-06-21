@@ -430,6 +430,7 @@
         <div class="estimate-trip-addon">
           <h3 class="estimate-trip-addon-title">${escapeHtml(addonLabel)}</h3>
           <div class="estimate-choice-group">${addonChoices}</div>
+          <p class="estimate-step-note">いずれかを選択してください。</p>
         </div>
       `;
     }
