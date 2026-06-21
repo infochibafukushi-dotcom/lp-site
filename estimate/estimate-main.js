@@ -471,6 +471,18 @@
     return state.config?.googleMaps || {};
   }
 
+  function logGoogleMapsConfig(context){
+    const mapsConfig = getGoogleMapsConfig();
+    const apiKey = String(mapsConfig.apiKey || "").trim();
+    console.log("[Estimate] googleMaps config (" + context + ")", {
+      enabled: mapsConfig.enabled !== false,
+      apiKeySet: Boolean(apiKey),
+      apiKeyLength: apiKey.length,
+      language: mapsConfig.language || "ja",
+      region: mapsConfig.region || "JP"
+    });
+  }
+
   function isAddressDistanceMode(){
     return state.distanceInputMode === "address";
   }
@@ -499,7 +511,8 @@
     const mapsConfig = getGoogleMapsConfig();
     const apiKey = String(mapsConfig.apiKey || "").trim();
     if(!apiKey){
-      state.routeCalcError = "Google Maps APIキーが設定されていません。管理者にお問い合わせください。";
+      logGoogleMapsConfig("calculateRouteDistance:missing-api-key");
+      state.routeCalcError = "Google Maps APIキーが設定されていません。管理画面の「料金シミュレーター設定」で APIキーを入力し、estimate-config.json を保存してください。";
       state.routeCalcResult = null;
       updateRouteCalcFeedback();
       return;
@@ -1047,6 +1060,7 @@
 
       const urlState = window.EstimateUrl?.parseUrlState?.() || {};
       state.config = await window.EstimateConfigLoader.loadEstimateConfig();
+      logGoogleMapsConfig("init:config-loaded");
 
       if(window.EstimateUrl?.applyUrlStateToFormState){
         window.EstimateUrl.applyUrlStateToFormState(state, urlState, state.config);

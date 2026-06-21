@@ -154,7 +154,7 @@
 
       <h3>Google Maps（住所から距離計算）</h3>
       <div class="row"><label><input type="checkbox" id="estimateGoogleMapsEnabled" ${estimateDraft.googleMaps?.enabled !== false ? "checked" : ""}> 住所からの距離計算を有効にする</label></div>
-      <div class="row"><label>APIキー</label><input type="password" id="estimateGoogleMapsApiKey" value="${escapeAttr(estimateDraft.googleMaps?.apiKey || "")}" autocomplete="off" placeholder="Google Maps Platform APIキー"></div>
+      <div class="row"><label>APIキー</label><input type="text" id="estimateGoogleMapsApiKey" value="${escapeAttr(estimateDraft.googleMaps?.apiKey || "")}" autocomplete="off" placeholder="Google Maps Platform APIキー（Routes API）"></div>
       <div class="grid2">
         <div class="row"><label>言語コード</label><input type="text" id="estimateGoogleMapsLanguage" value="${escapeAttr(estimateDraft.googleMaps?.language || "ja")}"></div>
         <div class="row"><label>リージョン</label><input type="text" id="estimateGoogleMapsRegion" value="${escapeAttr(estimateDraft.googleMaps?.region || "JP")}"></div>
@@ -281,7 +281,11 @@
 
     draft.googleMaps = {
       enabled: document.getElementById("estimateGoogleMapsEnabled")?.checked !== false,
-      apiKey: document.getElementById("estimateGoogleMapsApiKey")?.value.trim() || "",
+      apiKey: (function(){
+        const fromInput = document.getElementById("estimateGoogleMapsApiKey")?.value.trim() || "";
+        const existing = String(estimateDraft?.googleMaps?.apiKey || "").trim();
+        return fromInput || existing;
+      })(),
       language: document.getElementById("estimateGoogleMapsLanguage")?.value.trim() || "ja",
       region: document.getElementById("estimateGoogleMapsRegion")?.value.trim() || "JP"
     };
