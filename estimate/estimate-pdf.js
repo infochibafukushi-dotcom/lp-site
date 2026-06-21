@@ -165,6 +165,60 @@
     return { homepage: "", line: "" };
   }
 
+  function buildHiddenCaptureContainerStyle(){
+    return [
+      "position:fixed",
+      "left:-9999px",
+      "top:0",
+      "width:" + CONTENT_WIDTH_PX + "px",
+      "pointer-events:none",
+      "overflow:visible"
+    ].join(";");
+  }
+
+  function readElementContentHeight(element){
+    if(!element){
+      return 0;
+    }
+    return Math.max(
+      element.scrollHeight || 0,
+      element.offsetHeight || 0,
+      element.clientHeight || 0,
+      element.getBoundingClientRect().height || 0
+    );
+  }
+
+  function resolveFinalContentHeight(element, measuredContentHeight){
+    const scrollHeight = element ? element.scrollHeight : 0;
+    const offsetHeight = element ? element.offsetHeight : 0;
+    const clientHeight = element ? element.clientHeight : 0;
+    const rectHeight = element ? element.getBoundingClientRect().height : 0;
+    let finalContentHeight = Number(measuredContentHeight) > 0
+      ? Number(measuredContentHeight)
+      : readElementContentHeight(element);
+
+    if(finalContentHeight <= 0){
+      finalContentHeight = readElementContentHeight(element);
+    }
+    if(finalContentHeight > 0){
+      finalContentHeight = Math.min(finalContentHeight, CONTENT_HEIGHT_PX);
+    }
+    if(finalContentHeight <= 0){
+      finalContentHeight = CONTENT_HEIGHT_PX;
+    }
+
+    console.log("PDF_DEBUG_HEIGHT", {
+      scrollHeight: scrollHeight,
+      offsetHeight: offsetHeight,
+      clientHeight: clientHeight,
+      rectHeight: rectHeight,
+      measuredContentHeight: measuredContentHeight,
+      finalContentHeight: finalContentHeight
+    });
+
+    return finalContentHeight;
+  }
+
   function buildPdfElement(data, layout, qrDataUrls){
     layout = layout || getDefaultLayout();
     qrDataUrls = qrDataUrls || emptyQrDataUrls();
@@ -248,16 +302,7 @@
 
   function measureContentHeight(data, qrDataUrls){
     const container = document.createElement("div");
-    container.style.cssText = [
-      "position:fixed",
-      "left:0",
-      "top:0",
-      "width:" + CONTENT_WIDTH_PX + "px",
-      "z-index:-1",
-      "opacity:0",
-      "pointer-events:none",
-      "overflow:visible"
-    ].join(";");
+    container.style.cssText = buildHiddenCaptureContainerStyle();
     document.body.appendChild(container);
 
     let layout = getDefaultLayout();
@@ -265,16 +310,19 @@
       for(let i = 0; i < 24; i++){
         const probe = buildPdfElement(data, layout, qrDataUrls);
         container.appendChild(probe);
-        const contentHeight = probe.scrollHeight;
+        const contentHeight = readElementContentHeight(probe);
         container.removeChild(probe);
-        if(contentHeight <= CONTENT_HEIGHT_PX){
+        if(contentHeight > 0 && contentHeight <= CONTENT_HEIGHT_PX){
           return { layout: layout, contentHeight: contentHeight };
         }
         layout = scaleLayout(layout, 0.92);
       }
       const fallback = buildPdfElement(data, layout, qrDataUrls);
       container.appendChild(fallback);
-      const contentHeight = Math.min(fallback.scrollHeight, CONTENT_HEIGHT_PX);
+      const measuredHeight = readElementContentHeight(fallback);
+      const contentHeight = measuredHeight > 0
+        ? Math.min(measuredHeight, CONTENT_HEIGHT_PX)
+        : CONTENT_HEIGHT_PX;
       container.removeChild(fallback);
       return { layout: layout, contentHeight: contentHeight };
     }finally{
@@ -326,22 +374,13 @@
     const layout = measured.layout;
     const element = buildPdfElement(data, layout, qrDataUrls);
     const container = document.createElement("div");
-    container.style.cssText = [
-      "position:fixed",
-      "left:0",
-      "top:0",
-      "width:" + CONTENT_WIDTH_PX + "px",
-      "z-index:-1",
-      "opacity:0",
-      "pointer-events:none",
-      "overflow:visible"
-    ].join(";");
+    container.style.cssText = buildHiddenCaptureContainerStyle();
     container.appendChild(element);
     document.body.appendChild(container);
 
     await waitForNextFrame();
 
-    const contentHeight = Math.max(1, Math.min(element.scrollHeight, CONTENT_HEIGHT_PX));
+    const contentHeight = resolveFinalContentHeight(element, measured.contentHeight);
     const filename = (data.estimateNumber || "estimate") + ".pdf";
     try{
       console.log("PDF_DEBUG_5 html2canvas開始");
