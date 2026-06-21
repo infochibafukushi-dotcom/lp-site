@@ -1,0 +1,38 @@
+{
+  "390": {
+    "viewport": 390,
+    "displayW": 366,
+    "displayH": 260,
+    "cssHeight": "260px",
+    "cssWidth": "366px",
+    "objectFit": "contain",
+    "naturalW": 973,
+    "naturalH": 640,
+    "innerW": 366,
+    "sideMargin": 0
+  },
+  "1366": {
+    "viewport": 1366,
+    "displayW": 1286,
+    "displayH": 846,
+    "cssHeight": "845.875px",
+    "cssWidth": "1286px",
+    "objectFit": "contain",
+    "naturalW": 973,
+    "naturalH": 640,
+    "innerW": 1286,
+    "sideMargin": 0
+  },
+  "1920": {
+    "viewport": 1920,
+    "displayW": 1500,
+    "displayH": 987,
+    "cssHeight": "986.625px",
+    "cssWidth": "1500px",
+    "objectFit": "contain",
+    "naturalW": 973,
+    "naturalH": 640,
+    "innerW": 1500,
+    "sideMargin": 0
+  }
+}
