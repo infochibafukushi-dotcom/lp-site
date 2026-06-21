@@ -1,0 +1,54 @@
+{
+  "pc": {
+    "viewport": 1920,
+    "hero": {
+      "width": 1500,
+      "height": 420,
+      "maxWidth": "none",
+      "objectFit": "cover",
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    "normalVehicle": {
+      "width": 1500,
+      "height": 1011,
+      "maxWidth": "none",
+      "objectFit": "fill",
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    "normalArea": {
+      "width": 1500,
+      "height": 1011,
+      "maxWidth": "none",
+      "objectFit": "fill",
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    "normalInnerDisplay": "flex",
+    "normalInnerFlexDirection": "column"
+  },
+  "mobile": {
+    "viewport": 390,
+    "hero": {
+      "width": 366,
+      "height": 260,
+      "maxWidth": "700px",
+      "objectFit": "contain",
+      "background": "rgb(233, 236, 239)"
+    },
+    "normalVehicle": {
+      "width": 366,
+      "height": 247,
+      "maxWidth": "700px",
+      "objectFit": "fill",
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    "normalArea": {
+      "width": 366,
+      "height": 247,
+      "maxWidth": "700px",
+      "objectFit": "fill",
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    "normalInnerDisplay": "flex",
+    "normalInnerFlexDirection": "column"
+  }
+}
