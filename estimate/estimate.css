@@ -30,6 +30,34 @@
   margin-bottom:16px;
   box-shadow:0 2px 8px rgba(0,0,0,.04);
 }
+.estimate-step--active{
+  border-color:#e87f00;
+  box-shadow:0 4px 14px rgba(232,127,0,.12);
+}
+.estimate-step--done{
+  background:#faf8f5;
+}
+.estimate-step-summary{
+  margin:0;
+  font-size:16px;
+  font-weight:700;
+  color:#2d2a26;
+  line-height:1.6;
+}
+.estimate-step-edit{
+  flex:0 0 auto;
+  border:1px solid #d8cbb8;
+  border-radius:999px;
+  background:#fff;
+  color:#9a6b16;
+  font-size:13px;
+  font-weight:700;
+  padding:6px 12px;
+  cursor:pointer;
+}
+.estimate-step-edit:hover{
+  background:#fff8ef;
+}
 .estimate-step-head{
   display:flex;
   align-items:center;

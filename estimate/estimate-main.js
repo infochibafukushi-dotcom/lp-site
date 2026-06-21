@@ -10,7 +10,8 @@
     distanceKm: 0,
     estimateNumber: "",
     estimateCreatedAt: "",
-    selectionFingerprint: ""
+    selectionFingerprint: "",
+    lastActiveStepId: ""
   };
 
   function escapeHtml(text){
@@ -76,6 +77,7 @@
   }
 
   function syncAssistanceForMobility(){
+    if(!state.mobilityId) return;
     const options = window.EstimateCalc.getAssistanceOptions(state.config, state.mobilityId);
     const rule = window.EstimateCalc.getMobilityAssistanceRule(state.config, state.mobilityId);
 
@@ -84,8 +86,8 @@
       return;
     }
 
-    if(!options.some(function(item){ return item.id === state.assistanceId; })){
-      state.assistanceId = options[0]?.id || "";
+    if(state.assistanceId && !options.some(function(item){ return item.id === state.assistanceId; })){
+      state.assistanceId = "";
     }
   }
 
@@ -95,26 +97,157 @@
       return;
     }
     const options = window.EstimateCalc.getRoundTripAddonItems(state.config);
-    if(!options.some(function(item){ return item.id === state.roundTripAddonId; })){
-      state.roundTripAddonId = options[0]?.id || "";
+    if(state.roundTripAddonId && !options.some(function(item){ return item.id === state.roundTripAddonId; })){
+      state.roundTripAddonId = "";
     }
   }
 
-  function ensureDefaults(){
-    const mobilityItems = getVisibleItems("mobility");
-    const stairItems = getVisibleItems("stairAssist");
-    const tripItems = window.EstimateCalc.getTripTypeItems(state.config);
+  function getStepFlow(){
+    const steps = [
+      {
+        id: "mobility",
+        title: state.config.categories.mobility.label || "移動方法",
+        type: "select",
+        categoryKey: "mobility",
+        fieldName: "mobilitySelect",
+        getItems: function(){ return getVisibleItems("mobility"); },
+        getValue: function(){ return state.mobilityId; }
+      },
+      {
+        id: "assistance",
+        title: state.config.categories.assistance.label || "介助内容",
+        type: "assistance"
+      },
+      {
+        id: "stair",
+        title: state.config.categories.stairAssist.label || "階段介助",
+        type: "select",
+        categoryKey: "stairAssist",
+        fieldName: "stairSelect",
+        getItems: function(){ return getVisibleItems("stairAssist"); },
+        getValue: function(){ return state.stairId; }
+      },
+      {
+        id: "trip",
+        title: state.config.categories.tripType.label || "送迎方法",
+        type: "select",
+        categoryKey: "tripType",
+        fieldName: "tripSelect",
+        getItems: function(){ return window.EstimateCalc.getTripTypeItems(state.config); },
+        getValue: function(){ return state.tripTypeId; }
+      }
+    ];
 
-    if(!state.mobilityId && mobilityItems[0]){
-      state.mobilityId = mobilityItems[0].id;
+    if(window.EstimateCalc.isRoundTripSelected(state.config, state)){
+      steps.push({
+        id: "addon",
+        title: state.config.categories.roundTripAddon?.label || "待機・付き添い",
+        type: "select",
+        categoryKey: "roundTripAddon",
+        fieldName: "roundTripAddonSelect",
+        getItems: function(){ return window.EstimateCalc.getRoundTripAddonItems(state.config); },
+        getValue: function(){ return state.roundTripAddonId; }
+      });
     }
-    syncAssistanceForMobility();
 
-    if(!state.stairId && stairItems[0]){
-      state.stairId = stairItems[0].id;
+    steps.push({
+      id: "distance",
+      title: state.config.page?.distanceLabel || "片道距離（km）",
+      type: "distance"
+    });
+
+    return steps;
+  }
+
+  function isStepComplete(stepId){
+    switch(stepId){
+      case "mobility":
+        return Boolean(state.mobilityId);
+      case "assistance":
+        return Boolean(window.EstimateCalc.resolveAssistanceId(state.config, state));
+      case "stair":
+        return Boolean(state.stairId);
+      case "trip":
+        return Boolean(state.tripTypeId);
+      case "addon":
+        return Boolean(state.roundTripAddonId);
+      case "distance":
+        return Number(state.distanceKm) > 0;
+      default:
+        return false;
     }
-    if(!state.tripTypeId && tripItems[0]){
-      state.tripTypeId = tripItems[0].id;
+  }
+
+  function getFlowState(){
+    const flow = getStepFlow();
+    let activeIndex = flow.findIndex(function(step){
+      return !isStepComplete(step.id);
+    });
+    if(activeIndex < 0){
+      activeIndex = flow.length;
+    }
+    return { flow: flow, activeIndex: activeIndex };
+  }
+
+  function getStepSummaryText(step){
+    switch(step.id){
+      case "mobility": {
+        const item = window.EstimateCalc.findItem(state.config.categories?.mobility?.items, state.mobilityId);
+        return item?.label || "";
+      }
+      case "assistance": {
+        const id = window.EstimateCalc.resolveAssistanceId(state.config, state);
+        const item = window.EstimateCalc.findItem(state.config.categories?.assistance?.items, id);
+        return item?.label || "";
+      }
+      case "stair": {
+        const item = window.EstimateCalc.findItem(state.config.categories?.stairAssist?.items, state.stairId);
+        return item?.label || "";
+      }
+      case "trip": {
+        const item = window.EstimateCalc.findItem(state.config.categories?.tripType?.items, state.tripTypeId);
+        return item?.label || "";
+      }
+      case "addon": {
+        const item = window.EstimateCalc.findItem(state.config.categories?.roundTripAddon?.items, state.roundTripAddonId);
+        return item?.label || "";
+      }
+      case "distance":
+        return Number(state.distanceKm) > 0 ? Number(state.distanceKm).toFixed(1) + "km" : "";
+      default:
+        return "";
+    }
+  }
+
+  function clearStepsAfter(stepId){
+    const order = ["mobility", "assistance", "stair", "trip", "addon", "distance"];
+    const idx = order.indexOf(stepId);
+    if(idx < 0) return;
+
+    for(let i = idx + 1; i < order.length; i++){
+      switch(order[i]){
+        case "assistance":
+          if(window.EstimateCalc.getMobilityAssistanceRule(state.config, state.mobilityId)?.mode !== "fixed"){
+            state.assistanceId = "";
+          }else{
+            syncAssistanceForMobility();
+          }
+          break;
+        case "stair":
+          state.stairId = "";
+          break;
+        case "trip":
+          state.tripTypeId = "";
+          break;
+        case "addon":
+          state.roundTripAddonId = "";
+          break;
+        case "distance":
+          state.distanceKm = 0;
+          break;
+        default:
+          break;
+      }
     }
     syncRoundTripAddon();
   }
@@ -139,14 +272,19 @@
     });
   }
 
-  function renderSelectStep(stepNum, title, fieldName, items, currentValue){
+  function renderSelectStep(stepNum, step, items, currentValue){
+    const title = step.title;
+    const fieldName = step.fieldName;
+    const placeholder = currentValue
+      ? ""
+      : `<option value="" disabled selected hidden>選択してください</option>`;
     const options = items.map(function(item){
       const selected = item.id === currentValue ? " selected" : "";
       return `<option value="${escapeAttr(item.id)}"${selected}>${escapeHtml(item.label)}</option>`;
     }).join("");
 
     return `
-      <section class="estimate-step">
+      <section class="estimate-step estimate-step--active" data-step-id="${escapeAttr(step.id)}">
         <div class="estimate-step-head">
           <div>
             <div class="estimate-step-label">STEP${stepNum}</div>
@@ -155,6 +293,7 @@
         </div>
         <div class="estimate-field-row">
           <select class="estimate-select" id="${escapeAttr(fieldName)}" aria-label="${escapeAttr(title)}">
+            ${placeholder}
             ${options}
           </select>
         </div>
@@ -162,10 +301,10 @@
     `;
   }
 
-  function renderAssistanceStep(stepNum){
+  function renderAssistanceStep(stepNum, step){
     const options = window.EstimateCalc.getAssistanceOptions(state.config, state.mobilityId);
     const rule = window.EstimateCalc.getMobilityAssistanceRule(state.config, state.mobilityId);
-    const title = state.config.categories.assistance.label || "介助内容";
+    const title = step.title;
     const isFixed = rule?.mode === "fixed";
 
     const choices = options.map(function(item){
@@ -187,7 +326,7 @@
         : `<p class="estimate-step-note">必要に応じて選択してください。</p>`);
 
     return `
-      <section class="estimate-step">
+      <section class="estimate-step estimate-step--active" data-step-id="${escapeAttr(step.id)}">
         <div class="estimate-step-head">
           <div>
             <div class="estimate-step-label">STEP${stepNum}</div>
@@ -200,20 +339,11 @@
     `;
   }
 
-  function renderRoundTripAddonStep(stepNum){
-    if(!window.EstimateCalc.isRoundTripSelected(state.config, state)){
-      return "";
-    }
-    const items = window.EstimateCalc.getRoundTripAddonItems(state.config);
-    const title = state.config.categories.roundTripAddon?.label || "待機・付き添い";
-    return renderSelectStep(stepNum, title, "roundTripAddonSelect", items, state.roundTripAddonId);
-  }
-
-  function renderDistanceStep(stepNum){
-    const label = state.config.page?.distanceLabel || "片道距離（km）";
+  function renderDistanceStep(stepNum, step){
+    const label = step.title;
     const note = state.config.page?.distanceNote || "※往復送迎を選択した場合は運賃距離を自動で2倍計算します。";
     return `
-      <section class="estimate-step">
+      <section class="estimate-step estimate-step--active" data-step-id="${escapeAttr(step.id)}">
         <div class="estimate-step-head">
           <div>
             <div class="estimate-step-label">STEP${stepNum}</div>
@@ -223,6 +353,32 @@
         <label for="distanceKmInput" style="display:block;font-size:14px;font-weight:600;margin-bottom:8px;">${escapeHtml(label)}</label>
         <input type="number" class="estimate-input" id="distanceKmInput" min="0" step="0.1" inputmode="decimal" placeholder="例: 5.5" value="${state.distanceKm > 0 ? escapeAttr(state.distanceKm) : ""}">
         <p class="estimate-step-note">${escapeHtml(note)}</p>
+      </section>
+    `;
+  }
+
+  function renderStepActive(step, stepNum){
+    if(step.type === "assistance"){
+      return renderAssistanceStep(stepNum, step);
+    }
+    if(step.type === "distance"){
+      return renderDistanceStep(stepNum, step);
+    }
+    return renderSelectStep(stepNum, step, step.getItems(), step.getValue());
+  }
+
+  function renderStepSummary(step, stepNum){
+    const summary = getStepSummaryText(step);
+    return `
+      <section class="estimate-step estimate-step--done" data-step-id="${escapeAttr(step.id)}">
+        <div class="estimate-step-head">
+          <div>
+            <div class="estimate-step-label">STEP${stepNum}</div>
+            <h2 class="estimate-step-title">${escapeHtml(step.title)}</h2>
+          </div>
+          <button type="button" class="estimate-step-edit" data-edit-step="${escapeAttr(step.id)}">変更</button>
+        </div>
+        <p class="estimate-step-summary">${escapeHtml(summary)}</p>
       </section>
     `;
   }
@@ -328,34 +484,47 @@
     `;
   }
 
+  function scrollToActiveStep(flow, activeIndex){
+    const activeStep = flow[activeIndex];
+    if(!activeStep) return;
+    if(state.lastActiveStepId === activeStep.id) return;
+    state.lastActiveStepId = activeStep.id;
+    requestAnimationFrame(function(){
+      const el = document.querySelector('[data-step-id="' + activeStep.id + '"]');
+      if(el){
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+  }
+
   function renderPage(){
     const root = getRoot();
     if(!root || !state.config) return;
 
-    ensureDefaults();
+    syncAssistanceForMobility();
+    syncRoundTripAddon();
     invalidateEstimateNumberIfChanged();
+
+    const { flow, activeIndex } = getFlowState();
+    const allComplete = activeIndex >= flow.length;
     const result = window.EstimateCalc.computeEstimate(state.config, state);
 
-    const showAddon = window.EstimateCalc.isRoundTripSelected(state.config, state);
-    let step = 1;
-    const mobilityStep = step++;
-    const assistanceStep = step++;
-    const stairStep = step++;
-    const tripStep = step++;
-    const addonStep = showAddon ? step++ : 0;
-    const distanceStep = step;
+    let stepsHtml = "";
+    flow.forEach(function(step, index){
+      const stepNum = index + 1;
+      if(index < activeIndex){
+        stepsHtml += renderStepSummary(step, stepNum);
+      }else if(index === activeIndex){
+        stepsHtml += renderStepActive(step, stepNum);
+      }
+    });
 
     root.innerHTML = `
       <div class="estimate-wrap">
         <h1 class="estimate-title">${escapeHtml(state.config.page?.title || "概算見積シミュレーター")}</h1>
         <p class="estimate-lead">${escapeHtml(state.config.page?.description || "")}</p>
-        ${renderSelectStep(mobilityStep, state.config.categories.mobility.label || "移動方法", "mobilitySelect", getVisibleItems("mobility"), state.mobilityId)}
-        ${renderAssistanceStep(assistanceStep)}
-        ${renderSelectStep(stairStep, state.config.categories.stairAssist.label || "階段介助", "stairSelect", getVisibleItems("stairAssist"), state.stairId)}
-        ${renderSelectStep(tripStep, state.config.categories.tripType.label || "送迎方法", "tripSelect", window.EstimateCalc.getTripTypeItems(state.config), state.tripTypeId)}
-        ${showAddon ? renderRoundTripAddonStep(addonStep) : ""}
-        ${renderDistanceStep(distanceStep)}
-        ${renderResult(result)}
+        ${stepsHtml}
+        ${allComplete ? renderResult(result) : ""}
       </div>
     `;
 
@@ -367,6 +536,12 @@
     addSelectHelpButtons("tripSelect", "tripType");
     addSelectHelpButtons("stairSelect", "stairAssist");
     addSelectHelpButtons("roundTripAddonSelect", "roundTripAddon");
+
+    if(!allComplete){
+      scrollToActiveStep(flow, activeIndex);
+    }else{
+      state.lastActiveStepId = "result";
+    }
   }
 
   function addSelectHelpButtons(selectId, categoryKey){
@@ -510,7 +685,20 @@
     btn.addEventListener("click", copyShareUrl);
   }
 
+  function openStepForEdit(stepId){
+    clearStepsAfter(stepId);
+    state.lastActiveStepId = "";
+    renderPage();
+  }
+
   function bindEvents(){
+    document.querySelectorAll("[data-edit-step]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        const stepId = btn.getAttribute("data-edit-step");
+        if(stepId) openStepForEdit(stepId);
+      });
+    });
+
     const mobilitySelect = document.getElementById("mobilitySelect");
     const stairSelect = document.getElementById("stairSelect");
     const tripSelect = document.getElementById("tripSelect");
@@ -519,8 +707,11 @@
 
     if(mobilitySelect){
       mobilitySelect.addEventListener("change", function(){
+        if(!mobilitySelect.value) return;
         state.mobilityId = mobilitySelect.value;
+        clearStepsAfter("mobility");
         syncAssistanceForMobility();
+        state.lastActiveStepId = "";
         renderPage();
       });
     }
@@ -529,42 +720,59 @@
       input.addEventListener("change", function(){
         if(input.checked){
           state.assistanceId = input.value;
-          updateResultOnly();
+          clearStepsAfter("assistance");
+          state.lastActiveStepId = "";
+          renderPage();
         }
       });
     });
 
     if(stairSelect){
       stairSelect.addEventListener("change", function(){
+        if(!stairSelect.value) return;
         state.stairId = stairSelect.value;
-        updateResultOnly();
+        clearStepsAfter("stair");
+        state.lastActiveStepId = "";
+        renderPage();
       });
     }
     if(tripSelect){
       tripSelect.addEventListener("change", function(){
+        if(!tripSelect.value) return;
         state.tripTypeId = tripSelect.value;
+        clearStepsAfter("trip");
         syncRoundTripAddon();
+        state.lastActiveStepId = "";
         renderPage();
       });
     }
     if(addonSelect){
       addonSelect.addEventListener("change", function(){
+        if(!addonSelect.value) return;
         state.roundTripAddonId = addonSelect.value;
-        updateResultOnly();
+        clearStepsAfter("addon");
+        state.lastActiveStepId = "";
+        renderPage();
       });
     }
     if(distanceInput){
       distanceInput.addEventListener("input", function(){
         state.distanceKm = Number(distanceInput.value) || 0;
-        updateResultOnly();
+        invalidateEstimateNumberIfChanged();
+        const result = window.EstimateCalc.computeEstimate(state.config, state);
+        if(state.distanceKm > 0){
+          if(!document.querySelector(".estimate-result")){
+            state.lastActiveStepId = "";
+            renderPage();
+          }else{
+            refreshResultSection(result);
+          }
+        }else if(document.querySelector(".estimate-result")){
+          state.lastActiveStepId = "";
+          renderPage();
+        }
       });
     }
-  }
-
-  function updateResultOnly(){
-    invalidateEstimateNumberIfChanged();
-    const result = window.EstimateCalc.computeEstimate(state.config, state);
-    refreshResultSection(result);
   }
 
   async function init(){
@@ -584,6 +792,9 @@
       if(urlState.estimateNumber){
         state.estimateNumber = urlState.estimateNumber;
       }
+
+      syncAssistanceForMobility();
+      syncRoundTripAddon();
 
       renderPage();
     }catch(error){
