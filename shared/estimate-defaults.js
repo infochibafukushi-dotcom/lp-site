@@ -122,6 +122,16 @@
         language: "ja",
         region: "JP"
       },
+      pdfFooter: {
+        enabled: true,
+        businessName: "",
+        phone: "",
+        homepageUrl: "",
+        lineUrl: "",
+        message: "ご予約・ご相談はお気軽にお問い合わせください",
+        qrCodeUrl: "",
+        qrCodeLabel: "ホームページはこちら"
+      },
       resultLabels: {
         baseFare: "基本運賃",
         reservationPickupFee: "予約・迎車料金",

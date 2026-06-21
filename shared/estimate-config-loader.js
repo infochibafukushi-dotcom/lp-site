@@ -35,6 +35,13 @@
     if(data.enabled === false){
       throw new Error("料金シミュレーターは現在停止中です。");
     }
+    const defaults = global.EstimateDefaults?.createDefaultEstimateConfig?.() || {};
+    if(defaults.pdfFooter){
+      data.pdfFooter = Object.assign({}, defaults.pdfFooter, data.pdfFooter || {});
+    }
+    if(data.page && defaults.page?.resultNotes && typeof data.page.resultNotes !== "string"){
+      data.page.resultNotes = defaults.page.resultNotes;
+    }
     return data;
   }
 

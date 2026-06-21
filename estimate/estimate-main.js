@@ -939,7 +939,8 @@
         usageSummary: result.usageSummary,
         breakdownRows: getBreakdownRows(result),
         total: result.total,
-        disclaimer: state.config.page?.disclaimer || "",
+        resultNotes: state.config.page?.resultNotes || "",
+        pdfFooter: state.config.pdfFooter || {},
         pageTitle: state.config.page?.title || ""
       });
       if(feedback) feedback.textContent = "PDF を保存しました（" + state.estimateNumber + "）";

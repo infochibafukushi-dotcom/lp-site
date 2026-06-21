@@ -337,5 +337,15 @@
     "usageSummary": "ご利用内容",
     "total": "概算料金"
   },
+  "pdfFooter": {
+    "enabled": true,
+    "businessName": "",
+    "phone": "",
+    "homepageUrl": "",
+    "lineUrl": "",
+    "message": "ご予約・ご相談はお気軽にお問い合わせください",
+    "qrCodeUrl": "",
+    "qrCodeLabel": "ホームページはこちら"
+  },
   "options": {}
 }

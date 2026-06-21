@@ -54,7 +54,21 @@
     },
     "options": { "type": "object" },
     "mappings": { "type": "object" },
-    "resultLabels": { "type": "object" }
+    "resultLabels": { "type": "object" },
+    "pdfFooter": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "businessName": { "type": "string" },
+        "phone": { "type": "string" },
+        "homepageUrl": { "type": "string" },
+        "lineUrl": { "type": "string" },
+        "message": { "type": "string" },
+        "qrCodeUrl": { "type": "string" },
+        "qrCodeLabel": { "type": "string" }
+      },
+      "additionalProperties": true
+    }
   },
   "definitions": {
     "categoryItem": {
