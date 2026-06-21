@@ -70,7 +70,7 @@
   }
 
   async function fetchConfigUrls(){
-    const paths = ["./data/config.json", "data/config.json"];
+    const paths = ["./data/config.json", "data/config.json", "../data/config.json"];
     let lastError = null;
     for(const rawPath of paths){
       try{

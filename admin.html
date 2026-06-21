@@ -729,6 +729,7 @@ body{
       <a class="jump-btn" href="#card-sections-list">セクション編集</a>
       <a class="jump-btn" href="#card-preview">保存前プレビュー</a>
       <a class="jump-btn" href="#card-carechan-settings">ケアちゃん設定</a>
+      <a class="jump-btn" href="#card-estimate-settings">料金シミュレーター設定</a>
     </div>
   </div>
 
@@ -1351,6 +1352,82 @@ body{
     </div>
   </div>
 
+  <div class="card collapsible-card js-collapsible section-anchor" id="card-estimate-settings" data-open="false">
+    <button type="button" class="card-toggle js-card-toggle">
+      <span class="toggle-left">
+        <span class="toggle-icon">▶</span>
+        <span class="toggle-title">料金シミュレーター設定</span>
+      </span>
+      <span class="toggle-state">閉じています</span>
+    </button>
+    <div class="card-body js-card-body">
+      <p class="note">概算見積ページ（/estimate/）の料金設定です。保存先は Firestore です（GitHub JSON とは別系統）。</p>
+
+      <div class="grid2">
+        <div class="row">
+          <label>店舗ID（storeId）</label>
+          <input type="text" id="estimateStoreId" value="default" placeholder="default">
+          <div class="small">FC展開時は店舗ごとにIDを切り替えます。</div>
+        </div>
+      </div>
+
+      <h3 style="margin-top:16px;">Firestore 認証</h3>
+      <p class="note">保存には Firebase Auth でのログインが必要です。管理者アカウントに custom claim <code>admin: true</code> を付与してください。</p>
+      <div class="grid2">
+        <div class="row">
+          <label>メールアドレス</label>
+          <input type="email" id="estimateAuthEmail" autocomplete="username">
+        </div>
+        <div class="row">
+          <label>パスワード</label>
+          <input type="password" id="estimateAuthPassword" autocomplete="current-password">
+        </div>
+      </div>
+      <div class="actions">
+        <button type="button" id="estimateAuthSignInBtn">ログイン</button>
+        <button type="button" class="secondary" id="estimateAuthSignOutBtn">ログアウト</button>
+      </div>
+      <div class="preview" id="estimateAuthUserLabel">未ログイン</div>
+      <div class="preview" id="estimateAuthResult"></div>
+
+      <div class="actions" style="margin-top:16px;">
+        <button type="button" id="estimateReloadBtn">Firestore から再読込</button>
+        <button type="button" class="secondary" id="estimateSeedBtn">初期データを投入</button>
+        <button type="button" id="estimateSaveBtn">Firestore に保存</button>
+        <button type="button" class="secondary" id="estimatePreviewBtn">プレビューを見る</button>
+      </div>
+      <div class="preview" id="estimateSaveResult">まだ保存していません。</div>
+
+      <h3 style="margin-top:20px;">設定を複製（FC展開）</h3>
+      <p class="note">既存店舗の設定を新しい店舗IDへコピーします（例: default → ちばケアタクシー → 〇〇介護タクシー）。</p>
+      <div class="grid2">
+        <div class="row">
+          <label>複製元 storeId</label>
+          <input type="text" id="estimateCopyFromStoreId" value="default" placeholder="default">
+        </div>
+        <div class="row">
+          <label>複製先 storeId</label>
+          <input type="text" id="estimateCopyToStoreId" placeholder="例: chiba-care-taxi">
+        </div>
+      </div>
+      <div class="actions">
+        <button type="button" id="estimateDuplicateBtn">設定を複製</button>
+      </div>
+
+      <h3 style="margin-top:20px;">JSON エクスポート / インポート</h3>
+      <p class="note">加盟店追加時の設定バックアップ・一括反映に利用できます。</p>
+      <div class="actions">
+        <button type="button" class="secondary" id="estimateExportBtn">JSONエクスポート</button>
+        <label class="secondary" style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;">
+          <span>JSONインポート</span>
+          <input type="file" id="estimateImportFile" accept="application/json,.json" style="max-width:220px;">
+        </label>
+      </div>
+
+      <div id="estimateSettingsEditor" style="margin-top:16px;">読み込み中...</div>
+    </div>
+  </div>
+
 
   <div class="floating-save-bar">
     <div class="floating-save-inner">
@@ -1368,6 +1445,15 @@ body{
 <script src="./admin-sections-sort.js"></script>
 <script src="./carechan-cta-defaults.js"></script>
 <script src="./admin-carechan.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="./shared/firebase-config.js"></script>
+<script src="./shared/estimate-defaults.js"></script>
+<script src="./shared/estimate-store.js"></script>
+<script src="./shared/estimate-url.js"></script>
+<script src="./shared/estimate-validate.js"></script>
+<script src="./admin-estimate.js"></script>
 <script>
 const CONFIG_PATH = 'data/config.json';
 const SECTIONS_PATH = 'data/sections.json';

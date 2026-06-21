@@ -436,9 +436,9 @@
     "textAlign": "left",
     "links": [
       {
-        "text": "",
-        "url": "#",
-        "visible": false
+        "text": "概算見積をする",
+        "url": "./estimate/",
+        "visible": true
       },
       {
         "text": "",

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="介護タクシーの概算見積シミュレーター。ご利用内容を選択して概算料金を確認できます。">
+<title>概算見積シミュレーター | 介護タクシーLP</title>
+<link rel="stylesheet" href="../carechan.css">
+<link rel="stylesheet" href="./estimate.css">
+</head>
+<body class="estimate-page">
+
+<header style="background:#fff;padding:12px 14px;border-bottom:1px solid #ddd;display:flex;align-items:center;gap:10px;">
+  <a href="../index.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:#222;font-weight:700;">
+    <span>← LPに戻る</span>
+  </a>
+</header>
+
+<main id="estimateApp">
+  <div class="estimate-loading">読み込み中...</div>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="../shared/firebase-config.js"></script>
+<script src="../shared/estimate-number.js"></script>
+<script src="../shared/estimate-store.js"></script>
+<script src="../shared/estimate-defaults.js"></script>
+<script src="../shared/estimate-url.js"></script>
+<script src="../shared/estimate-handoff.js"></script>
+<script src="../carechan-cta-defaults.js"></script>
+<script src="./estimate-calc.js"></script>
+<script src="./estimate-help.js"></script>
+<script src="./estimate-pdf.js"></script>
+<script src="./estimate-main.js"></script>
+
+<script>
+(function(){
+  function trackCv(type, href){
+    const payload = { event: 'lp_cv_click', cv_type: type, href: href || '', ts: Date.now(), page: 'estimate' };
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push(payload);
+    if(typeof window.gtag === 'function'){
+      window.gtag('event', 'lp_cv_click', { cv_type: type, href: href || '', page: 'estimate' });
+    }
+  }
+  document.addEventListener('click', function(event){
+    const link = event.target.closest('a');
+    if(!link) return;
+    const href = String(link.getAttribute('href') || '');
+    if(/^tel:/i.test(href)) return trackCv('phone', href);
+    if(/lin\.ee|line\.me/i.test(href)) return trackCv('line', href);
+    if(/reserve|reservation|予約/i.test((link.textContent||'') + ' ' + href)) return trackCv('reservation', href);
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://infochibafukushi-dotcom.github.io/lp-site/schemas/estimate-simulator.schema.json",
+  "title": "EstimateSimulatorConfig",
+  "type": "object",
+  "required": ["enabled", "version", "storeId", "page", "basicFees", "distancePricing", "categories"],
+  "properties": {
+    "enabled": { "type": "boolean" },
+    "version": { "type": "number" },
+    "storeId": { "type": "string", "minLength": 1 },
+    "updatedAt": { "type": "string" },
+    "page": {
+      "type": "object",
+      "required": ["title", "description", "disclaimer"],
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "disclaimer": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "basicFees": { "type": "object" },
+    "distancePricing": {
+      "type": "object",
+      "required": ["mode"],
+      "properties": {
+        "mode": { "enum": ["patternA", "patternB"] },
+        "patternA": { "type": "object" },
+        "patternB": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
+    "categories": {
+      "type": "object",
+      "required": ["mobility", "assistance", "stairAssist", "tripType"],
+      "properties": {
+        "mobility": { "$ref": "#/definitions/category" },
+        "assistance": { "$ref": "#/definitions/category" },
+        "stairAssist": { "$ref": "#/definitions/category" },
+        "tripType": { "$ref": "#/definitions/tripCategory" }
+      },
+      "additionalProperties": true
+    },
+    "waitingFees": { "type": "object" },
+    "options": { "type": "object" },
+    "mappings": { "type": "object" },
+    "resultLabels": { "type": "object" },
+    "historySettings": {
+      "type": "object",
+      "properties": {
+        "saveHistory": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "definitions": {
+    "categoryItem": {
+      "type": "object",
+      "required": ["id", "label"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "amount": { "type": "number" },
+        "visible": { "type": "boolean" },
+        "order": { "type": "number" }
+      },
+      "additionalProperties": true
+    },
+    "tripTypeItem": {
+      "allOf": [
+        { "$ref": "#/definitions/categoryItem" },
+        {
+          "type": "object",
+          "properties": {
+            "distanceMultiplier": { "type": "number", "exclusiveMinimum": 0 },
+            "waitingFeeRef": { "type": "string" },
+            "escortFeeRef": { "type": "string" }
+          },
+          "additionalProperties": true
+        }
+      ]
+    },
+    "category": {
+      "type": "object",
+      "required": ["items"],
+      "properties": {
+        "label": { "type": "string" },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/categoryItem" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "tripCategory": {
+      "type": "object",
+      "required": ["items"],
+      "properties": {
+        "label": { "type": "string" },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/tripTypeItem" }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
