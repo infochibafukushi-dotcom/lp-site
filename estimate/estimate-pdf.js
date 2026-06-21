@@ -50,20 +50,23 @@
       cellPadV: 4,
       cellPadH: 6,
       amountPadRight: 12,
-      sectionGap: 10,
-      lineHeight: 1.45,
-      resultNotesLineHeight: 1.55,
-      totalBoxPad: 12,
-      resultNotesGap: 8,
-      footerGap: 8,
-      footerQrSize: 56
+      sectionGap: 7,
+      lineHeight: 1.4,
+      resultNotesLineHeight: 1.45,
+      totalBoxPad: 8,
+      resultNotesGap: 4,
+      footerGap: 4,
+      footerQrSize: 47,
+      qrRowGap: 14,
+      titleGap: 4,
+      headingGap: 2
     };
   }
 
   function scaleLayout(layout, factor){
     const next = {};
     Object.keys(layout).forEach(function(key){
-      const min = key === "amountPadRight" ? 8 : 6;
+      const min = key === "amountPadRight" ? 8 : key === "footerQrSize" ? 40 : 6;
       next[key] = Math.max(min, Math.round(layout[key] * factor * 10) / 10);
     });
     return next;
@@ -111,7 +114,7 @@
 
     const justifyContent = items.length === 2 ? "space-around" : "center";
     return (
-      "<div style=\"display:flex;justify-content:" + justifyContent + ";align-items:flex-start;gap:20px;" +
+      "<div style=\"display:flex;justify-content:" + justifyContent + ";align-items:flex-start;gap:" + layout.qrRowGap + "px;" +
       "margin-top:" + layout.footerGap + "px;\">" +
       items.join("") +
       "</div>"
@@ -280,7 +283,7 @@
 
     el.innerHTML =
       "<div style=\"box-sizing:border-box;width:100%;\">" +
-        "<h1 style=\"margin:0 0 6px;font-size:" + layout.titleFont + "px;line-height:1.25;\">概算見積書</h1>" +
+        "<h1 style=\"margin:0 0 " + layout.titleGap + "px;font-size:" + layout.titleFont + "px;line-height:1.25;\">概算見積書</h1>" +
         "<p style=\"margin:0 0 " + layout.sectionGap + "px;font-size:" + layout.metaFont + "px;color:#666;line-height:" + layout.lineHeight + ";\">" +
           escapeHtml(data.pageTitle || "概算見積シミュレーター") +
         "</p>" +
@@ -288,12 +291,12 @@
           "<tr><td style=\"padding:" + layout.cellPadV + "px 0;color:#666;width:28%;\">見積番号</td><td style=\"padding:" + layout.cellPadV + "px 0;font-weight:700;\">" + escapeHtml(data.estimateNumber || "") + "</td></tr>" +
           "<tr><td style=\"padding:" + layout.cellPadV + "px 0;color:#666;\">見積日時</td><td style=\"padding:" + layout.cellPadV + "px 0;\">" + escapeHtml(formatDateTime(data.createdAt)) + "</td></tr>" +
         "</table>" +
-        "<h2 style=\"margin:0 0 4px;font-size:" + layout.sectionFont + "px;color:#9a6b16;line-height:1.3;\">ご利用内容</h2>" +
+        "<h2 style=\"margin:0 0 " + layout.headingGap + "px;font-size:" + layout.sectionFont + "px;color:#9a6b16;line-height:1.3;\">ご利用内容</h2>" +
         "<table style=\"" + tableStyle + "\">" + (usageRows || "<tr><td colspan=\"2\" style=\"padding:" + layout.cellPadV + "px " + layout.cellPadH + "px;\">—</td></tr>") + "</table>" +
-        "<h2 style=\"margin:0 0 4px;font-size:" + layout.sectionFont + "px;color:#9a6b16;line-height:1.3;\">料金内訳</h2>" +
+        "<h2 style=\"margin:0 0 " + layout.headingGap + "px;font-size:" + layout.sectionFont + "px;color:#9a6b16;line-height:1.3;\">料金内訳</h2>" +
         "<table style=\"" + tableStyle + "\">" + (breakdownRows || "<tr><td colspan=\"2\" style=\"padding:" + layout.cellPadV + "px " + layout.cellPadH + "px;\">—</td></tr>") + "</table>" +
-        "<div style=\"margin:0;padding:" + layout.totalBoxPad + "px;border:2px solid #e87f00;border-radius:8px;text-align:center;\">" +
-          "<div style=\"font-size:" + layout.totalLabelFont + "px;color:#666;margin-bottom:4px;line-height:1.3;\">概算合計</div>" +
+        "<div class=\"estimate-pdf-total\" style=\"box-sizing:border-box;width:100%;margin:0;padding:" + layout.totalBoxPad + "px;border:2px solid #e87f00;border-radius:8px;text-align:center;\">" +
+          "<div style=\"font-size:" + layout.totalLabelFont + "px;color:#666;margin-bottom:2px;line-height:1.3;\">概算合計</div>" +
           "<div style=\"font-size:" + layout.totalFont + "px;font-weight:800;color:#c62828;line-height:1.2;\">" + escapeHtml(formatYen(data.total)) + "～</div>" +
         "</div>" +
         resultNotesHtml +

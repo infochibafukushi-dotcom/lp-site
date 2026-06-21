@@ -501,6 +501,10 @@
   box-sizing:border-box;
   text-align:right;
 }
+.estimate-pdf-source .estimate-pdf-total{
+  box-sizing:border-box;
+  width:100%;
+}
 
 .estimate-pdf-btn{
   display:block;
