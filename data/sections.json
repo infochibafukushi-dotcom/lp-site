@@ -585,8 +585,8 @@
     "menuGroups": [],
     "menuBottomCard": {
       "visible": false,
-      "title": "",
-      "text": ""
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
     },
     "configFooterCtas": {
       "visible": true,
