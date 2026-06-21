@@ -38,6 +38,14 @@
     const defaults = global.EstimateDefaults?.createDefaultEstimateConfig?.() || {};
     if(defaults.pdfFooter){
       data.pdfFooter = Object.assign({}, defaults.pdfFooter, data.pdfFooter || {});
+      if(!data.pdfFooter.homepageUrl && data.pdfFooter.qrCodeUrl){
+        data.pdfFooter.homepageUrl = String(data.pdfFooter.qrCodeUrl || "");
+      }
+      if(!data.pdfFooter.homepageQrLabel && data.pdfFooter.qrCodeLabel){
+        data.pdfFooter.homepageQrLabel = String(data.pdfFooter.qrCodeLabel || "");
+      }
+      delete data.pdfFooter.qrCodeUrl;
+      delete data.pdfFooter.qrCodeLabel;
     }
     if(data.page && defaults.page?.resultNotes && typeof data.page.resultNotes !== "string"){
       data.page.resultNotes = defaults.page.resultNotes;

@@ -127,10 +127,10 @@
         businessName: "",
         phone: "",
         homepageUrl: "",
+        homepageQrLabel: "ホームページはこちら",
         lineUrl: "",
-        message: "ご予約・ご相談はお気軽にお問い合わせください",
-        qrCodeUrl: "",
-        qrCodeLabel: "ホームページはこちら"
+        lineQrLabel: "LINEで相談",
+        message: "ご予約・ご相談はお気軽にお問い合わせください"
       },
       resultLabels: {
         baseFare: "基本運賃",

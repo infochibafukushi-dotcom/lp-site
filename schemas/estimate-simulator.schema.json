@@ -62,10 +62,10 @@
         "businessName": { "type": "string" },
         "phone": { "type": "string" },
         "homepageUrl": { "type": "string" },
+        "homepageQrLabel": { "type": "string" },
         "lineUrl": { "type": "string" },
-        "message": { "type": "string" },
-        "qrCodeUrl": { "type": "string" },
-        "qrCodeLabel": { "type": "string" }
+        "lineQrLabel": { "type": "string" },
+        "message": { "type": "string" }
       },
       "additionalProperties": true
     }

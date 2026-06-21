@@ -110,36 +110,69 @@
       <div class="row"><label>事業者名</label><input type="text" id="estimatePdfFooterBusinessName" value="${escapeAttr(footer.businessName || "")}" placeholder="例：ちばケアタクシー"></div>
       <div class="row"><label>電話番号</label><input type="text" id="estimatePdfFooterPhone" value="${escapeAttr(footer.phone || "")}" placeholder="例：043-000-0000"></div>
       <div class="row"><label>ホームページURL</label><input type="url" id="estimatePdfFooterHomepageUrl" value="${escapeAttr(footer.homepageUrl || "")}" placeholder="https://example.com"></div>
+      <div class="row"><label>ホームページQRラベル</label><input type="text" id="estimatePdfFooterHomepageQrLabel" value="${escapeAttr(footer.homepageQrLabel || "ホームページはこちら")}" placeholder="例：ホームページはこちら"></div>
       <div class="row"><label>LINE URL</label><input type="url" id="estimatePdfFooterLineUrl" value="${escapeAttr(footer.lineUrl || "")}" placeholder="https://line.me/xxxx"></div>
+      <div class="row"><label>LINE QRラベル</label><input type="text" id="estimatePdfFooterLineQrLabel" value="${escapeAttr(footer.lineQrLabel || "LINEで相談")}" placeholder="例：LINEで相談"></div>
       <div class="row"><label>フッターメッセージ</label><textarea id="estimatePdfFooterMessage" rows="2">${escapeHtml(footer.message || "")}</textarea></div>
-      <div class="row"><label>QRコードURL</label><input type="url" id="estimatePdfFooterQrUrl" value="${escapeAttr(footer.qrCodeUrl || "")}" placeholder="https://example.com"></div>
-      <div class="row"><label>QRコードラベル</label><input type="text" id="estimatePdfFooterQrLabel" value="${escapeAttr(footer.qrCodeLabel || "ホームページはこちら")}" placeholder="例：ホームページはこちら"></div>
-      <div id="estimatePdfFooterQrPreview" class="estimate-qr-preview"></div>
+      <div id="estimatePdfFooterQrPreview" class="estimate-qr-preview" style="margin-top:12px;"></div>
     `;
+  }
+
+  function renderQrPreviewItem(dataUrl, label, displaySize){
+    if(!dataUrl){
+      return "";
+    }
+    return (
+      "<div style=\"flex:1 1 0;min-width:0;max-width:160px;text-align:center;padding:12px;border:1px solid #ddd;border-radius:8px;background:#fafafa;\">" +
+      "<img src=\"" + escapeAttr(dataUrl) + "\" alt=\"QRコードプレビュー\" width=\"" + displaySize + "\" height=\"" + displaySize + "\" style=\"display:block;margin:0 auto 8px;\">" +
+      (label ? "<div style=\"font-size:13px;color:#444;line-height:1.35;\">" + escapeHtml(label) + "</div>" : "") +
+      "</div>"
+    );
   }
 
   async function updatePdfFooterQrPreview(){
     const preview = document.getElementById("estimatePdfFooterQrPreview");
     if(!preview) return;
-    const url = document.getElementById("estimatePdfFooterQrUrl")?.value.trim() || "";
-    const label = document.getElementById("estimatePdfFooterQrLabel")?.value.trim() || "";
-    if(!url){
-      preview.innerHTML = "<p class=\"note\">QRコードURLを入力するとプレビューが表示されます。</p>";
+
+    const homepageUrl = document.getElementById("estimatePdfFooterHomepageUrl")?.value.trim() || "";
+    const lineUrl = document.getElementById("estimatePdfFooterLineUrl")?.value.trim() || "";
+    const homepageLabel = document.getElementById("estimatePdfFooterHomepageQrLabel")?.value.trim() || "ホームページはこちら";
+    const lineLabel = document.getElementById("estimatePdfFooterLineQrLabel")?.value.trim() || "LINEで相談";
+    const displaySize = 56;
+
+    if(!homepageUrl && !lineUrl){
+      preview.innerHTML = "<p class=\"note\">ホームページURLまたはLINE URLを入力するとQRプレビューが表示されます。</p>";
       return;
     }
     if(!window.EstimateQr){
       preview.innerHTML = "<p class=\"note\">QRコードライブラリを読み込めません。</p>";
       return;
     }
-    const dataUrl = await window.EstimateQr.toDataUrl(url, 120);
-    if(!dataUrl){
-      preview.innerHTML = "<p class=\"note\">QRコードを生成できませんでした。URLを確認してください。</p>";
-      return;
+
+    const [homepageQr, lineQr] = await Promise.all([
+      homepageUrl ? window.EstimateQr.toDataUrl(homepageUrl, displaySize * 2) : "",
+      lineUrl ? window.EstimateQr.toDataUrl(lineUrl, displaySize * 2) : ""
+    ]);
+
+    const items = [];
+    if(homepageUrl){
+      items.push(
+        homepageQr
+          ? renderQrPreviewItem(homepageQr, homepageLabel, displaySize)
+          : "<div style=\"flex:1 1 0;min-width:0;max-width:160px;padding:12px;border:1px solid #f0d0d0;border-radius:8px;background:#fff5f5;color:#a33;font-size:13px;\">ホームページQRを生成できませんでした。</div>"
+      );
     }
+    if(lineUrl){
+      items.push(
+        lineQr
+          ? renderQrPreviewItem(lineQr, lineLabel, displaySize)
+          : "<div style=\"flex:1 1 0;min-width:0;max-width:160px;padding:12px;border:1px solid #f0d0d0;border-radius:8px;background:#fff5f5;color:#a33;font-size:13px;\">LINE QRを生成できませんでした。</div>"
+      );
+    }
+
     preview.innerHTML =
-      "<div style=\"display:inline-block;text-align:center;padding:12px;border:1px solid #ddd;border-radius:8px;background:#fafafa;\">" +
-      "<img src=\"" + escapeAttr(dataUrl) + "\" alt=\"QRコードプレビュー\" width=\"120\" height=\"120\" style=\"display:block;margin:0 auto 8px;\">" +
-      (label ? "<div style=\"font-size:13px;color:#444;\">" + escapeHtml(label) + "</div>" : "") +
+      "<div style=\"display:flex;justify-content:" + (items.length === 2 ? "space-around" : "center") + ";align-items:flex-start;gap:20px;max-width:360px;\">" +
+      items.join("") +
       "</div>";
   }
 
@@ -304,10 +337,10 @@
       businessName: document.getElementById("estimatePdfFooterBusinessName")?.value.trim() || "",
       phone: document.getElementById("estimatePdfFooterPhone")?.value.trim() || "",
       homepageUrl: document.getElementById("estimatePdfFooterHomepageUrl")?.value.trim() || "",
+      homepageQrLabel: document.getElementById("estimatePdfFooterHomepageQrLabel")?.value.trim() || "ホームページはこちら",
       lineUrl: document.getElementById("estimatePdfFooterLineUrl")?.value.trim() || "",
-      message: document.getElementById("estimatePdfFooterMessage")?.value.trim() || "",
-      qrCodeUrl: document.getElementById("estimatePdfFooterQrUrl")?.value.trim() || "",
-      qrCodeLabel: document.getElementById("estimatePdfFooterQrLabel")?.value.trim() || "ホームページはこちら"
+      lineQrLabel: document.getElementById("estimatePdfFooterLineQrLabel")?.value.trim() || "LINEで相談",
+      message: document.getElementById("estimatePdfFooterMessage")?.value.trim() || ""
     };
 
     document.querySelectorAll("[data-estimate-path]").forEach(function(el){
@@ -425,22 +458,32 @@
       businessName: "",
       phone: "",
       homepageUrl: "",
+      homepageQrLabel: "ホームページはこちら",
       lineUrl: "",
-      message: "ご予約・ご相談はお気軽にお問い合わせください",
-      qrCodeUrl: "",
-      qrCodeLabel: "ホームページはこちら"
+      lineQrLabel: "LINEで相談",
+      message: "ご予約・ご相談はお気軽にお問い合わせください"
     };
     draft.pdfFooter = Object.assign({}, defaults, draft.pdfFooter || {});
+
+    if(!draft.pdfFooter.homepageUrl && draft.pdfFooter.qrCodeUrl){
+      draft.pdfFooter.homepageUrl = String(draft.pdfFooter.qrCodeUrl || "");
+    }
+    if(!draft.pdfFooter.homepageQrLabel && draft.pdfFooter.qrCodeLabel){
+      draft.pdfFooter.homepageQrLabel = String(draft.pdfFooter.qrCodeLabel || "");
+    }
+    delete draft.pdfFooter.qrCodeUrl;
+    delete draft.pdfFooter.qrCodeLabel;
+
     if(typeof draft.pdfFooter.enabled !== "boolean"){
       draft.pdfFooter.enabled = true;
     }
     draft.pdfFooter.businessName = String(draft.pdfFooter.businessName || "");
     draft.pdfFooter.phone = String(draft.pdfFooter.phone || "");
     draft.pdfFooter.homepageUrl = String(draft.pdfFooter.homepageUrl || "");
+    draft.pdfFooter.homepageQrLabel = String(draft.pdfFooter.homepageQrLabel || defaults.homepageQrLabel || "");
     draft.pdfFooter.lineUrl = String(draft.pdfFooter.lineUrl || "");
+    draft.pdfFooter.lineQrLabel = String(draft.pdfFooter.lineQrLabel || defaults.lineQrLabel || "");
     draft.pdfFooter.message = String(draft.pdfFooter.message || defaults.message || "");
-    draft.pdfFooter.qrCodeUrl = String(draft.pdfFooter.qrCodeUrl || "");
-    draft.pdfFooter.qrCodeLabel = String(draft.pdfFooter.qrCodeLabel || defaults.qrCodeLabel || "");
     return draft;
   }
 
@@ -624,8 +667,10 @@
     if(
       event.target &&
       (
-        event.target.id === "estimatePdfFooterQrUrl" ||
-        event.target.id === "estimatePdfFooterQrLabel"
+        event.target.id === "estimatePdfFooterHomepageUrl" ||
+        event.target.id === "estimatePdfFooterHomepageQrLabel" ||
+        event.target.id === "estimatePdfFooterLineUrl" ||
+        event.target.id === "estimatePdfFooterLineQrLabel"
       )
     ){
       updatePdfFooterQrPreview();

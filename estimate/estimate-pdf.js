@@ -55,7 +55,7 @@
       totalBoxPad: 12,
       resultNotesGap: 8,
       footerGap: 8,
-      footerQrSize: 72
+      footerQrSize: 56
     };
   }
 
@@ -74,17 +74,56 @@
     );
   }
 
-  function buildPdfFooterHtml(pdfFooter, layout, qrDataUrl){
+  function buildQrItemHtml(dataUrl, label, layout){
+    if(!dataUrl){
+      return "";
+    }
+    return (
+      "<div style=\"flex:1 1 0;min-width:0;max-width:140px;text-align:center;\">" +
+      "<img src=\"" + dataUrl + "\" alt=\"\" width=\"" + layout.footerQrSize + "\" height=\"" + layout.footerQrSize + "\" " +
+      "style=\"display:block;margin:0 auto;\">" +
+      (label
+        ? "<div style=\"margin-top:4px;font-size:" + Math.max(8, layout.footerFont - 1) + "px;line-height:1.35;\">" + escapeHtml(label) + "</div>"
+        : "") +
+      "</div>"
+    );
+  }
+
+  function buildQrRowHtml(pdfFooter, layout, qrDataUrls){
+    qrDataUrls = qrDataUrls || {};
+    const homepageUrl = String(pdfFooter.homepageUrl || "").trim();
+    const lineUrl = String(pdfFooter.lineUrl || "").trim();
+    const homepageLabel = String(pdfFooter.homepageQrLabel || "ホームページはこちら").trim();
+    const lineLabel = String(pdfFooter.lineQrLabel || "LINEで相談").trim();
+    const items = [];
+
+    if(homepageUrl && qrDataUrls.homepage){
+      items.push(buildQrItemHtml(qrDataUrls.homepage, homepageLabel, layout));
+    }
+    if(lineUrl && qrDataUrls.line){
+      items.push(buildQrItemHtml(qrDataUrls.line, lineLabel, layout));
+    }
+    if(!items.length){
+      return "";
+    }
+
+    const justifyContent = items.length === 2 ? "space-around" : "center";
+    return (
+      "<div style=\"display:flex;justify-content:" + justifyContent + ";align-items:flex-start;gap:20px;" +
+      "margin-top:" + layout.footerGap + "px;\">" +
+      items.join("") +
+      "</div>"
+    );
+  }
+
+  function buildPdfFooterHtml(pdfFooter, layout, qrDataUrls){
     if(!pdfFooter || pdfFooter.enabled === false){
       return "";
     }
 
     const businessName = String(pdfFooter.businessName || "").trim();
     const phone = String(pdfFooter.phone || "").trim();
-    const homepageUrl = String(pdfFooter.homepageUrl || "").trim();
-    const lineUrl = String(pdfFooter.lineUrl || "").trim();
     const message = String(pdfFooter.message || "").trim();
-    const qrLabel = String(pdfFooter.qrCodeLabel || "").trim();
     const parts = [];
 
     if(businessName){
@@ -97,25 +136,12 @@
     if(phone){
       parts.push("<div>TEL：" + escapeHtml(phone) + "</div>");
     }
-    if(homepageUrl && !qrDataUrl){
-      parts.push("<div style=\"margin-top:4px;\">ホームページ</div>");
-      parts.push("<div style=\"word-break:break-all;\">" + escapeHtml(homepageUrl) + "</div>");
+
+    const qrRowHtml = buildQrRowHtml(pdfFooter, layout, qrDataUrls);
+    if(qrRowHtml){
+      parts.push(qrRowHtml);
     }
-    if(lineUrl){
-      parts.push("<div style=\"margin-top:4px;\">LINE相談</div>");
-      parts.push("<div style=\"word-break:break-all;\">" + escapeHtml(lineUrl) + "</div>");
-    }
-    if(qrDataUrl){
-      parts.push(
-        "<div style=\"margin-top:" + layout.footerGap + "px;\">" +
-        "<img src=\"" + qrDataUrl + "\" alt=\"\" width=\"" + layout.footerQrSize + "\" height=\"" + layout.footerQrSize + "\" " +
-        "style=\"display:block;margin:0 auto;\">" +
-        "</div>"
-      );
-      if(qrLabel){
-        parts.push("<div style=\"margin-top:4px;\">" + escapeHtml(qrLabel) + "</div>");
-      }
-    }
+
     if(message){
       parts.push(
         "<div style=\"margin-top:" + layout.footerGap + "px;\">" + escapeHtml(message) + "</div>"
@@ -135,9 +161,13 @@
     );
   }
 
-  function buildPdfElement(data, layout, qrDataUrl){
+  function emptyQrDataUrls(){
+    return { homepage: "", line: "" };
+  }
+
+  function buildPdfElement(data, layout, qrDataUrls){
     layout = layout || getDefaultLayout();
-    qrDataUrl = qrDataUrl || "";
+    qrDataUrls = qrDataUrls || emptyQrDataUrls();
     const el = document.createElement("div");
     el.className = "estimate-pdf-source";
     el.setAttribute("aria-hidden", "true");
@@ -186,7 +216,7 @@
       )
       : "";
 
-    const footerHtml = buildPdfFooterHtml(data.pdfFooter, layout, qrDataUrl);
+    const footerHtml = buildPdfFooterHtml(data.pdfFooter, layout, qrDataUrls);
 
     const bodyFont = layout.baseFont + "px";
     const tableStyle =
@@ -216,7 +246,7 @@
     return el;
   }
 
-  function measureContentHeight(data, qrDataUrl){
+  function measureContentHeight(data, qrDataUrls){
     const container = document.createElement("div");
     container.style.cssText = [
       "position:fixed",
@@ -233,7 +263,7 @@
     let layout = getDefaultLayout();
     try{
       for(let i = 0; i < 24; i++){
-        const probe = buildPdfElement(data, layout, qrDataUrl);
+        const probe = buildPdfElement(data, layout, qrDataUrls);
         container.appendChild(probe);
         const contentHeight = probe.scrollHeight;
         container.removeChild(probe);
@@ -242,7 +272,7 @@
         }
         layout = scaleLayout(layout, 0.92);
       }
-      const fallback = buildPdfElement(data, layout, qrDataUrl);
+      const fallback = buildPdfElement(data, layout, qrDataUrls);
       container.appendChild(fallback);
       const contentHeight = Math.min(fallback.scrollHeight, CONTENT_HEIGHT_PX);
       container.removeChild(fallback);
@@ -260,15 +290,28 @@
     });
   }
 
-  async function resolveQrDataUrl(pdfFooter, size){
+  async function resolveQrDataUrls(pdfFooter, renderSize){
+    const empty = emptyQrDataUrls();
     if(!pdfFooter || pdfFooter.enabled === false){
-      return "";
+      return empty;
     }
-    const qrUrl = String(pdfFooter.qrCodeUrl || "").trim();
-    if(!qrUrl || !global.EstimateQr || typeof global.EstimateQr.toDataUrl !== "function"){
-      return "";
+    if(!global.EstimateQr || typeof global.EstimateQr.toDataUrl !== "function"){
+      return empty;
     }
-    return global.EstimateQr.toDataUrl(qrUrl, size);
+
+    const homepageUrl = String(pdfFooter.homepageUrl || "").trim();
+    const lineUrl = String(pdfFooter.lineUrl || "").trim();
+    const generateSize = Number(renderSize) > 0 ? Number(renderSize) * 2 : 112;
+
+    const [homepage, line] = await Promise.all([
+      homepageUrl ? global.EstimateQr.toDataUrl(homepageUrl, generateSize) : "",
+      lineUrl ? global.EstimateQr.toDataUrl(lineUrl, generateSize) : ""
+    ]);
+
+    return {
+      homepage: homepage || "",
+      line: line || ""
+    };
   }
 
   async function savePdf(data){
@@ -278,10 +321,10 @@
 
     console.log("PDF_DEBUG_4 PDF DOM生成");
     const defaultLayout = getDefaultLayout();
-    const qrDataUrl = await resolveQrDataUrl(data.pdfFooter, defaultLayout.footerQrSize * 2);
-    const measured = measureContentHeight(data, qrDataUrl);
+    const qrDataUrls = await resolveQrDataUrls(data.pdfFooter, defaultLayout.footerQrSize);
+    const measured = measureContentHeight(data, qrDataUrls);
     const layout = measured.layout;
-    const element = buildPdfElement(data, layout, qrDataUrl);
+    const element = buildPdfElement(data, layout, qrDataUrls);
     const container = document.createElement("div");
     container.style.cssText = [
       "position:fixed",
