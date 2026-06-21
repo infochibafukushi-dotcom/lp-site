@@ -16,10 +16,27 @@
     });
   }
 
+  function escapeHtml(text){
+    return String(text ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;");
+  }
+
   function buildPdfElement(data){
     const el = document.createElement("div");
     el.className = "estimate-pdf-source";
-    el.style.cssText = "width:720px;padding:32px;font-family:'Hiragino Sans','Yu Gothic','Meiryo',sans-serif;color:#222;background:#fff;";
+    el.setAttribute("aria-hidden", "true");
+    el.style.cssText = [
+      "box-sizing:border-box",
+      "width:720px",
+      "min-height:200px",
+      "padding:32px",
+      "font-family:'Hiragino Sans','Yu Gothic','Meiryo',sans-serif",
+      "color:#222",
+      "background:#fff"
+    ].join(";");
 
     const usageRows = (data.usageSummary || []).map(function(line){
       return `<tr><td style="padding:6px 8px;border-bottom:1px solid #eee;color:#666;width:38%;">${escapeHtml(line.label)}</td><td style="padding:6px 8px;border-bottom:1px solid #eee;font-weight:600;">${escapeHtml(line.value)}</td></tr>`;
@@ -37,9 +54,9 @@
         <tr><td style="padding:6px 0;color:#666;">見積日時</td><td style="padding:6px 0;">${escapeHtml(formatDateTime(data.createdAt))}</td></tr>
       </table>
       <h2 style="margin:0 0 8px;font-size:16px;color:#9a6b16;">ご利用内容</h2>
-      <table style="width:100%;border-collapse:collapse;margin-bottom:18px;font-size:14px;">${usageRows}</table>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:18px;font-size:14px;">${usageRows || "<tr><td colspan=\"2\" style=\"padding:6px 8px;\">—</td></tr>"}</table>
       <h2 style="margin:0 0 8px;font-size:16px;color:#9a6b16;">料金内訳</h2>
-      <table style="width:100%;border-collapse:collapse;margin-bottom:18px;font-size:14px;">${breakdownRows}</table>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:18px;font-size:14px;">${breakdownRows || "<tr><td colspan=\"2\" style=\"padding:6px 8px;\">—</td></tr>"}</table>
       <div style="margin:16px 0;padding:16px;border:2px solid #e87f00;border-radius:8px;text-align:center;">
         <div style="font-size:14px;color:#666;margin-bottom:4px;">概算合計</div>
         <div style="font-size:28px;font-weight:800;color:#c62828;">${escapeHtml(formatYen(data.total))}</div>
@@ -50,23 +67,35 @@
     return el;
   }
 
-  function escapeHtml(text){
-    return String(text ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;");
+  function waitForNextFrame(){
+    return new Promise(function(resolve){
+      requestAnimationFrame(function(){
+        requestAnimationFrame(resolve);
+      });
+    });
   }
 
   async function savePdf(data){
     if(typeof html2pdf === "undefined"){
       throw new Error("PDF ライブラリが読み込まれていません。");
     }
+
     const element = buildPdfElement(data);
-    element.style.position = "fixed";
-    element.style.left = "-9999px";
-    element.style.top = "0";
-    document.body.appendChild(element);
+    const container = document.createElement("div");
+    container.style.cssText = [
+      "position:fixed",
+      "left:0",
+      "top:0",
+      "width:720px",
+      "z-index:-1",
+      "opacity:0",
+      "pointer-events:none",
+      "overflow:visible"
+    ].join(";");
+    container.appendChild(element);
+    document.body.appendChild(container);
+
+    await waitForNextFrame();
 
     const filename = (data.estimateNumber || "estimate") + ".pdf";
     try{
@@ -74,11 +103,19 @@
         margin: 10,
         filename: filename,
         image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          scrollX: 0,
+          scrollY: 0,
+          backgroundColor: "#ffffff",
+          width: element.scrollWidth,
+          height: element.scrollHeight
+        },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
       }).from(element).save();
     }finally{
-      element.remove();
+      container.remove();
     }
   }
 

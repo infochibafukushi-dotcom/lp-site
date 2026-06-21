@@ -63,6 +63,12 @@
           pushError(errors, "page." + key + " must be a string");
         }
       });
+      if(data.page.distanceLabel != null && typeof data.page.distanceLabel !== "string"){
+        pushError(errors, "page.distanceLabel must be a string");
+      }
+      if(data.page.distanceNote != null && typeof data.page.distanceNote !== "string"){
+        pushError(errors, "page.distanceNote must be a string");
+      }
     }
 
     if(!isObject(data.basicFees)){
@@ -78,7 +84,7 @@
     if(!isObject(data.categories)){
       pushError(errors, "categories is required");
     }else{
-      ["mobility", "assistance", "stairAssist", "tripType"].forEach(function(key){
+      ["mobility", "assistance", "stairAssist", "tripType", "roundTripAddon"].forEach(function(key){
         const category = data.categories[key];
         if(!isObject(category)){
           pushError(errors, "categories." + key + " is required");
@@ -88,8 +94,28 @@
           errors,
           "categories." + key + ".items",
           category.items,
-          key === "tripType"
+          key === "tripType" || key === "roundTripAddon"
         );
+      });
+    }
+
+    if(isObject(data.mappings?.mobilityAssistance)){
+      Object.keys(data.mappings.mobilityAssistance).forEach(function(mobilityId){
+        const rule = data.mappings.mobilityAssistance[mobilityId];
+        const path = "mappings.mobilityAssistance." + mobilityId;
+        if(!isObject(rule)){
+          pushError(errors, path + " must be an object");
+          return;
+        }
+        if(!["select", "required", "fixed"].includes(rule.mode)){
+          pushError(errors, path + ".mode must be select, required, or fixed");
+        }
+        if(rule.assistanceIds != null && !Array.isArray(rule.assistanceIds)){
+          pushError(errors, path + ".assistanceIds must be an array");
+        }
+        if(rule.assistanceId != null && typeof rule.assistanceId !== "string"){
+          pushError(errors, path + ".assistanceId must be a string");
+        }
       });
     }
 

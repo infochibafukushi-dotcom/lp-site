@@ -52,7 +52,7 @@
   }
 
   function renderTripBehaviorFields(categoryKey, item, index){
-    if(categoryKey !== "tripType") return "";
+    if(categoryKey !== "tripType" && categoryKey !== "roundTripAddon") return "";
     const waitingKeys = Object.keys(estimateDraft.waitingFees || {});
     const waitingOptions = ['<option value="">なし</option>'].concat(waitingKeys.map(function(key){
       const selected = item.waitingFeeRef === key ? " selected" : "";
@@ -93,6 +93,7 @@
             <div class="row"><label>並び順</label><input type="number" min="0" step="1" data-item-field="order" data-category="${escapeAttr(categoryKey)}" data-index="${index}" value="${escapeAttr(item.order ?? (index + 1))}"></div>
           </div>
           ${renderTripBehaviorFields(categoryKey, item, index)}
+          ${categoryKey === "tripType" ? `<label><input type="checkbox" data-item-field="showInSelector" data-category="${escapeAttr(categoryKey)}" data-index="${index}" ${item.showInSelector !== false ? "checked" : ""}> 送迎方法の選択肢に表示</label>` : ""}
           <div class="row"><label>説明文（必須推奨）</label><textarea rows="3" data-item-field="description" data-category="${escapeAttr(categoryKey)}" data-index="${index}">${escapeHtml(item.description || "")}</textarea></div>
           <label><input type="checkbox" data-item-field="visible" data-category="${escapeAttr(categoryKey)}" data-index="${index}" ${item.visible !== false ? "checked" : ""}> 表示する</label>
         </div>
@@ -100,22 +101,35 @@
     }).join("");
   }
 
-  function renderMappingsEditor(){
+  function renderMobilityAssistanceEditor(){
     const root = document.getElementById("estimateMappingsEditor");
     if(!root || !estimateDraft) return;
     const mobilityItems = estimateDraft.categories?.mobility?.items || [];
     const assistanceItems = estimateDraft.categories?.assistance?.items || [];
-    const mappings = estimateDraft.mappings?.mobilityToAssistance || {};
+    const rules = estimateDraft.mappings?.mobilityAssistance || {};
 
     root.innerHTML = mobilityItems.map(function(mobility){
-      const options = assistanceItems.map(function(assist){
-        const selected = mappings[mobility.id] === assist.id ? " selected" : "";
+      const rule = rules[mobility.id] || { mode: "select", assistanceIds: [], assistanceId: "" };
+      const modeOptions = ["select", "required", "fixed"].map(function(mode){
+        const selected = rule.mode === mode ? " selected" : "";
+        return `<option value="${mode}"${selected}>${mode}</option>`;
+      }).join("");
+      const assistOptions = assistanceItems.map(function(assist){
+        const selected = (rule.assistanceIds || []).includes(assist.id) ? " selected" : "";
+        return `<option value="${escapeAttr(assist.id)}"${selected}>${escapeHtml(assist.label || assist.id)}</option>`;
+      }).join("");
+      const fixedOptions = assistanceItems.map(function(assist){
+        const selected = rule.assistanceId === assist.id ? " selected" : "";
         return `<option value="${escapeAttr(assist.id)}"${selected}>${escapeHtml(assist.label || assist.id)}</option>`;
       }).join("");
       return `
-        <div class="row">
-          <label>${escapeHtml(mobility.label || mobility.id)}</label>
-          <select data-mapping-mobility="${escapeAttr(mobility.id)}">${options}</select>
+        <div class="estimate-admin-item">
+          <strong>${escapeHtml(mobility.label || mobility.id)}</strong>
+          <div class="grid2">
+            <div class="row"><label>選択方式</label><select data-mobility-rule-mode="${escapeAttr(mobility.id)}">${modeOptions}</select></div>
+            <div class="row"><label>固定介助（fixed時）</label><select data-mobility-rule-fixed="${escapeAttr(mobility.id)}">${fixedOptions}</select></div>
+          </div>
+          <div class="row"><label>選択肢（select/required時・Ctrlで複数選択）</label><select multiple size="4" data-mobility-rule-ids="${escapeAttr(mobility.id)}">${assistOptions}</select></div>
         </div>
       `;
     }).join("");
@@ -128,7 +142,6 @@
     const dp = estimateDraft.distancePricing || {};
     const patternA = dp.patternA || {};
     const patternB = dp.patternB || {};
-    const bodyOpt = estimateDraft.options?.bodyAssist || {};
 
     root.innerHTML = `
       <div class="row"><label><input type="checkbox" id="estimateEnabledToggle" ${estimateDraft.enabled !== false ? "checked" : ""}> 概算見積ページを公開する</label></div>
@@ -136,6 +149,8 @@
       <h3>ページ設定</h3>
       <div class="row"><label>タイトル</label><input type="text" id="estimatePageTitle" value="${escapeAttr(estimateDraft.page?.title || "")}"></div>
       <div class="row"><label>説明文</label><textarea id="estimatePageDescription" rows="3">${escapeHtml(estimateDraft.page?.description || "")}</textarea></div>
+      <div class="row"><label>距離入力ラベル</label><input type="text" id="estimateDistanceLabel" value="${escapeAttr(estimateDraft.page?.distanceLabel || "片道距離（km）")}"></div>
+      <div class="row"><label>距離入力補足文</label><textarea id="estimateDistanceNote" rows="2">${escapeHtml(estimateDraft.page?.distanceNote || "")}</textarea></div>
 
       <h3>基本料金</h3>
       ${renderFeeEditor("基本運賃", estimateDraft.basicFees?.baseFare, "basicFees.baseFare")}
@@ -178,26 +193,23 @@
       ${renderFeeEditor("待機30分料金", estimateDraft.waitingFees?.waiting30min, "waitingFees.waiting30min")}
       ${renderFeeEditor("付き添い30分料金", estimateDraft.waitingFees?.escort30min, "waitingFees.escort30min")}
 
-      <h3>送迎方法</h3>
+      <h3>送迎方法（片道・往復）</h3>
+      <p class="note">「送迎方法の選択肢に表示」にチェックした項目のみ利用者画面に表示されます。</p>
       <div id="estimateTripItems">${renderCategoryItems("tripType")}</div>
       <button type="button" class="secondary" data-action="add-item" data-category="tripType">送迎方法を追加</button>
 
-      <h3>追加オプション：身体介助</h3>
-      <div class="grid2">
-        <div class="row"><label>表示名</label><input type="text" id="estimateBodyAssistLabel" value="${escapeAttr(bodyOpt.label || "身体介助")}"></div>
-        <div class="row"><label>紐付け介助ID</label><input type="text" id="estimateBodyAssistId" value="${escapeAttr(bodyOpt.assistanceId || "body-assist")}"></div>
-      </div>
-      <div class="row"><label>説明文</label><textarea id="estimateBodyAssistDescription" rows="3">${escapeHtml(bodyOpt.description || "")}</textarea></div>
-      <label><input type="checkbox" id="estimateBodyAssistVisible" ${bodyOpt.visible !== false ? "checked" : ""}> 表示する</label>
+      <h3>往復時の待機・付き添い</h3>
+      <div id="estimateRoundTripAddonItems">${renderCategoryItems("roundTripAddon")}</div>
+      <button type="button" class="secondary" data-action="add-item" data-category="roundTripAddon">待機・付き添い項目を追加</button>
 
-      <h3>移動方法 → 介助内容 自動選択</h3>
+      <h3>移動方法 → 介助内容の選択ルール</h3>
       <div id="estimateMappingsEditor"></div>
 
       <h3>注意事項</h3>
       <div class="row"><label>概算見積ページに表示する注意事項</label><textarea id="estimatePageDisclaimer" rows="5">${escapeHtml(estimateDraft.page?.disclaimer || "")}</textarea></div>
     `;
 
-    renderMappingsEditor();
+    renderMobilityAssistanceEditor();
     toggleDistanceModeFields();
   }
 
@@ -227,7 +239,9 @@
     draft.page = {
       title: document.getElementById("estimatePageTitle")?.value.trim() || "",
       description: document.getElementById("estimatePageDescription")?.value || "",
-      disclaimer: document.getElementById("estimatePageDisclaimer")?.value || ""
+      disclaimer: document.getElementById("estimatePageDisclaimer")?.value || "",
+      distanceLabel: document.getElementById("estimateDistanceLabel")?.value.trim() || "片道距離（km）",
+      distanceNote: document.getElementById("estimateDistanceNote")?.value || ""
     };
 
     document.querySelectorAll("[data-estimate-path]").forEach(function(el){
@@ -275,27 +289,49 @@
     });
 
     draft.options = draft.options || {};
-    draft.options.bodyAssist = {
-      id: "body-assist-option",
-      label: document.getElementById("estimateBodyAssistLabel")?.value.trim() || "身体介助",
-      description: document.getElementById("estimateBodyAssistDescription")?.value || "",
-      assistanceId: document.getElementById("estimateBodyAssistId")?.value.trim() || "body-assist",
-      visible: document.getElementById("estimateBodyAssistVisible")?.checked !== false
-    };
+    delete draft.options.bodyAssist;
 
-    draft.mappings = draft.mappings || { mobilityToAssistance: {} };
-    document.querySelectorAll("[data-mapping-mobility]").forEach(function(el){
-      const mobilityId = el.getAttribute("data-mapping-mobility");
-      if(mobilityId){
-        draft.mappings.mobilityToAssistance[mobilityId] = el.value;
+    draft.mappings = draft.mappings || {};
+    draft.mappings.mobilityAssistance = draft.mappings.mobilityAssistance || {};
+    document.querySelectorAll("[data-mobility-rule-mode]").forEach(function(el){
+      const mobilityId = el.getAttribute("data-mobility-rule-mode");
+      if(!mobilityId) return;
+      if(!draft.mappings.mobilityAssistance[mobilityId]){
+        draft.mappings.mobilityAssistance[mobilityId] = { mode: "select", assistanceIds: [], assistanceId: "" };
       }
+      draft.mappings.mobilityAssistance[mobilityId].mode = el.value || "select";
     });
+    document.querySelectorAll("[data-mobility-rule-fixed]").forEach(function(el){
+      const mobilityId = el.getAttribute("data-mobility-rule-fixed");
+      if(!mobilityId) return;
+      if(!draft.mappings.mobilityAssistance[mobilityId]){
+        draft.mappings.mobilityAssistance[mobilityId] = { mode: "fixed", assistanceIds: [], assistanceId: "" };
+      }
+      draft.mappings.mobilityAssistance[mobilityId].assistanceId = el.value || "";
+    });
+    document.querySelectorAll("[data-mobility-rule-ids]").forEach(function(el){
+      const mobilityId = el.getAttribute("data-mobility-rule-ids");
+      if(!mobilityId) return;
+      if(!draft.mappings.mobilityAssistance[mobilityId]){
+        draft.mappings.mobilityAssistance[mobilityId] = { mode: "select", assistanceIds: [], assistanceId: "" };
+      }
+      draft.mappings.mobilityAssistance[mobilityId].assistanceIds = Array.from(el.selectedOptions || []).map(function(opt){
+        return opt.value;
+      });
+    });
+    delete draft.mappings.mobilityToAssistance;
 
     if(Array.isArray(draft.categories?.tripType?.items)){
       draft.categories.tripType.items.forEach(function(item){
         if(!(Number(item.distanceMultiplier) > 0)){
           item.distanceMultiplier = 1;
         }
+        item.waitingFeeRef = String(item.waitingFeeRef || "").trim();
+        item.escortFeeRef = String(item.escortFeeRef || "").trim();
+      });
+    }
+    if(Array.isArray(draft.categories?.roundTripAddon?.items)){
+      draft.categories.roundTripAddon.items.forEach(function(item){
         item.waitingFeeRef = String(item.waitingFeeRef || "").trim();
         item.escortFeeRef = String(item.escortFeeRef || "").trim();
       });
@@ -326,10 +362,13 @@
       visible: true,
       order: nextOrder
     };
-    if(categoryKey === "tripType"){
-      newItem.distanceMultiplier = 1;
+    if(categoryKey === "tripType" || categoryKey === "roundTripAddon"){
+      newItem.distanceMultiplier = categoryKey === "tripType" ? 1 : undefined;
       newItem.waitingFeeRef = "";
       newItem.escortFeeRef = "";
+      if(categoryKey === "tripType"){
+        newItem.showInSelector = true;
+      }
     }
     items.push(newItem);
     markEstimateDirty();

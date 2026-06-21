@@ -4,10 +4,11 @@
     const distanceRaw = params.get("distance");
     return {
       mobilityId: String(params.get("mobility") || "").trim(),
+      assistanceId: String(params.get("assist") || params.get("assistance") || "").trim(),
       stairId: String(params.get("stair") || "").trim(),
       tripTypeId: String(params.get("trip") || "").trim(),
+      roundTripAddonId: String(params.get("addon") || "").trim(),
       distanceKm: distanceRaw !== null && distanceRaw !== "" ? Number(distanceRaw) : 0,
-      bodyAssist: params.get("bodyAssist") === "1" || params.get("bodyAssist") === "true",
       estimateNumber: String(params.get("estimateNo") || params.get("estimateNumber") || "").trim()
     };
   }
@@ -16,10 +17,11 @@
     const opts = options || {};
     const params = new URLSearchParams();
     if(state.mobilityId) params.set("mobility", state.mobilityId);
+    if(state.assistanceId) params.set("assist", state.assistanceId);
     if(state.stairId) params.set("stair", state.stairId);
     if(state.tripTypeId) params.set("trip", state.tripTypeId);
+    if(state.roundTripAddonId) params.set("addon", state.roundTripAddonId);
     if(Number(state.distanceKm) > 0) params.set("distance", String(state.distanceKm));
-    if(state.bodyAssist) params.set("bodyAssist", "1");
     if(state.estimateNumber) params.set("estimateNo", state.estimateNumber);
 
     let path = opts.pathname;
@@ -47,16 +49,21 @@
     if(urlState.mobilityId && hasItem("mobility", urlState.mobilityId)){
       formState.mobilityId = urlState.mobilityId;
     }
+    if(urlState.assistanceId && hasItem("assistance", urlState.assistanceId)){
+      formState.assistanceId = urlState.assistanceId;
+    }
     if(urlState.stairId && hasItem("stairAssist", urlState.stairId)){
       formState.stairId = urlState.stairId;
     }
     if(urlState.tripTypeId && hasItem("tripType", urlState.tripTypeId)){
       formState.tripTypeId = urlState.tripTypeId;
     }
+    if(urlState.roundTripAddonId && hasItem("roundTripAddon", urlState.roundTripAddonId)){
+      formState.roundTripAddonId = urlState.roundTripAddonId;
+    }
     if(urlState.distanceKm > 0){
       formState.distanceKm = urlState.distanceKm;
     }
-    formState.bodyAssist = urlState.bodyAssist === true;
     if(urlState.estimateNumber){
       formState.estimateNumber = urlState.estimateNumber;
     }

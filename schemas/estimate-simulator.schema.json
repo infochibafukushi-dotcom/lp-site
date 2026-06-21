@@ -31,12 +31,13 @@
     },
     "categories": {
       "type": "object",
-      "required": ["mobility", "assistance", "stairAssist", "tripType"],
+      "required": ["mobility", "assistance", "stairAssist", "tripType", "roundTripAddon"],
       "properties": {
         "mobility": { "$ref": "#/definitions/category" },
         "assistance": { "$ref": "#/definitions/category" },
         "stairAssist": { "$ref": "#/definitions/category" },
-        "tripType": { "$ref": "#/definitions/tripCategory" }
+        "tripType": { "$ref": "#/definitions/tripCategory" },
+        "roundTripAddon": { "$ref": "#/definitions/tripCategory" }
       },
       "additionalProperties": true
     },

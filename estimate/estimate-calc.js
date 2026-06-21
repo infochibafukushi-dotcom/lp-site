@@ -42,6 +42,48 @@
     return Number(feeObj.amount) || 0;
   }
 
+  function getMobilityAssistanceRule(config, mobilityId){
+    const rules = config?.mappings?.mobilityAssistance || {};
+    return rules[mobilityId] || null;
+  }
+
+  function getAssistanceOptions(config, mobilityId){
+    const rule = getMobilityAssistanceRule(config, mobilityId);
+    const allItems = config?.categories?.assistance?.items || [];
+    if(!rule){
+      return visibleItems(allItems);
+    }
+    if(rule.mode === "fixed"){
+      const fixed = findItem(allItems, rule.assistanceId);
+      return fixed ? [fixed] : [];
+    }
+    const ids = Array.isArray(rule.assistanceIds) ? rule.assistanceIds : [];
+    return ids.map(function(id){ return findItem(allItems, id); }).filter(Boolean);
+  }
+
+  function resolveAssistanceId(config, state){
+    const rule = getMobilityAssistanceRule(config, state.mobilityId);
+    if(rule?.mode === "fixed"){
+      return rule.assistanceId || "";
+    }
+    return state.assistanceId || "";
+  }
+
+  function isRoundTripSelected(config, state){
+    const trip = findItem(config?.categories?.tripType?.items, state.tripTypeId);
+    return trip?.id === "round-trip";
+  }
+
+  function getTripTypeItems(config){
+    return visibleItems(config?.categories?.tripType?.items || []).filter(function(item){
+      return item.showInSelector !== false;
+    });
+  }
+
+  function getRoundTripAddonItems(config){
+    return visibleItems(config?.categories?.roundTripAddon?.items || []);
+  }
+
   function buildUsageSummary(config, state){
     const lines = [];
     const mobility = findItem(config.categories?.mobility?.items, state.mobilityId);
@@ -49,22 +91,9 @@
       lines.push({ label: config.categories.mobility.label || "移動方法", value: mobility.label });
     }
 
-    const assistanceParts = [];
-    const autoId = config.mappings?.mobilityToAssistance?.[state.mobilityId];
-    const autoAssist = findItem(config.categories?.assistance?.items, autoId);
-    if(autoAssist && autoAssist.id !== "no-assist"){
-      assistanceParts.push(autoAssist.label);
-    }
-    if(state.bodyAssist){
-      const body = findItem(config.categories?.assistance?.items, config.options?.bodyAssist?.assistanceId || "body-assist");
-      if(body){
-        assistanceParts.push(body.label);
-      }
-    }
-    if(assistanceParts.length){
-      lines.push({ label: config.categories.assistance.label || "介助内容", value: assistanceParts.join("、") });
-    }else{
-      lines.push({ label: config.categories.assistance.label || "介助内容", value: "介助なし" });
+    const assistance = findItem(config.categories?.assistance?.items, resolveAssistanceId(config, state));
+    if(assistance){
+      lines.push({ label: config.categories.assistance.label || "介助内容", value: assistance.label });
     }
 
     const stair = findItem(config.categories?.stairAssist?.items, state.stairId);
@@ -77,9 +106,20 @@
       lines.push({ label: config.categories.tripType.label || "送迎方法", value: trip.label });
     }
 
+    if(isRoundTripSelected(config, state)){
+      const addon = findItem(config.categories?.roundTripAddon?.items, state.roundTripAddonId);
+      if(addon){
+        lines.push({
+          label: config.categories.roundTripAddon?.label || "待機・付き添い",
+          value: addon.label
+        });
+      }
+    }
+
+    const distanceLabel = config.page?.distanceLabel || "片道距離";
     const distance = Number(state.distanceKm);
     if(distance > 0){
-      lines.push({ label: "距離", value: distance.toFixed(1) + "km" });
+      lines.push({ label: distanceLabel, value: distance.toFixed(1) + "km" });
     }
 
     return lines;
@@ -100,17 +140,11 @@
     const mobility = findItem(config.categories?.mobility?.items, state.mobilityId);
     const wheelchairFee = mobility ? getFeeAmount(mobility) : 0;
 
-    const autoAssistId = config.mappings?.mobilityToAssistance?.[state.mobilityId];
-    const autoAssist = findItem(config.categories?.assistance?.items, autoAssistId);
-    let assistanceFee = autoAssist ? getFeeAmount(autoAssist) : 0;
-
-    if(state.bodyAssist){
-      const bodyAssist = findItem(
-        config.categories?.assistance?.items,
-        config.options?.bodyAssist?.assistanceId || "body-assist"
-      );
-      assistanceFee += bodyAssist ? getFeeAmount(bodyAssist) : 0;
-    }
+    const assistance = findItem(
+      config.categories?.assistance?.items,
+      resolveAssistanceId(config, state)
+    );
+    const assistanceFee = assistance ? getFeeAmount(assistance) : 0;
 
     const stair = findItem(config.categories?.stairAssist?.items, state.stairId);
     const stairFee = stair ? getFeeAmount(stair) : 0;
@@ -118,22 +152,29 @@
     const trip = findItem(config.categories?.tripType?.items, state.tripTypeId);
     let waitingFee = 0;
     let escortFee = 0;
-
     let distanceMultiplier = 1;
+
     if(trip){
       const rawMultiplier = Number(trip.distanceMultiplier);
       if(rawMultiplier > 0){
         distanceMultiplier = rawMultiplier;
       }
-      const waitingRef = String(trip.waitingFeeRef || "").trim();
-      if(waitingRef && config.waitingFees?.[waitingRef]){
-        waitingFee = getFeeAmount(config.waitingFees[waitingRef]);
-      }
-      const escortRef = String(trip.escortFeeRef || "").trim();
-      if(escortRef && config.waitingFees?.[escortRef]){
-        escortFee = getFeeAmount(config.waitingFees[escortRef]);
+    }
+
+    if(isRoundTripSelected(config, state)){
+      const addon = findItem(config.categories?.roundTripAddon?.items, state.roundTripAddonId);
+      if(addon){
+        const waitingRef = String(addon.waitingFeeRef || "").trim();
+        if(waitingRef && config.waitingFees?.[waitingRef]){
+          waitingFee = getFeeAmount(config.waitingFees[waitingRef]);
+        }
+        const escortRef = String(addon.escortFeeRef || "").trim();
+        if(escortRef && config.waitingFees?.[escortRef]){
+          escortFee = getFeeAmount(config.waitingFees[escortRef]);
+        }
       }
     }
+
     distanceFare = distanceFare * distanceMultiplier;
 
     const breakdown = {
@@ -164,6 +205,12 @@
     findItem: findItem,
     calcDistanceFare: calcDistanceFare,
     computeEstimate: computeEstimate,
-    buildUsageSummary: buildUsageSummary
+    buildUsageSummary: buildUsageSummary,
+    getAssistanceOptions: getAssistanceOptions,
+    getMobilityAssistanceRule: getMobilityAssistanceRule,
+    resolveAssistanceId: resolveAssistanceId,
+    isRoundTripSelected: isRoundTripSelected,
+    getTripTypeItems: getTripTypeItems,
+    getRoundTripAddonItems: getRoundTripAddonItems
   };
 })(typeof window !== "undefined" ? window : globalThis);

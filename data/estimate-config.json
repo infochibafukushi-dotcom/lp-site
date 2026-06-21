@@ -1,11 +1,13 @@
 {
   "enabled": true,
   "version": 1,
-  "updatedAt": "2026-06-21T03:47:11.573Z",
+  "updatedAt": "2026-06-21T04:09:12.419Z",
   "page": {
     "title": "概算見積シミュレーター",
     "description": "ご利用内容を選択すると概算料金を確認できます。\n実際の料金は運行ルートや介助内容等により変動する場合があります。",
-    "disclaimer": "※表示料金は概算です。\n※実際の料金は運行ルート、交通状況、運行時間、迎車場所、介助内容等により変動する場合があります。\n※待機・院内付き添い料金は実際の利用時間により変動します。\n※障害者割引・福祉タクシー券等は概算見積には反映しておりません。"
+    "disclaimer": "※表示料金は概算です。\n※実際の料金は運行ルート、交通状況、運行時間、迎車場所、介助内容等により変動する場合があります。\n※待機・院内付き添い料金は実際の利用時間により変動します。\n※障害者割引・福祉タクシー券等は概算見積には反映しておりません。",
+    "distanceLabel": "片道距離（km）",
+    "distanceNote": "※往復送迎を選択した場合は運賃距離を自動で2倍計算します。"
   },
   "basicFees": {
     "baseFare": {
@@ -50,9 +52,9 @@
       "label": "移動方法",
       "items": [
         {
-          "id": "free-wheelchair",
-          "label": "無料車いす",
-          "description": "当社の標準車いすを無料でご利用いただけます。",
+          "id": "cane-walk",
+          "label": "杖・歩行器",
+          "description": "杖や歩行器での移動に対応します。",
           "amount": 0,
           "visible": true,
           "order": 1
@@ -66,9 +68,9 @@
           "order": 2
         },
         {
-          "id": "cane-walk",
-          "label": "杖・歩行",
-          "description": "杖や歩行での移動に対応します。",
+          "id": "free-wheelchair",
+          "label": "無料車いす",
+          "description": "当社の標準車いすを無料でご利用いただけます。",
           "amount": 0,
           "visible": true,
           "order": 3
@@ -95,36 +97,28 @@
       "label": "介助内容",
       "items": [
         {
-          "id": "boarding-assist",
-          "label": "乗降介助",
-          "description": "車両への乗り降りをお手伝いする介助です。\n玄関先や病院入口などでの安全な移乗をサポートします。",
-          "amount": 1100,
+          "id": "watch-assist",
+          "label": "見守り介助",
+          "description": "転倒防止のため付き添いながら移動を見守ります。",
+          "amount": 0,
           "visible": true,
           "order": 1
         },
         {
-          "id": "body-assist",
-          "label": "身体介助",
-          "description": "歩行介助、立ち上がり介助、移動介助など、身体に直接触れて行う介助です。\n利用者様の状態に応じて安全な移動をサポートします。",
-          "amount": 1600,
+          "id": "boarding-assist",
+          "label": "乗降介助",
+          "description": "車いす固定やリフト操作、\n車への乗り降りをお手伝いします。",
+          "amount": 1100,
           "visible": true,
           "order": 2
         },
         {
-          "id": "stretcher-assist",
-          "label": "ストレッチャー介助",
-          "description": "ストレッチャーへの移乗や固定、搬送時の介助を行います。\n寝たままの状態で移動が必要な方が対象です。",
-          "amount": 6000,
+          "id": "body-assist",
+          "label": "身体介助",
+          "description": "お部屋から車いすへの移乗介助、\n車両への乗降介助、\n車いす固定などを行います。",
+          "amount": 1600,
           "visible": true,
           "order": 3
-        },
-        {
-          "id": "no-assist",
-          "label": "介助なし",
-          "description": "介助不要の場合に選択します。",
-          "amount": 0,
-          "visible": true,
-          "order": 4
         }
       ]
     },
@@ -193,7 +187,8 @@
           "order": 1,
           "distanceMultiplier": 1,
           "waitingFeeRef": "",
-          "escortFeeRef": ""
+          "escortFeeRef": "",
+          "showInSelector": true
         },
         {
           "id": "round-trip",
@@ -204,27 +199,65 @@
           "order": 2,
           "distanceMultiplier": 2,
           "waitingFeeRef": "",
-          "escortFeeRef": ""
+          "escortFeeRef": "",
+          "showInSelector": true
         },
         {
           "id": "waiting",
-          "label": "待機",
-          "description": "通院やお買い物などの間、車両と乗務員が待機するサービスです。\n表示料金は30分を基準とした概算です。",
+          "label": "待機（旧）",
+          "description": "旧設定項目です。",
           "amount": 0,
           "visible": true,
           "order": 3,
           "distanceMultiplier": 2,
           "waitingFeeRef": "waiting30min",
-          "escortFeeRef": ""
+          "escortFeeRef": "",
+          "showInSelector": false
         },
         {
           "id": "hospital-escort",
-          "label": "病院付き添い",
-          "description": "受付、診察室への移動、会計、薬の受け取りなどをお手伝いします。\n表示料金は30分を基準とした概算です。",
+          "label": "病院付き添い（旧）",
+          "description": "旧設定項目です。",
           "amount": 0,
           "visible": true,
           "order": 4,
           "distanceMultiplier": 2,
+          "waitingFeeRef": "",
+          "escortFeeRef": "escort30min",
+          "showInSelector": false
+        }
+      ]
+    },
+    "roundTripAddon": {
+      "label": "待機・付き添い",
+      "items": [
+        {
+          "id": "addon-none",
+          "label": "なし",
+          "description": "待機・付き添いは不要です。",
+          "amount": 0,
+          "visible": true,
+          "order": 1,
+          "waitingFeeRef": "",
+          "escortFeeRef": ""
+        },
+        {
+          "id": "addon-waiting",
+          "label": "病院待機（30分）",
+          "description": "通院などの間、車両と乗務員が待機するサービスです。",
+          "amount": 0,
+          "visible": true,
+          "order": 2,
+          "waitingFeeRef": "waiting30min",
+          "escortFeeRef": ""
+        },
+        {
+          "id": "addon-escort",
+          "label": "病院付き添い（30分）",
+          "description": "受付、診察室への移動、会計、薬の受け取りなどをお手伝いします。",
+          "amount": 0,
+          "visible": true,
+          "order": 3,
           "waitingFeeRef": "",
           "escortFeeRef": "escort30min"
         }
@@ -234,7 +267,7 @@
   "waitingFees": {
     "waiting30min": {
       "id": "waiting30min",
-      "label": "待機30分料金",
+      "label": "病院待機（30分）",
       "description": "通院やお買い物などの間、車両と乗務員が待機するサービスです。\n表示料金は30分を基準とした概算です。",
       "amount": 800,
       "visible": true,
@@ -242,29 +275,53 @@
     },
     "escort30min": {
       "id": "escort30min",
-      "label": "付き添い30分料金",
+      "label": "病院付き添い（30分）",
       "description": "受付、診察室への移動、会計、薬の受け取りなどをお手伝いします。\n表示料金は30分を基準とした概算です。",
       "amount": 1600,
       "visible": true,
       "order": 2
     }
   },
-  "options": {
-    "bodyAssist": {
-      "id": "body-assist-option",
-      "label": "身体介助",
-      "description": "歩行介助、立ち上がり介助、移動介助など、身体に直接触れて行う介助です。\n利用者様の状態に応じて安全な移動をサポートします。",
-      "assistanceId": "body-assist",
-      "visible": true
-    }
-  },
   "mappings": {
-    "mobilityToAssistance": {
-      "free-wheelchair": "boarding-assist",
-      "own-wheelchair": "boarding-assist",
-      "reclining-wheelchair": "boarding-assist",
-      "stretcher": "stretcher-assist",
-      "cane-walk": "no-assist"
+    "mobilityAssistance": {
+      "cane-walk": {
+        "mode": "select",
+        "assistanceIds": [
+          "watch-assist",
+          "boarding-assist",
+          "body-assist"
+        ],
+        "assistanceId": ""
+      },
+      "own-wheelchair": {
+        "mode": "required",
+        "assistanceIds": [
+          "boarding-assist",
+          "body-assist"
+        ],
+        "assistanceId": ""
+      },
+      "free-wheelchair": {
+        "mode": "required",
+        "assistanceIds": [
+          "boarding-assist",
+          "body-assist"
+        ],
+        "assistanceId": ""
+      },
+      "reclining-wheelchair": {
+        "mode": "required",
+        "assistanceIds": [
+          "boarding-assist",
+          "body-assist"
+        ],
+        "assistanceId": ""
+      },
+      "stretcher": {
+        "mode": "fixed",
+        "assistanceIds": [],
+        "assistanceId": "body-assist"
+      }
     }
   },
   "resultLabels": {

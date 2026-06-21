@@ -23,8 +23,11 @@ function validateEstimateConfig(data){
   if(!data.distancePricing || !data.distancePricing.mode) throw new Error('estimate-config.distancePricing invalid');
   const categories = data.categories;
   if(!categories || typeof categories !== 'object') throw new Error('estimate-config.categories invalid');
-  for (const key of ['mobility', 'assistance', 'stairAssist', 'tripType']) {
+  for (const key of ['mobility', 'assistance', 'stairAssist', 'tripType', 'roundTripAddon']) {
     if(!Array.isArray(categories[key]?.items)) throw new Error('estimate-config.categories.' + key + '.items invalid');
+  }
+  if(!data.mappings?.mobilityAssistance || typeof data.mappings.mobilityAssistance !== 'object') {
+    throw new Error('estimate-config.mappings.mobilityAssistance invalid');
   }
 }
 
