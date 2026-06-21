@@ -49,6 +49,7 @@
       footerFont: 10,
       cellPadV: 4,
       cellPadH: 6,
+      amountPadRight: 12,
       sectionGap: 10,
       lineHeight: 1.45,
       resultNotesLineHeight: 1.55,
@@ -62,7 +63,8 @@
   function scaleLayout(layout, factor){
     const next = {};
     Object.keys(layout).forEach(function(key){
-      next[key] = Math.max(6, Math.round(layout[key] * factor * 10) / 10);
+      const min = key === "amountPadRight" ? 8 : 6;
+      next[key] = Math.max(min, Math.round(layout[key] * factor * 10) / 10);
     });
     return next;
   }
@@ -253,7 +255,7 @@
         "<td style=\"padding:" + layout.cellPadV + "px " + layout.cellPadH + "px;border-bottom:1px solid #eee;\">" +
         escapeHtml(row.label) +
         "</td>" +
-        "<td style=\"padding:" + layout.cellPadV + "px " + layout.cellPadH + "px;border-bottom:1px solid #eee;text-align:right;\">" +
+        "<td class=\"estimate-pdf-amount\" style=\"padding:" + layout.cellPadV + "px " + layout.amountPadRight + "px " + layout.cellPadV + "px " + layout.cellPadH + "px;border-bottom:1px solid #eee;text-align:right;\">" +
         escapeHtml(formatYen(row.amount)) +
         "</td>" +
         "</tr>"

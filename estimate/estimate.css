@@ -497,6 +497,11 @@
 .estimate-copy-url-btn:hover{
   background:#fff8ef;
 }
+.estimate-pdf-source .estimate-pdf-amount{
+  box-sizing:border-box;
+  text-align:right;
+}
+
 .estimate-pdf-btn{
   display:block;
   width:100%;
