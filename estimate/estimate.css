@@ -444,14 +444,31 @@
 .estimate-breakdown li:last-child{
   border-bottom:none;
 }
-.estimate-breakdown .amount-zero{
-  color:#aaa;
+.estimate-total-section{
+  margin-top:16px;
+}
+.estimate-total-rule{
+  margin:12px 0;
+  text-align:center;
+  color:#d8cbb8;
+  font-size:12px;
+  letter-spacing:2px;
+  line-height:1;
+}
+.estimate-total-rule::before{
+  content:"━━━━━━━━━━";
 }
 .estimate-total-box{
-  margin-top:16px;
-  padding-top:16px;
-  border-top:2px solid #efe7dc;
+  margin:0;
+  padding:8px 0;
   text-align:center;
+}
+.estimate-result-notes{
+  margin-top:4px;
+  font-size:13px;
+  line-height:1.8;
+  color:#666;
+  white-space:pre-line;
 }
 .estimate-total-label{
   font-size:15px;

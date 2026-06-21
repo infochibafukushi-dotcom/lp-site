@@ -386,21 +386,21 @@
 
   function getBreakdownRows(result){
     const labels = state.config.resultLabels || {};
+    const breakdown = result.breakdown || {};
+    const reservationPickupAmount =
+      (Number(breakdown.reservationFee) || 0) + (Number(breakdown.pickupFee) || 0);
+
     return [
-      ["baseFare", labels.baseFare || "基本運賃"],
-      ["reservationFee", labels.reservationFee || "予約料金"],
-      ["pickupFee", labels.pickupFee || "迎車料金"],
-      ["distanceFare", labels.distanceFare || "距離運賃"],
-      ["wheelchairFee", labels.wheelchairFee || "車いす料金"],
-      ["assistanceFee", labels.assistanceFee || "介助料金"],
-      ["stairFee", labels.stairFee || "階段介助料金"],
-      ["waitingFee", labels.waitingFee || "待機料金"],
-      ["escortFee", labels.escortFee || "付き添い料金"]
-    ].map(function(row){
-      return {
-        label: row[1],
-        amount: Number(result.breakdown[row[0]]) || 0
-      };
+      { label: labels.baseFare || "基本運賃", amount: Number(breakdown.baseFare) || 0 },
+      { label: labels.reservationPickupFee || "予約・迎車料金", amount: reservationPickupAmount },
+      { label: labels.distanceFare || "距離運賃", amount: Number(breakdown.distanceFare) || 0 },
+      { label: labels.wheelchairFee || "車いす料金", amount: Number(breakdown.wheelchairFee) || 0 },
+      { label: labels.assistanceFee || "介助料金", amount: Number(breakdown.assistanceFee) || 0 },
+      { label: labels.stairFee || "階段介助料金", amount: Number(breakdown.stairFee) || 0 },
+      { label: labels.waitingFee || "待機料金", amount: Number(breakdown.waitingFee) || 0 },
+      { label: labels.escortFee || "付き添い料金", amount: Number(breakdown.escortFee) || 0 }
+    ].filter(function(row){
+      return row.amount > 0;
     });
   }
 
@@ -708,9 +708,15 @@
 
   function renderBreakdown(result){
     return getBreakdownRows(result).map(function(row){
-      const zeroClass = row.amount === 0 ? " amount-zero" : "";
-      return `<li><span>${escapeHtml(row.label)}</span><span class="${zeroClass.trim()}">${formatYen(row.amount)}</span></li>`;
+      return `<li><span>${escapeHtml(row.label)}</span><span>${formatYen(row.amount)}</span></li>`;
     }).join("");
+  }
+
+  function getResultNotes(){
+    const fallback =
+      "※表示料金は概算です。\n" +
+      "※実際の料金は運行距離、交通状況、待機時間、付き添い時間、介助内容等により変動する場合があります。";
+    return state.config.page?.resultNotes || fallback;
   }
 
   function renderUsageSummary(result){
@@ -787,9 +793,14 @@
         <ul class="estimate-breakdown">
           ${renderBreakdown(result)}
         </ul>
-        <div class="estimate-total-box">
-          <div class="estimate-total-label">${escapeHtml(totalLabel)}</div>
-          <div class="estimate-total-amount">${formatYen(result.total)}</div>
+        <div class="estimate-total-section">
+          <div class="estimate-total-rule" aria-hidden="true"></div>
+          <div class="estimate-total-box">
+            <div class="estimate-total-label">${escapeHtml(totalLabel)}</div>
+            <div class="estimate-total-amount">${formatYen(result.total)}～</div>
+          </div>
+          <div class="estimate-total-rule" aria-hidden="true"></div>
+          <div class="estimate-result-notes">${escapeHtml(getResultNotes())}</div>
         </div>
         <button type="button" class="estimate-pdf-btn" id="estimatePdfBtn">見積書PDFを保存</button>
         <div class="estimate-pdf-feedback" id="estimatePdfFeedback" aria-live="polite"></div>

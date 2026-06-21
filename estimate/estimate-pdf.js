@@ -126,7 +126,7 @@
           "<table style=\"" + tableStyle + "\">" + (breakdownRows || "<tr><td colspan=\"2\" style=\"padding:" + layout.cellPadV + "px " + layout.cellPadH + "px;\">—</td></tr>") + "</table>" +
           "<div style=\"margin:0 0 " + layout.sectionGap + "px;padding:" + layout.totalBoxPad + "px;border:2px solid #e87f00;border-radius:8px;text-align:center;\">" +
             "<div style=\"font-size:" + layout.totalLabelFont + "px;color:#666;margin-bottom:4px;line-height:1.3;\">概算合計</div>" +
-            "<div style=\"font-size:" + layout.totalFont + "px;font-weight:800;color:#c62828;line-height:1.2;\">" + escapeHtml(formatYen(data.total)) + "</div>" +
+            "<div style=\"font-size:" + layout.totalFont + "px;font-weight:800;color:#c62828;line-height:1.2;\">" + escapeHtml(formatYen(data.total)) + "～</div>" +
           "</div>" +
         "</div>" +
         "<div style=\"flex:1 1 auto;display:flex;flex-direction:column;justify-content:flex-end;min-height:0;\">" +
