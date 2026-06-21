@@ -396,9 +396,7 @@
           scrollY: 0,
           backgroundColor: "#ffffff",
           width: CONTENT_WIDTH_PX,
-          height: contentHeight,
-          windowWidth: CONTENT_WIDTH_PX,
-          windowHeight: contentHeight
+          height: contentHeight
         },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
       }).from(element);
