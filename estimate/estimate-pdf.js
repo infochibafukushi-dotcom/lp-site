@@ -182,6 +182,7 @@
       throw new Error("PDF ライブラリが読み込まれていません。");
     }
 
+    console.log("PDF_DEBUG_4 PDF DOM生成");
     const layout = measureLayout(data);
     const element = buildPdfElement(data, layout);
     const container = document.createElement("div");
@@ -202,7 +203,8 @@
 
     const filename = (data.estimateNumber || "estimate") + ".pdf";
     try{
-      await html2pdf().set({
+      console.log("PDF_DEBUG_5 html2canvas開始");
+      const worker = html2pdf().set({
         margin: A4.marginMm,
         filename: filename,
         pagebreak: { mode: ["avoid-all", "css", "legacy"] },
@@ -217,7 +219,9 @@
           height: CONTENT_HEIGHT_PX
         },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
-      }).from(element).save();
+      }).from(element);
+      console.log("PDF_DEBUG_6 PDF保存開始");
+      await worker.save();
     }finally{
       container.remove();
     }

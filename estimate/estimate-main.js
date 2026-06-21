@@ -651,6 +651,7 @@
       scrollToActiveStep(flow, activeIndex);
     }else{
       state.lastActiveStepId = "result";
+      console.log("PDF_DEBUG_1 ボタン描画");
     }
   }
 
@@ -672,6 +673,14 @@
       if(resetBtn){
         event.preventDefault();
         resetAll();
+        return;
+      }
+      const pdfBtn = event.target.closest("#estimatePdfBtn");
+      if(pdfBtn){
+        event.preventDefault();
+        if(pdfBtn.disabled) return;
+        console.log("PDF_DEBUG_2 ボタンクリック");
+        saveEstimatePdf();
       }
     });
   }
@@ -690,6 +699,7 @@
   }
 
   async function saveEstimatePdf(){
+    console.log("PDF_DEBUG_3 generateEstimatePdf開始");
     const feedback = document.getElementById("estimatePdfFeedback");
     const btn = document.getElementById("estimatePdfBtn");
     if(btn) btn.disabled = true;
@@ -719,12 +729,6 @@
     }
   }
 
-  function bindPdfButton(){
-    const btn = document.getElementById("estimatePdfBtn");
-    if(!btn) return;
-    btn.addEventListener("click", saveEstimatePdf);
-  }
-
   function refreshResultSection(result){
     const resultSection = document.querySelector(".estimate-result");
     const ctaGroup = document.querySelector(".estimate-cta-group");
@@ -741,7 +745,6 @@
     if(newCta && ctaGroup) ctaGroup.replaceWith(newCta);
     if(newDisclaimer && disclaimer) disclaimer.replaceWith(newDisclaimer);
     bindCopyUrlButton();
-    bindPdfButton();
   }
 
   function buildShareUrl(){
