@@ -1,7 +1,7 @@
 {
   "enabled": true,
   "version": 1,
-  "updatedAt": "2026-06-21T05:36:00.640Z",
+  "updatedAt": "2026-06-21T12:00:00.000Z",
   "page": {
     "title": "概算見積シミュレーター",
     "description": "ご利用内容を選択すると概算料金を確認できます。\n実際の料金は運行ルートや介助内容等により変動する場合があります。",
@@ -339,11 +339,11 @@
   },
   "pdfFooter": {
     "enabled": true,
-    "businessName": "",
-    "phone": "",
-    "homepageUrl": "",
+    "businessName": "ちばケアタクシー",
+    "phone": "090-6331-4289",
+    "homepageUrl": "https://infochibafukushi-dotcom.github.io/lp-site/#",
     "homepageQrLabel": "ホームページはこちら",
-    "lineUrl": "",
+    "lineUrl": "https://lin.ee/XA05KN5",
     "lineQrLabel": "LINEで相談",
     "message": "ご予約・ご相談はお気軽にお問い合わせください"
   },
