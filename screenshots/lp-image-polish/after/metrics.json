@@ -1,0 +1,26 @@
+{
+  "hero": {
+    "w": 1500,
+    "h": 480,
+    "maxW": "none",
+    "fit": "cover"
+  },
+  "card": {
+    "w": 452,
+    "h": 301,
+    "maxW": "none",
+    "fit": "cover"
+  },
+  "normal": {
+    "w": 1500,
+    "h": 560,
+    "maxW": "none",
+    "fit": "cover"
+  },
+  "media": {
+    "w": 734,
+    "h": 462,
+    "maxW": "none",
+    "fit": "cover"
+  }
+}
