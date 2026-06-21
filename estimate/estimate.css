@@ -499,7 +499,7 @@
 }
 .estimate-pdf-source .estimate-pdf-amount{
   box-sizing:border-box;
-  text-align:right;
+  text-align:left;
 }
 .estimate-pdf-source .estimate-pdf-total{
   box-sizing:border-box;

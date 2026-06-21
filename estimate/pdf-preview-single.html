@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF単体プレビュー</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    font-family: "Yu Gothic", "Meiryo", sans-serif;
+  }
+  .a4-sheet {
+    width: 794px;
+    height: 1123px;
+    background: #fff;
+    overflow: hidden;
+  }
+  .a4-inner {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  .zoom-wrap {
+    padding: 12px;
+    background: #fff;
+  }
+  .preview-loading {
+    padding: 40px;
+    text-align: center;
+    color: #666;
+  }
+</style>
+</head>
+<body>
+<div id="mount"><div class="preview-loading">生成中...</div></div>
+
+<script src="../shared/libs/qrcode.min.js"></script>
+<script src="../shared/estimate-qr.js"></script>
+<script>
+(function(){
+  const params = new URLSearchParams(location.search);
+  const mode = params.get("mode") || "full";
+  const version = params.get("version") === "before" ? "before" : "after";
+  const scriptSrc = version === "before" ? "./estimate-pdf.before.js" : "./estimate-pdf.js";
+  const preset = params.get("preset") || "standard";
+  const marginMm = 8;
+
+  const mockPresets = {
+    standard: {
+      usageSummary: [
+        { label: "ご利用区分", value: "介護タクシー" },
+        { label: "移動手段", value: "自家用車椅子" },
+        { label: "往復", value: "片道" },
+        { label: "出発地", value: "千葉市中央区" },
+        { label: "目的地", value: "千葉大学医学部附属病院" },
+        { label: "付き添い", value: "あり（約60分）" }
+      ],
+      breakdownRows: [
+        { label: "基本運賃", amount: 730 },
+        { label: "予約・迎車料金", amount: 900 },
+        { label: "距離運賃", amount: 3460 },
+        { label: "介助料金", amount: 1100 },
+        { label: "付き添い料金", amount: 1600 }
+      ],
+      total: 7790
+    },
+    few: {
+      usageSummary: [
+        { label: "ご利用区分", value: "介護タクシー" },
+        { label: "移動手段", value: "杖・歩行" },
+        { label: "往復", value: "片道" },
+        { label: "出発地", value: "千葉市中央区" },
+        { label: "目的地", value: "千葉駅" }
+      ],
+      breakdownRows: [
+        { label: "基本運賃", amount: 730 },
+        { label: "予約・迎車料金", amount: 900 },
+        { label: "距離運賃", amount: 1460 }
+      ],
+      total: 3090
+    },
+    many: {
+      usageSummary: [
+        { label: "ご利用区分", value: "介護タクシー" },
+        { label: "移動手段", value: "リクライニング車椅子" },
+        { label: "往復", value: "往復" },
+        { label: "出発地", value: "千葉市中央区" },
+        { label: "目的地", value: "千葉大学医学部附属病院" },
+        { label: "付き添い", value: "あり（約90分）" },
+        { label: "階段介助", value: "あり" }
+      ],
+      breakdownRows: [
+        { label: "基本運賃", amount: 730 },
+        { label: "予約・迎車料金", amount: 900 },
+        { label: "距離運賃", amount: 3460 },
+        { label: "車いす料金", amount: 500 },
+        { label: "介助料金", amount: 1100 },
+        { label: "階段介助料金", amount: 2200 },
+        { label: "待機料金", amount: 800 },
+        { label: "付き添い料金", amount: 2400 }
+      ],
+      total: 12090
+    }
+  };
+
+  const selectedPreset = mockPresets[preset] || mockPresets.standard;
+  const mockData = {
+    estimateNumber: "EST-20250621-001",
+    createdAt: "2026-06-21T10:00:00.000Z",
+    pageTitle: "ちばケアタクシー 概算見積シミュレーター",
+    usageSummary: selectedPreset.usageSummary,
+    breakdownRows: selectedPreset.breakdownRows,
+    total: selectedPreset.total,
+    resultNotes:
+      "※表示料金は概算です。\n" +
+      "※実際の料金は運行距離、交通状況、待機時間、付き添い時間、介助内容等により変動する場合があります。",
+    pdfFooter: {
+      enabled: true,
+      businessName: "ちばケアタクシー",
+      phone: "090-6331-4289",
+      homepageUrl: "https://infochibafukushi-dotcom.github.io/lp-site/#",
+      homepageQrLabel: "ホームページ",
+      lineUrl: "https://lin.ee/XA05KN5",
+      lineQrLabel: "LINE",
+      message: "ご予約・ご相談はお気軽にお問い合わせください"
+    }
+  };
+
+  function mmToPx(mm){
+    return mm * 96 / 25.4;
+  }
+
+  function extractSection(source, sectionMode){
+    if(sectionMode === "breakdown"){
+      const section = source.querySelector(".estimate-pdf-breakdown-section");
+      if(section) return section;
+      const heading = Array.from(source.querySelectorAll("h2")).find(function(h){
+        return h.textContent.trim() === "料金内訳";
+      });
+      const wrap = document.createElement("div");
+      if(heading){
+        wrap.appendChild(heading.cloneNode(true));
+        if(heading.nextElementSibling) wrap.appendChild(heading.nextElementSibling.cloneNode(true));
+      }
+      return wrap;
+    }
+    if(sectionMode === "total"){
+      return source.querySelector(".estimate-pdf-total-section") ||
+        source.querySelector(".estimate-pdf-total") ||
+        document.createElement("div");
+    }
+    if(sectionMode === "qr"){
+      const section = source.querySelector(".estimate-pdf-footer-section");
+      if(section) return section;
+      const imgs = source.querySelectorAll("img");
+      if(!imgs.length) return document.createElement("div");
+      let node = imgs[0].parentElement;
+      while(node && node !== source){
+        const text = node.textContent || "";
+        if(text.indexOf("TEL") >= 0 && node.querySelectorAll("img").length >= imgs.length){
+          return node;
+        }
+        node = node.parentElement;
+      }
+      return imgs[0].parentElement || document.createElement("div");
+    }
+    return source;
+  }
+
+  function mountContent(node){
+    const mount = document.getElementById("mount");
+    mount.innerHTML = "";
+    if(mode === "full"){
+      const sheet = document.createElement("div");
+      sheet.className = "a4-sheet";
+      sheet.id = "a4Sheet";
+      const inner = document.createElement("div");
+      inner.className = "a4-inner";
+      inner.style.padding = mmToPx(marginMm) + "px";
+      inner.appendChild(node);
+      sheet.appendChild(inner);
+      mount.appendChild(sheet);
+    }else{
+      const wrap = document.createElement("div");
+      wrap.className = "zoom-wrap";
+      wrap.id = "zoomWrap";
+      wrap.appendChild(node);
+      mount.appendChild(wrap);
+    }
+  }
+
+  const script = document.createElement("script");
+  script.src = scriptSrc;
+  script.onload = async function(){
+    try{
+      const element = await window.EstimatePdf.buildPreviewElement(mockData);
+      const source = element.querySelector(".estimate-pdf-source") || element;
+      const display = mode === "full" ? element : extractSection(source, mode).cloneNode(true);
+      if(mode !== "full"){
+        display.querySelectorAll("img").forEach(function(img){
+          const live = source.querySelector("img[src=\"" + img.getAttribute("src") + "\"]");
+          if(live) img.src = live.src;
+        });
+      }
+      mountContent(display);
+      document.body.setAttribute("data-pdf-ready", "1");
+    }catch(error){
+      document.getElementById("mount").innerHTML =
+        "<div class=\"preview-loading\">エラー: " + error.message + "</div>";
+    }
+  };
+  script.onerror = function(){
+    document.getElementById("mount").innerHTML =
+      "<div class=\"preview-loading\">スクリプト読み込み失敗: " + scriptSrc + "</div>";
+  };
+  document.head.appendChild(script);
+})();
+</script>
+</body>
+</html>

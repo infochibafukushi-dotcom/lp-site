@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF比較プレビュー</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 20px;
+    background: #d0d0d0;
+    font-family: "Yu Gothic", "Meiryo", sans-serif;
+  }
+  .compare-title {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: #222;
+    margin: 0 0 16px;
+  }
+  .compare-row {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 24px;
+  }
+  .compare-col {
+    text-align: center;
+  }
+  .compare-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 8px;
+  }
+  iframe {
+    border: 0;
+    display: block;
+    background: #fff;
+    box-shadow: 0 4px 18px rgba(0,0,0,.18);
+  }
+  iframe.mode-full {
+    width: 794px;
+    height: 1123px;
+  }
+</style>
+</head>
+<body>
+<div class="compare-title" id="compareTitle"></div>
+<div class="compare-row" id="compareRow"></div>
+<script>
+(function(){
+  const params = new URLSearchParams(location.search);
+  const mode = params.get("mode") || "full";
+  const titles = {
+    full: "PC版 PDF（A4全体）改善前 / 改善後 比較",
+    breakdown: "料金内訳 改善前 / 改善後 比較",
+    total: "概算合計 改善前 / 改善後 比較",
+    qr: "QRコードエリア 改善前 / 改善後 比較"
+  };
+  document.getElementById("compareTitle").textContent = titles[mode] || titles.full;
+
+  const versions = [
+    { key: "before", label: "改善前" },
+    { key: "after", label: "改善後" }
+  ];
+
+  const row = document.getElementById("compareRow");
+  let readyCount = 0;
+
+  versions.forEach(function(v){
+    const col = document.createElement("div");
+    col.className = "compare-col";
+
+    const label = document.createElement("div");
+    label.className = "compare-label";
+    label.textContent = v.label;
+    col.appendChild(label);
+
+    const frame = document.createElement("iframe");
+    frame.className = mode === "full" ? "mode-full" : "mode-zoom";
+    frame.src = "./pdf-preview-single.html?version=" + v.key + "&mode=" + mode;
+    frame.onload = function(){
+      const check = function(){
+        try{
+          const doc = frame.contentDocument;
+          if(doc && doc.body.getAttribute("data-pdf-ready") === "1"){
+            if(mode !== "full"){
+              const wrap = doc.getElementById("zoomWrap");
+              if(wrap){
+                frame.style.width = Math.ceil(wrap.scrollWidth + 24) + "px";
+                frame.style.height = Math.ceil(wrap.scrollHeight + 24) + "px";
+              }
+            }
+            readyCount += 1;
+            if(readyCount === versions.length){
+              document.body.setAttribute("data-pdf-ready", "1");
+            }
+            return;
+          }
+        }catch(e){}
+        setTimeout(check, 100);
+      };
+      check();
+    };
+    col.appendChild(frame);
+    row.appendChild(col);
+  });
+})();
+</script>
+</body>
+</html>

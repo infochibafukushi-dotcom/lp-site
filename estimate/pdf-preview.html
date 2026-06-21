@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDFプレビュー | 概算見積</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 16px;
+    background: #e8e8e8;
+    font-family: sans-serif;
+  }
+  .preview-toolbar {
+    max-width: 900px;
+    margin: 0 auto 12px;
+    font-size: 13px;
+    color: #444;
+  }
+  .preview-frame {
+    margin: 0 auto;
+    background: #fff;
+    box-shadow: 0 2px 12px rgba(0,0,0,.15);
+    overflow: hidden;
+  }
+  .preview-frame.desktop {
+    width: 794px;
+  }
+  .preview-frame.mobile {
+    width: 375px;
+    padding: 8px 0;
+    background: #e8e8e8;
+    box-shadow: none;
+  }
+  .preview-inner {
+    margin: 0 auto;
+    overflow: hidden;
+  }
+  .preview-frame.mobile .preview-inner {
+    transform-origin: top center;
+  }
+  .preview-loading {
+    padding: 40px;
+    text-align: center;
+    color: #666;
+  }
+</style>
+</head>
+<body>
+<div class="preview-toolbar" id="previewLabel">PDFプレビュー読み込み中...</div>
+<div class="preview-frame desktop" id="previewFrame">
+  <div class="preview-inner" id="previewRoot">
+    <div class="preview-loading">生成中...</div>
+  </div>
+</div>
+
+<script src="../shared/libs/qrcode.min.js"></script>
+<script src="../shared/estimate-qr.js"></script>
+<script src="./estimate-pdf.js"></script>
+<script>
+(function(){
+  const params = new URLSearchParams(location.search);
+  const viewport = params.get("viewport") === "mobile" ? "mobile" : "desktop";
+  const frame = document.getElementById("previewFrame");
+  const label = document.getElementById("previewLabel");
+  const root = document.getElementById("previewRoot");
+
+  frame.className = "preview-frame " + viewport;
+  label.textContent = viewport === "mobile"
+    ? "スマホブラウザ相当（375px）PDFプレビュー"
+    : "PCブラウザ相当（794px）PDFプレビュー";
+
+  const mockData = {
+    estimateNumber: "EST-20250621-001",
+    createdAt: new Date().toISOString(),
+    pageTitle: "ちばケアタクシー 概算見積シミュレーター",
+    usageSummary: [
+      { label: "ご利用区分", value: "介護タクシー" },
+      { label: "移動手段", value: "自家用車椅子" },
+      { label: "往復", value: "片道" },
+      { label: "出発地", value: "千葉市中央区" },
+      { label: "目的地", value: "千葉大学医学部附属病院" },
+      { label: "付き添い", value: "あり（約60分）" }
+    ],
+    breakdownRows: [
+      { label: "基本運賃", amount: 730 },
+      { label: "予約・迎車料金", amount: 900 },
+      { label: "距離運賃", amount: 3460 },
+      { label: "介助料金", amount: 1100 },
+      { label: "付き添い料金", amount: 1600 }
+    ],
+    total: 7790,
+    resultNotes:
+      "※表示料金は概算です。\n" +
+      "※実際の料金は運行距離、交通状況、待機時間、付き添い時間、介助内容等により変動する場合があります。",
+    pdfFooter: {
+      enabled: true,
+      businessName: "ちばケアタクシー",
+      phone: "090-6331-4289",
+      homepageUrl: "https://infochibafukushi-dotcom.github.io/lp-site/#",
+      homepageQrLabel: "ホームページ",
+      lineUrl: "https://lin.ee/XA05KN5",
+      lineQrLabel: "LINE",
+      message: "ご予約・ご相談はお気軽にお問い合わせください"
+    }
+  };
+
+  async function render(){
+    if(!window.EstimatePdf || typeof window.EstimatePdf.buildPreviewElement !== "function"){
+      root.innerHTML = "<div class=\"preview-loading\">PDFモジュールの読み込みに失敗しました。</div>";
+      return;
+    }
+    try{
+      const element = await window.EstimatePdf.buildPreviewElement(mockData);
+      root.innerHTML = "";
+      if(viewport === "mobile"){
+        const contentWidth = window.EstimatePdf.CONTENT_WIDTH_PX;
+        const scale = Math.min(1, (frame.clientWidth - 16) / contentWidth);
+        const scaler = document.createElement("div");
+        scaler.style.width = Math.floor(contentWidth * scale) + "px";
+        scaler.style.overflow = "hidden";
+        scaler.style.margin = "0 auto";
+        element.style.width = contentWidth + "px";
+        element.style.transform = "scale(" + scale + ")";
+        element.style.transformOrigin = "top left";
+        scaler.appendChild(element);
+        root.appendChild(scaler);
+        const scaledHeight = Math.ceil(element.offsetHeight * scale);
+        scaler.style.height = scaledHeight + "px";
+        frame.style.height = scaledHeight + 16 + "px";
+        frame.style.background = "#fff";
+        frame.style.boxShadow = "0 2px 12px rgba(0,0,0,.15)";
+      }else{
+        root.appendChild(element);
+      }
+      document.body.setAttribute("data-pdf-ready", "1");
+    }catch(error){
+      root.innerHTML = "<div class=\"preview-loading\">プレビュー生成エラー: " + error.message + "</div>";
+    }
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

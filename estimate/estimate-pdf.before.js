@@ -41,137 +41,33 @@
     return {
       baseFont: 11,
       titleFont: 20,
-      sectionFont: 13.5,
-      metaFont: 10.5,
+      sectionFont: 13,
+      metaFont: 10,
       totalLabelFont: 12,
       totalFont: 26,
       resultNotesFont: 9,
-      footerFont: 10.5,
-      footerBusinessFont: 13,
-      footerPhoneFont: 11.5,
+      footerFont: 10,
       cellPadV: 4,
       cellPadH: 6,
-      breakdownFont: 11,
-      breakdownCellPadV: 4,
-      breakdownLineHeight: 1.4,
-      breakdownLabelPadRight: 12,
-      breakdownTableWidth: 100,
-      sectionGap: 6,
-      lineHeight: 1.38,
-      resultNotesLineHeight: 1.42,
-      totalBlockPadV: 4,
-      totalTopGap: 8,
+      amountPadRight: 12,
+      sectionGap: 7,
+      lineHeight: 1.4,
+      resultNotesLineHeight: 1.45,
+      totalBoxPad: 8,
       resultNotesGap: 4,
       footerGap: 4,
-      footerQrSize: 46,
-      qrRowGap: 24,
-      qrLabelGap: 3,
+      footerQrSize: 47,
+      qrRowGap: 14,
       titleGap: 4,
-      headingGap: 3,
-      footerTopGap: 10,
-      pagePadTop: 2,
-      pagePadBottom: 0,
-      fillPage: false
+      headingGap: 2
     };
-  }
-
-  function cloneLayout(layout){
-    return Object.assign({}, layout);
-  }
-
-  function countBreakdownRows(data){
-    return (data.breakdownRows || []).filter(function(row){
-      return (Number(row.amount) || 0) > 0 || String(row.label || "").trim();
-    }).length;
-  }
-
-  function tuneLayoutForContent(data, layout){
-    const next = cloneLayout(layout);
-    const breakdownCount = countBreakdownRows(data);
-    const usageCount = (data.usageSummary || []).length;
-    const hasNotes = Boolean(String(data.resultNotes || "").trim());
-    const hasFooter = !data.pdfFooter || data.pdfFooter.enabled !== false;
-
-    next.breakdownTableWidth = 100;
-
-    if(breakdownCount <= 3){
-      next.breakdownFont = 12.5;
-      next.breakdownCellPadV = 7;
-      next.breakdownLineHeight = 1.5;
-      next.sectionGap = 7;
-      next.totalTopGap = 10;
-      next.totalFont = 27;
-    }else if(breakdownCount <= 5){
-      next.breakdownFont = 11.5;
-      next.breakdownCellPadV = 5;
-      next.breakdownLineHeight = 1.42;
-      next.totalFont = 26;
-    }else if(breakdownCount <= 7){
-      next.breakdownFont = 10.5;
-      next.breakdownCellPadV = 3;
-      next.breakdownLineHeight = 1.35;
-      next.sectionGap = 5;
-      next.totalFont = 24;
-    }else{
-      next.breakdownFont = 9.5;
-      next.breakdownCellPadV = 2;
-      next.breakdownLineHeight = 1.28;
-      next.sectionGap = 4;
-      next.baseFont = 10;
-      next.sectionFont = 12.5;
-      next.totalFont = 22;
-      next.footerQrSize = 40;
-    }
-
-    if(usageCount >= 7){
-      next.cellPadV = Math.max(2, next.cellPadV - 1);
-      next.sectionGap = Math.max(4, next.sectionGap - 1);
-    }
-
-    if(hasNotes && breakdownCount >= 6){
-      next.resultNotesFont = 8.5;
-      next.resultNotesLineHeight = 1.35;
-    }
-
-    if(hasFooter && breakdownCount <= 4 && usageCount <= 6){
-      next.footerQrSize = 48;
-      next.footerBusinessFont = 14;
-      next.fillPage = true;
-    }
-
-    return next;
   }
 
   function scaleLayout(layout, factor){
     const next = {};
     Object.keys(layout).forEach(function(key){
-      if(key === "fillPage"){
-        next[key] = layout[key];
-        return;
-      }
-      let min = 6;
-      if(key === "breakdownLabelPadRight"){
-        min = 6;
-      }else if(key === "breakdownTableWidth"){
-        min = 88;
-      }else if(key === "footerQrSize"){
-        min = 36;
-      }else if(key === "breakdownFont" || key === "baseFont"){
-        min = 9;
-      }
+      const min = key === "amountPadRight" ? 8 : key === "footerQrSize" ? 40 : 6;
       next[key] = Math.max(min, Math.round(layout[key] * factor * 10) / 10);
-    });
-    return next;
-  }
-
-  function expandLayout(layout, factor){
-    const next = {};
-    Object.keys(layout).forEach(function(key){
-      if(key === "fillPage"){
-        next[key] = layout[key];
-        return;
-      }
-      next[key] = Math.round(layout[key] * factor * 10) / 10;
     });
     return next;
   }
@@ -188,11 +84,11 @@
       return "";
     }
     return (
-      "<div style=\"flex:0 0 auto;text-align:center;\">" +
+      "<div style=\"flex:1 1 0;min-width:0;max-width:140px;text-align:center;\">" +
       "<img src=\"" + dataUrl + "\" alt=\"\" width=\"" + layout.footerQrSize + "\" height=\"" + layout.footerQrSize + "\" " +
       "style=\"display:block;margin:0 auto;\">" +
       (label
-        ? "<div style=\"margin-top:" + layout.qrLabelGap + "px;font-size:8px;line-height:1.2;color:#666;\">" + escapeHtml(label) + "</div>"
+        ? "<div style=\"margin-top:4px;font-size:" + Math.max(8, layout.footerFont - 1) + "px;line-height:1.35;\">" + escapeHtml(label) + "</div>"
         : "") +
       "</div>"
     );
@@ -216,8 +112,9 @@
       return "";
     }
 
+    const justifyContent = items.length === 2 ? "space-around" : "center";
     return (
-      "<div style=\"display:flex;justify-content:center;align-items:flex-start;gap:" + layout.qrRowGap + "px;" +
+      "<div style=\"display:flex;justify-content:" + justifyContent + ";align-items:flex-start;gap:" + layout.qrRowGap + "px;" +
       "margin-top:" + layout.footerGap + "px;\">" +
       items.join("") +
       "</div>"
@@ -236,17 +133,13 @@
 
     if(businessName){
       parts.push(
-        "<div style=\"font-weight:700;font-size:" + layout.footerBusinessFont + "px;line-height:1.3;letter-spacing:.02em;\">" +
+        "<div style=\"font-weight:700;font-size:" + (layout.footerFont + 1) + "px;\">" +
         escapeHtml(businessName) +
         "</div>"
       );
     }
     if(phone){
-      parts.push(
-        "<div style=\"font-size:" + layout.footerPhoneFont + "px;line-height:1.3;font-weight:600;margin-top:2px;\">" +
-        "TEL：" + escapeHtml(phone) +
-        "</div>"
-      );
+      parts.push("<div>TEL：" + escapeHtml(phone) + "</div>");
     }
 
     const qrRowHtml = buildQrRowHtml(pdfFooter, layout, qrDataUrls);
@@ -256,9 +149,7 @@
 
     if(message){
       parts.push(
-        "<div style=\"margin-top:" + (layout.footerGap + 1) + "px;font-size:" + Math.max(8.5, layout.footerFont - 1) + "px;line-height:1.35;color:#555;\">" +
-        escapeHtml(message) +
-        "</div>"
+        "<div style=\"margin-top:" + layout.footerGap + "px;\">" + escapeHtml(message) + "</div>"
       );
     }
 
@@ -268,9 +159,10 @@
 
     return (
       footerRule(layout) +
-      "<div style=\"font-size:" + layout.footerFont + "px;line-height:1.4;text-align:center;color:#333;\">" +
+      "<div style=\"font-size:" + layout.footerFont + "px;line-height:1.55;text-align:center;color:#333;\">" +
       parts.join("") +
-      "</div>"
+      "</div>" +
+      footerRule(layout)
     );
   }
 
@@ -363,10 +255,10 @@
     const breakdownRows = (data.breakdownRows || []).map(function(row){
       return (
         "<tr>" +
-        "<td style=\"padding:" + layout.breakdownCellPadV + "px " + layout.breakdownLabelPadRight + "px " + layout.breakdownCellPadV + "px 0;border-bottom:1px solid #e3e3e3;\">" +
+        "<td style=\"padding:" + layout.cellPadV + "px " + layout.cellPadH + "px;border-bottom:1px solid #eee;\">" +
         escapeHtml(row.label) +
         "</td>" +
-        "<td class=\"estimate-pdf-amount\" style=\"padding:" + layout.breakdownCellPadV + "px 0;border-bottom:1px solid #e3e3e3;text-align:left;white-space:nowrap;font-weight:600;\">" +
+        "<td class=\"estimate-pdf-amount\" style=\"padding:" + layout.cellPadV + "px " + layout.amountPadRight + "px " + layout.cellPadV + "px " + layout.cellPadH + "px;border-bottom:1px solid #eee;text-align:right;\">" +
         escapeHtml(formatYen(row.amount)) +
         "</td>" +
         "</tr>"
@@ -386,54 +278,29 @@
     const footerHtml = buildPdfFooterHtml(data.pdfFooter, layout, qrDataUrls);
 
     const bodyFont = layout.baseFont + "px";
-    const breakdownFont = layout.breakdownFont + "px";
     const tableStyle =
       "width:100%;border-collapse:collapse;margin-bottom:" + layout.sectionGap + "px;font-size:" + bodyFont + ";line-height:" + layout.lineHeight + ";";
-    const breakdownTableStyle =
-      "width:" + layout.breakdownTableWidth + "%;border-collapse:collapse;margin-bottom:" + layout.totalTopGap + "px;font-size:" + breakdownFont +
-      ";line-height:" + layout.breakdownLineHeight + ";table-layout:fixed;";
 
-    const totalHtml =
-      footerRule(layout) +
-      "<div class=\"estimate-pdf-total\" style=\"text-align:center;padding:" + layout.totalBlockPadV + "px 0 " + (layout.totalBlockPadV + 1) + "px;\">" +
-        "<div style=\"font-size:" + layout.totalLabelFont + "px;color:#666;line-height:1.2;margin-bottom:2px;letter-spacing:.04em;\">概算合計</div>" +
-        "<div style=\"font-size:" + layout.totalFont + "px;font-weight:800;color:#c62828;line-height:1.1;letter-spacing:.01em;\">" + escapeHtml(formatYen(data.total)) + "～</div>" +
-      "</div>" +
-      footerRule(layout);
-
-    const pageShellStyle = layout.fillPage
-      ? "box-sizing:border-box;display:flex;flex-direction:column;min-height:" + CONTENT_HEIGHT_PX + "px;width:100%;padding-top:" + layout.pagePadTop + "px;padding-bottom:" + layout.pagePadBottom + "px;"
-      : "box-sizing:border-box;width:100%;padding-top:" + layout.pagePadTop + "px;padding-bottom:" + layout.pagePadBottom + "px;";
-
-    const mainContentHtml =
-        "<h1 style=\"margin:0 0 " + layout.titleGap + "px;font-size:" + layout.titleFont + "px;line-height:1.18;letter-spacing:.02em;\">概算見積書</h1>" +
+    el.innerHTML =
+      "<div style=\"box-sizing:border-box;width:100%;\">" +
+        "<h1 style=\"margin:0 0 " + layout.titleGap + "px;font-size:" + layout.titleFont + "px;line-height:1.25;\">概算見積書</h1>" +
         "<p style=\"margin:0 0 " + layout.sectionGap + "px;font-size:" + layout.metaFont + "px;color:#666;line-height:" + layout.lineHeight + ";\">" +
           escapeHtml(data.pageTitle || "概算見積シミュレーター") +
         "</p>" +
         "<table style=\"width:100%;border-collapse:collapse;margin-bottom:" + layout.sectionGap + "px;font-size:" + layout.metaFont + "px;line-height:" + layout.lineHeight + ";\">" +
-          "<tr><td style=\"padding:" + layout.cellPadV + "px 0;color:#666;width:26%;\">見積番号</td><td style=\"padding:" + layout.cellPadV + "px 0;font-weight:700;\">" + escapeHtml(data.estimateNumber || "") + "</td></tr>" +
+          "<tr><td style=\"padding:" + layout.cellPadV + "px 0;color:#666;width:28%;\">見積番号</td><td style=\"padding:" + layout.cellPadV + "px 0;font-weight:700;\">" + escapeHtml(data.estimateNumber || "") + "</td></tr>" +
           "<tr><td style=\"padding:" + layout.cellPadV + "px 0;color:#666;\">見積日時</td><td style=\"padding:" + layout.cellPadV + "px 0;\">" + escapeHtml(formatDateTime(data.createdAt)) + "</td></tr>" +
         "</table>" +
-        "<h2 style=\"margin:0 0 " + layout.headingGap + "px;font-size:" + layout.sectionFont + "px;color:#9a6b16;line-height:1.22;\">ご利用内容</h2>" +
+        "<h2 style=\"margin:0 0 " + layout.headingGap + "px;font-size:" + layout.sectionFont + "px;color:#9a6b16;line-height:1.3;\">ご利用内容</h2>" +
         "<table style=\"" + tableStyle + "\">" + (usageRows || "<tr><td colspan=\"2\" style=\"padding:" + layout.cellPadV + "px " + layout.cellPadH + "px;\">—</td></tr>") + "</table>" +
-        "<div class=\"estimate-pdf-breakdown-section\">" +
-          "<h2 style=\"margin:0 0 " + layout.headingGap + "px;font-size:" + layout.sectionFont + "px;color:#9a6b16;line-height:1.22;\">料金内訳</h2>" +
-          "<table class=\"estimate-pdf-breakdown\" style=\"" + breakdownTableStyle + "\">" +
-            "<colgroup><col style=\"width:54%;\"><col style=\"width:46%;\"></colgroup>" +
-            (breakdownRows || "<tr><td colspan=\"2\" style=\"padding:" + layout.breakdownCellPadV + "px " + layout.cellPadH + "px;\">—</td></tr>") +
-          "</table>" +
+        "<h2 style=\"margin:0 0 " + layout.headingGap + "px;font-size:" + layout.sectionFont + "px;color:#9a6b16;line-height:1.3;\">料金内訳</h2>" +
+        "<table style=\"" + tableStyle + "\">" + (breakdownRows || "<tr><td colspan=\"2\" style=\"padding:" + layout.cellPadV + "px " + layout.cellPadH + "px;\">—</td></tr>") + "</table>" +
+        "<div class=\"estimate-pdf-total\" style=\"box-sizing:border-box;width:100%;margin:0;padding:" + layout.totalBoxPad + "px;border:2px solid #e87f00;border-radius:8px;text-align:center;\">" +
+          "<div style=\"font-size:" + layout.totalLabelFont + "px;color:#666;margin-bottom:2px;line-height:1.3;\">概算合計</div>" +
+          "<div style=\"font-size:" + layout.totalFont + "px;font-weight:800;color:#c62828;line-height:1.2;\">" + escapeHtml(formatYen(data.total)) + "～</div>" +
         "</div>" +
-        "<div class=\"estimate-pdf-total-section\">" + totalHtml + "</div>" +
-        resultNotesHtml;
-
-    const footerBlockHtml = footerHtml
-      ? "<div class=\"estimate-pdf-footer-section\" style=\"" + (layout.fillPage ? "margin-top:auto;padding-top:" : "margin-top:") + layout.footerTopGap + "px;\">" + footerHtml + "</div>"
-      : "";
-
-    el.innerHTML =
-      "<div style=\"" + pageShellStyle + "\">" +
-        "<div style=\"flex:0 0 auto;\">" + mainContentHtml + "</div>" +
-        footerBlockHtml +
+        resultNotesHtml +
+        footerHtml +
       "</div>";
     return el;
   }
@@ -443,46 +310,25 @@
     container.style.cssText = buildHiddenCaptureContainerStyle();
     document.body.appendChild(container);
 
-    let layout = tuneLayoutForContent(data, getDefaultLayout());
-    let contentHeight = 0;
+    let layout = getDefaultLayout();
     try{
       for(let i = 0; i < 24; i++){
         const probe = buildPdfElement(data, layout, qrDataUrls);
         container.appendChild(probe);
-        contentHeight = readElementContentHeight(probe);
+        const contentHeight = readElementContentHeight(probe);
         container.removeChild(probe);
         if(contentHeight > 0 && contentHeight <= CONTENT_HEIGHT_PX){
-          break;
+          return { layout: layout, contentHeight: contentHeight };
         }
-        layout = scaleLayout(layout, 0.94);
+        layout = scaleLayout(layout, 0.92);
       }
-
-      if(contentHeight > 0 && contentHeight <= CONTENT_HEIGHT_PX * 0.78 && layout.fillPage){
-        for(let j = 0; j < 10; j++){
-          const expanded = expandLayout(layout, 1.03);
-          const probe = buildPdfElement(data, expanded, qrDataUrls);
-          container.appendChild(probe);
-          const expandedHeight = readElementContentHeight(probe);
-          container.removeChild(probe);
-          if(expandedHeight > 0 && expandedHeight <= CONTENT_HEIGHT_PX){
-            layout = expanded;
-            contentHeight = expandedHeight;
-          }else{
-            break;
-          }
-        }
-      }
-
-      if(contentHeight <= 0 || contentHeight > CONTENT_HEIGHT_PX){
-        const fallback = buildPdfElement(data, layout, qrDataUrls);
-        container.appendChild(fallback);
-        const measuredHeight = readElementContentHeight(fallback);
-        contentHeight = measuredHeight > 0
-          ? Math.min(measuredHeight, CONTENT_HEIGHT_PX)
-          : CONTENT_HEIGHT_PX;
-        container.removeChild(fallback);
-      }
-
+      const fallback = buildPdfElement(data, layout, qrDataUrls);
+      container.appendChild(fallback);
+      const measuredHeight = readElementContentHeight(fallback);
+      const contentHeight = measuredHeight > 0
+        ? Math.min(measuredHeight, CONTENT_HEIGHT_PX)
+        : CONTENT_HEIGHT_PX;
+      container.removeChild(fallback);
       return { layout: layout, contentHeight: contentHeight };
     }finally{
       container.remove();
@@ -521,21 +367,14 @@
     };
   }
 
-  async function buildPreviewElement(data){
-    const tuned = tuneLayoutForContent(data, getDefaultLayout());
-    const qrDataUrls = await resolveQrDataUrls(data.pdfFooter, tuned.footerQrSize);
-    const measured = measureContentHeight(data, qrDataUrls);
-    return buildPdfElement(data, measured.layout, qrDataUrls);
-  }
-
   async function savePdf(data){
     if(typeof html2pdf === "undefined"){
       throw new Error("PDF ライブラリが読み込まれていません。");
     }
 
     console.log("PDF_DEBUG_4 PDF DOM生成");
-    const tuned = tuneLayoutForContent(data, getDefaultLayout());
-    const qrDataUrls = await resolveQrDataUrls(data.pdfFooter, tuned.footerQrSize);
+    const defaultLayout = getDefaultLayout();
+    const qrDataUrls = await resolveQrDataUrls(data.pdfFooter, defaultLayout.footerQrSize);
     const measured = measureContentHeight(data, qrDataUrls);
     const layout = measured.layout;
     const element = buildPdfElement(data, layout, qrDataUrls);
@@ -569,6 +408,14 @@
     }finally{
       container.remove();
     }
+  }
+
+
+  async function buildPreviewElement(data){
+    const defaultLayout = getDefaultLayout();
+    const qrDataUrls = await resolveQrDataUrls(data.pdfFooter, defaultLayout.footerQrSize);
+    const measured = measureContentHeight(data, qrDataUrls);
+    return buildPdfElement(data, measured.layout, qrDataUrls);
   }
 
   global.EstimatePdf = {
