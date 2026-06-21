@@ -1,0 +1,227 @@
+{
+  "comparison": [
+    {
+      "padRight": 8,
+      "domScreenshot": "C:\\Users\\yamam\\OneDrive\\ドキュメント\\GitHub\\lp-site\\tmp\\amount-padding-compare\\dom-pad-8.png",
+      "layoutAmountPadRight": 12,
+      "cellMetrics": [
+        {
+          "text": "¥1,200",
+          "paddingRight": "8px",
+          "textRightPx": 733.21875,
+          "rootWidthPx": 733.21875,
+          "rightMarginPx": 0
+        },
+        {
+          "text": "¥4,800",
+          "paddingRight": "8px",
+          "textRightPx": 733.21875,
+          "rootWidthPx": 733.21875,
+          "rightMarginPx": 0
+        },
+        {
+          "text": "¥3,500",
+          "paddingRight": "8px",
+          "textRightPx": 733.21875,
+          "rootWidthPx": 733.21875,
+          "rightMarginPx": 0
+        },
+        {
+          "text": "¥1,200",
+          "paddingRight": "8px",
+          "textRightPx": 733.21875,
+          "rootWidthPx": 733.21875,
+          "rightMarginPx": 0
+        }
+      ],
+      "canvas": null,
+      "maxInkX": null,
+      "rightGapPx": null,
+      "coverageWidthRatio": null,
+      "pageCount": 1,
+      "qrCount": 2,
+      "footerOk": true,
+      "contentHeight": 0,
+      "contentHeightLimit": 1062.0472440944882
+    },
+    {
+      "padRight": 12,
+      "domScreenshot": "C:\\Users\\yamam\\OneDrive\\ドキュメント\\GitHub\\lp-site\\tmp\\amount-padding-compare\\dom-pad-12.png",
+      "layoutAmountPadRight": 12,
+      "cellMetrics": [
+        {
+          "text": "¥1,200",
+          "paddingRight": "12px",
+          "textRightPx": 733.21875,
+          "rootWidthPx": 733.21875,
+          "rightMarginPx": 0
+        },
+        {
+          "text": "¥4,800",
+          "paddingRight": "12px",
+          "textRightPx": 733.21875,
+          "rootWidthPx": 733.21875,
+          "rightMarginPx": 0
+        },
+        {
+          "text": "¥3,500",
+          "paddingRight": "12px",
+          "textRightPx": 733.21875,
+          "rootWidthPx": 733.21875,
+          "rightMarginPx": 0
+        },
+        {
+          "text": "¥1,200",
+          "paddingRight": "12px",
+          "textRightPx": 733.21875,
+          "rootWidthPx": 733.21875,
+          "rightMarginPx": 0
+        }
+      ],
+      "canvas": null,
+      "maxInkX": null,
+      "rightGapPx": null,
+      "coverageWidthRatio": null,
+      "pageCount": 1,
+      "qrCount": 2,
+      "footerOk": true,
+      "contentHeight": 0,
+      "contentHeightLimit": 1062.0472440944882
+    },
+    {
+      "padRight": 16,
+      "domScreenshot": "C:\\Users\\yamam\\OneDrive\\ドキュメント\\GitHub\\lp-site\\tmp\\amount-padding-compare\\dom-pad-16.png",
+      "layoutAmountPadRight": 12,
+      "cellMetrics": [
+        {
+          "text": "¥1,200",
+          "paddingRight": "16px",
+          "textRightPx": 733.21875,
+          "rootWidthPx": 733.21875,
+          "rightMarginPx": 0
+        },
+        {
+          "text": "¥4,800",
+          "paddingRight": "16px",
+          "textRightPx": 733.21875,
+          "rootWidthPx": 733.21875,
+          "rightMarginPx": 0
+        },
+        {
+          "text": "¥3,500",
+          "paddingRight": "16px",
+          "textRightPx": 733.21875,
+          "rootWidthPx": 733.21875,
+          "rightMarginPx": 0
+        },
+        {
+          "text": "¥1,200",
+          "paddingRight": "16px",
+          "textRightPx": 733.21875,
+          "rootWidthPx": 733.21875,
+          "rightMarginPx": 0
+        }
+      ],
+      "canvas": null,
+      "maxInkX": null,
+      "rightGapPx": null,
+      "coverageWidthRatio": null,
+      "pageCount": 1,
+      "qrCount": 2,
+      "footerOk": true,
+      "contentHeight": 0,
+      "contentHeightLimit": 1062.0472440944882
+    },
+    {
+      "padRight": 20,
+      "domScreenshot": "C:\\Users\\yamam\\OneDrive\\ドキュメント\\GitHub\\lp-site\\tmp\\amount-padding-compare\\dom-pad-20.png",
+      "layoutAmountPadRight": 12,
+      "cellMetrics": [
+        {
+          "text": "¥1,200",
+          "paddingRight": "20px",
+          "textRightPx": 733.21875,
+          "rootWidthPx": 733.21875,
+          "rightMarginPx": 0
+        },
+        {
+          "text": "¥4,800",
+          "paddingRight": "20px",
+          "textRightPx": 733.21875,
+          "rootWidthPx": 733.21875,
+          "rightMarginPx": 0
+        },
+        {
+          "text": "¥3,500",
+          "paddingRight": "20px",
+          "textRightPx": 733.21875,
+          "rootWidthPx": 733.21875,
+          "rightMarginPx": 0
+        },
+        {
+          "text": "¥1,200",
+          "paddingRight": "20px",
+          "textRightPx": 733.21875,
+          "rootWidthPx": 733.21875,
+          "rightMarginPx": 0
+        }
+      ],
+      "canvas": null,
+      "maxInkX": null,
+      "rightGapPx": null,
+      "coverageWidthRatio": null,
+      "pageCount": 1,
+      "qrCount": 2,
+      "footerOk": true,
+      "contentHeight": 0,
+      "contentHeightLimit": 1062.0472440944882
+    }
+  ],
+  "finalWithInline12px": {
+    "layoutAmountPadRight": 12,
+    "cellMetrics": [
+      {
+        "text": "¥1,200",
+        "paddingRight": "12px",
+        "textRightPx": 733.21875,
+        "rootWidthPx": 733.21875,
+        "rightMarginPx": 0
+      },
+      {
+        "text": "¥4,800",
+        "paddingRight": "12px",
+        "textRightPx": 733.21875,
+        "rootWidthPx": 733.21875,
+        "rightMarginPx": 0
+      },
+      {
+        "text": "¥3,500",
+        "paddingRight": "12px",
+        "textRightPx": 733.21875,
+        "rootWidthPx": 733.21875,
+        "rightMarginPx": 0
+      },
+      {
+        "text": "¥1,200",
+        "paddingRight": "12px",
+        "textRightPx": 733.21875,
+        "rootWidthPx": 733.21875,
+        "rightMarginPx": 0
+      }
+    ],
+    "canvas": null,
+    "maxInkX": null,
+    "rightGapPx": null,
+    "coverageWidthRatio": null,
+    "pageCount": 1,
+    "qrCount": 2,
+    "footerOk": true,
+    "contentHeight": 0,
+    "contentHeightLimit": 1062.0472440944882
+  },
+  "finalPdf": {
+    "usedSavePdf": false,
+    "pageCount": 2
+  },
+  "outputDir": "C:\\Users\\yamam\\OneDrive\\ドキュメント\\GitHub\\lp-site\\tmp\\amount-padding-compare"
+}
