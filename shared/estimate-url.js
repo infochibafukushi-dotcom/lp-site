@@ -63,6 +63,7 @@
     }
     if(urlState.distanceKm > 0){
       formState.distanceKm = urlState.distanceKm;
+      formState.distanceInputText = String(urlState.distanceKm);
     }
     if(urlState.estimateNumber){
       formState.estimateNumber = urlState.estimateNumber;

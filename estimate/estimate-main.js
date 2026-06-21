@@ -8,6 +8,7 @@
     tripTypeId: "",
     roundTripAddonId: "",
     distanceKm: 0,
+    distanceInputText: "",
     estimateNumber: "",
     estimateCreatedAt: "",
     selectionFingerprint: "",
@@ -31,6 +32,43 @@
   function formatYen(amount){
     const n = Number(amount) || 0;
     return "¥" + n.toLocaleString("ja-JP");
+  }
+
+  function parseDistanceValue(raw){
+    const text = String(raw ?? "").trim().replace(/，/g, ".");
+    if(!text) return null;
+    if(!/^\d+(\.\d+)?$/.test(text)) return null;
+    const n = Number(text);
+    if(!Number.isFinite(n) || n <= 0) return null;
+    return n;
+  }
+
+  function getDistanceInputDisplayValue(){
+    if(state.distanceInputText !== ""){
+      return state.distanceInputText;
+    }
+    if(state.distanceKm > 0){
+      return String(state.distanceKm);
+    }
+    return "";
+  }
+
+  function commitDistanceInput(){
+    const parsed = parseDistanceValue(state.distanceInputText);
+    if(parsed !== null){
+      state.distanceKm = parsed;
+      state.distanceInputText = String(parsed);
+      invalidateEstimateNumberIfChanged();
+      state.lastActiveStepId = "";
+      renderPage();
+      return;
+    }
+    state.distanceKm = 0;
+    invalidateEstimateNumberIfChanged();
+    if(document.querySelector(".estimate-result")){
+      state.lastActiveStepId = "";
+      renderPage();
+    }
   }
 
   function getRoot(){
@@ -247,6 +285,7 @@
           break;
         case "distance":
           state.distanceKm = 0;
+          state.distanceInputText = "";
           break;
         default:
           break;
@@ -281,6 +320,7 @@
         break;
       case "distance":
         state.distanceKm = 0;
+        state.distanceInputText = "";
         break;
       default:
         break;
@@ -312,6 +352,7 @@
     state.tripTypeId = "";
     state.roundTripAddonId = "";
     state.distanceKm = 0;
+    state.distanceInputText = "";
     state.estimateNumber = "";
     state.estimateCreatedAt = "";
     state.selectionFingerprint = "";
@@ -422,7 +463,7 @@
           </div>
         </div>
         <label for="distanceKmInput" class="estimate-distance-label">${escapeHtml(label)}</label>
-        <input type="number" class="estimate-input" id="distanceKmInput" min="0" step="0.1" inputmode="decimal" placeholder="例: 5.5" value="${state.distanceKm > 0 ? escapeAttr(state.distanceKm) : ""}">
+        <input type="text" class="estimate-input estimate-input--distance" id="distanceKmInput" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="例: 5.5" value="${escapeAttr(getDistanceInputDisplayValue())}">
         <p class="estimate-step-note">${escapeHtml(note)}</p>
       </section>
     `;
@@ -797,19 +838,15 @@
     const distanceInput = document.getElementById("distanceKmInput");
     if(distanceInput){
       distanceInput.addEventListener("input", function(){
-        state.distanceKm = Number(distanceInput.value) || 0;
-        invalidateEstimateNumberIfChanged();
-        const result = window.EstimateCalc.computeEstimate(state.config, state);
-        if(state.distanceKm > 0){
-          if(!document.querySelector(".estimate-result")){
-            state.lastActiveStepId = "";
-            renderPage();
-          }else{
-            refreshResultSection(result);
-          }
-        }else if(document.querySelector(".estimate-result")){
-          state.lastActiveStepId = "";
-          renderPage();
+        state.distanceInputText = distanceInput.value;
+      });
+      distanceInput.addEventListener("blur", function(){
+        commitDistanceInput();
+      });
+      distanceInput.addEventListener("keydown", function(event){
+        if(event.key === "Enter"){
+          event.preventDefault();
+          distanceInput.blur();
         }
       });
     }

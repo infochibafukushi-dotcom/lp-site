@@ -144,6 +144,15 @@
   outline:2px solid #e87f00;
   border-color:#e87f00;
 }
+.estimate-input--distance{
+  -moz-appearance:textfield;
+  appearance:textfield;
+}
+.estimate-input--distance::-webkit-outer-spin-button,
+.estimate-input--distance::-webkit-inner-spin-button{
+  -webkit-appearance:none;
+  margin:0;
+}
 .estimate-checkbox-row{
   display:flex;
   align-items:center;
