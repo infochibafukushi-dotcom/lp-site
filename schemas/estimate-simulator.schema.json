@@ -3,11 +3,10 @@
   "$id": "https://infochibafukushi-dotcom.github.io/lp-site/schemas/estimate-simulator.schema.json",
   "title": "EstimateSimulatorConfig",
   "type": "object",
-  "required": ["enabled", "version", "storeId", "page", "basicFees", "distancePricing", "categories"],
+  "required": ["enabled", "version", "page", "basicFees", "distancePricing", "categories"],
   "properties": {
     "enabled": { "type": "boolean" },
     "version": { "type": "number" },
-    "storeId": { "type": "string", "minLength": 1 },
     "updatedAt": { "type": "string" },
     "page": {
       "type": "object",
@@ -44,14 +43,7 @@
     "waitingFees": { "type": "object" },
     "options": { "type": "object" },
     "mappings": { "type": "object" },
-    "resultLabels": { "type": "object" },
-    "historySettings": {
-      "type": "object",
-      "properties": {
-        "saveHistory": { "type": "boolean" }
-      },
-      "additionalProperties": true
-    }
+    "resultLabels": { "type": "object" }
   },
   "definitions": {
     "categoryItem": {

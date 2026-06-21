@@ -54,9 +54,6 @@
     if(typeof data.version !== "number"){
       pushError(errors, "version must be a number");
     }
-    if(!data.storeId || typeof data.storeId !== "string"){
-      pushError(errors, "storeId is required");
-    }
 
     if(!isObject(data.page)){
       pushError(errors, "page is required");
@@ -97,11 +94,7 @@
     }
 
     if(data.historySettings != null){
-      if(!isObject(data.historySettings)){
-        pushError(errors, "historySettings must be an object");
-      }else if(typeof data.historySettings.saveHistory !== "boolean"){
-        pushError(errors, "historySettings.saveHistory must be a boolean");
-      }
+      pushError(errors, "historySettings is no longer supported");
     }
 
     return {

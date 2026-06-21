@@ -18,11 +18,10 @@
     });
   }
 
-  function createDefaultEstimateConfig(storeId){
+  function createDefaultEstimateConfig(){
     return {
       enabled: true,
       version: 1,
-      storeId: storeId || "default",
       updatedAt: new Date().toISOString(),
       page: {
         title: "概算見積シミュレーター",
@@ -127,9 +126,6 @@
         escortFee: "付き添い料金",
         usageSummary: "ご利用内容",
         total: "概算料金"
-      },
-      historySettings: {
-        saveHistory: false
       }
     };
   }

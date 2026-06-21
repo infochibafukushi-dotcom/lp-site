@@ -1366,82 +1366,21 @@ body{
       <div id="estimateSettingsEditor" style="margin-top:16px;">読み込み中...</div>
 
       <div class="actions" style="margin-top:16px;">
-        <button type="button" id="estimateSaveBtn">Firestore に保存</button>
+        <button type="button" id="estimateReloadBtn">再読込</button>
+        <button type="button" id="estimateSaveBtn">estimate-config.json を保存</button>
         <button type="button" class="secondary" id="estimatePreviewBtn">プレビューを見る</button>
+        <button type="button" class="secondary" id="estimateSeedBtn">初期値に戻す</button>
       </div>
       <div class="preview" id="estimateSaveResult">まだ保存していません。</div>
 
-      <div class="card collapsible-card js-collapsible section-anchor" id="card-estimate-fc-settings" data-open="false" style="margin-top:20px;">
-        <button type="button" class="card-toggle js-card-toggle">
-          <span class="toggle-left">
-            <span class="toggle-icon">▶</span>
-            <span class="toggle-title">詳細設定（FC向け）</span>
-          </span>
-          <span class="toggle-state">閉じています</span>
-        </button>
-        <div class="card-body js-card-body">
-          <p class="note">FC展開・Firestore 認証・設定複製・JSON入出力など。通常運用では開く必要はありません。</p>
-
-          <div class="grid2">
-            <div class="row">
-              <label>店舗ID（storeId）</label>
-              <input type="text" id="estimateStoreId" value="default" placeholder="default">
-              <div class="small">FC展開時は店舗ごとにIDを切り替えます。</div>
-            </div>
-          </div>
-
-          <div id="estimateFcSettingsEditor"></div>
-
-          <h3 style="margin-top:16px;">Firestore 認証</h3>
-          <p class="note">保存には Firebase Auth でのログインが必要です。管理者アカウントに custom claim <code>admin: true</code> を付与してください。</p>
-          <div class="grid2">
-            <div class="row">
-              <label>メールアドレス</label>
-              <input type="email" id="estimateAuthEmail" autocomplete="username">
-            </div>
-            <div class="row">
-              <label>パスワード</label>
-              <input type="password" id="estimateAuthPassword" autocomplete="current-password">
-            </div>
-          </div>
-          <div class="actions">
-            <button type="button" id="estimateAuthSignInBtn">ログイン</button>
-            <button type="button" class="secondary" id="estimateAuthSignOutBtn">ログアウト</button>
-          </div>
-          <div class="preview" id="estimateAuthUserLabel">未ログイン</div>
-          <div class="preview" id="estimateAuthResult"></div>
-
-          <div class="actions" style="margin-top:16px;">
-            <button type="button" id="estimateReloadBtn">Firestore から再読込</button>
-            <button type="button" class="secondary" id="estimateSeedBtn">初期データを投入</button>
-          </div>
-
-          <h3 style="margin-top:20px;">設定を複製（FC展開）</h3>
-          <p class="note">既存店舗の設定を新しい店舗IDへコピーします。</p>
-          <div class="grid2">
-            <div class="row">
-              <label>複製元 storeId</label>
-              <input type="text" id="estimateCopyFromStoreId" value="default" placeholder="default">
-            </div>
-            <div class="row">
-              <label>複製先 storeId</label>
-              <input type="text" id="estimateCopyToStoreId" placeholder="例: chiba-care-taxi">
-            </div>
-          </div>
-          <div class="actions">
-            <button type="button" id="estimateDuplicateBtn">設定を複製</button>
-          </div>
-
-          <h3 style="margin-top:20px;">JSON エクスポート / インポート</h3>
-          <p class="note">加盟店追加時の設定バックアップ・一括反映に利用できます。</p>
-          <div class="actions">
-            <button type="button" class="secondary" id="estimateExportBtn">JSONエクスポート</button>
-            <label class="secondary" style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;">
-              <span>JSONインポート</span>
-              <input type="file" id="estimateImportFile" accept="application/json,.json" style="max-width:220px;">
-            </label>
-          </div>
-        </div>
+      <h3 style="margin-top:20px;">JSON エクスポート / インポート</h3>
+      <p class="note">設定のバックアップや別LPへの反映に利用できます。</p>
+      <div class="actions">
+        <button type="button" class="secondary" id="estimateExportBtn">JSONエクスポート</button>
+        <label class="secondary" style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;">
+          <span>JSONインポート</span>
+          <input type="file" id="estimateImportFile" accept="application/json,.json" style="max-width:220px;">
+        </label>
       </div>
     </div>
   </div>
@@ -1463,18 +1402,13 @@ body{
 <script src="./admin-sections-sort.js"></script>
 <script src="./carechan-cta-defaults.js"></script>
 <script src="./admin-carechan.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="./shared/firebase-config.js"></script>
 <script src="./shared/estimate-defaults.js"></script>
-<script src="./shared/estimate-store.js"></script>
-<script src="./shared/estimate-url.js"></script>
 <script src="./shared/estimate-validate.js"></script>
 <script src="./admin-estimate.js"></script>
 <script>
 const CONFIG_PATH = 'data/config.json';
 const SECTIONS_PATH = 'data/sections.json';
+const ESTIMATE_CONFIG_PATH = 'data/estimate-config.json';
 const COLOR_PRESETS = [
   '#ffffff','#f8f9fa','#f1f3f5','#e9ecef','#dee2e6',
   '#000000','#343a40','#495057','#6c757d','#adb5bd',
@@ -1564,6 +1498,7 @@ let menuGroupOpenState = {};
 let sectionOpenState = {};
 let dirtyConfig = false;
 let dirtySections = false;
+let dirtyEstimate = false;
 let saveStateType = '';
 let saveStateMessage = '';
 
@@ -1585,10 +1520,11 @@ function updateFloatingSaveStatus(message = '', type = ''){
       finalMessage = '保存に失敗しました。';
     }else if(finalType === 'success'){
       finalMessage = '保存が完了しました。';
-    }else if(dirtyConfig || dirtySections){
+    }else if(dirtyConfig || dirtySections || dirtyEstimate){
       const labels = [];
       if(dirtyConfig) labels.push('上部・下部設定');
       if(dirtySections) labels.push('セクション');
+      if(dirtyEstimate) labels.push('概算見積設定');
       finalType = 'dirty';
       finalMessage = '未保存: ' + labels.join(' / ');
     }else{
@@ -1626,6 +1562,19 @@ function clearSectionsDirty(){
   updateFloatingSaveStatus();
 }
 
+function markEstimateConfigDirty(){
+  dirtyEstimate = true;
+  updateFloatingSaveStatus();
+}
+
+function clearEstimateConfigDirty(){
+  dirtyEstimate = false;
+  updateFloatingSaveStatus();
+}
+
+window.markEstimateConfigDirty = markEstimateConfigDirty;
+window.clearEstimateConfigDirty = clearEstimateConfigDirty;
+
 function bindDirtyTrackers(){
   document.addEventListener('input', function(event){
     const target = event.target;
@@ -1638,6 +1587,11 @@ function bindDirtyTrackers(){
 
     if(target.closest('#card-section-add') || target.closest('#card-sections-sort') || target.closest('#card-sections-list') || target.closest('#card-preview')){
       markSectionsDirty();
+      return;
+    }
+
+    if(target.closest('#card-estimate-settings')){
+      markEstimateConfigDirty();
     }
   });
 
@@ -1652,11 +1606,16 @@ function bindDirtyTrackers(){
 
     if(target.closest('#card-section-add') || target.closest('#card-sections-sort') || target.closest('#card-sections-list') || target.closest('#card-preview')){
       markSectionsDirty();
+      return;
+    }
+
+    if(target.closest('#card-estimate-settings')){
+      markEstimateConfigDirty();
     }
   });
 
   window.addEventListener('beforeunload', function(event){
-    if(!(dirtyConfig || dirtySections)) return;
+    if(!(dirtyConfig || dirtySections || dirtyEstimate)) return;
     event.preventDefault();
     event.returnValue = '';
   });
@@ -1667,8 +1626,9 @@ async function saveAllToGitHub(){
 
   const configOk = await saveConfigToGitHub(true);
   const sectionsOk = await saveSectionsToGitHub(true);
+  const estimateOk = await saveEstimateConfigToGitHub(true);
 
-  if(configOk && sectionsOk){
+  if(configOk && sectionsOk && estimateOk){
     updateFloatingSaveStatus('すべて保存しました。数十秒後にLPへ反映されます。', 'success');
     return true;
   }
@@ -3879,6 +3839,45 @@ async function saveConfigToGitHub(isSilent = false){
     return false;
   }
 }
+
+async function saveEstimateConfigToGitHub(isSilent = false){
+  try{
+    if(typeof getEstimateDraftForSave !== 'function'){
+      throw new Error('概算見積設定エディタが読み込まれていません。');
+    }
+    if(!isSilent){
+      updateFloatingSaveStatus('概算見積設定を保存しています...', 'saving');
+    }
+    const draft = getEstimateDraftForSave();
+    await saveFileToGitHub(ESTIMATE_CONFIG_PATH, JSON.stringify(draft, null, 2));
+    if(typeof clearEstimateConfigDirty === 'function'){
+      clearEstimateConfigDirty();
+    }else{
+      dirtyEstimate = false;
+    }
+    if(!isSilent){
+      const box = document.getElementById('estimateSaveResult');
+      if(box){
+        box.className = 'preview success';
+        box.textContent = 'estimate-config.json の保存に成功しました。数十秒後にLPへ反映されます。';
+      }
+      updateFloatingSaveStatus('概算見積設定を保存しました。', 'success');
+    }
+    return true;
+  }catch(error){
+    if(!isSilent){
+      const box = document.getElementById('estimateSaveResult');
+      if(box){
+        box.className = 'preview error';
+        box.textContent = '保存失敗: ' + error.message;
+      }
+      updateFloatingSaveStatus('概算見積設定の保存に失敗しました。', 'error');
+    }
+    return false;
+  }
+}
+
+window.saveEstimateConfigToGitHub = saveEstimateConfigToGitHub;
 
 async function saveSectionsToGitHub(isSilent = false){
   try{

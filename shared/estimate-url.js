@@ -3,7 +3,6 @@
     const params = new URLSearchParams(search || (typeof window !== "undefined" ? window.location.search : ""));
     const distanceRaw = params.get("distance");
     return {
-      storeId: String(params.get("store") || "").trim(),
       mobilityId: String(params.get("mobility") || "").trim(),
       stairId: String(params.get("stair") || "").trim(),
       tripTypeId: String(params.get("trip") || "").trim(),
@@ -16,8 +15,6 @@
   function buildShareUrl(state, options){
     const opts = options || {};
     const params = new URLSearchParams();
-    const storeId = String(state.storeId || "").trim();
-    if(storeId) params.set("store", storeId);
     if(state.mobilityId) params.set("mobility", state.mobilityId);
     if(state.stairId) params.set("stair", state.stairId);
     if(state.tripTypeId) params.set("trip", state.tripTypeId);

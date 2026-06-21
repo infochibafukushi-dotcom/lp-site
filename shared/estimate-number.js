@@ -24,7 +24,6 @@
   function buildHistoryRecord(payload){
     return {
       estimateNumber: payload.estimateNumber,
-      storeId: payload.storeId,
       createdAt: payload.createdAt || new Date().toISOString(),
       usageSummary: payload.usageSummary || [],
       breakdown: payload.breakdown || {},

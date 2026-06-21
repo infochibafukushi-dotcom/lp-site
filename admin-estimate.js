@@ -1,4 +1,5 @@
 (function(){
+  const ESTIMATE_CONFIG_PATH = "data/estimate-config.json";
   let estimateDraft = null;
 
   function escapeHtml(text){
@@ -24,15 +25,16 @@
     box.textContent = message || "";
   }
 
-  function setAuthStatus(message, type){
-    const box = document.getElementById("estimateAuthResult");
-    if(!box) return;
-    box.className = "preview" + (type ? " " + type : "");
-    box.textContent = message || "";
+  function markEstimateDirty(){
+    if(typeof window.markEstimateConfigDirty === "function"){
+      window.markEstimateConfigDirty();
+    }
   }
 
-  function getStoreIdInput(){
-    return document.getElementById("estimateStoreId")?.value.trim() || "default";
+  function clearEstimateDirty(){
+    if(typeof window.clearEstimateConfigDirty === "function"){
+      window.clearEstimateConfigDirty();
+    }
   }
 
   function renderFeeEditor(label, obj, path){
@@ -98,26 +100,43 @@
     }).join("");
   }
 
-  function renderEditor(){
-    renderMainEditor();
-    renderFcEditor();
-    renderMappingsEditor();
-    toggleDistanceModeFields();
-    if(window.AdminCollapse && typeof window.AdminCollapse.bindWithin === "function"){
-      const fcCard = document.getElementById("card-estimate-fc-settings");
-      if(fcCard) window.AdminCollapse.bindWithin(fcCard);
-    }
+  function renderMappingsEditor(){
+    const root = document.getElementById("estimateMappingsEditor");
+    if(!root || !estimateDraft) return;
+    const mobilityItems = estimateDraft.categories?.mobility?.items || [];
+    const assistanceItems = estimateDraft.categories?.assistance?.items || [];
+    const mappings = estimateDraft.mappings?.mobilityToAssistance || {};
+
+    root.innerHTML = mobilityItems.map(function(mobility){
+      const options = assistanceItems.map(function(assist){
+        const selected = mappings[mobility.id] === assist.id ? " selected" : "";
+        return `<option value="${escapeAttr(assist.id)}"${selected}>${escapeHtml(assist.label || assist.id)}</option>`;
+      }).join("");
+      return `
+        <div class="row">
+          <label>${escapeHtml(mobility.label || mobility.id)}</label>
+          <select data-mapping-mobility="${escapeAttr(mobility.id)}">${options}</select>
+        </div>
+      `;
+    }).join("");
   }
 
-  function renderMainEditor(){
+  function renderEditor(){
     const root = document.getElementById("estimateSettingsEditor");
     if(!root || !estimateDraft) return;
 
     const dp = estimateDraft.distancePricing || {};
     const patternA = dp.patternA || {};
     const patternB = dp.patternB || {};
+    const bodyOpt = estimateDraft.options?.bodyAssist || {};
 
     root.innerHTML = `
+      <div class="row"><label><input type="checkbox" id="estimateEnabledToggle" ${estimateDraft.enabled !== false ? "checked" : ""}> 概算見積ページを公開する</label></div>
+
+      <h3>ページ設定</h3>
+      <div class="row"><label>タイトル</label><input type="text" id="estimatePageTitle" value="${escapeAttr(estimateDraft.page?.title || "")}"></div>
+      <div class="row"><label>説明文</label><textarea id="estimatePageDescription" rows="3">${escapeHtml(estimateDraft.page?.description || "")}</textarea></div>
+
       <h3>基本料金</h3>
       ${renderFeeEditor("基本運賃", estimateDraft.basicFees?.baseFare, "basicFees.baseFare")}
       ${renderFeeEditor("予約料金", estimateDraft.basicFees?.reservationFee, "basicFees.reservationFee")}
@@ -159,27 +178,9 @@
       ${renderFeeEditor("待機30分料金", estimateDraft.waitingFees?.waiting30min, "waitingFees.waiting30min")}
       ${renderFeeEditor("付き添い30分料金", estimateDraft.waitingFees?.escort30min, "waitingFees.escort30min")}
 
-      <h3>注意事項</h3>
-      <div class="row"><label>概算見積ページに表示する注意事項</label><textarea id="estimatePageDisclaimer" rows="5">${escapeHtml(estimateDraft.page?.disclaimer || "")}</textarea></div>
-    `;
-  }
-
-  function renderFcEditor(){
-    const root = document.getElementById("estimateFcSettingsEditor");
-    if(!root || !estimateDraft) return;
-
-    const bodyOpt = estimateDraft.options?.bodyAssist || {};
-
-    root.innerHTML = `
-      <h3 style="margin-top:16px;">公開・履歴</h3>
-      <div class="row"><label><input type="checkbox" id="estimateEnabledToggle" ${estimateDraft.enabled !== false ? "checked" : ""}> 概算見積ページを公開する</label></div>
-      <div class="row">
-        <label><input type="checkbox" id="estimateSaveHistoryToggle" ${estimateDraft.historySettings?.saveHistory === true ? "checked" : ""}> 見積履歴を Firestore に保存する（ON）</label>
-      </div>
-
-      <h3>ページ設定</h3>
-      <div class="row"><label>タイトル</label><input type="text" id="estimatePageTitle" value="${escapeAttr(estimateDraft.page?.title || "")}"></div>
-      <div class="row"><label>説明文</label><textarea id="estimatePageDescription" rows="3">${escapeHtml(estimateDraft.page?.description || "")}</textarea></div>
+      <h3>送迎方法</h3>
+      <div id="estimateTripItems">${renderCategoryItems("tripType")}</div>
+      <button type="button" class="secondary" data-action="add-item" data-category="tripType">送迎方法を追加</button>
 
       <h3>追加オプション：身体介助</h3>
       <div class="grid2">
@@ -189,34 +190,15 @@
       <div class="row"><label>説明文</label><textarea id="estimateBodyAssistDescription" rows="3">${escapeHtml(bodyOpt.description || "")}</textarea></div>
       <label><input type="checkbox" id="estimateBodyAssistVisible" ${bodyOpt.visible !== false ? "checked" : ""}> 表示する</label>
 
-      <h3>送迎方法</h3>
-      <div id="estimateTripItems">${renderCategoryItems("tripType")}</div>
-      <button type="button" class="secondary" data-action="add-item" data-category="tripType">送迎方法を追加</button>
-
       <h3>移動方法 → 介助内容 自動選択</h3>
       <div id="estimateMappingsEditor"></div>
+
+      <h3>注意事項</h3>
+      <div class="row"><label>概算見積ページに表示する注意事項</label><textarea id="estimatePageDisclaimer" rows="5">${escapeHtml(estimateDraft.page?.disclaimer || "")}</textarea></div>
     `;
-  }
 
-  function renderMappingsEditor(){
-    const root = document.getElementById("estimateMappingsEditor");
-    if(!root || !estimateDraft) return;
-    const mobilityItems = estimateDraft.categories?.mobility?.items || [];
-    const assistanceItems = estimateDraft.categories?.assistance?.items || [];
-    const mappings = estimateDraft.mappings?.mobilityToAssistance || {};
-
-    root.innerHTML = mobilityItems.map(function(mobility){
-      const options = assistanceItems.map(function(assist){
-        const selected = mappings[mobility.id] === assist.id ? " selected" : "";
-        return `<option value="${escapeAttr(assist.id)}"${selected}>${escapeHtml(assist.label || assist.id)}</option>`;
-      }).join("");
-      return `
-        <div class="row">
-          <label>${escapeHtml(mobility.label || mobility.id)}</label>
-          <select data-mapping-mobility="${escapeAttr(mobility.id)}">${options}</select>
-        </div>
-      `;
-    }).join("");
+    renderMappingsEditor();
+    toggleDistanceModeFields();
   }
 
   function toggleDistanceModeFields(){
@@ -242,9 +224,6 @@
     const draft = deepClone(estimateDraft);
 
     draft.enabled = document.getElementById("estimateEnabledToggle")?.checked !== false;
-    draft.historySettings = {
-      saveHistory: document.getElementById("estimateSaveHistoryToggle")?.checked === true
-    };
     draft.page = {
       title: document.getElementById("estimatePageTitle")?.value.trim() || "",
       description: document.getElementById("estimatePageDescription")?.value || "",
@@ -312,8 +291,6 @@
       }
     });
 
-    draft.storeId = getStoreIdInput();
-
     if(Array.isArray(draft.categories?.tripType?.items)){
       draft.categories.tripType.items.forEach(function(item){
         if(!(Number(item.distanceMultiplier) > 0)){
@@ -324,6 +301,15 @@
       });
     }
 
+    draft.version = typeof draft.version === "number" ? draft.version : 1;
+    draft.updatedAt = new Date().toISOString();
+    return draft;
+  }
+
+  function normalizeEstimateConfig(data){
+    const draft = deepClone(data || {});
+    if(typeof draft.enabled !== "boolean") draft.enabled = true;
+    if(typeof draft.version !== "number") draft.version = 1;
     return draft;
   }
 
@@ -346,6 +332,7 @@
       newItem.escortFeeRef = "";
     }
     items.push(newItem);
+    markEstimateDirty();
     renderEditor();
   }
 
@@ -358,6 +345,7 @@
     items[index] = items[target];
     items[target] = tmp;
     items.forEach(function(item, idx){ item.order = idx + 1; });
+    markEstimateDirty();
     renderEditor();
   }
 
@@ -367,21 +355,37 @@
     if(!confirm("この項目を削除しますか？")) return;
     items.splice(index, 1);
     items.forEach(function(item, idx){ item.order = idx + 1; });
+    markEstimateDirty();
     renderEditor();
   }
 
-  async function loadEstimateSettings(){
-    if(!window.EstimateStore?.isEnabled()){
-      setEstimateStatus("Firebase が未設定です。shared/firebase-config.js を設定してください。", "error");
-      return;
+  function validateDraftConfig(draft){
+    if(!window.EstimateValidate || typeof window.EstimateValidate.validateEstimateConfig !== "function"){
+      return { ok: true, errors: [] };
     }
+    return window.EstimateValidate.validateEstimateConfig(draft);
+  }
+
+  async function loadEstimateSettings(){
     try{
-      setEstimateStatus("Firestore から読み込み中...", "warn");
-      estimateDraft = await window.EstimateStore.loadEstimateConfig(getStoreIdInput());
+      setEstimateStatus("estimate-config.json を読み込み中...", "warn");
+      const res = await fetch("./" + ESTIMATE_CONFIG_PATH + "?" + Date.now(), { cache: "no-store" });
+      if(!res.ok){
+        throw new Error("HTTP " + res.status);
+      }
+      estimateDraft = normalizeEstimateConfig(await res.json());
       renderEditor();
+      clearEstimateDirty();
       setEstimateStatus("読み込みに成功しました。", "success");
     }catch(error){
-      setEstimateStatus("読み込み失敗: " + error.message, "error");
+      if(window.EstimateDefaults?.createDefaultEstimateConfig){
+        estimateDraft = window.EstimateDefaults.createDefaultEstimateConfig();
+        renderEditor();
+        markEstimateDirty();
+        setEstimateStatus("estimate-config.json が見つかりません。初期値を表示しています。保存してください。", "warn");
+      }else{
+        setEstimateStatus("読み込み失敗: " + error.message, "error");
+      }
     }
   }
 
@@ -393,59 +397,34 @@
       if(!validation.ok){
         throw new Error("保存前検証エラー: " + validation.errors.join(" / "));
       }
-      setEstimateStatus("Firestore に保存中...", "warn");
-      estimateDraft = await window.EstimateStore.saveEstimateConfig(draft, getStoreIdInput());
-      setEstimateStatus("保存に成功しました。", "success");
+      estimateDraft = draft;
+      if(typeof window.saveEstimateConfigToGitHub === "function"){
+        await window.saveEstimateConfigToGitHub(false);
+      }else{
+        throw new Error("GitHub 保存機能が利用できません。");
+      }
     }catch(error){
       setEstimateStatus("保存失敗: " + error.message, "error");
     }
   }
 
-  async function seedDefaultSettings(){
+  function resetToDefaultSettings(){
     if(!window.EstimateDefaults?.createDefaultEstimateConfig){
       setEstimateStatus("初期データ生成モジュールが見つかりません。", "error");
       return;
     }
-    if(!confirm("初期データで Firestore を上書き保存します。よろしいですか？")) return;
-    try{
-      estimateDraft = window.EstimateDefaults.createDefaultEstimateConfig(getStoreIdInput());
-      renderEditor();
-      await saveEstimateSettings();
-      setEstimateStatus("初期データの投入に成功しました。", "success");
-    }catch(error){
-      setEstimateStatus("初期データ投入失敗: " + error.message, "error");
-    }
-  }
-
-  async function duplicateSettings(){
-    const fromStoreId = document.getElementById("estimateCopyFromStoreId")?.value.trim();
-    const toStoreId = document.getElementById("estimateCopyToStoreId")?.value.trim();
-    if(!fromStoreId || !toStoreId){
-      setEstimateStatus("複製元・複製先の店舗IDを入力してください。", "error");
-      return;
-    }
-    if(fromStoreId === toStoreId){
-      setEstimateStatus("複製元と複製先が同じです。", "error");
-      return;
-    }
-    if(!confirm('「' + fromStoreId + '」の設定を「' + toStoreId + '」へ複製します。よろしいですか？')) return;
-    try{
-      setEstimateStatus("設定を複製中...", "warn");
-      await window.EstimateStore.copyEstimateConfig(fromStoreId, toStoreId);
-      document.getElementById("estimateStoreId").value = toStoreId;
-      await loadEstimateSettings();
-      setEstimateStatus("「" + toStoreId + "」へ複製しました。", "success");
-    }catch(error){
-      setEstimateStatus("複製失敗: " + error.message, "error");
-    }
+    if(!confirm("編集内容を初期値に戻します。よろしいですか？")) return;
+    estimateDraft = window.EstimateDefaults.createDefaultEstimateConfig();
+    markEstimateDirty();
+    renderEditor();
+    setEstimateStatus("初期値を表示しました。「estimate-config.json を保存」で反映してください。", "success");
   }
 
   function exportSettingsJson(){
     try{
       const draft = collectDraftFromForm();
       if(!draft) throw new Error("エクスポートするデータがありません。");
-      const storeId = getStoreIdInput();
-      const filename = "estimate-simulator-" + storeId + ".json";
+      const filename = "estimate-config.json";
       const blob = new Blob([JSON.stringify(draft, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -459,30 +438,20 @@
     }
   }
 
-  function validateDraftConfig(draft){
-    if(!window.EstimateValidate || typeof window.EstimateValidate.validateEstimateConfig !== "function"){
-      return { ok: true, errors: [] };
-    }
-    return window.EstimateValidate.validateEstimateConfig(draft);
-  }
-
   function importSettingsJson(file){
     if(!file) return;
     const reader = new FileReader();
     reader.onload = function(){
       try{
-        const parsed = JSON.parse(String(reader.result || ""));
-        if(!parsed || typeof parsed !== "object"){
-          throw new Error("JSON の形式が不正です。");
-        }
-        parsed.storeId = getStoreIdInput();
+        const parsed = normalizeEstimateConfig(JSON.parse(String(reader.result || "")));
         const validation = validateDraftConfig(parsed);
         if(!validation.ok){
           throw new Error("スキーマ検証エラー: " + validation.errors.join(" / "));
         }
         estimateDraft = parsed;
+        markEstimateDirty();
         renderEditor();
-        setEstimateStatus("JSON を読み込みました。内容を確認して「Firestore に保存」してください。", "success");
+        setEstimateStatus("JSON を読み込みました。内容を確認して保存してください。", "success");
       }catch(error){
         setEstimateStatus("インポート失敗: " + error.message, "error");
       }
@@ -491,29 +460,7 @@
   }
 
   function openPreview(){
-    const storeId = getStoreIdInput();
-    const previewPath = "./estimate/?store=" + encodeURIComponent(storeId);
-    window.open(previewPath, "_blank", "noopener,noreferrer");
-  }
-
-  async function signIn(){
-    const email = document.getElementById("estimateAuthEmail")?.value.trim();
-    const password = document.getElementById("estimateAuthPassword")?.value;
-    if(!email || !password){
-      setAuthStatus("メールアドレスとパスワードを入力してください。", "error");
-      return;
-    }
-    try{
-      await window.EstimateStore.signInAdmin(email, password);
-      setAuthStatus("ログインしました。", "success");
-    }catch(error){
-      setAuthStatus("ログイン失敗: " + error.message, "error");
-    }
-  }
-
-  async function signOut(){
-    await window.EstimateStore.signOutAdmin();
-    setAuthStatus("ログアウトしました。", "warn");
+    window.open("./estimate/", "_blank", "noopener,noreferrer");
   }
 
   function handleCategoryItemAction(btn){
@@ -530,13 +477,13 @@
     if(event.target && event.target.id === "estimateDistanceMode"){
       toggleDistanceModeFields();
     }
+    markEstimateDirty();
   }
 
   function bindEvents(){
     document.getElementById("estimateReloadBtn")?.addEventListener("click", loadEstimateSettings);
     document.getElementById("estimateSaveBtn")?.addEventListener("click", saveEstimateSettings);
-    document.getElementById("estimateSeedBtn")?.addEventListener("click", seedDefaultSettings);
-    document.getElementById("estimateDuplicateBtn")?.addEventListener("click", duplicateSettings);
+    document.getElementById("estimateSeedBtn")?.addEventListener("click", resetToDefaultSettings);
     document.getElementById("estimateExportBtn")?.addEventListener("click", exportSettingsJson);
     document.getElementById("estimatePreviewBtn")?.addEventListener("click", openPreview);
     document.getElementById("estimateImportFile")?.addEventListener("change", function(event){
@@ -544,8 +491,6 @@
       importSettingsJson(file);
       event.target.value = "";
     });
-    document.getElementById("estimateAuthSignInBtn")?.addEventListener("click", signIn);
-    document.getElementById("estimateAuthSignOutBtn")?.addEventListener("click", signOut);
 
     document.getElementById("estimateSettingsEditor")?.addEventListener("click", function(event){
       const btn = event.target.closest("[data-action]");
@@ -553,35 +498,27 @@
       handleCategoryItemAction(btn);
     });
 
-    document.getElementById("estimateFcSettingsEditor")?.addEventListener("click", function(event){
-      const btn = event.target.closest("[data-action]");
-      if(!btn) return;
-      handleCategoryItemAction(btn);
-    });
-
+    document.getElementById("estimateSettingsEditor")?.addEventListener("input", handleEstimateEditorChange);
     document.getElementById("estimateSettingsEditor")?.addEventListener("change", handleEstimateEditorChange);
-    document.getElementById("estimateFcSettingsEditor")?.addEventListener("change", handleEstimateEditorChange);
+  }
 
-    if(window.EstimateStore?.isEnabled() && window.EstimateStore?.onAuthStateChanged){
-      window.EstimateStore.onAuthStateChanged(function(user){
-        const label = document.getElementById("estimateAuthUserLabel");
-        if(label){
-          label.textContent = user ? ("ログイン中: " + user.email) : "未ログイン";
-        }
-      });
+  function getEstimateDraftForSave(){
+    const draft = collectDraftFromForm();
+    if(!draft) throw new Error("概算見積設定がありません。");
+    const validation = validateDraftConfig(draft);
+    if(!validation.ok){
+      throw new Error("概算見積設定の検証エラー: " + validation.errors.join(" / "));
     }
+    return draft;
   }
 
   function initEstimateAdmin(){
     bindEvents();
-    if(window.EstimateStore?.isEnabled()){
-      loadEstimateSettings();
-    }else{
-      setEstimateStatus("Firebase 未設定のため、shared/firebase-config.js を設定後に再読込してください。", "warn");
-      estimateDraft = window.EstimateDefaults?.createDefaultEstimateConfig("default");
-      renderEditor();
-    }
+    loadEstimateSettings();
   }
+
+  window.getEstimateDraftForSave = getEstimateDraftForSave;
+  window.loadEstimateSettings = loadEstimateSettings;
 
   if(document.readyState === "loading"){
     document.addEventListener("DOMContentLoaded", initEstimateAdmin);

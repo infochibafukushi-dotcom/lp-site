@@ -1,0 +1,283 @@
+{
+  "enabled": true,
+  "version": 1,
+  "updatedAt": "2026-06-21T03:47:11.573Z",
+  "page": {
+    "title": "概算見積シミュレーター",
+    "description": "ご利用内容を選択すると概算料金を確認できます。\n実際の料金は運行ルートや介助内容等により変動する場合があります。",
+    "disclaimer": "※表示料金は概算です。\n※実際の料金は運行ルート、交通状況、運行時間、迎車場所、介助内容等により変動する場合があります。\n※待機・院内付き添い料金は実際の利用時間により変動します。\n※障害者割引・福祉タクシー券等は概算見積には反映しておりません。"
+  },
+  "basicFees": {
+    "baseFare": {
+      "id": "baseFare",
+      "label": "基本運賃",
+      "description": "",
+      "amount": 730,
+      "visible": true,
+      "order": 1
+    },
+    "reservationFee": {
+      "id": "reservationFee",
+      "label": "予約料金",
+      "description": "",
+      "amount": 400,
+      "visible": true,
+      "order": 2
+    },
+    "pickupFee": {
+      "id": "pickupFee",
+      "label": "迎車料金",
+      "description": "",
+      "amount": 500,
+      "visible": true,
+      "order": 3
+    }
+  },
+  "distancePricing": {
+    "mode": "patternA",
+    "patternA": {
+      "initialDistanceKm": 1.096,
+      "initialFare": 730,
+      "incrementDistanceKm": 0.221,
+      "incrementFare": 100
+    },
+    "patternB": {
+      "perKmRate": 450
+    }
+  },
+  "categories": {
+    "mobility": {
+      "label": "移動方法",
+      "items": [
+        {
+          "id": "free-wheelchair",
+          "label": "無料車いす",
+          "description": "当社の標準車いすを無料でご利用いただけます。",
+          "amount": 0,
+          "visible": true,
+          "order": 1
+        },
+        {
+          "id": "own-wheelchair",
+          "label": "ご自身の車いす",
+          "description": "普段ご利用されている車いすのままご乗車いただけます。",
+          "amount": 0,
+          "visible": true,
+          "order": 2
+        },
+        {
+          "id": "cane-walk",
+          "label": "杖・歩行",
+          "description": "杖や歩行での移動に対応します。",
+          "amount": 0,
+          "visible": true,
+          "order": 3
+        },
+        {
+          "id": "reclining-wheelchair",
+          "label": "リクライニング車いす",
+          "description": "長時間の移動や座位保持が難しい方向けのリクライニング式車いすです。",
+          "amount": 2500,
+          "visible": true,
+          "order": 4
+        },
+        {
+          "id": "stretcher",
+          "label": "ストレッチャー",
+          "description": "寝たままの状態で搬送できる設備です。座ることが難しい方に対応します。",
+          "amount": 4000,
+          "visible": true,
+          "order": 5
+        }
+      ]
+    },
+    "assistance": {
+      "label": "介助内容",
+      "items": [
+        {
+          "id": "boarding-assist",
+          "label": "乗降介助",
+          "description": "車両への乗り降りをお手伝いする介助です。\n玄関先や病院入口などでの安全な移乗をサポートします。",
+          "amount": 1100,
+          "visible": true,
+          "order": 1
+        },
+        {
+          "id": "body-assist",
+          "label": "身体介助",
+          "description": "歩行介助、立ち上がり介助、移動介助など、身体に直接触れて行う介助です。\n利用者様の状態に応じて安全な移動をサポートします。",
+          "amount": 1600,
+          "visible": true,
+          "order": 2
+        },
+        {
+          "id": "stretcher-assist",
+          "label": "ストレッチャー介助",
+          "description": "ストレッチャーへの移乗や固定、搬送時の介助を行います。\n寝たままの状態で移動が必要な方が対象です。",
+          "amount": 6000,
+          "visible": true,
+          "order": 3
+        },
+        {
+          "id": "no-assist",
+          "label": "介助なし",
+          "description": "介助不要の場合に選択します。",
+          "amount": 0,
+          "visible": true,
+          "order": 4
+        }
+      ]
+    },
+    "stairAssist": {
+      "label": "階段介助",
+      "items": [
+        {
+          "id": "stair-none",
+          "label": "階段介助なし",
+          "description": "",
+          "amount": 0,
+          "visible": true,
+          "order": 1
+        },
+        {
+          "id": "stair-watch",
+          "label": "見守り介助",
+          "description": "階段や移動時に転倒防止のため付き添い、安全確認を行います。\n身体を支える介助は含みません。",
+          "amount": 0,
+          "visible": true,
+          "order": 2
+        },
+        {
+          "id": "stair-floor2",
+          "label": "2階移動",
+          "description": "エレベーターのない建物などで、階段を利用して移動する際の介助です。\n階数や介助人数により料金が異なります。",
+          "amount": 3000,
+          "visible": true,
+          "order": 3
+        },
+        {
+          "id": "stair-floor3",
+          "label": "3階移動",
+          "description": "エレベーターのない建物などで、階段を利用して移動する際の介助です。\n階数や介助人数により料金が異なります。",
+          "amount": 5000,
+          "visible": true,
+          "order": 4
+        },
+        {
+          "id": "stair-floor4",
+          "label": "4階移動",
+          "description": "エレベーターのない建物などで、階段を利用して移動する際の介助です。\n階数や介助人数により料金が異なります。",
+          "amount": 7000,
+          "visible": true,
+          "order": 5
+        },
+        {
+          "id": "stair-floor5",
+          "label": "5階移動",
+          "description": "エレベーターのない建物などで、階段を利用して移動する際の介助です。\n階数や介助人数により料金が異なります。",
+          "amount": 10000,
+          "visible": true,
+          "order": 6
+        }
+      ]
+    },
+    "tripType": {
+      "label": "送迎方法",
+      "items": [
+        {
+          "id": "one-way",
+          "label": "片道",
+          "description": "片道の送迎です。",
+          "amount": 0,
+          "visible": true,
+          "order": 1,
+          "distanceMultiplier": 1,
+          "waitingFeeRef": "",
+          "escortFeeRef": ""
+        },
+        {
+          "id": "round-trip",
+          "label": "往復",
+          "description": "往復の送迎です。距離運賃は2倍で計算します。",
+          "amount": 0,
+          "visible": true,
+          "order": 2,
+          "distanceMultiplier": 2,
+          "waitingFeeRef": "",
+          "escortFeeRef": ""
+        },
+        {
+          "id": "waiting",
+          "label": "待機",
+          "description": "通院やお買い物などの間、車両と乗務員が待機するサービスです。\n表示料金は30分を基準とした概算です。",
+          "amount": 0,
+          "visible": true,
+          "order": 3,
+          "distanceMultiplier": 2,
+          "waitingFeeRef": "waiting30min",
+          "escortFeeRef": ""
+        },
+        {
+          "id": "hospital-escort",
+          "label": "病院付き添い",
+          "description": "受付、診察室への移動、会計、薬の受け取りなどをお手伝いします。\n表示料金は30分を基準とした概算です。",
+          "amount": 0,
+          "visible": true,
+          "order": 4,
+          "distanceMultiplier": 2,
+          "waitingFeeRef": "",
+          "escortFeeRef": "escort30min"
+        }
+      ]
+    }
+  },
+  "waitingFees": {
+    "waiting30min": {
+      "id": "waiting30min",
+      "label": "待機30分料金",
+      "description": "通院やお買い物などの間、車両と乗務員が待機するサービスです。\n表示料金は30分を基準とした概算です。",
+      "amount": 800,
+      "visible": true,
+      "order": 1
+    },
+    "escort30min": {
+      "id": "escort30min",
+      "label": "付き添い30分料金",
+      "description": "受付、診察室への移動、会計、薬の受け取りなどをお手伝いします。\n表示料金は30分を基準とした概算です。",
+      "amount": 1600,
+      "visible": true,
+      "order": 2
+    }
+  },
+  "options": {
+    "bodyAssist": {
+      "id": "body-assist-option",
+      "label": "身体介助",
+      "description": "歩行介助、立ち上がり介助、移動介助など、身体に直接触れて行う介助です。\n利用者様の状態に応じて安全な移動をサポートします。",
+      "assistanceId": "body-assist",
+      "visible": true
+    }
+  },
+  "mappings": {
+    "mobilityToAssistance": {
+      "free-wheelchair": "boarding-assist",
+      "own-wheelchair": "boarding-assist",
+      "reclining-wheelchair": "boarding-assist",
+      "stretcher": "stretcher-assist",
+      "cane-walk": "no-assist"
+    }
+  },
+  "resultLabels": {
+    "baseFare": "基本運賃",
+    "reservationFee": "予約料金",
+    "pickupFee": "迎車料金",
+    "distanceFare": "距離運賃",
+    "wheelchairFee": "車いす料金",
+    "assistanceFee": "介助料金",
+    "stairFee": "階段介助料金",
+    "waitingFee": "待機料金",
+    "escortFee": "付き添い料金",
+    "usageSummary": "ご利用内容",
+    "total": "概算料金"
+  }
+}
