@@ -70,9 +70,16 @@
     return formState;
   }
 
+  function clearUrlState(){
+    if(typeof window === "undefined" || !window.history) return;
+    const path = window.location.pathname || "/estimate/";
+    window.history.replaceState({}, "", path);
+  }
+
   global.EstimateUrl = {
     parseUrlState: parseUrlState,
     buildShareUrl: buildShareUrl,
-    applyUrlStateToFormState: applyUrlStateToFormState
+    applyUrlStateToFormState: applyUrlStateToFormState,
+    clearUrlState: clearUrlState
   };
 })(typeof window !== "undefined" ? window : globalThis);

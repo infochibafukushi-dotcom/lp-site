@@ -98,8 +98,8 @@
           label: "待機・付き添い",
           items: [
             addonItem("addon-none", "なし", "待機・付き添いは不要です。", 1, {}),
-            addonItem("addon-waiting", "病院待機（30分）", "通院などの間、車両と乗務員が待機するサービスです。", 2, { waitingFeeRef: "waiting30min" }),
-            addonItem("addon-escort", "病院付き添い（30分）", "受付、診察室への移動、会計、薬の受け取りなどをお手伝いします。", 3, { escortFeeRef: "escort30min" })
+            addonItem("addon-waiting", "病院待機（30分）", "通院中、車両と乗務員が待機するサービスです。\n表示料金は30分を基準とした概算です。", 2, { waitingFeeRef: "waiting30min" }),
+            addonItem("addon-escort", "病院付き添い（30分）", "受付、院内移動、会計、薬の受け取りなどをお手伝いします。\n表示料金は30分を基準とした概算です。", 3, { escortFeeRef: "escort30min" })
           ]
         }
       },

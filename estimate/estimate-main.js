@@ -14,6 +14,8 @@
     lastActiveStepId: ""
   };
 
+  let delegatedBound = false;
+
   function escapeHtml(text){
     return String(text ?? "")
       .replaceAll("&", "&amp;")
@@ -107,32 +109,33 @@
       {
         id: "mobility",
         title: state.config.categories.mobility.label || "移動方法",
-        type: "select",
+        type: "choice",
         categoryKey: "mobility",
-        fieldName: "mobilitySelect",
+        choiceName: "mobilityChoice",
         getItems: function(){ return getVisibleItems("mobility"); },
         getValue: function(){ return state.mobilityId; }
       },
       {
         id: "assistance",
         title: state.config.categories.assistance.label || "介助内容",
-        type: "assistance"
+        type: "assistance",
+        choiceName: "assistanceChoice"
       },
       {
         id: "stair",
         title: state.config.categories.stairAssist.label || "階段介助",
-        type: "select",
+        type: "choice",
         categoryKey: "stairAssist",
-        fieldName: "stairSelect",
+        choiceName: "stairChoice",
         getItems: function(){ return getVisibleItems("stairAssist"); },
         getValue: function(){ return state.stairId; }
       },
       {
         id: "trip",
         title: state.config.categories.tripType.label || "送迎方法",
-        type: "select",
+        type: "choice",
         categoryKey: "tripType",
-        fieldName: "tripSelect",
+        choiceName: "tripChoice",
         getItems: function(){ return window.EstimateCalc.getTripTypeItems(state.config); },
         getValue: function(){ return state.tripTypeId; }
       }
@@ -142,9 +145,9 @@
       steps.push({
         id: "addon",
         title: state.config.categories.roundTripAddon?.label || "待機・付き添い",
-        type: "select",
+        type: "choice",
         categoryKey: "roundTripAddon",
-        fieldName: "roundTripAddonSelect",
+        choiceName: "addonChoice",
         getItems: function(){ return window.EstimateCalc.getRoundTripAddonItems(state.config); },
         getValue: function(){ return state.roundTripAddonId; }
       });
@@ -252,6 +255,82 @@
     syncRoundTripAddon();
   }
 
+  function clearStepValue(stepId){
+    switch(stepId){
+      case "mobility":
+        state.mobilityId = "";
+        state.assistanceId = "";
+        break;
+      case "assistance": {
+        const rule = window.EstimateCalc.getMobilityAssistanceRule(state.config, state.mobilityId);
+        if(rule?.mode === "fixed"){
+          state.mobilityId = "";
+        }
+        state.assistanceId = "";
+        break;
+      }
+      case "stair":
+        state.stairId = "";
+        break;
+      case "trip":
+        state.tripTypeId = "";
+        state.roundTripAddonId = "";
+        break;
+      case "addon":
+        state.roundTripAddonId = "";
+        break;
+      case "distance":
+        state.distanceKm = 0;
+        break;
+      default:
+        break;
+    }
+    syncAssistanceForMobility();
+    syncRoundTripAddon();
+  }
+
+  function openStepForEdit(stepId){
+    clearStepsAfter(stepId);
+    clearStepValue(stepId);
+    state.estimateNumber = "";
+    state.estimateCreatedAt = "";
+    state.selectionFingerprint = "";
+    state.lastActiveStepId = "";
+    renderPage();
+    requestAnimationFrame(function(){
+      const el = document.querySelector('[data-step-id="' + stepId + '"]');
+      if(el){
+        el.scrollIntoView({ behavior: "auto", block: "start" });
+      }
+    });
+  }
+
+  function resetAll(){
+    state.mobilityId = "";
+    state.assistanceId = "";
+    state.stairId = "";
+    state.tripTypeId = "";
+    state.roundTripAddonId = "";
+    state.distanceKm = 0;
+    state.estimateNumber = "";
+    state.estimateCreatedAt = "";
+    state.selectionFingerprint = "";
+    state.lastActiveStepId = "";
+    if(window.EstimateUrl?.clearUrlState){
+      window.EstimateUrl.clearUrlState();
+    }
+    if(window.EstimateHandoff?.clearHandoffRecord){
+      window.EstimateHandoff.clearHandoffRecord();
+    }
+    renderPage();
+    requestAnimationFrame(function(){
+      const el = document.querySelector('[data-step-id="mobility"]');
+      if(el){
+        el.scrollIntoView({ behavior: "auto", block: "start" });
+      }
+    });
+  }
+
   function getBreakdownRows(result){
     const labels = state.config.resultLabels || {};
     return [
@@ -272,15 +351,15 @@
     });
   }
 
-  function renderSelectStep(stepNum, step, items, currentValue){
+  function renderChoiceStep(stepNum, step, items, currentValue){
     const title = step.title;
-    const fieldName = step.fieldName;
-    const placeholder = currentValue
-      ? ""
-      : `<option value="" disabled selected hidden>選択してください</option>`;
-    const options = items.map(function(item){
-      const selected = item.id === currentValue ? " selected" : "";
-      return `<option value="${escapeAttr(item.id)}"${selected}>${escapeHtml(item.label)}</option>`;
+    const choices = items.map(function(item){
+      const showAmount = step.categoryKey !== "tripType" && step.categoryKey !== "roundTripAddon";
+      return window.EstimateHelp.renderChoiceCard(item, {
+        name: step.choiceName,
+        checked: item.id === currentValue,
+        showAmount: showAmount
+      });
     }).join("");
 
     return `
@@ -291,12 +370,7 @@
             <h2 class="estimate-step-title">${escapeHtml(title)}</h2>
           </div>
         </div>
-        <div class="estimate-field-row">
-          <select class="estimate-select" id="${escapeAttr(fieldName)}" aria-label="${escapeAttr(title)}">
-            ${placeholder}
-            ${options}
-          </select>
-        </div>
+        <div class="estimate-choice-group">${choices}</div>
       </section>
     `;
   }
@@ -308,15 +382,12 @@
     const isFixed = rule?.mode === "fixed";
 
     const choices = options.map(function(item){
-      const checked = item.id === state.assistanceId ? " checked" : "";
-      const disabled = isFixed ? " disabled" : "";
-      return `
-        <label class="estimate-radio-row">
-          <input type="radio" name="assistanceChoice" value="${escapeAttr(item.id)}"${checked}${disabled}>
-          <span>${escapeHtml(item.label)}</span>
-          ${window.EstimateHelp.createHelpButton(item.label, item.description)}
-        </label>
-      `;
+      return window.EstimateHelp.renderChoiceCard(item, {
+        name: step.choiceName,
+        checked: item.id === state.assistanceId,
+        disabled: isFixed,
+        showAmount: true
+      });
     }).join("");
 
     const note = isFixed
@@ -333,7 +404,7 @@
             <h2 class="estimate-step-title">${escapeHtml(title)}</h2>
           </div>
         </div>
-        <div class="estimate-radio-group">${choices}</div>
+        <div class="estimate-choice-group">${choices}</div>
         ${note}
       </section>
     `;
@@ -350,7 +421,7 @@
             <h2 class="estimate-step-title">${escapeHtml(label)}</h2>
           </div>
         </div>
-        <label for="distanceKmInput" style="display:block;font-size:14px;font-weight:600;margin-bottom:8px;">${escapeHtml(label)}</label>
+        <label for="distanceKmInput" class="estimate-distance-label">${escapeHtml(label)}</label>
         <input type="number" class="estimate-input" id="distanceKmInput" min="0" step="0.1" inputmode="decimal" placeholder="例: 5.5" value="${state.distanceKm > 0 ? escapeAttr(state.distanceKm) : ""}">
         <p class="estimate-step-note">${escapeHtml(note)}</p>
       </section>
@@ -364,7 +435,7 @@
     if(step.type === "distance"){
       return renderDistanceStep(stepNum, step);
     }
-    return renderSelectStep(stepNum, step, step.getItems(), step.getValue());
+    return renderChoiceStep(stepNum, step, step.getItems(), step.getValue());
   }
 
   function renderStepSummary(step, stepNum){
@@ -376,7 +447,7 @@
             <div class="estimate-step-label">STEP${stepNum}</div>
             <h2 class="estimate-step-title">${escapeHtml(step.title)}</h2>
           </div>
-          <button type="button" class="estimate-step-edit" data-edit-step="${escapeAttr(step.id)}">変更</button>
+          <button type="button" class="estimate-step-edit" data-edit-step="${escapeAttr(step.id)}" aria-label="${escapeAttr(step.title)}を変更">変更</button>
         </div>
         <p class="estimate-step-summary">${escapeHtml(summary)}</p>
       </section>
@@ -472,6 +543,7 @@
         <div class="estimate-pdf-feedback" id="estimatePdfFeedback" aria-live="polite"></div>
         <button type="button" class="estimate-copy-url-btn" id="estimateCopyUrlBtn">見積URLをコピー</button>
         <div class="estimate-copy-url-feedback" id="estimateCopyUrlFeedback" aria-live="polite"></div>
+        <button type="button" class="estimate-reset-btn estimate-reset-btn--bottom" id="estimateResetBtnBottom">最初からやり直す</button>
       </section>
       <div class="estimate-cta-group">
         <a class="estimate-cta-primary" href="${escapeAttr(reservationUrl)}" target="_blank" rel="noopener noreferrer">この内容で予約する</a>
@@ -492,7 +564,7 @@
     requestAnimationFrame(function(){
       const el = document.querySelector('[data-step-id="' + activeStep.id + '"]');
       if(el){
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        el.scrollIntoView({ behavior: "auto", block: "start" });
       }
     });
   }
@@ -521,7 +593,10 @@
 
     root.innerHTML = `
       <div class="estimate-wrap">
-        <h1 class="estimate-title">${escapeHtml(state.config.page?.title || "概算見積シミュレーター")}</h1>
+        <div class="estimate-header">
+          <h1 class="estimate-title">${escapeHtml(state.config.page?.title || "概算見積シミュレーター")}</h1>
+          <button type="button" class="estimate-reset-btn" id="estimateResetBtn">最初からやり直す</button>
+        </div>
         <p class="estimate-lead">${escapeHtml(state.config.page?.description || "")}</p>
         ${stepsHtml}
         ${allComplete ? renderResult(result) : ""}
@@ -529,13 +604,7 @@
     `;
 
     bindEvents();
-    window.EstimateHelp.bindHelpButtons(root);
     bindCopyUrlButton();
-
-    addSelectHelpButtons("mobilitySelect", "mobility");
-    addSelectHelpButtons("tripSelect", "tripType");
-    addSelectHelpButtons("stairSelect", "stairAssist");
-    addSelectHelpButtons("roundTripAddonSelect", "roundTripAddon");
 
     if(!allComplete){
       scrollToActiveStep(flow, activeIndex);
@@ -544,34 +613,26 @@
     }
   }
 
-  function addSelectHelpButtons(selectId, categoryKey){
-    const select = document.getElementById(selectId);
-    if(!select || !select.parentElement) return;
-    const row = select.parentElement;
-
-    function updateHelp(){
-      const items = state.config.categories[categoryKey]?.items || [];
-      const item = window.EstimateCalc.findItem(items, select.value);
-      let btn = row.querySelector(".estimate-select-help");
-      if(!item || !String(item.description || "").trim()){
-        if(btn) btn.remove();
+  function bindDelegatedEvents(){
+    const root = getRoot();
+    if(!root || delegatedBound) return;
+    delegatedBound = true;
+    root.addEventListener("click", function(event){
+      const editBtn = event.target.closest("[data-edit-step]");
+      if(editBtn){
+        event.preventDefault();
+        event.stopPropagation();
+        if(editBtn.disabled) return;
+        const stepId = editBtn.getAttribute("data-edit-step");
+        if(stepId) openStepForEdit(stepId);
         return;
       }
-      if(!btn){
-        btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "estimate-help-btn estimate-select-help";
-        row.appendChild(btn);
+      const resetBtn = event.target.closest("#estimateResetBtn, #estimateResetBtnBottom");
+      if(resetBtn){
+        event.preventDefault();
+        resetAll();
       }
-      btn.setAttribute("aria-label", item.label + "の説明を見る");
-      btn.textContent = "?";
-      btn.onclick = function(){
-        window.EstimateHelp.openHelp(item.label, item.description);
-      };
-    }
-
-    select.addEventListener("change", updateHelp);
-    updateHelp();
+    });
   }
 
   async function ensureEstimateNumber(result){
@@ -685,76 +746,55 @@
     btn.addEventListener("click", copyShareUrl);
   }
 
-  function openStepForEdit(stepId){
-    clearStepsAfter(stepId);
-    state.lastActiveStepId = "";
-    renderPage();
-  }
-
-  function bindEvents(){
-    document.querySelectorAll("[data-edit-step]").forEach(function(btn){
-      btn.addEventListener("click", function(){
-        const stepId = btn.getAttribute("data-edit-step");
-        if(stepId) openStepForEdit(stepId);
-      });
-    });
-
-    const mobilitySelect = document.getElementById("mobilitySelect");
-    const stairSelect = document.getElementById("stairSelect");
-    const tripSelect = document.getElementById("tripSelect");
-    const addonSelect = document.getElementById("roundTripAddonSelect");
-    const distanceInput = document.getElementById("distanceKmInput");
-
-    if(mobilitySelect){
-      mobilitySelect.addEventListener("change", function(){
-        if(!mobilitySelect.value) return;
-        state.mobilityId = mobilitySelect.value;
-        clearStepsAfter("mobility");
-        syncAssistanceForMobility();
-        state.lastActiveStepId = "";
-        renderPage();
-      });
-    }
-
-    document.querySelectorAll('input[name="assistanceChoice"]').forEach(function(input){
+  function bindChoiceGroup(name, handler){
+    document.querySelectorAll('input[name="' + name + '"]').forEach(function(input){
       input.addEventListener("change", function(){
-        if(input.checked){
-          state.assistanceId = input.value;
-          clearStepsAfter("assistance");
-          state.lastActiveStepId = "";
-          renderPage();
+        if(input.checked && input.value){
+          handler(input.value);
         }
       });
     });
+  }
 
-    if(stairSelect){
-      stairSelect.addEventListener("change", function(){
-        if(!stairSelect.value) return;
-        state.stairId = stairSelect.value;
-        clearStepsAfter("stair");
-        state.lastActiveStepId = "";
-        renderPage();
-      });
-    }
-    if(tripSelect){
-      tripSelect.addEventListener("change", function(){
-        if(!tripSelect.value) return;
-        state.tripTypeId = tripSelect.value;
-        clearStepsAfter("trip");
-        syncRoundTripAddon();
-        state.lastActiveStepId = "";
-        renderPage();
-      });
-    }
-    if(addonSelect){
-      addonSelect.addEventListener("change", function(){
-        if(!addonSelect.value) return;
-        state.roundTripAddonId = addonSelect.value;
-        clearStepsAfter("addon");
-        state.lastActiveStepId = "";
-        renderPage();
-      });
-    }
+  function bindEvents(){
+    bindChoiceGroup("mobilityChoice", function(value){
+      state.mobilityId = value;
+      clearStepsAfter("mobility");
+      syncAssistanceForMobility();
+      state.lastActiveStepId = "";
+      renderPage();
+    });
+
+    bindChoiceGroup("assistanceChoice", function(value){
+      state.assistanceId = value;
+      clearStepsAfter("assistance");
+      state.lastActiveStepId = "";
+      renderPage();
+    });
+
+    bindChoiceGroup("stairChoice", function(value){
+      state.stairId = value;
+      clearStepsAfter("stair");
+      state.lastActiveStepId = "";
+      renderPage();
+    });
+
+    bindChoiceGroup("tripChoice", function(value){
+      state.tripTypeId = value;
+      clearStepsAfter("trip");
+      syncRoundTripAddon();
+      state.lastActiveStepId = "";
+      renderPage();
+    });
+
+    bindChoiceGroup("addonChoice", function(value){
+      state.roundTripAddonId = value;
+      clearStepsAfter("addon");
+      state.lastActiveStepId = "";
+      renderPage();
+    });
+
+    const distanceInput = document.getElementById("distanceKmInput");
     if(distanceInput){
       distanceInput.addEventListener("input", function(){
         state.distanceKm = Number(distanceInput.value) || 0;
@@ -781,6 +821,7 @@
       if(!window.EstimateConfigLoader || typeof window.EstimateConfigLoader.loadEstimateConfig !== "function"){
         throw new Error("設定の読み込み機能が利用できません。");
       }
+      bindDelegatedEvents();
       await loadCtaUrls();
 
       const urlState = window.EstimateUrl?.parseUrlState?.() || {};

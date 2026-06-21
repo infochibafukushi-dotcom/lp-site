@@ -27,9 +27,16 @@
     }
   }
 
+  function clearHandoffRecord(){
+    try{
+      sessionStorage.removeItem("lp_estimate_handoff");
+    }catch(error){}
+  }
+
   global.EstimateHandoff = {
     saveHandoffRecord: saveHandoffRecord,
     getHandoffRecord: getHandoffRecord,
-    appendEstimateNoToUrl: appendEstimateNoToUrl
+    appendEstimateNoToUrl: appendEstimateNoToUrl,
+    clearHandoffRecord: clearHandoffRecord
   };
 })(typeof window !== "undefined" ? window : globalThis);
