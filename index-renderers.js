@@ -21,7 +21,19 @@
     return window.IndexUtils.escapeHtml(text || "").replace(/\r?\n/g, "<br>");
   }
 
-  function renderNormal(section){
+  function renderConfigFooterCtas(section, config){
+    if(window.SectionBottomButtons && typeof window.SectionBottomButtons.renderConfigFooterCtas === "function"){
+      return window.SectionBottomButtons.renderConfigFooterCtas(
+        section,
+        config,
+        window.IndexUtils.escapeAttr,
+        window.IndexUtils.escapeHtml
+      );
+    }
+    return "";
+  }
+
+  function renderNormal(section, config){
     const imageAttrs = buildImageAttrs(section?.__imagePriority);
     const imageHtml = section.image
       ? `<img class="normal-image" src="${window.IndexUtils.escapeAttr(section.image)}" alt="${window.IndexUtils.escapeAttr(section.title || "")}" ${imageAttrs}>`
@@ -35,6 +47,7 @@
           <div class="normal-image-wrap">${linkedImage}</div>
           <p class="section-text text-${window.IndexUtils.escapeAttr(section.textSize || "medium")} text-${window.IndexUtils.escapeAttr(section.textAlign || "left")}">${window.IndexUtils.escapeHtml(section.text || "")}</p>
           ${renderSectionBottomLinks(section)}
+          ${renderConfigFooterCtas(section, config)}
         </div>
       </section>
     `;
@@ -268,7 +281,7 @@
     `;
   }
 
-  function renderSection(section, idx){
+  function renderSection(section, idx, config){
     section = window.IndexUtils.ensureSectionShape(section, idx);
     section.__imagePriority = idx === 0 ? "high" : "lazy";
 
@@ -278,7 +291,7 @@
 
     switch(section.type){
       case "normal":
-        return renderNormal(section);
+        return renderNormal(section, config);
       case "slider":
         return renderSlider(section, idx);
       case "card4":

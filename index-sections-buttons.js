@@ -29,7 +29,37 @@
     return "count-3";
   }
 
-  function buildAnchor(url, text, escapeAttr, escapeHtml){
+  const CONFIG_FOOTER_CTA_LABELS = [
+    { key: "phone", text: "電話する" },
+    { key: "line", text: "LINE相談" },
+    { key: "reservation", text: "ネット予約" }
+  ];
+
+  function getFooterButtons(config){
+    if(!config || typeof config !== "object"){
+      return [];
+    }
+    const isPc = window.matchMedia ? window.matchMedia("(min-width: 769px)").matches : window.innerWidth >= 769;
+    const footer = isPc ? (config.footerPc || config.footer) : config.footer;
+    return Array.isArray(footer) ? footer : [];
+  }
+
+  function getConfigFooterCtaLinks(config){
+    const footer = getFooterButtons(config);
+    return CONFIG_FOOTER_CTA_LABELS.map(function(item, index){
+      const url = String(footer[index]?.link || "").trim();
+      if(!url){
+        return null;
+      }
+      return {
+        key: item.key,
+        text: item.text,
+        url: url
+      };
+    }).filter(Boolean);
+  }
+
+  function buildAnchor(url, text, escapeAttr, escapeHtml, extraAttrs){
     const href = String(url || "#").trim() || "#";
 
     const isExternal =
@@ -38,8 +68,9 @@
       /^tel:/i.test(href);
 
     const extra = isExternal ? ' target="_blank" rel="noopener noreferrer"' : "";
+    const attrs = extraAttrs ? " " + extraAttrs : "";
 
-    return `<a class="section-bottom-link" href="${escapeAttr(href)}"${extra}>${escapeHtml(text)}</a>`;
+    return `<a class="section-bottom-link" href="${escapeAttr(href)}"${extra}${attrs}>${escapeHtml(text)}</a>`;
   }
 
   function render(section, escapeAttr, escapeHtml){
@@ -59,8 +90,61 @@
     `;
   }
 
+  function renderConfigFooterCtas(section, config, escapeAttr, escapeHtml){
+    const block = section?.configFooterCtas;
+    if(!block || block.visible !== true){
+      return "";
+    }
+
+    const links = getConfigFooterCtaLinks(config);
+    if(links.length === 0){
+      return "";
+    }
+
+    const alignClass = getAlignClass(section);
+    const countClass = getCountClass(links);
+    const text = String(block.text || "").trim();
+    const textAlign = String(section?.textAlign || "left").trim().toLowerCase();
+    const textHtml = text
+      ? `<p class="section-consult-note text-${escapeAttr(textAlign)}">${escapeHtml(text)}</p>`
+      : "";
+
+    return `
+      <div class="section-config-footer-ctas" data-config-footer-ctas="1">
+        ${textHtml}
+        <div class="section-bottom-links ${escapeAttr(alignClass)} ${escapeAttr(countClass)}">
+          ${links.map(function(link){
+            return buildAnchor(
+              link.url,
+              link.text,
+              escapeAttr,
+              escapeHtml,
+              `data-config-cta="${escapeAttr(link.key)}"`
+            );
+          }).join("")}
+        </div>
+      </div>
+    `;
+  }
+
+  function hydrateConfigFooterCtas(config){
+    const links = getConfigFooterCtaLinks(config);
+    if(links.length === 0){
+      return;
+    }
+
+    links.forEach(function(link){
+      document.querySelectorAll(`[data-config-cta="${link.key}"]`).forEach(function(anchor){
+        anchor.href = link.url;
+        anchor.textContent = link.text;
+      });
+    });
+  }
+
   window.SectionBottomButtons = {
-    render: render
+    render: render,
+    renderConfigFooterCtas: renderConfigFooterCtas,
+    hydrateConfigFooterCtas: hydrateConfigFooterCtas
   };
 
 })();

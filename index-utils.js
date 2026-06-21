@@ -410,6 +410,12 @@
     }
 
     ensureSectionLinks(section);
+
+    section.configFooterCtas = {
+      visible: section.configFooterCtas?.visible === true,
+      text: section.configFooterCtas?.text || ""
+    };
+
     return section;
   }
 

@@ -99,28 +99,25 @@
   }
 
   function renderEditor(){
+    renderMainEditor();
+    renderFcEditor();
+    renderMappingsEditor();
+    toggleDistanceModeFields();
+    if(window.AdminCollapse && typeof window.AdminCollapse.bindWithin === "function"){
+      const fcCard = document.getElementById("card-estimate-fc-settings");
+      if(fcCard) window.AdminCollapse.bindWithin(fcCard);
+    }
+  }
+
+  function renderMainEditor(){
     const root = document.getElementById("estimateSettingsEditor");
     if(!root || !estimateDraft) return;
 
     const dp = estimateDraft.distancePricing || {};
     const patternA = dp.patternA || {};
     const patternB = dp.patternB || {};
-    const bodyOpt = estimateDraft.options?.bodyAssist || {};
 
     root.innerHTML = `
-      <div class="row"><label><input type="checkbox" id="estimateEnabledToggle" ${estimateDraft.enabled !== false ? "checked" : ""}> 概算見積ページを公開する</label></div>
-
-      <h3>見積履歴</h3>
-      <div class="row">
-        <label><input type="checkbox" id="estimateSaveHistoryToggle" ${estimateDraft.historySettings?.saveHistory === true ? "checked" : ""}> 見積履歴を Firestore に保存する（ON）</label>
-      </div>
-      <p class="note">OFF の場合、見積番号は発行されますが履歴は保存しません。ON の場合、日次連番（EST-YYYYMMDD-0001）で履歴を保存します。</p>
-
-      <h3>ページ設定</h3>
-      <div class="row"><label>タイトル</label><input type="text" id="estimatePageTitle" value="${escapeAttr(estimateDraft.page?.title || "")}"></div>
-      <div class="row"><label>説明文</label><textarea id="estimatePageDescription" rows="3">${escapeHtml(estimateDraft.page?.description || "")}</textarea></div>
-      <div class="row"><label>注意事項</label><textarea id="estimatePageDisclaimer" rows="5">${escapeHtml(estimateDraft.page?.disclaimer || "")}</textarea></div>
-
       <h3>基本料金</h3>
       ${renderFeeEditor("基本運賃", estimateDraft.basicFees?.baseFare, "basicFees.baseFare")}
       ${renderFeeEditor("予約料金", estimateDraft.basicFees?.reservationFee, "basicFees.reservationFee")}
@@ -146,13 +143,43 @@
         <div class="row"><label>1km単価（円）</label><input type="number" min="0" step="1" id="estimatePerKmRate" value="${escapeAttr(patternB.perKmRate ?? 0)}"></div>
       </div>
 
-      <h3>車両料金（移動方法）</h3>
+      <h3>車いす料金（移動方法）</h3>
       <div id="estimateMobilityItems">${renderCategoryItems("mobility")}</div>
       <button type="button" class="secondary" data-action="add-item" data-category="mobility">移動方法を追加</button>
 
       <h3>介助料金</h3>
       <div id="estimateAssistanceItems">${renderCategoryItems("assistance")}</div>
       <button type="button" class="secondary" data-action="add-item" data-category="assistance">介助項目を追加</button>
+
+      <h3>階段介助料金</h3>
+      <div id="estimateStairItems">${renderCategoryItems("stairAssist")}</div>
+      <button type="button" class="secondary" data-action="add-item" data-category="stairAssist">階段介助項目を追加</button>
+
+      <h3>待機料金</h3>
+      ${renderFeeEditor("待機30分料金", estimateDraft.waitingFees?.waiting30min, "waitingFees.waiting30min")}
+      ${renderFeeEditor("付き添い30分料金", estimateDraft.waitingFees?.escort30min, "waitingFees.escort30min")}
+
+      <h3>注意事項</h3>
+      <div class="row"><label>概算見積ページに表示する注意事項</label><textarea id="estimatePageDisclaimer" rows="5">${escapeHtml(estimateDraft.page?.disclaimer || "")}</textarea></div>
+    `;
+  }
+
+  function renderFcEditor(){
+    const root = document.getElementById("estimateFcSettingsEditor");
+    if(!root || !estimateDraft) return;
+
+    const bodyOpt = estimateDraft.options?.bodyAssist || {};
+
+    root.innerHTML = `
+      <h3 style="margin-top:16px;">公開・履歴</h3>
+      <div class="row"><label><input type="checkbox" id="estimateEnabledToggle" ${estimateDraft.enabled !== false ? "checked" : ""}> 概算見積ページを公開する</label></div>
+      <div class="row">
+        <label><input type="checkbox" id="estimateSaveHistoryToggle" ${estimateDraft.historySettings?.saveHistory === true ? "checked" : ""}> 見積履歴を Firestore に保存する（ON）</label>
+      </div>
+
+      <h3>ページ設定</h3>
+      <div class="row"><label>タイトル</label><input type="text" id="estimatePageTitle" value="${escapeAttr(estimateDraft.page?.title || "")}"></div>
+      <div class="row"><label>説明文</label><textarea id="estimatePageDescription" rows="3">${escapeHtml(estimateDraft.page?.description || "")}</textarea></div>
 
       <h3>追加オプション：身体介助</h3>
       <div class="grid2">
@@ -162,24 +189,13 @@
       <div class="row"><label>説明文</label><textarea id="estimateBodyAssistDescription" rows="3">${escapeHtml(bodyOpt.description || "")}</textarea></div>
       <label><input type="checkbox" id="estimateBodyAssistVisible" ${bodyOpt.visible !== false ? "checked" : ""}> 表示する</label>
 
-      <h3>階段介助</h3>
-      <div id="estimateStairItems">${renderCategoryItems("stairAssist")}</div>
-      <button type="button" class="secondary" data-action="add-item" data-category="stairAssist">階段介助項目を追加</button>
-
       <h3>送迎方法</h3>
       <div id="estimateTripItems">${renderCategoryItems("tripType")}</div>
       <button type="button" class="secondary" data-action="add-item" data-category="tripType">送迎方法を追加</button>
 
-      <h3>待機・付き添い料金</h3>
-      ${renderFeeEditor("待機30分料金", estimateDraft.waitingFees?.waiting30min, "waitingFees.waiting30min")}
-      ${renderFeeEditor("付き添い30分料金", estimateDraft.waitingFees?.escort30min, "waitingFees.escort30min")}
-
       <h3>移動方法 → 介助内容 自動選択</h3>
       <div id="estimateMappingsEditor"></div>
     `;
-
-    renderMappingsEditor();
-    toggleDistanceModeFields();
   }
 
   function renderMappingsEditor(){
@@ -500,6 +516,22 @@
     setAuthStatus("ログアウトしました。", "warn");
   }
 
+  function handleCategoryItemAction(btn){
+    const action = btn.getAttribute("data-action");
+    const category = btn.getAttribute("data-category");
+    const index = Number(btn.getAttribute("data-index"));
+    if(action === "add-item") addCategoryItem(category);
+    if(action === "move-up") moveCategoryItem(category, index, -1);
+    if(action === "move-down") moveCategoryItem(category, index, 1);
+    if(action === "remove-item") removeCategoryItem(category, index);
+  }
+
+  function handleEstimateEditorChange(event){
+    if(event.target && event.target.id === "estimateDistanceMode"){
+      toggleDistanceModeFields();
+    }
+  }
+
   function bindEvents(){
     document.getElementById("estimateReloadBtn")?.addEventListener("click", loadEstimateSettings);
     document.getElementById("estimateSaveBtn")?.addEventListener("click", saveEstimateSettings);
@@ -518,20 +550,17 @@
     document.getElementById("estimateSettingsEditor")?.addEventListener("click", function(event){
       const btn = event.target.closest("[data-action]");
       if(!btn) return;
-      const action = btn.getAttribute("data-action");
-      const category = btn.getAttribute("data-category");
-      const index = Number(btn.getAttribute("data-index"));
-      if(action === "add-item") addCategoryItem(category);
-      if(action === "move-up") moveCategoryItem(category, index, -1);
-      if(action === "move-down") moveCategoryItem(category, index, 1);
-      if(action === "remove-item") removeCategoryItem(category, index);
+      handleCategoryItemAction(btn);
     });
 
-    document.getElementById("estimateSettingsEditor")?.addEventListener("change", function(event){
-      if(event.target && event.target.id === "estimateDistanceMode"){
-        toggleDistanceModeFields();
-      }
+    document.getElementById("estimateFcSettingsEditor")?.addEventListener("click", function(event){
+      const btn = event.target.closest("[data-action]");
+      if(!btn) return;
+      handleCategoryItemAction(btn);
     });
+
+    document.getElementById("estimateSettingsEditor")?.addEventListener("change", handleEstimateEditorChange);
+    document.getElementById("estimateFcSettingsEditor")?.addEventListener("change", handleEstimateEditorChange);
 
     if(window.EstimateStore?.isEnabled() && window.EstimateStore?.onAuthStateChanged){
       window.EstimateStore.onAuthStateChanged(function(user){

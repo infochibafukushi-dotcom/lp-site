@@ -223,7 +223,7 @@
     return config;
   }
 
-  async function loadSections(){
+  async function loadSections(config){
     const container = document.getElementById("sectionsContainer");
     if(!container) return;
 
@@ -243,7 +243,7 @@
       sections = sections.map((section, idx) => window.IndexUtils.ensureSectionShape(section, idx));
       sections = window.IndexUtils.ensureUniqueSectionIds(sections);
 
-      container.innerHTML = sections.map((section, idx) => window.IndexRenderers.renderSection(section, idx)).join("");
+      container.innerHTML = sections.map((section, idx) => window.IndexRenderers.renderSection(section, idx, config)).join("");
 
       if(window.IndexSlider && typeof window.IndexSlider.initSliders === "function"){
         window.IndexSlider.initSliders();
@@ -268,7 +268,13 @@
   function bindResponsiveReload(){
     if(!window.matchMedia) return;
     const mq = window.matchMedia("(min-width: 769px)");
-    const handler = function(){ loadConfig().catch(function(){}); };
+    const handler = function(){
+      loadConfig().then(function(config){
+        if(window.SectionBottomButtons && typeof window.SectionBottomButtons.hydrateConfigFooterCtas === "function"){
+          window.SectionBottomButtons.hydrateConfigFooterCtas(config);
+        }
+      }).catch(function(){});
+    };
     if(typeof mq.addEventListener === "function"){
       mq.addEventListener("change", handler);
     }else if(typeof mq.addListener === "function"){
@@ -293,7 +299,7 @@
       bindResponsiveReload();
       bindHashScroll();
       const config = await loadConfig();
-      await loadSections();
+      await loadSections(config);
       renderPopup(config || {});
     }catch(error){
       const container = document.getElementById("sectionsContainer");

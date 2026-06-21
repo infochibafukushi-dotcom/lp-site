@@ -436,9 +436,9 @@
     "textAlign": "left",
     "links": [
       {
-        "text": "概算見積をする",
-        "url": "./estimate/",
-        "visible": true
+        "text": "",
+        "url": "#",
+        "visible": false
       },
       {
         "text": "",
@@ -547,6 +547,50 @@
       "visible": true,
       "title": "ご予約・ご相談はこちら",
       "text": "※〇〇〇〇〇〇〇〇〇\n〇〇〇〇\n〇〇〇〇〇〇〇〇\n〇〇〇〇〇〇〇〇〇〇〇\nご予約・ご相談はこちら\n料金の詳細やご不明点はお気軽にお問い合わせください。"
+    }
+  },
+  {
+    "id": "section-estimate-simulator-intro",
+    "sectionId": "gaisan-mitsumori-simulator",
+    "type": "normal",
+    "enabled": true,
+    "title": "概算見積シミュレーター",
+    "text": "料金の目安を簡単に確認できます。\n\n移動方法や介助内容、距離を入力すると概算料金を自動計算できます。",
+    "textSize": "medium",
+    "bgColor": "#f7f5f0",
+    "alignY": "middle",
+    "titleAlign": "center",
+    "textAlign": "center",
+    "image": "",
+    "link": "#",
+    "images": [],
+    "items": [],
+    "links": [
+      {
+        "text": "概算見積をする",
+        "url": "./estimate/",
+        "visible": true
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ],
+    "menuGroups": [],
+    "menuBottomCard": {
+      "visible": false,
+      "title": "",
+      "text": ""
+    },
+    "configFooterCtas": {
+      "visible": true,
+      "text": "料金の目安が分かったらお気軽にご相談ください"
     }
   },
   {
