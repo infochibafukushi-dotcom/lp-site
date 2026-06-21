@@ -233,6 +233,105 @@
   font-weight:600;
   margin-bottom:8px;
 }
+.estimate-distance-label--spaced{
+  margin-top:14px;
+}
+.estimate-distance-mode{
+  border:none;
+  margin:0 0 16px;
+  padding:0;
+}
+.estimate-distance-mode-legend{
+  font-size:14px;
+  font-weight:700;
+  color:#2d2a26;
+  margin-bottom:10px;
+  padding:0;
+}
+.estimate-distance-mode-option{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 0;
+  font-size:15px;
+  font-weight:600;
+  color:#2d2a26;
+  cursor:pointer;
+}
+.estimate-distance-mode-option input{
+  width:18px;
+  height:18px;
+  accent-color:#e87f00;
+  flex:0 0 auto;
+}
+.estimate-address-calc,
+.estimate-manual-distance{
+  margin-top:4px;
+}
+.estimate-calc-distance-btn{
+  display:block;
+  width:100%;
+  margin-top:16px;
+  padding:14px;
+  border:none;
+  border-radius:10px;
+  background:#e87f00;
+  color:#fff;
+  font-size:15px;
+  font-weight:700;
+  cursor:pointer;
+}
+.estimate-calc-distance-btn:hover{
+  background:#cf7100;
+}
+.estimate-calc-distance-btn:disabled{
+  opacity:.65;
+  cursor:wait;
+}
+.estimate-route-feedback{
+  margin-top:10px;
+  font-size:13px;
+  line-height:1.7;
+  color:#2e7d32;
+  min-height:1.2em;
+}
+.estimate-route-feedback--error{
+  color:#c62828;
+}
+.estimate-route-result{
+  margin-top:16px;
+  padding:14px 16px;
+  background:#faf8f4;
+  border:1px solid #efe7dc;
+  border-radius:12px;
+}
+.estimate-route-result-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:6px 0;
+}
+.estimate-route-result-row + .estimate-route-result-row{
+  border-top:1px solid #efe7dc;
+}
+.estimate-route-result-label{
+  font-size:14px;
+  font-weight:600;
+  color:#666;
+}
+.estimate-route-result-value{
+  font-size:18px;
+  font-weight:800;
+  color:#2d2a26;
+}
+.estimate-address-disclaimer{
+  margin:14px 0 0;
+  font-size:13px;
+  line-height:1.85;
+  color:#888;
+  white-space:pre-line;
+}
 .estimate-step-note{
   margin:10px 0 0;
   font-size:13px;

@@ -116,6 +116,12 @@
           "stretcher": { mode: "fixed", assistanceIds: [], assistanceId: "body-assist" }
         }
       },
+      googleMaps: {
+        enabled: true,
+        apiKey: "",
+        language: "ja",
+        region: "JP"
+      },
       resultLabels: {
         baseFare: "基本運賃",
         reservationFee: "予約料金",

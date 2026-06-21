@@ -9,6 +9,12 @@
     roundTripAddonId: "",
     distanceKm: 0,
     distanceInputText: "",
+    distanceInputMode: "address",
+    originAddress: "",
+    destinationAddress: "",
+    routeCalcResult: null,
+    routeCalcError: "",
+    routeCalcLoading: false,
     estimateNumber: "",
     estimateCreatedAt: "",
     selectionFingerprint: "",
@@ -286,6 +292,8 @@
         case "distance":
           state.distanceKm = 0;
           state.distanceInputText = "";
+          state.routeCalcResult = null;
+          state.routeCalcError = "";
           break;
         default:
           break;
@@ -321,6 +329,8 @@
       case "distance":
         state.distanceKm = 0;
         state.distanceInputText = "";
+        state.routeCalcResult = null;
+        state.routeCalcError = "";
         break;
       default:
         break;
@@ -353,6 +363,12 @@
     state.roundTripAddonId = "";
     state.distanceKm = 0;
     state.distanceInputText = "";
+    state.distanceInputMode = "address";
+    state.originAddress = "";
+    state.destinationAddress = "";
+    state.routeCalcResult = null;
+    state.routeCalcError = "";
+    state.routeCalcLoading = false;
     state.estimateNumber = "";
     state.estimateCreatedAt = "";
     state.selectionFingerprint = "";
@@ -451,9 +467,145 @@
     `;
   }
 
+  function getGoogleMapsConfig(){
+    return state.config?.googleMaps || {};
+  }
+
+  function isAddressDistanceMode(){
+    return state.distanceInputMode === "address";
+  }
+
+  function formatRouteDuration(minutes){
+    const n = Number(minutes) || 0;
+    return n > 0 ? n + "分" : "";
+  }
+
+  function formatRouteDistance(km){
+    const n = Number(km) || 0;
+    return n > 0 ? n.toFixed(1) + "km" : "";
+  }
+
+  async function calculateRouteDistance(){
+    const origin = String(state.originAddress || "").trim();
+    const destination = String(state.destinationAddress || "").trim();
+
+    if(!origin || !destination){
+      state.routeCalcError = "出発地と目的地を入力してください。";
+      state.routeCalcResult = null;
+      updateRouteCalcFeedback();
+      return;
+    }
+
+    const mapsConfig = getGoogleMapsConfig();
+    const apiKey = String(mapsConfig.apiKey || "").trim();
+    if(!apiKey){
+      state.routeCalcError = "Google Maps APIキーが設定されていません。管理者にお問い合わせください。";
+      state.routeCalcResult = null;
+      updateRouteCalcFeedback();
+      return;
+    }
+
+    if(!window.EstimateDistanceApi || typeof window.EstimateDistanceApi.computeRouteDistance !== "function"){
+      state.routeCalcError = "距離計算機能が読み込まれていません。";
+      updateRouteCalcFeedback();
+      return;
+    }
+
+    state.routeCalcLoading = true;
+    state.routeCalcError = "";
+    updateRouteCalcFeedback();
+
+    try{
+      const result = await window.EstimateDistanceApi.computeRouteDistance({
+        apiKey: apiKey,
+        origin: origin,
+        destination: destination,
+        languageCode: mapsConfig.language || "ja",
+        region: mapsConfig.region || "JP"
+      });
+      state.routeCalcResult = {
+        distanceKm: result.distanceKm,
+        durationMinutes: result.durationMinutes
+      };
+      state.distanceKm = result.distanceKm;
+      state.distanceInputText = String(result.distanceKm);
+      state.routeCalcError = "";
+      invalidateEstimateNumberIfChanged();
+      state.lastActiveStepId = "";
+      renderPage();
+    }catch(error){
+      state.routeCalcResult = null;
+      state.routeCalcError = error?.message || "距離の計算に失敗しました。";
+      state.routeCalcLoading = false;
+      updateRouteCalcFeedback();
+    }
+  }
+
+  function updateRouteCalcFeedback(){
+    const feedback = document.getElementById("routeCalcFeedback");
+    const btn = document.getElementById("calculateDistanceBtn");
+    if(btn){
+      btn.disabled = state.routeCalcLoading;
+      btn.textContent = state.routeCalcLoading ? "計算中..." : "距離を計算する";
+    }
+    if(feedback){
+      feedback.textContent = state.routeCalcError || "";
+      feedback.className = "estimate-route-feedback" + (state.routeCalcError ? " estimate-route-feedback--error" : "");
+    }
+  }
+
   function renderDistanceStep(stepNum, step){
     const label = step.title;
     const note = state.config.page?.distanceNote || "※往復送迎を選択した場合は運賃距離を自動で2倍計算します。";
+    const addressMode = isAddressDistanceMode();
+    const calcResult = state.routeCalcResult;
+    const addressDisclaimer = "住所検索による距離は\n丁目・番地単位で算出されるため、\n実際の運行距離と異なる場合があります。\n\n概算料金の目安としてご利用ください。";
+
+    const modeRadios = `
+      <fieldset class="estimate-distance-mode">
+        <legend class="estimate-distance-mode-legend">距離入力方法</legend>
+        <label class="estimate-distance-mode-option">
+          <input type="radio" name="distanceInputMode" value="address" ${addressMode ? "checked" : ""}>
+          <span>住所から自動計算（推奨）</span>
+        </label>
+        <label class="estimate-distance-mode-option">
+          <input type="radio" name="distanceInputMode" value="manual" ${!addressMode ? "checked" : ""}>
+          <span>距離を直接入力</span>
+        </label>
+      </fieldset>
+    `;
+
+    const addressPanel = `
+      <div class="estimate-address-calc" id="estimateAddressCalcPanel">
+        <label for="originAddressInput" class="estimate-distance-label">出発地住所</label>
+        <input type="text" class="estimate-input" id="originAddressInput" autocomplete="street-address" placeholder="例: 千葉県千葉市中央区本町1-1" value="${escapeAttr(state.originAddress)}">
+        <label for="destinationAddressInput" class="estimate-distance-label estimate-distance-label--spaced">目的地住所</label>
+        <input type="text" class="estimate-input" id="destinationAddressInput" autocomplete="street-address" placeholder="例: 千葉県千葉市中央区中央4-17-1" value="${escapeAttr(state.destinationAddress)}">
+        <button type="button" class="estimate-calc-distance-btn" id="calculateDistanceBtn" ${state.routeCalcLoading ? "disabled" : ""}>${state.routeCalcLoading ? "計算中..." : "距離を計算する"}</button>
+        <div class="estimate-route-feedback${state.routeCalcError ? " estimate-route-feedback--error" : ""}" id="routeCalcFeedback" aria-live="polite">${escapeHtml(state.routeCalcError || "")}</div>
+        ${calcResult ? `
+          <div class="estimate-route-result" aria-live="polite">
+            <div class="estimate-route-result-row">
+              <span class="estimate-route-result-label">距離</span>
+              <span class="estimate-route-result-value">${escapeHtml(formatRouteDistance(calcResult.distanceKm))}</span>
+            </div>
+            <div class="estimate-route-result-row">
+              <span class="estimate-route-result-label">所要時間</span>
+              <span class="estimate-route-result-value">${escapeHtml(formatRouteDuration(calcResult.durationMinutes))}</span>
+            </div>
+          </div>
+        ` : ""}
+        <p class="estimate-address-disclaimer">${escapeHtml(addressDisclaimer)}</p>
+      </div>
+    `;
+
+    const manualPanel = `
+      <div class="estimate-manual-distance" id="estimateManualDistancePanel">
+        <label for="distanceKmInput" class="estimate-distance-label">${escapeHtml(label)}</label>
+        <input type="text" class="estimate-input estimate-input--distance" id="distanceKmInput" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="例: 5.5" value="${escapeAttr(getDistanceInputDisplayValue())}">
+      </div>
+    `;
+
     return `
       <section class="estimate-step estimate-step--active" data-step-id="${escapeAttr(step.id)}">
         <div class="estimate-step-head">
@@ -462,8 +614,8 @@
             <h2 class="estimate-step-title">${escapeHtml(label)}</h2>
           </div>
         </div>
-        <label for="distanceKmInput" class="estimate-distance-label">${escapeHtml(label)}</label>
-        <input type="text" class="estimate-input estimate-input--distance" id="distanceKmInput" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="例: 5.5" value="${escapeAttr(getDistanceInputDisplayValue())}">
+        ${modeRadios}
+        ${addressMode ? addressPanel : manualPanel}
         <p class="estimate-step-note">${escapeHtml(note)}</p>
       </section>
     `;
@@ -838,6 +990,35 @@
       renderPage();
     });
 
+    bindChoiceGroup("distanceInputMode", function(value){
+      state.distanceInputMode = value === "manual" ? "manual" : "address";
+      state.routeCalcError = "";
+      state.lastActiveStepId = "";
+      renderPage();
+    });
+
+    const originInput = document.getElementById("originAddressInput");
+    if(originInput){
+      originInput.addEventListener("input", function(){
+        state.originAddress = originInput.value;
+      });
+    }
+
+    const destinationInput = document.getElementById("destinationAddressInput");
+    if(destinationInput){
+      destinationInput.addEventListener("input", function(){
+        state.destinationAddress = destinationInput.value;
+      });
+    }
+
+    const calculateBtn = document.getElementById("calculateDistanceBtn");
+    if(calculateBtn){
+      calculateBtn.addEventListener("click", function(event){
+        event.preventDefault();
+        calculateRouteDistance();
+      });
+    }
+
     const distanceInput = document.getElementById("distanceKmInput");
     if(distanceInput){
       distanceInput.addEventListener("input", function(){
@@ -872,6 +1053,10 @@
       }
       if(urlState.estimateNumber){
         state.estimateNumber = urlState.estimateNumber;
+      }
+
+      if(state.config?.googleMaps?.enabled === false){
+        state.distanceInputMode = "manual";
       }
 
       syncAssistanceForMobility();

@@ -152,6 +152,15 @@
       <div class="row"><label>距離入力ラベル</label><input type="text" id="estimateDistanceLabel" value="${escapeAttr(estimateDraft.page?.distanceLabel || "片道距離（km）")}"></div>
       <div class="row"><label>距離入力補足文</label><textarea id="estimateDistanceNote" rows="2">${escapeHtml(estimateDraft.page?.distanceNote || "")}</textarea></div>
 
+      <h3>Google Maps（住所から距離計算）</h3>
+      <div class="row"><label><input type="checkbox" id="estimateGoogleMapsEnabled" ${estimateDraft.googleMaps?.enabled !== false ? "checked" : ""}> 住所からの距離計算を有効にする</label></div>
+      <div class="row"><label>APIキー</label><input type="password" id="estimateGoogleMapsApiKey" value="${escapeAttr(estimateDraft.googleMaps?.apiKey || "")}" autocomplete="off" placeholder="Google Maps Platform APIキー"></div>
+      <div class="grid2">
+        <div class="row"><label>言語コード</label><input type="text" id="estimateGoogleMapsLanguage" value="${escapeAttr(estimateDraft.googleMaps?.language || "ja")}"></div>
+        <div class="row"><label>リージョン</label><input type="text" id="estimateGoogleMapsRegion" value="${escapeAttr(estimateDraft.googleMaps?.region || "JP")}"></div>
+      </div>
+      <p class="note">APIキーは HTTP リファラー制限（GitHub Pages ドメイン）と Routes API のみ有効化を推奨します。</p>
+
       <h3>基本料金</h3>
       ${renderFeeEditor("基本運賃", estimateDraft.basicFees?.baseFare, "basicFees.baseFare")}
       ${renderFeeEditor("予約料金", estimateDraft.basicFees?.reservationFee, "basicFees.reservationFee")}
@@ -268,6 +277,13 @@
     };
     draft.distancePricing.patternB = {
       perKmRate: Number(document.getElementById("estimatePerKmRate")?.value) || 0
+    };
+
+    draft.googleMaps = {
+      enabled: document.getElementById("estimateGoogleMapsEnabled")?.checked !== false,
+      apiKey: document.getElementById("estimateGoogleMapsApiKey")?.value.trim() || "",
+      language: document.getElementById("estimateGoogleMapsLanguage")?.value.trim() || "ja",
+      region: document.getElementById("estimateGoogleMapsRegion")?.value.trim() || "JP"
     };
 
     document.querySelectorAll("[data-item-field]").forEach(function(el){

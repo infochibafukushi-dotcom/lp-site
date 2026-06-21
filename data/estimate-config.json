@@ -35,6 +35,12 @@
       "order": 3
     }
   },
+  "googleMaps": {
+    "enabled": true,
+    "apiKey": "",
+    "language": "ja",
+    "region": "JP"
+  },
   "distancePricing": {
     "mode": "patternA",
     "patternA": {

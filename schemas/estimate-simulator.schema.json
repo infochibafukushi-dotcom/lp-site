@@ -42,6 +42,16 @@
       "additionalProperties": true
     },
     "waitingFees": { "type": "object" },
+    "googleMaps": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "apiKey": { "type": "string" },
+        "language": { "type": "string" },
+        "region": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
     "options": { "type": "object" },
     "mappings": { "type": "object" },
     "resultLabels": { "type": "object" }
