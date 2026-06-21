@@ -339,6 +339,17 @@
   color:#888;
   white-space:pre-line;
 }
+.estimate-trip-addon{
+  margin-top:24px;
+  padding-top:20px;
+  border-top:1px solid #efe7dc;
+}
+.estimate-trip-addon-title{
+  margin:0 0 12px;
+  font-size:16px;
+  font-weight:700;
+  color:#2d2a26;
+}
 .estimate-auto-assist{
   margin-top:8px;
   padding:12px;

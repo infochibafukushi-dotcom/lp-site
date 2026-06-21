@@ -239,8 +239,8 @@
       "items": [
         {
           "id": "addon-none",
-          "label": "なし",
-          "description": "待機・付き添いは不要です。",
+          "label": "待機なし",
+          "description": "往復送迎のみで、待機・付き添いは不要です。",
           "amount": 0,
           "visible": true,
           "order": 1,
@@ -249,8 +249,8 @@
         },
         {
           "id": "addon-waiting",
-          "label": "病院待機（30分）",
-          "description": "通院中、車両と乗務員が待機するサービスです。\n表示料金は30分を基準とした概算です。",
+          "label": "待機（30分）",
+          "description": "目的地での待機中、車両と乗務員が待機するサービスです。\n表示料金は30分を基準とした概算です。",
           "amount": 0,
           "visible": true,
           "order": 2,
@@ -259,8 +259,8 @@
         },
         {
           "id": "addon-escort",
-          "label": "病院付き添い（30分）",
-          "description": "受付、院内移動、会計、薬の受け取りなどをお手伝いします。\n表示料金は30分を基準とした概算です。",
+          "label": "付き添い（30分）",
+          "description": "受付、施設内移動、会計などをお手伝いします。\n表示料金は30分を基準とした概算です。",
           "amount": 0,
           "visible": true,
           "order": 3,
@@ -273,7 +273,7 @@
   "waitingFees": {
     "waiting30min": {
       "id": "waiting30min",
-      "label": "病院待機（30分）",
+      "label": "待機（30分）",
       "description": "通院やお買い物などの間、車両と乗務員が待機するサービスです。\n表示料金は30分を基準とした概算です。",
       "amount": 800,
       "visible": true,
@@ -281,8 +281,8 @@
     },
     "escort30min": {
       "id": "escort30min",
-      "label": "病院付き添い（30分）",
-      "description": "受付、診察室への移動、会計、薬の受け取りなどをお手伝いします。\n表示料金は30分を基準とした概算です。",
+      "label": "付き添い（30分）",
+      "description": "受付、施設内移動、会計、薬の受け取りなどをお手伝いします。\n表示料金は30分を基準とした概算です。",
       "amount": 1600,
       "visible": true,
       "order": 2

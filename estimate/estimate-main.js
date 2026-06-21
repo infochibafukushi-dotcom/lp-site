@@ -177,25 +177,11 @@
       {
         id: "trip",
         title: state.config.categories.tripType.label || "送迎方法",
-        type: "choice",
+        type: "trip",
         categoryKey: "tripType",
-        choiceName: "tripChoice",
-        getItems: function(){ return window.EstimateCalc.getTripTypeItems(state.config); },
-        getValue: function(){ return state.tripTypeId; }
+        choiceName: "tripChoice"
       }
     ];
-
-    if(window.EstimateCalc.isRoundTripSelected(state.config, state)){
-      steps.push({
-        id: "addon",
-        title: state.config.categories.roundTripAddon?.label || "待機・付き添い",
-        type: "choice",
-        categoryKey: "roundTripAddon",
-        choiceName: "addonChoice",
-        getItems: function(){ return window.EstimateCalc.getRoundTripAddonItems(state.config); },
-        getValue: function(){ return state.roundTripAddonId; }
-      });
-    }
 
     steps.push({
       id: "distance",
@@ -215,9 +201,13 @@
       case "stair":
         return Boolean(state.stairId);
       case "trip":
-        return Boolean(state.tripTypeId);
-      case "addon":
-        return Boolean(state.roundTripAddonId);
+        if(!state.tripTypeId){
+          return false;
+        }
+        if(window.EstimateCalc.isRoundTripSelected(state.config, state)){
+          return Boolean(state.roundTripAddonId);
+        }
+        return true;
       case "distance":
         return Number(state.distanceKm) > 0;
       default:
@@ -253,11 +243,17 @@
       }
       case "trip": {
         const item = window.EstimateCalc.findItem(state.config.categories?.tripType?.items, state.tripTypeId);
-        return item?.label || "";
-      }
-      case "addon": {
-        const item = window.EstimateCalc.findItem(state.config.categories?.roundTripAddon?.items, state.roundTripAddonId);
-        return item?.label || "";
+        const parts = [item?.label || ""];
+        if(window.EstimateCalc.isRoundTripSelected(state.config, state)){
+          const addon = window.EstimateCalc.findItem(
+            state.config.categories?.roundTripAddon?.items,
+            state.roundTripAddonId
+          );
+          if(addon?.label){
+            parts.push(addon.label);
+          }
+        }
+        return parts.filter(Boolean).join(" / ");
       }
       case "distance":
         return Number(state.distanceKm) > 0 ? Number(state.distanceKm).toFixed(1) + "km" : "";
@@ -406,6 +402,50 @@
         amount: Number(result.breakdown[row[0]]) || 0
       };
     });
+  }
+
+  function renderTripStep(stepNum, step){
+    const title = step.title;
+    const tripItems = window.EstimateCalc.getTripTypeItems(state.config);
+    const tripChoices = tripItems.map(function(item){
+      return window.EstimateHelp.renderChoiceCard(item, {
+        name: step.choiceName,
+        checked: item.id === state.tripTypeId,
+        showAmount: false
+      });
+    }).join("");
+
+    let addonSection = "";
+    if(window.EstimateCalc.isRoundTripSelected(state.config, state)){
+      const addonLabel = state.config.categories.roundTripAddon?.label || "待機・付き添い";
+      const addonItems = window.EstimateCalc.getRoundTripAddonItems(state.config);
+      const addonChoices = addonItems.map(function(item){
+        return window.EstimateHelp.renderChoiceCard(item, {
+          name: "addonChoice",
+          checked: item.id === state.roundTripAddonId,
+          showAmount: false
+        });
+      }).join("");
+      addonSection = `
+        <div class="estimate-trip-addon">
+          <h3 class="estimate-trip-addon-title">${escapeHtml(addonLabel)}</h3>
+          <div class="estimate-choice-group">${addonChoices}</div>
+        </div>
+      `;
+    }
+
+    return `
+      <section class="estimate-step estimate-step--active" data-step-id="${escapeAttr(step.id)}">
+        <div class="estimate-step-head">
+          <div>
+            <div class="estimate-step-label">STEP${stepNum}</div>
+            <h2 class="estimate-step-title">${escapeHtml(title)}</h2>
+          </div>
+        </div>
+        <div class="estimate-choice-group">${tripChoices}</div>
+        ${addonSection}
+      </section>
+    `;
   }
 
   function renderChoiceStep(stepNum, step, items, currentValue){
@@ -572,14 +612,15 @@
     const note = state.config.page?.distanceNote || "※往復送迎を選択した場合は運賃距離を自動で2倍計算します。";
     const addressMode = isAddressDistanceMode();
     const calcResult = state.routeCalcResult;
-    const addressDisclaimer = "住所検索による距離は\n丁目・番地単位で算出されるため、\n実際の運行距離と異なる場合があります。\n\n概算料金の目安としてご利用ください。";
+    const addressFacilityNote = "住所のほか、病院・施設名でも検索できます。";
+    const addressDisclaimer = "住所・施設名検索による距離は\n丁目・番地単位で算出されるため、\n実際の運行距離と異なる場合があります。\n\n概算料金の目安としてご利用ください。";
 
     const modeRadios = `
       <fieldset class="estimate-distance-mode">
         <legend class="estimate-distance-mode-legend">距離入力方法</legend>
         <label class="estimate-distance-mode-option">
           <input type="radio" name="distanceInputMode" value="address" ${addressMode ? "checked" : ""}>
-          <span>住所から自動計算（推奨）</span>
+          <span>住所・施設名から自動計算（推奨）</span>
         </label>
         <label class="estimate-distance-mode-option">
           <input type="radio" name="distanceInputMode" value="manual" ${!addressMode ? "checked" : ""}>
@@ -590,10 +631,11 @@
 
     const addressPanel = `
       <div class="estimate-address-calc" id="estimateAddressCalcPanel">
-        <label for="originAddressInput" class="estimate-distance-label">出発地住所</label>
-        <input type="text" class="estimate-input" id="originAddressInput" autocomplete="street-address" placeholder="例: 千葉県千葉市中央区本町1-1" value="${escapeAttr(state.originAddress)}">
-        <label for="destinationAddressInput" class="estimate-distance-label estimate-distance-label--spaced">目的地住所</label>
-        <input type="text" class="estimate-input" id="destinationAddressInput" autocomplete="street-address" placeholder="例: 千葉県千葉市中央区中央4-17-1" value="${escapeAttr(state.destinationAddress)}">
+        <label for="originAddressInput" class="estimate-distance-label">出発地（住所・施設名）</label>
+        <input type="text" class="estimate-input" id="originAddressInput" autocomplete="street-address" placeholder="例: 千葉市中央区○○町1-2-3" value="${escapeAttr(state.originAddress)}">
+        <label for="destinationAddressInput" class="estimate-distance-label estimate-distance-label--spaced">目的地（住所・施設名）</label>
+        <input type="text" class="estimate-input" id="destinationAddressInput" autocomplete="street-address" placeholder="例: 千葉メディカルセンター" value="${escapeAttr(state.destinationAddress)}">
+        <p class="estimate-step-note">${escapeHtml(addressFacilityNote)}</p>
         <button type="button" class="estimate-calc-distance-btn" id="calculateDistanceBtn" ${state.routeCalcLoading ? "disabled" : ""}>${state.routeCalcLoading ? "計算中..." : "距離を計算する"}</button>
         <div class="estimate-route-feedback${state.routeCalcError ? " estimate-route-feedback--error" : ""}" id="routeCalcFeedback" aria-live="polite">${escapeHtml(state.routeCalcError || "")}</div>
         ${calcResult ? `
@@ -637,6 +679,9 @@
   function renderStepActive(step, stepNum){
     if(step.type === "assistance"){
       return renderAssistanceStep(stepNum, step);
+    }
+    if(step.type === "trip"){
+      return renderTripStep(stepNum, step);
     }
     if(step.type === "distance"){
       return renderDistanceStep(stepNum, step);
@@ -990,6 +1035,9 @@
 
     bindChoiceGroup("tripChoice", function(value){
       state.tripTypeId = value;
+      if(!window.EstimateCalc.isRoundTripSelected(state.config, state)){
+        state.roundTripAddonId = "";
+      }
       clearStepsAfter("trip");
       syncRoundTripAddon();
       state.lastActiveStepId = "";
