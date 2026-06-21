@@ -471,93 +471,14 @@ footer{
     gap:32px;
   }
 
-  .section-inner:has(.slider-shell){
-    display:grid;
-    grid-template-columns:minmax(0, 1fr) minmax(0, 1fr);
-    gap:32px 40px;
-    align-items:center;
-  }
-
-  .section-inner:has(.slider-shell) .section-title{
-    grid-column:1;
-    grid-row:1;
-    margin-bottom:16px;
-  }
-
-  .section-inner:has(.slider-shell) .slider-shell{
-    grid-column:2;
-    grid-row:1 / span 3;
-    margin-top:0;
-    align-self:center;
-  }
-
-  .section-inner:has(.slider-shell) .section-text{
-    grid-column:1;
-    grid-row:2;
-    margin-top:0;
-  }
-
-  .section-inner:has(.slider-shell) .section-bottom-links{
-    grid-column:1;
-    grid-row:3;
-    margin-top:16px;
-  }
-
-  .section-inner:has(.slider-shell) .slider-slide img{
+  .slider-slide img{
     width:100%;
-    max-width:100%;
-    height:460px;
-    object-fit:cover;
+    max-width:1100px;
+    height:420px;
+    object-fit:contain;
     object-position:center;
-    margin:0;
-  }
-
-  .section-inner:has(.normal-image-wrap img){
-    display:grid;
-    grid-template-columns:minmax(0, 1fr) minmax(0, 1fr);
-    gap:32px 40px;
-    align-items:center;
-  }
-
-  .section-inner:has(.normal-image-wrap img) .normal-image-wrap{
-    grid-column:1;
-    grid-row:1 / span 4;
-    margin-top:0;
-    align-self:center;
-  }
-
-  .section-inner:has(.normal-image-wrap img) .section-title{
-    grid-column:2;
-    grid-row:1;
-    margin-bottom:16px;
-  }
-
-  .section-inner:has(.normal-image-wrap img) .section-text{
-    grid-column:2;
-    grid-row:2;
-    margin-top:0;
-  }
-
-  .section-inner:has(.normal-image-wrap img) .section-bottom-links{
-    grid-column:2;
-    grid-row:3;
-    margin-top:16px;
-  }
-
-  .section-inner:has(.normal-image-wrap img) .section-config-footer-ctas{
-    grid-column:2;
-    grid-row:4;
-  }
-
-  .section-inner:has(.normal-image-wrap img) .normal-image{
-    width:100%;
-    max-width:none;
-    height:auto;
-    min-height:280px;
-    max-height:520px;
-    object-fit:cover;
-    object-position:center;
-    margin:0;
+    display:block;
+    margin:0 auto;
   }
 }
 
