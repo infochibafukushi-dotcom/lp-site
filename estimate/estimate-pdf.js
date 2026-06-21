@@ -394,9 +394,7 @@
           useCORS: true,
           scrollX: 0,
           scrollY: 0,
-          backgroundColor: "#ffffff",
-          width: CONTENT_WIDTH_PX,
-          height: contentHeight
+          backgroundColor: "#ffffff"
         },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
       }).from(element);
