@@ -1,7 +1,7 @@
 {
   "enabled": true,
   "version": 1,
-  "updatedAt": "2026-06-21T04:42:46.900Z",
+  "updatedAt": "2026-06-21T05:36:00.640Z",
   "page": {
     "title": "概算見積シミュレーター",
     "description": "ご利用内容を選択すると概算料金を確認できます。\n実際の料金は運行ルートや介助内容等により変動する場合があります。",
@@ -37,7 +37,7 @@
   },
   "googleMaps": {
     "enabled": true,
-    "apiKey": "",
+    "apiKey": "AIzaSyCrwzuWYya6wdzIeMxp9ANpi-mM-lrfDkM",
     "language": "ja",
     "region": "JP"
   },
@@ -245,7 +245,8 @@
           "visible": true,
           "order": 1,
           "waitingFeeRef": "",
-          "escortFeeRef": ""
+          "escortFeeRef": "",
+          "distanceMultiplier": 1
         },
         {
           "id": "addon-waiting",
@@ -255,7 +256,8 @@
           "visible": true,
           "order": 2,
           "waitingFeeRef": "waiting30min",
-          "escortFeeRef": ""
+          "escortFeeRef": "",
+          "distanceMultiplier": 1
         },
         {
           "id": "addon-escort",
@@ -265,7 +267,8 @@
           "visible": true,
           "order": 3,
           "waitingFeeRef": "",
-          "escortFeeRef": "escort30min"
+          "escortFeeRef": "escort30min",
+          "distanceMultiplier": 1
         }
       ]
     }
@@ -297,7 +300,7 @@
           "boarding-assist",
           "body-assist"
         ],
-        "assistanceId": ""
+        "assistanceId": "watch-assist"
       },
       "own-wheelchair": {
         "mode": "required",
@@ -305,7 +308,7 @@
           "boarding-assist",
           "body-assist"
         ],
-        "assistanceId": ""
+        "assistanceId": "watch-assist"
       },
       "free-wheelchair": {
         "mode": "required",
@@ -313,7 +316,7 @@
           "boarding-assist",
           "body-assist"
         ],
-        "assistanceId": ""
+        "assistanceId": "watch-assist"
       },
       "reclining-wheelchair": {
         "mode": "required",
@@ -321,7 +324,7 @@
           "boarding-assist",
           "body-assist"
         ],
-        "assistanceId": ""
+        "assistanceId": "watch-assist"
       },
       "stretcher": {
         "mode": "fixed",
@@ -342,5 +345,6 @@
     "escortFee": "付き添い料金",
     "usageSummary": "ご利用内容",
     "total": "概算料金"
-  }
+  },
+  "options": {}
 }
