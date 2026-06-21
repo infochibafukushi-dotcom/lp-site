@@ -1,0 +1,42 @@
+[
+  {
+    "viewportWidth": 1920,
+    "sectionInnerWidth": 1100,
+    "sectionInnerMaxWidth": "1100px",
+    "utilizationPct": 57.3,
+    "card3Width": 356,
+    "sliderImgWidth": 700,
+    "menuListInnerWidth": 720,
+    "sectionCount": 17
+  },
+  {
+    "viewportWidth": 1600,
+    "sectionInnerWidth": 1100,
+    "sectionInnerMaxWidth": "1100px",
+    "utilizationPct": 68.8,
+    "card3Width": 356,
+    "sliderImgWidth": 700,
+    "menuListInnerWidth": 720,
+    "sectionCount": 17
+  },
+  {
+    "viewportWidth": 1366,
+    "sectionInnerWidth": 1100,
+    "sectionInnerMaxWidth": "1100px",
+    "utilizationPct": 80.5,
+    "card3Width": 356,
+    "sliderImgWidth": 700,
+    "menuListInnerWidth": 720,
+    "sectionCount": 17
+  },
+  {
+    "viewportWidth": 1280,
+    "sectionInnerWidth": 1100,
+    "sectionInnerMaxWidth": "1100px",
+    "utilizationPct": 85.9,
+    "card3Width": 356,
+    "sliderImgWidth": 700,
+    "menuListInnerWidth": 720,
+    "sectionCount": 17
+  }
+]
