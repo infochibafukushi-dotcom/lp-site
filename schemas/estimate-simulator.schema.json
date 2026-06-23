@@ -14,7 +14,12 @@
       "properties": {
         "title": { "type": "string" },
         "description": { "type": "string" },
-        "disclaimer": { "type": "string" }
+        "disclaimer": { "type": "string" },
+        "resultNotes": { "type": "string" },
+        "distanceLabel": { "type": "string" },
+        "distanceNote": { "type": "string" },
+        "preFixedFareNotice": { "type": "string" },
+        "tollRoadNote": { "type": "string" }
       },
       "additionalProperties": true
     },
@@ -28,6 +33,26 @@
         "patternB": { "type": "object" }
       },
       "additionalProperties": true
+    },
+    "fareMode": {
+      "type": "string",
+      "enum": ["time", "distance", "distance_time"]
+    },
+    "fareModeOptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" },
+          "enabled": { "type": "boolean" }
+        },
+        "required": ["id", "label"],
+        "additionalProperties": true
+      }
+    },
+    "fareComponents": {
+      "type": "object"
     },
     "categories": {
       "type": "object",

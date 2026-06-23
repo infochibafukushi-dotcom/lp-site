@@ -8,6 +8,7 @@
       stairId: String(params.get("stair") || "").trim(),
       tripTypeId: String(params.get("trip") || "").trim(),
       roundTripAddonId: String(params.get("addon") || "").trim(),
+      roadType: String(params.get("roadType") || params.get("road") || "").trim(),
       distanceKm: distanceRaw !== null && distanceRaw !== "" ? Number(distanceRaw) : 0,
       estimateNumber: String(params.get("estimateNo") || params.get("estimateNumber") || "").trim()
     };
@@ -21,6 +22,7 @@
     if(state.stairId) params.set("stair", state.stairId);
     if(state.tripTypeId) params.set("trip", state.tripTypeId);
     if(state.roundTripAddonId) params.set("addon", state.roundTripAddonId);
+    if(state.roadType === "toll") params.set("roadType", "toll");
     if(Number(state.distanceKm) > 0) params.set("distance", String(state.distanceKm));
     if(state.estimateNumber) params.set("estimateNo", state.estimateNumber);
 
@@ -60,6 +62,9 @@
     }
     if(urlState.roundTripAddonId && hasItem("roundTripAddon", urlState.roundTripAddonId)){
       formState.roundTripAddonId = urlState.roundTripAddonId;
+    }
+    if(urlState.roadType === "toll"){
+      formState.roadType = "toll";
     }
     if(urlState.distanceKm > 0){
       formState.distanceKm = urlState.distanceKm;

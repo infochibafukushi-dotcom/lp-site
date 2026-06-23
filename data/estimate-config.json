@@ -7,8 +7,10 @@
     "description": "ご利用内容を選択すると概算料金を確認できます。\n実際の料金は運行ルートや介助内容等により変動する場合があります。",
     "disclaimer": "※表示料金は概算です。\n※実際の料金は運行ルート、交通状況、運行時間、迎車場所、介助内容等により変動する場合があります。\n※待機・院内付き添い料金は実際の利用時間により変動します。\n※障害者割引・福祉タクシー券等は概算見積には反映しておりません。",
     "resultNotes": "※表示料金は概算です。\n※実際の料金は運行距離、交通状況、待機時間、付き添い時間、介助内容等により変動する場合があります。",
+    "preFixedFareNotice": "事前確定運賃は、乗車前に提示した走行予定ルートまたは主要経由地点、運賃額についてお客様の同意を得た場合に適用します。渋滞・交通規制等により運転者がルート変更する場合も、お客様の同意を得たうえで、運賃は事前確定額のままとなります。ただし、お客様都合で目的地・経由地・ルートを変更する場合は、その時点で事前確定運賃による運送を終了し、以後は別途精算します。介助料・機材料・有料道路料金等は、事前確定運賃とは別に区分してご請求します。",
     "distanceLabel": "片道距離（km）",
-    "distanceNote": "※往復送迎を選択した場合は運賃距離を自動で2倍計算します。"
+    "distanceNote": "※往復送迎を選択した場合は運賃距離を自動で2倍計算します。",
+    "tollRoadNote": "通行料金は実費負担となります。"
   },
   "basicFees": {
     "baseFare": {
@@ -53,6 +55,90 @@
     "patternB": {
       "perKmRate": 450
     }
+  },
+  "fareMode": "time",
+  "fareModeOptions": [
+    {
+      "id": "time",
+      "label": "時間制運賃",
+      "enabled": true
+    },
+    {
+      "id": "distance",
+      "label": "距離制運賃",
+      "enabled": true
+    },
+    {
+      "id": "distance_time",
+      "label": "距離時間併用運賃",
+      "enabled": true
+    }
+  ],
+  "fareComponents": {
+    "time": [
+      {
+        "key": "timeBaseFare",
+        "label": "時間制運賃",
+        "calculator": "time_block",
+        "params": {
+          "baseMinutes": 30,
+          "baseAmount": 5000,
+          "perBlockMinutes": 15,
+          "perBlockAmount": 1200
+        }
+      },
+      {
+        "key": "pickupFee",
+        "label": "迎車料金",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "pickupFee"
+      }
+    ],
+    "distance": [
+      {
+        "key": "baseFare",
+        "label": "基本運賃",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "baseFare"
+      },
+      {
+        "key": "pickupFee",
+        "label": "迎車料金",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "pickupFee"
+      },
+      {
+        "key": "distanceFare",
+        "label": "距離運賃",
+        "calculator": "distance_pricing_ref",
+        "pricingRef": "distancePricing"
+      }
+    ],
+    "distance_time": [
+      {
+        "key": "baseFare",
+        "label": "基本運賃",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "baseFare"
+      },
+      {
+        "key": "distanceFare",
+        "label": "距離運賃",
+        "calculator": "distance_pricing_ref",
+        "pricingRef": "distancePricing"
+      },
+      {
+        "key": "timeAdjustment",
+        "label": "時間加算",
+        "calculator": "time_block",
+        "params": {
+          "baseMinutes": 20,
+          "baseAmount": 0,
+          "perBlockMinutes": 10,
+          "perBlockAmount": 300
+        }
+      }
+    ]
   },
   "categories": {
     "mobility": {
@@ -334,8 +420,16 @@
     "stairFee": "階段介助料金",
     "waitingFee": "待機料金",
     "escortFee": "付き添い料金",
+    "fixedFareSection": "事前確定運賃",
+    "careServiceSection": "介助・サービス料金",
+    "expenseSection": "実費・別途費用",
+    "tollRoadExpense": "有料道路・高速道路通行料金",
+    "fareModeTime": "時間制運賃",
+    "fareModeDistance": "距離制運賃",
+    "fareModeDistanceTime": "距離時間併用運賃",
     "usageSummary": "ご利用内容",
-    "total": "概算料金"
+    "total": "概算料金",
+    "totalEstimateSection": "合計目安"
   },
   "pdfFooter": {
     "enabled": true,

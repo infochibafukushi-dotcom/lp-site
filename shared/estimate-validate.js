@@ -69,6 +69,12 @@
       if(data.page.distanceNote != null && typeof data.page.distanceNote !== "string"){
         pushError(errors, "page.distanceNote must be a string");
       }
+      if(data.page.preFixedFareNotice != null && typeof data.page.preFixedFareNotice !== "string"){
+        pushError(errors, "page.preFixedFareNotice must be a string");
+      }
+      if(data.page.tollRoadNote != null && typeof data.page.tollRoadNote !== "string"){
+        pushError(errors, "page.tollRoadNote must be a string");
+      }
     }
 
     if(!isObject(data.basicFees)){
@@ -79,6 +85,16 @@
       pushError(errors, "distancePricing is required");
     }else if(data.distancePricing.mode !== "patternA" && data.distancePricing.mode !== "patternB"){
       pushError(errors, 'distancePricing.mode must be "patternA" or "patternB"');
+    }
+
+    if(data.fareMode != null && !["time", "distance", "distance_time"].includes(data.fareMode)){
+      pushError(errors, 'fareMode must be "time", "distance", or "distance_time"');
+    }
+    if(data.fareModeOptions != null && !Array.isArray(data.fareModeOptions)){
+      pushError(errors, "fareModeOptions must be an array");
+    }
+    if(data.fareComponents != null && !isObject(data.fareComponents)){
+      pushError(errors, "fareComponents must be an object");
     }
 
     if(!isObject(data.categories)){

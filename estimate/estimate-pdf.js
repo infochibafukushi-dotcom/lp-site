@@ -80,6 +80,12 @@
   }
 
   function countBreakdownRows(data){
+    if(Array.isArray(data.fareSections) && data.fareSections.length){
+      return data.fareSections.reduce(function(total, section){
+        const rows = Array.isArray(section?.rows) ? section.rows.length : 0;
+        return total + Math.max(rows, 1);
+      }, 0);
+    }
     return (data.breakdownRows || []).filter(function(row){
       return (Number(row.amount) || 0) > 0 || String(row.label || "").trim();
     }).length;
@@ -360,6 +366,7 @@
       );
     }).join("");
 
+    const fareSections = Array.isArray(data.fareSections) ? data.fareSections : [];
     const breakdownRows = (data.breakdownRows || []).map(function(row){
       return (
         "<tr>" +
@@ -371,6 +378,47 @@
         "</td>" +
         "</tr>"
       );
+    }).join("");
+    const fareSectionRows = fareSections.map(function(section){
+      const rows = Array.isArray(section?.rows) ? section.rows : [];
+      const titleRow =
+        "<tr>" +
+          "<td colspan=\"2\" style=\"padding:" + (layout.breakdownCellPadV + 1) + "px 0 6px;font-weight:700;color:#9a6b16;\">" +
+            escapeHtml(section?.title || "") +
+          "</td>" +
+        "</tr>";
+      const contentRows = rows.length
+        ? rows.map(function(row){
+          if(row.note){
+            return (
+              "<tr>" +
+                "<td style=\"padding:" + layout.breakdownCellPadV + "px " + layout.breakdownLabelPadRight + "px " + layout.breakdownCellPadV + "px 0;border-bottom:1px solid #e3e3e3;\">" +
+                  escapeHtml(row.label) +
+                "</td>" +
+                "<td style=\"padding:" + layout.breakdownCellPadV + "px 0;border-bottom:1px solid #e3e3e3;text-align:left;line-height:1.45;\">" +
+                  escapeHtml(row.note) +
+                "</td>" +
+              "</tr>"
+            );
+          }
+          return (
+            "<tr>" +
+              "<td style=\"padding:" + layout.breakdownCellPadV + "px " + layout.breakdownLabelPadRight + "px " + layout.breakdownCellPadV + "px 0;border-bottom:1px solid #e3e3e3;\">" +
+                escapeHtml(row.label) +
+              "</td>" +
+              "<td class=\"estimate-pdf-amount\" style=\"padding:" + layout.breakdownCellPadV + "px 0;border-bottom:1px solid #e3e3e3;text-align:left;white-space:nowrap;font-weight:600;\">" +
+                escapeHtml(formatYen(row.amount)) +
+              "</td>" +
+            "</tr>"
+          );
+        }).join("")
+        : (
+          "<tr>" +
+            "<td style=\"padding:" + layout.breakdownCellPadV + "px " + layout.breakdownLabelPadRight + "px " + layout.breakdownCellPadV + "px 0;border-bottom:1px solid #e3e3e3;color:#666;\">該当なし</td>" +
+            "<td style=\"padding:" + layout.breakdownCellPadV + "px 0;border-bottom:1px solid #e3e3e3;color:#666;\">-</td>" +
+          "</tr>"
+        );
+      return titleRow + contentRows;
     }).join("");
 
     const resultNotes = String(data.resultNotes || "").trim();
@@ -396,7 +444,7 @@
     const totalHtml =
       footerRule(layout) +
       "<div class=\"estimate-pdf-total\" style=\"text-align:center;padding:" + layout.totalBlockPadV + "px 0 " + (layout.totalBlockPadV + 1) + "px;\">" +
-        "<div style=\"font-size:" + layout.totalLabelFont + "px;color:#666;line-height:1.2;margin-bottom:2px;letter-spacing:.04em;\">概算合計</div>" +
+        "<div style=\"font-size:" + layout.totalLabelFont + "px;color:#666;line-height:1.2;margin-bottom:2px;letter-spacing:.04em;\">合計目安</div>" +
         "<div style=\"font-size:" + layout.totalFont + "px;font-weight:800;color:#c62828;line-height:1.1;letter-spacing:.01em;\">" + escapeHtml(formatYen(data.total)) + "～</div>" +
       "</div>" +
       footerRule(layout);
@@ -420,7 +468,7 @@
           "<h2 style=\"margin:0 0 " + layout.headingGap + "px;font-size:" + layout.sectionFont + "px;color:#9a6b16;line-height:1.22;\">料金内訳</h2>" +
           "<table class=\"estimate-pdf-breakdown\" style=\"" + breakdownTableStyle + "\">" +
             "<colgroup><col style=\"width:54%;\"><col style=\"width:46%;\"></colgroup>" +
-            (breakdownRows || "<tr><td colspan=\"2\" style=\"padding:" + layout.breakdownCellPadV + "px " + layout.cellPadH + "px;\">—</td></tr>") +
+            (fareSectionRows || breakdownRows || "<tr><td colspan=\"2\" style=\"padding:" + layout.breakdownCellPadV + "px " + layout.cellPadH + "px;\">—</td></tr>") +
           "</table>" +
         "</div>" +
         "<div class=\"estimate-pdf-total-section\">" + totalHtml + "</div>" +

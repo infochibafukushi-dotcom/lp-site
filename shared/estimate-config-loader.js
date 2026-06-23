@@ -50,6 +50,31 @@
     if(data.page && defaults.page?.resultNotes && typeof data.page.resultNotes !== "string"){
       data.page.resultNotes = defaults.page.resultNotes;
     }
+    if(data.page && defaults.page?.preFixedFareNotice && typeof data.page.preFixedFareNotice !== "string"){
+      data.page.preFixedFareNotice = defaults.page.preFixedFareNotice;
+    }
+    if(data.page && defaults.page?.tollRoadNote && typeof data.page.tollRoadNote !== "string"){
+      data.page.tollRoadNote = defaults.page.tollRoadNote;
+    }
+    if(defaults.resultLabels){
+      data.resultLabels = Object.assign({}, defaults.resultLabels, data.resultLabels || {});
+    }
+    if(Array.isArray(defaults.fareModeOptions)){
+      const options = Array.isArray(data.fareModeOptions) ? data.fareModeOptions : [];
+      const map = {};
+      options.forEach(function(item){
+        if(item?.id) map[item.id] = item;
+      });
+      data.fareModeOptions = defaults.fareModeOptions.map(function(item){
+        return Object.assign({}, item, map[item.id] || {});
+      });
+    }
+    if(defaults.fareComponents){
+      data.fareComponents = Object.assign({}, defaults.fareComponents, data.fareComponents || {});
+    }
+    const modes = ["time", "distance", "distance_time"];
+    const modeExists = modes.includes(String(data.fareMode || ""));
+    data.fareMode = modeExists ? String(data.fareMode) : String(defaults.fareMode || "time");
     return data;
   }
 

@@ -10,9 +10,11 @@
     distanceKm: 0,
     distanceInputText: "",
     distanceInputMode: "address",
+    roadType: "general",
     originAddress: "",
     destinationAddress: "",
     routeCalcResult: null,
+    routePlan: null,
     routeCalcError: "",
     routeCalcLoading: false,
     estimateNumber: "",
@@ -94,7 +96,9 @@
       state.stairId,
       state.tripTypeId,
       state.roundTripAddonId,
-      String(state.distanceKm)
+      String(state.distanceKm),
+      state.roadType,
+      String(state.routePlan?.selectedRouteId || "")
     ].join("|");
   }
 
@@ -288,7 +292,9 @@
         case "distance":
           state.distanceKm = 0;
           state.distanceInputText = "";
+          state.roadType = "general";
           state.routeCalcResult = null;
+          state.routePlan = null;
           state.routeCalcError = "";
           break;
         default:
@@ -325,7 +331,9 @@
       case "distance":
         state.distanceKm = 0;
         state.distanceInputText = "";
+        state.roadType = "general";
         state.routeCalcResult = null;
+        state.routePlan = null;
         state.routeCalcError = "";
         break;
       default:
@@ -360,9 +368,11 @@
     state.distanceKm = 0;
     state.distanceInputText = "";
     state.distanceInputMode = "address";
+    state.roadType = "general";
     state.originAddress = "";
     state.destinationAddress = "";
     state.routeCalcResult = null;
+    state.routePlan = null;
     state.routeCalcError = "";
     state.routeCalcLoading = false;
     state.estimateNumber = "";
@@ -384,24 +394,51 @@
     });
   }
 
-  function getBreakdownRows(result){
+  function getFareSections(result){
     const labels = state.config.resultLabels || {};
-    const breakdown = result.breakdown || {};
-    const reservationPickupAmount =
-      (Number(breakdown.reservationFee) || 0) + (Number(breakdown.pickupFee) || 0);
+    const snapshot = result.quoteSnapshot || {};
+    const fixedFareRows = Array.isArray(snapshot.fixedFareBreakdown)
+      ? snapshot.fixedFareBreakdown.map(function(row){
+        return {
+          label: row.label || row.key || "",
+          amount: Number(row.amount) || 0
+        };
+      }).filter(function(row){ return row.amount > 0; })
+      : [];
+    const careServiceRows = Array.isArray(snapshot.serviceFees)
+      ? snapshot.serviceFees.map(function(row){
+        return {
+          label: row.label || row.key || "",
+          amount: Number(row.amount) || 0
+        };
+      }).filter(function(row){ return row.amount > 0; })
+      : [];
+    const expenseRows = Array.isArray(snapshot.expenses)
+      ? snapshot.expenses.map(function(row){
+        return {
+          label: row.label || row.key || "",
+          note: row.note || ""
+        };
+      })
+      : [];
 
     return [
-      { label: labels.baseFare || "基本運賃", amount: Number(breakdown.baseFare) || 0 },
-      { label: labels.reservationPickupFee || "予約・迎車料金", amount: reservationPickupAmount },
-      { label: labels.distanceFare || "距離運賃", amount: Number(breakdown.distanceFare) || 0 },
-      { label: labels.wheelchairFee || "車いす料金", amount: Number(breakdown.wheelchairFee) || 0 },
-      { label: labels.assistanceFee || "介助料金", amount: Number(breakdown.assistanceFee) || 0 },
-      { label: labels.stairFee || "階段介助料金", amount: Number(breakdown.stairFee) || 0 },
-      { label: labels.waitingFee || "待機料金", amount: Number(breakdown.waitingFee) || 0 },
-      { label: labels.escortFee || "付き添い料金", amount: Number(breakdown.escortFee) || 0 }
-    ].filter(function(row){
-      return row.amount > 0;
-    });
+      {
+        key: "fixedFare",
+        title: labels.fixedFareSection || "事前確定運賃",
+        rows: fixedFareRows
+      },
+      {
+        key: "careService",
+        title: labels.careServiceSection || "介助・サービス料金",
+        rows: careServiceRows
+      },
+      {
+        key: "expense",
+        title: labels.expenseSection || "実費・別途費用",
+        rows: expenseRows
+      }
+    ];
   }
 
   function renderTripStep(stepNum, step){
@@ -574,12 +611,27 @@
         apiKey: apiKey,
         origin: origin,
         destination: destination,
+        roadType: state.roadType,
         languageCode: mapsConfig.language || "ja",
         region: mapsConfig.region || "JP"
       });
       state.routeCalcResult = {
         distanceKm: result.distanceKm,
         durationMinutes: result.durationMinutes
+      };
+      state.routePlan = {
+        provider: "google_routes",
+        roadType: state.roadType === "toll" ? "toll" : "general",
+        selectedRouteId: String(result.selectedRouteId || "route_0"),
+        routes: Array.isArray(result.routes) ? result.routes : [],
+        pickup: {
+          address: origin,
+          latLng: null
+        },
+        destination: {
+          address: destination,
+          latLng: null
+        }
       };
       state.distanceKm = result.distanceKm;
       state.distanceInputText = String(result.distanceKm);
@@ -589,6 +641,7 @@
       renderPage();
     }catch(error){
       state.routeCalcResult = null;
+      state.routePlan = null;
       state.routeCalcError = error?.message || "距離の計算に失敗しました。";
       state.routeCalcLoading = false;
       updateRouteCalcFeedback();
@@ -615,6 +668,9 @@
     const calcResult = state.routeCalcResult;
     const addressFacilityNote = "住所のほか、病院・施設名でも検索できます。";
     const addressDisclaimer = "住所・施設名検索による距離は\n丁目・番地単位で算出されるため、\n実際の運行距離と異なる場合があります。\n\n概算料金の目安としてご利用ください。";
+    const tollRoadNote =
+      state.config.page?.tollRoadNote ||
+      "通行料金は実費負担となります。";
 
     const modeRadios = `
       <fieldset class="estimate-distance-mode">
@@ -626,6 +682,19 @@
         <label class="estimate-distance-mode-option">
           <input type="radio" name="distanceInputMode" value="manual" ${!addressMode ? "checked" : ""}>
           <span>距離を直接入力</span>
+        </label>
+      </fieldset>
+    `;
+    const roadTypeRadios = `
+      <fieldset class="estimate-road-type">
+        <legend class="estimate-road-type-legend">道路利用設定</legend>
+        <label class="estimate-road-type-option">
+          <input type="radio" name="roadType" value="general" ${state.roadType !== "toll" ? "checked" : ""}>
+          <span>一般道を利用する（推奨）</span>
+        </label>
+        <label class="estimate-road-type-option">
+          <input type="radio" name="roadType" value="toll" ${state.roadType === "toll" ? "checked" : ""}>
+          <span>有料道路・高速道路を利用する</span>
         </label>
       </fieldset>
     `;
@@ -671,6 +740,8 @@
           </div>
         </div>
         ${modeRadios}
+        ${roadTypeRadios}
+        ${state.roadType === "toll" ? `<p class="estimate-road-type-note">${escapeHtml(tollRoadNote)}</p>` : ""}
         ${addressMode ? addressPanel : manualPanel}
         <p class="estimate-step-note">${escapeHtml(note)}</p>
       </section>
@@ -706,9 +777,26 @@
     `;
   }
 
-  function renderBreakdown(result){
-    return getBreakdownRows(result).map(function(row){
-      return `<li><span>${escapeHtml(row.label)}</span><span>${formatYen(row.amount)}</span></li>`;
+  function renderFareSections(result){
+    const sections = getFareSections(result);
+    return sections.map(function(section){
+      const rows = section.rows || [];
+      const body = rows.length
+        ? rows.map(function(row){
+          if(row.note){
+            return `<li><span>${escapeHtml(row.label)}</span><span class="estimate-breakdown-note-value">${escapeHtml(row.note)}</span></li>`;
+          }
+          return `<li><span>${escapeHtml(row.label)}</span><span>${formatYen(row.amount)}</span></li>`;
+        }).join("")
+        : `<li class="estimate-breakdown-empty"><span>該当なし</span><span>-</span></li>`;
+      return `
+        <div class="estimate-breakdown-section">
+          <div class="estimate-breakdown-section-title">${escapeHtml(section.title)}</div>
+          <ul class="estimate-breakdown">
+            ${body}
+          </ul>
+        </div>
+      `;
     }).join("");
   }
 
@@ -716,7 +804,9 @@
     const fallback =
       "※表示料金は概算です。\n" +
       "※実際の料金は運行距離、交通状況、待機時間、付き添い時間、介助内容等により変動する場合があります。";
-    return state.config.page?.resultNotes || fallback;
+    const fixedFareNotice = String(state.config.page?.preFixedFareNotice || "").trim();
+    const base = state.config.page?.resultNotes || fallback;
+    return fixedFareNotice ? (base + "\n\n" + fixedFareNotice) : base;
   }
 
   function renderUsageSummary(result){
@@ -769,18 +859,21 @@
       distanceKm: state.distanceKm,
       usageSummary: result.usageSummary,
       breakdown: result.breakdown,
+      quoteSnapshot: result.quoteSnapshot || null,
+      routePlan: result.routePlan || state.routePlan || null,
       selections: {
         mobilityId: state.mobilityId,
         assistanceId: state.assistanceId,
         stairId: state.stairId,
         tripTypeId: state.tripTypeId,
-        roundTripAddonId: state.roundTripAddonId
+        roundTripAddonId: state.roundTripAddonId,
+        roadType: state.roadType
       }
     });
   }
 
   function renderResult(result){
-    const totalLabel = state.config.resultLabels?.total || "概算料金";
+    const totalLabel = state.config.resultLabels?.totalEstimateSection || state.config.resultLabels?.total || "合計目安";
     const reservationUrl = getReservationUrl();
     const lineUrl = state.ctaUrls.line || "#";
     const phoneUrl = state.ctaUrls.phone || "#";
@@ -790,9 +883,9 @@
         <h3>見積結果</h3>
         ${renderEstimateNumberBox()}
         ${renderUsageSummary(result)}
-        <ul class="estimate-breakdown">
-          ${renderBreakdown(result)}
-        </ul>
+        <div class="estimate-breakdown-groups">
+          ${renderFareSections(result)}
+        </div>
         <div class="estimate-total-section">
           <div class="estimate-total-rule" aria-hidden="true"></div>
           <div class="estimate-total-box">
@@ -937,9 +1030,11 @@
         estimateNumber: state.estimateNumber,
         createdAt: state.estimateCreatedAt,
         usageSummary: result.usageSummary,
-        breakdownRows: getBreakdownRows(result),
+        quoteSnapshot: result.quoteSnapshot || null,
+        fareSections: getFareSections(result),
+        breakdownRows: [],
         total: result.total,
-        resultNotes: state.config.page?.resultNotes || "",
+        resultNotes: getResultNotes(),
         pdfFooter: state.config.pdfFooter || {},
         pageTitle: state.config.page?.title || ""
       });
@@ -981,6 +1076,7 @@
       tripTypeId: state.tripTypeId,
       roundTripAddonId: state.roundTripAddonId,
       distanceKm: state.distanceKm,
+      roadType: state.roadType,
       estimateNumber: state.estimateNumber
     });
   }
@@ -1067,6 +1163,17 @@
     bindChoiceGroup("distanceInputMode", function(value){
       state.distanceInputMode = value === "manual" ? "manual" : "address";
       state.routeCalcError = "";
+      if(state.distanceInputMode === "manual"){
+        state.routePlan = null;
+      }
+      state.lastActiveStepId = "";
+      renderPage();
+    });
+
+    bindChoiceGroup("roadType", function(value){
+      state.roadType = value === "toll" ? "toll" : "general";
+      state.routeCalcError = "";
+      state.routePlan = null;
       state.lastActiveStepId = "";
       renderPage();
     });
@@ -1125,6 +1232,9 @@
 
       if(window.EstimateUrl?.applyUrlStateToFormState){
         window.EstimateUrl.applyUrlStateToFormState(state, urlState, state.config);
+      }
+      if(state.roadType !== "toll"){
+        state.roadType = "general";
       }
       if(urlState.estimateNumber){
         state.estimateNumber = urlState.estimateNumber;

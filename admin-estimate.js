@@ -217,6 +217,7 @@
     const dp = estimateDraft.distancePricing || {};
     const patternA = dp.patternA || {};
     const patternB = dp.patternB || {};
+    const fareMode = String(estimateDraft.fareMode || "time");
 
     root.innerHTML = `
       <div class="row"><label><input type="checkbox" id="estimateEnabledToggle" ${estimateDraft.enabled !== false ? "checked" : ""}> 概算見積ページを公開する</label></div>
@@ -259,6 +260,17 @@
       </div>
       <div id="estimatePatternBFields">
         <div class="row"><label>1km単価（円）</label><input type="number" min="0" step="1" id="estimatePerKmRate" value="${escapeAttr(patternB.perKmRate ?? 0)}"></div>
+      </div>
+
+      <h3>運賃方式</h3>
+      <div class="row">
+        <label><input type="radio" name="estimateFareMode" value="time" ${fareMode === "time" ? "checked" : ""}> 時間制運賃</label>
+      </div>
+      <div class="row">
+        <label><input type="radio" name="estimateFareMode" value="distance" ${fareMode === "distance" ? "checked" : ""}> 距離制運賃</label>
+      </div>
+      <div class="row">
+        <label><input type="radio" name="estimateFareMode" value="distance_time" ${fareMode === "distance_time" ? "checked" : ""}> 距離時間併用運賃</label>
       </div>
 
       <h3>車いす料金（移動方法）</h3>
@@ -328,8 +340,10 @@
       description: document.getElementById("estimatePageDescription")?.value || "",
       disclaimer: document.getElementById("estimatePageDisclaimer")?.value || "",
       resultNotes: estimateDraft.page?.resultNotes || "",
+      preFixedFareNotice: estimateDraft.page?.preFixedFareNotice || "",
       distanceLabel: document.getElementById("estimateDistanceLabel")?.value.trim() || "片道距離（km）",
-      distanceNote: document.getElementById("estimateDistanceNote")?.value || ""
+      distanceNote: document.getElementById("estimateDistanceNote")?.value || "",
+      tollRoadNote: estimateDraft.page?.tollRoadNote || ""
     };
 
     draft.pdfFooter = {
@@ -368,6 +382,9 @@
     draft.distancePricing.patternB = {
       perKmRate: Number(document.getElementById("estimatePerKmRate")?.value) || 0
     };
+
+    const selectedFareMode = document.querySelector('input[name="estimateFareMode"]:checked')?.value || "time";
+    draft.fareMode = ["time", "distance", "distance_time"].includes(selectedFareMode) ? selectedFareMode : "time";
 
     draft.googleMaps = {
       enabled: document.getElementById("estimateGoogleMapsEnabled")?.checked !== false,
@@ -489,10 +506,20 @@
 
   function normalizeEstimateConfig(data){
     const draft = deepClone(data || {});
+    const defaults = window.EstimateDefaults?.createDefaultEstimateConfig?.() || {};
     if(typeof draft.enabled !== "boolean") draft.enabled = true;
     if(typeof draft.version !== "number") draft.version = 1;
     if(draft.page && typeof draft.page.resultNotes !== "string"){
       draft.page.resultNotes = "";
+    }
+    if(Array.isArray(defaults.fareModeOptions)){
+      draft.fareModeOptions = Array.isArray(draft.fareModeOptions) ? draft.fareModeOptions : deepClone(defaults.fareModeOptions);
+    }
+    if(defaults.fareComponents){
+      draft.fareComponents = Object.assign({}, deepClone(defaults.fareComponents), draft.fareComponents || {});
+    }
+    if(!["time", "distance", "distance_time"].includes(String(draft.fareMode || ""))){
+      draft.fareMode = String(defaults.fareMode || "time");
     }
     return ensurePdfFooter(draft);
   }

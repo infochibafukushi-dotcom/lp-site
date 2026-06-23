@@ -264,6 +264,40 @@
   accent-color:#e87f00;
   flex:0 0 auto;
 }
+.estimate-road-type{
+  border:none;
+  margin:0 0 12px;
+  padding:0;
+}
+.estimate-road-type-legend{
+  font-size:14px;
+  font-weight:700;
+  color:#2d2a26;
+  margin-bottom:8px;
+  padding:0;
+}
+.estimate-road-type-option{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px 0;
+  font-size:15px;
+  font-weight:600;
+  color:#2d2a26;
+  cursor:pointer;
+}
+.estimate-road-type-option input{
+  width:18px;
+  height:18px;
+  accent-color:#e87f00;
+  flex:0 0 auto;
+}
+.estimate-road-type-note{
+  margin:0 0 8px;
+  font-size:13px;
+  line-height:1.8;
+  color:#b45309;
+}
 .estimate-address-calc,
 .estimate-manual-distance{
   margin-top:4px;
@@ -433,6 +467,23 @@
   padding:0;
   list-style:none;
 }
+.estimate-breakdown-groups{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.estimate-breakdown-section{
+  border:1px solid #efe7dc;
+  border-radius:12px;
+  padding:12px 14px;
+  background:#faf8f4;
+}
+.estimate-breakdown-section-title{
+  margin:0 0 8px;
+  font-size:14px;
+  font-weight:700;
+  color:#9a6b16;
+}
 .estimate-breakdown li{
   display:flex;
   justify-content:space-between;
@@ -443,6 +494,16 @@
 }
 .estimate-breakdown li:last-child{
   border-bottom:none;
+}
+.estimate-breakdown-note-value{
+  text-align:right;
+  font-size:13px;
+  line-height:1.6;
+  color:#666;
+  max-width:62%;
+}
+.estimate-breakdown-empty{
+  color:#888;
 }
 .estimate-total-section{
   margin-top:16px;
