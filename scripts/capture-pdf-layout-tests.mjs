@@ -162,7 +162,80 @@ function getFallbackRoutePlan(){
   };
 }
 
-function buildCaseData(config, routePlan, testCase){
+function decodePolyline(encoded){
+  const poly = String(encoded || "");
+  if(!poly){
+    return [];
+  }
+  let index = 0;
+  const len = poly.length;
+  let lat = 0;
+  let lng = 0;
+  const points = [];
+  while(index < len){
+    let shift = 0;
+    let result = 0;
+    let byte = 0;
+    do{
+      byte = poly.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    }while(byte >= 0x20);
+    const deltaLat = ((result & 1) ? ~(result >> 1) : (result >> 1));
+    lat += deltaLat;
+    shift = 0;
+    result = 0;
+    do{
+      byte = poly.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    }while(byte >= 0x20);
+    const deltaLng = ((result & 1) ? ~(result >> 1) : (result >> 1));
+    lng += deltaLng;
+    points.push({ lat: lat / 1e5, lng: lng / 1e5 });
+  }
+  return points;
+}
+
+async function fetchRouteMapDataUrl(page, config, routePlan){
+  const apiKey = String(config?.googleMaps?.apiKey || "").trim();
+  const encodedPolyline = String(routePlan?.encodedPolyline || "").trim();
+  if(!apiKey || !encodedPolyline){
+    return "";
+  }
+  const path = decodePolyline(encodedPolyline);
+  if(path.length < 2){
+    return "";
+  }
+  const staticMapUrl = await page.evaluate(function(args){
+    if(!window.EstimatePdf || typeof window.EstimatePdf.buildStaticMapUrl !== "function"){
+      return "";
+    }
+    return window.EstimatePdf.buildStaticMapUrl(args);
+  }, {
+    apiKey: apiKey,
+    encodedPolyline: encodedPolyline,
+    startPoint: path[0],
+    endPoint: path[path.length - 1],
+    pathPoints: path,
+    widthPx: 640,
+    heightPx: 240,
+    language: config?.googleMaps?.language || "ja",
+    region: config?.googleMaps?.region || "JP"
+  });
+  if(!staticMapUrl){
+    return "";
+  }
+  const response = await fetch(staticMapUrl);
+  if(!response.ok){
+    console.warn("Static map fetch failed:", response.status);
+    return "";
+  }
+  const buffer = Buffer.from(await response.arrayBuffer());
+  return "data:image/png;base64," + buffer.toString("base64");
+}
+
+function buildCaseData(config, routePlan, testCase, routeMapDataUrl){
   const pdfFooter = Object.assign({}, config.pdfFooter || {});
   if(!testCase.qr){
     pdfFooter.homepageUrl = "";
@@ -238,7 +311,8 @@ function buildCaseData(config, routePlan, testCase){
     resultNotes: String(config.page?.resultNotes || "※表示料金は概算です。").trim(),
     pdfFooter: pdfFooter,
     routePlan: routePlan,
-    googleMaps: config.googleMaps || {}
+    googleMaps: config.googleMaps || {},
+    routeMapDataUrl: routeMapDataUrl || ""
   };
 }
 
@@ -266,9 +340,9 @@ async function waitForReady(page){
   await new Promise(function(resolve){ setTimeout(resolve, 500); });
 }
 
-async function captureCase(browser, port, config, routePlan, testCase){
+async function captureCase(browser, port, config, routePlan, routeMapDataUrl, testCase){
   const page = await browser.newPage();
-  const mockData = buildCaseData(config, routePlan, testCase);
+  const mockData = buildCaseData(config, routePlan, testCase, routeMapDataUrl);
   await page.goto("http://127.0.0.1:" + port + "/estimate/pdf-layout-test.html", {
     waitUntil: "networkidle0",
     timeout: 120000
@@ -330,6 +404,13 @@ async function main(){
   const browser = await puppeteer.launch({ headless: true });
   const bootstrapPage = await browser.newPage();
   const routePlan = await fetchRoutePlan(config, bootstrapPage, port);
+  let routeMapDataUrl = "";
+  if(routePlan?.encodedPolyline){
+    routeMapDataUrl = await fetchRouteMapDataUrl(bootstrapPage, config, routePlan);
+    if(routeMapDataUrl){
+      console.log("Static map preloaded:", Math.round(routeMapDataUrl.length / 1024) + "KB data URL");
+    }
+  }
   await bootstrapPage.close();
   if(!routePlan?.encodedPolyline){
     throw new Error("routePlan を取得できませんでした");
@@ -346,7 +427,7 @@ async function main(){
   const results = [];
   try{
     for(const testCase of testCases){
-      const result = await captureCase(browser, port, config, routePlan, testCase);
+      const result = await captureCase(browser, port, config, routePlan, routeMapDataUrl, testCase);
       results.push(result);
       console.log(
         result.id,

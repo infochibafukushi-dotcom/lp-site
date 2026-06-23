@@ -100,6 +100,43 @@
     return Boolean(data?.routeMapDataUrl) || Boolean(getRouteEncodedPolyline(data?.routePlan));
   }
 
+  function formatRouteDistanceMeters(meters){
+    const value = Number(meters) || 0;
+    if(value <= 0){
+      return "";
+    }
+    return (value / 1000).toFixed(1) + "km";
+  }
+
+  function formatRouteDurationSeconds(seconds){
+    const sec = Number(seconds) || 0;
+    if(sec <= 0){
+      return "";
+    }
+    return Math.max(1, Math.round(sec / 60)) + "分";
+  }
+
+  function getRoadTypeLabel(roadType){
+    return String(roadType || "") === "toll" ? "有料道路利用" : "一般道利用";
+  }
+
+  function getPolylineBounds(points){
+    if(!Array.isArray(points) || !points.length){
+      return null;
+    }
+    let minLat = points[0].lat;
+    let maxLat = points[0].lat;
+    let minLng = points[0].lng;
+    let maxLng = points[0].lng;
+    points.forEach(function(point){
+      minLat = Math.min(minLat, point.lat);
+      maxLat = Math.max(maxLat, point.lat);
+      minLng = Math.min(minLng, point.lng);
+      maxLng = Math.max(maxLng, point.lng);
+    });
+    return { minLat: minLat, maxLat: maxLat, minLng: minLng, maxLng: maxLng };
+  }
+
   function getDefaultLayout(){
     return {
       baseFont: 11,
@@ -134,8 +171,9 @@
       footerTopGap: 8,
       pagePadTop: 2,
       pagePadBottom: 0,
-      routeMapHeight: 132,
+      routeMapHeight: 240,
       routeMapTitleGap: 4,
+      routeMapInfoGap: 4,
       routeMapBottomGap: 6
     };
   }
@@ -193,7 +231,7 @@
       next.sectionFont = 12.5;
       next.totalFont = 22;
       next.footerQrSize = 38;
-      next.routeMapHeight = 110;
+      next.routeMapHeight = 190;
     }
 
     if(usageCount >= 7){
@@ -207,14 +245,14 @@
     }
 
     if(hasMap){
-      next.routeMapHeight = breakdownCount >= 6 ? 108 : 128;
+      next.routeMapHeight = breakdownCount >= 8 ? 190 : (breakdownCount >= 6 ? 210 : 240);
       next.sectionGap = Math.max(4, next.sectionGap - 1);
       next.footerTopGap = Math.max(6, next.footerTopGap - 2);
     }
 
-    if(hasFooter && hasMap && breakdownCount >= 5){
+    if(hasFooter && hasMap && breakdownCount >= 7){
       next.footerQrSize = 40;
-      next.routeMapHeight = 104;
+      next.routeMapHeight = Math.min(next.routeMapHeight, 200);
     }
 
     return next;
@@ -231,7 +269,7 @@
       }else if(key === "footerQrSize"){
         min = 32;
       }else if(key === "routeMapHeight"){
-        min = 72;
+        min = 150;
       }else if(key === "breakdownFont" || key === "baseFont"){
         min = 9;
       }
@@ -338,10 +376,30 @@
     );
   }
 
-  function buildRouteMapHtml(routeMapDataUrl, layout){
+  function buildRouteMapHtml(routeMapDataUrl, layout, routePlan){
     if(!routeMapDataUrl){
       return "";
     }
+    const primaryRoute = getRoutePlanPrimaryRoute(routePlan);
+    const infoParts = [];
+    const roadLabel = getRoadTypeLabel(routePlan?.roadType);
+    const distanceLabel = formatRouteDistanceMeters(primaryRoute?.distanceMeters || routePlan?.distanceMeters);
+    const durationLabel = formatRouteDurationSeconds(primaryRoute?.durationSeconds || routePlan?.durationSeconds);
+    if(roadLabel){
+      infoParts.push("道路設定：" + roadLabel);
+    }
+    if(distanceLabel){
+      infoParts.push("予定距離：" + distanceLabel);
+    }
+    if(durationLabel){
+      infoParts.push("予定時間：" + durationLabel);
+    }
+    const infoHtml = infoParts.length
+      ? (
+        "<div style=\"margin-top:" + layout.routeMapInfoGap + "px;font-size:" + Math.max(9, layout.metaFont - 1) + "px;" +
+        "line-height:1.5;color:#555;\">" + escapeHtml(infoParts.join("　")) + "</div>"
+      )
+      : "";
     return (
       "<div class=\"estimate-pdf-route-map\" style=\"margin:0 0 " + layout.routeMapBottomGap + "px;\">" +
         "<div style=\"margin:0 0 " + layout.routeMapTitleGap + "px;font-size:" + Math.max(11, layout.sectionFont - 1) + "px;" +
@@ -349,6 +407,7 @@
         "<img src=\"" + routeMapDataUrl + "\" alt=\"走行予定ルート地図\" " +
         "style=\"display:block;width:100%;height:auto;max-height:" + layout.routeMapHeight + "px;object-fit:contain;" +
         "object-position:left bottom;border-radius:8px;background:#f5f5f5;\">" +
+        infoHtml +
       "</div>"
     );
   }
@@ -357,34 +416,53 @@
     return { homepage: "", line: "" };
   }
 
+  function formatCoord(value){
+    return Number(value).toFixed(6);
+  }
+
   function buildStaticMapUrl(options){
     const apiKey = String(options?.apiKey || "").trim();
     const encodedPolyline = String(options?.encodedPolyline || "").trim();
     const startPoint = options?.startPoint;
     const endPoint = options?.endPoint;
+    const pathPoints = Array.isArray(options?.pathPoints) ? options.pathPoints : [];
     const widthPx = Math.min(640, Math.max(320, Math.round(Number(options?.widthPx) || CONTENT_WIDTH_PX)));
-    const heightPx = Math.round(Number(options?.heightPx) || layoutRouteMapHeight(widthPx));
+    const heightPx = Math.round(Number(options?.heightPx) || 240);
 
     if(!apiKey || !encodedPolyline || !startPoint || !endPoint){
       return "";
     }
 
+    const bounds = getPolylineBounds(pathPoints.length ? pathPoints : [startPoint, endPoint]);
     const params = [
       "size=" + widthPx + "x" + heightPx,
       "scale=2",
       "maptype=roadmap",
       "language=" + encodeURIComponent(options?.language || "ja"),
-      "region=" + encodeURIComponent(options?.region || "JP"),
-      "path=" + encodeURIComponent("color:0xE87F00FF|weight:5|enc:" + encodedPolyline),
-      "markers=" + encodeURIComponent("color:0x2E7D32|" + startPoint.lat + "," + startPoint.lng),
-      "markers=" + encodeURIComponent("color:0xC62828|" + endPoint.lat + "," + endPoint.lng),
-      "key=" + encodeURIComponent(apiKey)
+      "region=" + encodeURIComponent(options?.region || "JP")
     ];
-    return STATIC_MAP_BASE_URL + "?" + params.join("&");
-  }
 
-  function layoutRouteMapHeight(widthPx){
-    return Math.max(96, Math.round(widthPx * 0.34));
+    if(bounds){
+      const latSpan = Math.max(bounds.maxLat - bounds.minLat, 0.0005);
+      const lngSpan = Math.max(bounds.maxLng - bounds.minLng, 0.0005);
+      const latPad = Math.max(latSpan * 0.17, 0.0008);
+      const lngPad = Math.max(lngSpan * 0.17, 0.0008);
+      const visibleSouthWest = formatCoord(bounds.minLat - latPad) + "," + formatCoord(bounds.minLng - lngPad);
+      const visibleNorthEast = formatCoord(bounds.maxLat + latPad) + "," + formatCoord(bounds.maxLng + lngPad);
+      params.push("visible=" + encodeURIComponent(visibleSouthWest + "|" + visibleNorthEast));
+    }
+
+    params.push(
+      "path=" + encodeURIComponent("color:0xE87F00FF|weight:8|enc:" + encodedPolyline),
+      "markers=" + encodeURIComponent(
+        "size:small|color:0x2E7D32|" + formatCoord(startPoint.lat) + "," + formatCoord(startPoint.lng)
+      ),
+      "markers=" + encodeURIComponent(
+        "size:small|color:0xC62828|" + formatCoord(endPoint.lat) + "," + formatCoord(endPoint.lng)
+      ),
+      "key=" + encodeURIComponent(apiKey)
+    );
+    return STATIC_MAP_BASE_URL + "?" + params.join("&");
   }
 
   function loadImageAsDataUrl(url){
@@ -441,12 +519,13 @@
       return "";
     }
 
-    const mapHeight = layout ? layout.routeMapHeight : 132;
+    const mapHeight = layout ? layout.routeMapHeight : 240;
     const staticMapUrl = buildStaticMapUrl({
       apiKey: apiKey,
       encodedPolyline: encodedPolyline,
       startPoint: path[0],
       endPoint: path[path.length - 1],
+      pathPoints: path,
       widthPx: CONTENT_WIDTH_PX,
       heightPx: mapHeight,
       language: mapsConfig.language || "ja",
@@ -586,7 +665,7 @@
       : "";
 
     const footerHtml = buildPdfFooterHtml(data.pdfFooter, layout, qrDataUrls);
-    const routeMapHtml = buildRouteMapHtml(data.routeMapDataUrl, layout);
+    const routeMapHtml = buildRouteMapHtml(data.routeMapDataUrl, layout, data.routePlan);
 
     const bodyFont = layout.baseFont + "px";
     const breakdownFont = layout.breakdownFont + "px";
@@ -711,11 +790,14 @@
   async function preparePdfRenderData(data){
     let layout = tuneLayoutForContent(data, getDefaultLayout());
     const qrDataUrls = await resolveQrDataUrls(data.pdfFooter, layout.footerQrSize);
-    let routeMapDataUrl = await resolveRouteMapDataUrl(data.routePlan, data.googleMaps, layout);
+    let routeMapDataUrl = String(data.routeMapDataUrl || "").trim();
+    if(!routeMapDataUrl){
+      routeMapDataUrl = await resolveRouteMapDataUrl(data.routePlan, data.googleMaps, layout);
+    }
     let enriched = Object.assign({}, data, { routeMapDataUrl: routeMapDataUrl });
     let measured = measureContentHeight(enriched, qrDataUrls);
 
-    if(routeMapDataUrl && measured.contentHeight > CONTENT_HEIGHT_PX){
+    if(routeMapDataUrl && measured.contentHeight > CONTENT_HEIGHT_PX && !String(data.routeMapDataUrl || "").trim()){
       layout = measured.layout;
       routeMapDataUrl = await resolveRouteMapDataUrl(data.routePlan, data.googleMaps, layout);
       enriched = Object.assign({}, data, { routeMapDataUrl: routeMapDataUrl });

@@ -6,14 +6,14 @@
     "pageCount": 1,
     "metrics": {
       "sheetHeight": 1123,
-      "contentHeight": 783,
+      "contentHeight": 989,
       "contentLimit": 1062.0472440944882,
       "fitsSinglePage": true,
       "hasRouteMap": true,
-      "routeMapLoaded": false,
-      "routeMapHeight": 0,
-      "routeMapWidth": 0,
-      "routeMapSrc": "https://maps.googleapis.com/maps/api/sta"
+      "routeMapLoaded": true,
+      "routeMapHeight": 480,
+      "routeMapWidth": 1280,
+      "routeMapSrc": "data:image/png;base64,iVBORw0KGgoAAAANSU"
     }
   },
   {
@@ -23,14 +23,14 @@
     "pageCount": 1,
     "metrics": {
       "sheetHeight": 1123,
-      "contentHeight": 721,
+      "contentHeight": 953,
       "contentLimit": 1062.0472440944882,
       "fitsSinglePage": true,
       "hasRouteMap": true,
-      "routeMapLoaded": false,
-      "routeMapHeight": 0,
-      "routeMapWidth": 0,
-      "routeMapSrc": "https://maps.googleapis.com/maps/api/sta"
+      "routeMapLoaded": true,
+      "routeMapHeight": 480,
+      "routeMapWidth": 1280,
+      "routeMapSrc": "data:image/png;base64,iVBORw0KGgoAAAANSU"
     }
   },
   {
@@ -40,14 +40,14 @@
     "pageCount": 1,
     "metrics": {
       "sheetHeight": 1123,
-      "contentHeight": 782,
+      "contentHeight": 1014,
       "contentLimit": 1062.0472440944882,
       "fitsSinglePage": true,
       "hasRouteMap": true,
-      "routeMapLoaded": false,
-      "routeMapHeight": 0,
-      "routeMapWidth": 0,
-      "routeMapSrc": "https://maps.googleapis.com/maps/api/sta"
+      "routeMapLoaded": true,
+      "routeMapHeight": 480,
+      "routeMapWidth": 1280,
+      "routeMapSrc": "data:image/png;base64,iVBORw0KGgoAAAANSU"
     }
   },
   {
@@ -57,14 +57,14 @@
     "pageCount": 1,
     "metrics": {
       "sheetHeight": 1123,
-      "contentHeight": 808,
+      "contentHeight": 1044,
       "contentLimit": 1062.0472440944882,
       "fitsSinglePage": true,
       "hasRouteMap": true,
-      "routeMapLoaded": false,
-      "routeMapHeight": 0,
-      "routeMapWidth": 0,
-      "routeMapSrc": "https://maps.googleapis.com/maps/api/sta"
+      "routeMapLoaded": true,
+      "routeMapHeight": 480,
+      "routeMapWidth": 1280,
+      "routeMapSrc": "data:image/png;base64,iVBORw0KGgoAAAANSU"
     }
   },
   {
@@ -74,14 +74,14 @@
     "pageCount": 1,
     "metrics": {
       "sheetHeight": 1123,
-      "contentHeight": 726,
+      "contentHeight": 929,
       "contentLimit": 1062.0472440944882,
       "fitsSinglePage": true,
       "hasRouteMap": true,
-      "routeMapLoaded": false,
-      "routeMapHeight": 0,
-      "routeMapWidth": 0,
-      "routeMapSrc": "https://maps.googleapis.com/maps/api/sta"
+      "routeMapLoaded": true,
+      "routeMapHeight": 480,
+      "routeMapWidth": 1280,
+      "routeMapSrc": "data:image/png;base64,iVBORw0KGgoAAAANSU"
     }
   }
 ]
