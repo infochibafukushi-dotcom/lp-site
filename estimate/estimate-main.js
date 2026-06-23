@@ -1036,6 +1036,9 @@
   function getReservationUrl(){
     const base = state.ctaUrls.reservation || "#";
     if(window.EstimateHandoff && state.estimateNumber){
+      if(typeof window.EstimateHandoff.buildReservationHandoffUrl === "function"){
+        return window.EstimateHandoff.buildReservationHandoffUrl(base, state.estimateNumber);
+      }
       return window.EstimateHandoff.appendEstimateNoToUrl(base, state.estimateNumber);
     }
     return base;
@@ -1059,7 +1062,16 @@
         tripTypeId: state.tripTypeId,
         roundTripAddonId: state.roundTripAddonId,
         roadType: state.roadType
-      }
+      },
+      handoffSource: "lp-site-estimate",
+      dtoVersion: 1
+    });
+  }
+
+  function syncHandoffForResult(result){
+    if(!window.EstimateHandoff) return;
+    void ensureEstimateNumber(result).then(function(){
+      refreshResultSection(result);
     });
   }
 
@@ -1128,7 +1140,7 @@
         <button type="button" class="estimate-reset-btn estimate-reset-btn--bottom" id="estimateResetBtnBottom">最初からやり直す</button>
       </section>
       <div class="estimate-cta-group">
-        <a class="estimate-cta-primary" href="${escapeAttr(reservationUrl)}" target="_blank" rel="noopener noreferrer">この内容で予約する</a>
+        <a class="estimate-cta-primary" href="${escapeAttr(reservationUrl)}" rel="noopener noreferrer">この内容で予約する</a>
         <div class="estimate-cta-secondary-row">
           <a class="estimate-cta-secondary" href="${escapeAttr(lineUrl)}" target="_blank" rel="noopener noreferrer">LINEで相談する</a>
           <a class="estimate-cta-secondary" href="${escapeAttr(phoneUrl)}">電話で問い合わせる</a>
@@ -1192,6 +1204,7 @@
       scrollToActiveStep(flow, activeIndex);
     }else{
       state.lastActiveStepId = "result";
+      syncHandoffForResult(result);
       renderRouteMapIfNeeded();
       console.log("PDF_DEBUG_1 ボタン描画");
     }
