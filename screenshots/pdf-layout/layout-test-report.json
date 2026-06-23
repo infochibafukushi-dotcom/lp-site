@@ -1,0 +1,87 @@
+[
+  {
+    "id": "01-qr-on-waiting-on-time",
+    "screenshotPath": "C:\\Users\\yamam\\OneDrive\\ドキュメント\\GitHub\\lp-site\\screenshots\\pdf-layout\\01-qr-on-waiting-on-time.png",
+    "pdfPath": "C:\\Users\\yamam\\OneDrive\\ドキュメント\\GitHub\\lp-site\\screenshots\\pdf-layout\\01-qr-on-waiting-on-time.pdf",
+    "pageCount": 1,
+    "metrics": {
+      "sheetHeight": 1123,
+      "contentHeight": 783,
+      "contentLimit": 1062.0472440944882,
+      "fitsSinglePage": true,
+      "hasRouteMap": true,
+      "routeMapLoaded": false,
+      "routeMapHeight": 0,
+      "routeMapWidth": 0,
+      "routeMapSrc": "https://maps.googleapis.com/maps/api/sta"
+    }
+  },
+  {
+    "id": "02-qr-off-waiting-off-time",
+    "screenshotPath": "C:\\Users\\yamam\\OneDrive\\ドキュメント\\GitHub\\lp-site\\screenshots\\pdf-layout\\02-qr-off-waiting-off-time.png",
+    "pdfPath": "C:\\Users\\yamam\\OneDrive\\ドキュメント\\GitHub\\lp-site\\screenshots\\pdf-layout\\02-qr-off-waiting-off-time.pdf",
+    "pageCount": 1,
+    "metrics": {
+      "sheetHeight": 1123,
+      "contentHeight": 721,
+      "contentLimit": 1062.0472440944882,
+      "fitsSinglePage": true,
+      "hasRouteMap": true,
+      "routeMapLoaded": false,
+      "routeMapHeight": 0,
+      "routeMapWidth": 0,
+      "routeMapSrc": "https://maps.googleapis.com/maps/api/sta"
+    }
+  },
+  {
+    "id": "03-qr-on-waiting-off-time",
+    "screenshotPath": "C:\\Users\\yamam\\OneDrive\\ドキュメント\\GitHub\\lp-site\\screenshots\\pdf-layout\\03-qr-on-waiting-off-time.png",
+    "pdfPath": "C:\\Users\\yamam\\OneDrive\\ドキュメント\\GitHub\\lp-site\\screenshots\\pdf-layout\\03-qr-on-waiting-off-time.pdf",
+    "pageCount": 1,
+    "metrics": {
+      "sheetHeight": 1123,
+      "contentHeight": 782,
+      "contentLimit": 1062.0472440944882,
+      "fitsSinglePage": true,
+      "hasRouteMap": true,
+      "routeMapLoaded": false,
+      "routeMapHeight": 0,
+      "routeMapWidth": 0,
+      "routeMapSrc": "https://maps.googleapis.com/maps/api/sta"
+    }
+  },
+  {
+    "id": "04-qr-on-waiting-on-distance",
+    "screenshotPath": "C:\\Users\\yamam\\OneDrive\\ドキュメント\\GitHub\\lp-site\\screenshots\\pdf-layout\\04-qr-on-waiting-on-distance.png",
+    "pdfPath": "C:\\Users\\yamam\\OneDrive\\ドキュメント\\GitHub\\lp-site\\screenshots\\pdf-layout\\04-qr-on-waiting-on-distance.pdf",
+    "pageCount": 1,
+    "metrics": {
+      "sheetHeight": 1123,
+      "contentHeight": 808,
+      "contentLimit": 1062.0472440944882,
+      "fitsSinglePage": true,
+      "hasRouteMap": true,
+      "routeMapLoaded": false,
+      "routeMapHeight": 0,
+      "routeMapWidth": 0,
+      "routeMapSrc": "https://maps.googleapis.com/maps/api/sta"
+    }
+  },
+  {
+    "id": "05-qr-off-waiting-on-time",
+    "screenshotPath": "C:\\Users\\yamam\\OneDrive\\ドキュメント\\GitHub\\lp-site\\screenshots\\pdf-layout\\05-qr-off-waiting-on-time.png",
+    "pdfPath": "C:\\Users\\yamam\\OneDrive\\ドキュメント\\GitHub\\lp-site\\screenshots\\pdf-layout\\05-qr-off-waiting-on-time.pdf",
+    "pageCount": 1,
+    "metrics": {
+      "sheetHeight": 1123,
+      "contentHeight": 726,
+      "contentLimit": 1062.0472440944882,
+      "fitsSinglePage": true,
+      "hasRouteMap": true,
+      "routeMapLoaded": false,
+      "routeMapHeight": 0,
+      "routeMapWidth": 0,
+      "routeMapSrc": "https://maps.googleapis.com/maps/api/sta"
+    }
+  }
+]
