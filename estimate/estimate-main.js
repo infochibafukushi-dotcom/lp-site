@@ -575,6 +575,191 @@
     return n > 0 ? n.toFixed(1) + "km" : "";
   }
 
+  function formatRouteDurationSeconds(seconds){
+    const sec = Number(seconds) || 0;
+    if(sec <= 0){
+      return "";
+    }
+    const minutes = Math.max(1, Math.round(sec / 60));
+    return minutes + "分";
+  }
+
+  function formatRouteDistanceMeters(meters){
+    const value = Number(meters) || 0;
+    if(value <= 0){
+      return "";
+    }
+    return (value / 1000).toFixed(1) + "km";
+  }
+
+  function decodePolyline(encoded){
+    const poly = String(encoded || "");
+    if(!poly) return [];
+    let index = 0;
+    const len = poly.length;
+    let lat = 0;
+    let lng = 0;
+    const points = [];
+
+    while(index < len){
+      let b;
+      let shift = 0;
+      let result = 0;
+      do{
+        b = poly.charCodeAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      }while(b >= 0x20 && index < len);
+      const dlat = (result & 1) ? ~(result >> 1) : (result >> 1);
+      lat += dlat;
+
+      shift = 0;
+      result = 0;
+      do{
+        b = poly.charCodeAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      }while(b >= 0x20 && index < len);
+      const dlng = (result & 1) ? ~(result >> 1) : (result >> 1);
+      lng += dlng;
+
+      points.push({ lat: lat / 1e5, lng: lng / 1e5 });
+    }
+    return points;
+  }
+
+  let googleMapsApiPromise = null;
+
+  function loadGoogleMapsJsApi(){
+    if(window.google?.maps){
+      return Promise.resolve(window.google.maps);
+    }
+    if(googleMapsApiPromise){
+      return googleMapsApiPromise;
+    }
+    const mapsConfig = getGoogleMapsConfig();
+    const apiKey = String(mapsConfig.apiKey || "").trim();
+    if(!apiKey){
+      return Promise.reject(new Error("Google Maps APIキーが設定されていません。"));
+    }
+
+    googleMapsApiPromise = new Promise(function(resolve, reject){
+      const callbackName = "__estimateGoogleMapsInit_" + Date.now();
+      window[callbackName] = function(){
+        try{
+          delete window[callbackName];
+        }catch(error){}
+        resolve(window.google.maps);
+      };
+
+      const script = document.createElement("script");
+      script.src =
+        "https://maps.googleapis.com/maps/api/js?key=" +
+        encodeURIComponent(apiKey) +
+        "&language=" + encodeURIComponent(mapsConfig.language || "ja") +
+        "&region=" + encodeURIComponent(mapsConfig.region || "JP") +
+        "&callback=" + encodeURIComponent(callbackName);
+      script.async = true;
+      script.defer = true;
+      script.onerror = function(){
+        try{
+          delete window[callbackName];
+        }catch(error){}
+        reject(new Error("Google Maps JavaScript APIの読み込みに失敗しました。"));
+      };
+      document.head.appendChild(script);
+    });
+
+    return googleMapsApiPromise;
+  }
+
+  function getRoutePlanPrimaryRoute(routePlan){
+    if(!routePlan) return null;
+    if(Array.isArray(routePlan.routes) && routePlan.routes.length){
+      const selectedId = String(routePlan.selectedRouteId || "");
+      const selected = routePlan.routes.find(function(route){
+        return String(route?.routeId || "") === selectedId;
+      });
+      return selected || routePlan.routes[0];
+    }
+    return {
+      encodedPolyline: String(routePlan.encodedPolyline || ""),
+      distanceMeters: Number(routePlan.distanceMeters) || 0,
+      durationSeconds: Number(routePlan.durationSeconds) || 0
+    };
+  }
+
+  function getRoadTypeLabel(roadType){
+    return String(roadType || "") === "toll" ? "有料道路利用" : "一般道利用";
+  }
+
+  async function renderRouteMapIfNeeded(){
+    const mapContainer = document.getElementById("estimateRouteMap");
+    if(!mapContainer) return;
+
+    const mapsConfig = getGoogleMapsConfig();
+    if(mapsConfig.enabled === false){
+      mapContainer.innerHTML = '<p class="estimate-route-map-error">地図表示は現在無効です。</p>';
+      return;
+    }
+    const routePlan = state.routePlan;
+    const primaryRoute = getRoutePlanPrimaryRoute(routePlan);
+    const encodedPolyline = String(primaryRoute?.encodedPolyline || routePlan?.encodedPolyline || "");
+    if(!encodedPolyline){
+      mapContainer.innerHTML = '<p class="estimate-route-map-error">ルート情報が取得できないため地図を表示できません。</p>';
+      return;
+    }
+
+    const path = decodePolyline(encodedPolyline);
+    if(path.length < 2){
+      mapContainer.innerHTML = '<p class="estimate-route-map-error">ルート情報が不足しているため地図を表示できません。</p>';
+      return;
+    }
+
+    try{
+      await loadGoogleMapsJsApi();
+      const map = new window.google.maps.Map(mapContainer, {
+        center: path[0],
+        zoom: 14,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false
+      });
+
+      const routeLine = new window.google.maps.Polyline({
+        path: path,
+        geodesic: true,
+        strokeColor: "#e87f00",
+        strokeOpacity: 0.95,
+        strokeWeight: 5
+      });
+      routeLine.setMap(map);
+
+      const startPoint = path[0];
+      const endPoint = path[path.length - 1];
+      new window.google.maps.Marker({
+        position: startPoint,
+        map: map,
+        title: "出発地",
+        label: "発"
+      });
+      new window.google.maps.Marker({
+        position: endPoint,
+        map: map,
+        title: "目的地",
+        label: "着"
+      });
+
+      const bounds = new window.google.maps.LatLngBounds();
+      path.forEach(function(point){
+        bounds.extend(point);
+      });
+      map.fitBounds(bounds, 48);
+    }catch(error){
+      mapContainer.innerHTML = '<p class="estimate-route-map-error">' + escapeHtml(error?.message || "地図表示に失敗しました。") + "</p>";
+    }
+  }
+
   async function calculateRouteDistance(){
     const origin = String(state.originAddress || "").trim();
     const destination = String(state.destinationAddress || "").trim();
@@ -619,10 +804,16 @@
         distanceKm: result.distanceKm,
         durationMinutes: result.durationMinutes
       };
+      const primaryRoute = Array.isArray(result.routes) && result.routes.length ? result.routes[0] : null;
       state.routePlan = {
         provider: "google_routes",
         roadType: state.roadType === "toll" ? "toll" : "general",
         selectedRouteId: String(result.selectedRouteId || "route_0"),
+        encodedPolyline: String(primaryRoute?.encodedPolyline || ""),
+        routeLabels: Array.isArray(primaryRoute?.routeLabels) ? primaryRoute.routeLabels.slice() : [],
+        routeToken: String(primaryRoute?.routeToken || ""),
+        distanceMeters: Number(primaryRoute?.distanceMeters) || 0,
+        durationSeconds: Number(primaryRoute?.durationSeconds) || 0,
         routes: Array.isArray(result.routes) ? result.routes : [],
         pickup: {
           address: origin,
@@ -878,10 +1069,45 @@
     const lineUrl = state.ctaUrls.line || "#";
     const phoneUrl = state.ctaUrls.phone || "#";
 
+    const routePlan = state.routePlan;
+    const primaryRoute = getRoutePlanPrimaryRoute(routePlan);
+    const plannedDistance = formatRouteDistanceMeters(primaryRoute?.distanceMeters || routePlan?.distanceMeters || 0);
+    const plannedDuration = formatRouteDurationSeconds(primaryRoute?.durationSeconds || routePlan?.durationSeconds || 0);
+    const roadTypeLabel = getRoadTypeLabel(routePlan?.roadType || state.roadType);
+    const routeCardHtml = routePlan ? `
+      <section class="estimate-route-preview" aria-label="走行予定ルート">
+        <h4 class="estimate-route-preview-title">走行予定ルート</h4>
+        <div class="estimate-route-map" id="estimateRouteMap" role="img" aria-label="走行予定ルート地図"></div>
+        <dl class="estimate-route-info-list">
+          <div class="estimate-route-info-row">
+            <dt>出発地</dt>
+            <dd>${escapeHtml(routePlan?.pickup?.address || state.originAddress || "-")}</dd>
+          </div>
+          <div class="estimate-route-info-row">
+            <dt>目的地</dt>
+            <dd>${escapeHtml(routePlan?.destination?.address || state.destinationAddress || "-")}</dd>
+          </div>
+          <div class="estimate-route-info-row">
+            <dt>道路設定</dt>
+            <dd>${escapeHtml(roadTypeLabel)}</dd>
+          </div>
+          <div class="estimate-route-info-row">
+            <dt>予定距離</dt>
+            <dd>${escapeHtml(plannedDistance || formatRouteDistance(state.distanceKm) || "-")}</dd>
+          </div>
+          <div class="estimate-route-info-row">
+            <dt>予定時間</dt>
+            <dd>${escapeHtml(plannedDuration || formatRouteDuration(state.routeCalcResult?.durationMinutes || 0) || "-")}</dd>
+          </div>
+        </dl>
+      </section>
+    ` : "";
+
     return `
       <section class="estimate-result" aria-live="polite" aria-atomic="true">
         <h3>見積結果</h3>
         ${renderEstimateNumberBox()}
+        ${routeCardHtml}
         ${renderUsageSummary(result)}
         <div class="estimate-breakdown-groups">
           ${renderFareSections(result)}
@@ -966,6 +1192,7 @@
       scrollToActiveStep(flow, activeIndex);
     }else{
       state.lastActiveStepId = "result";
+      renderRouteMapIfNeeded();
       console.log("PDF_DEBUG_1 ボタン描画");
     }
   }
@@ -1062,6 +1289,7 @@
     if(newResult) resultSection.replaceWith(newResult);
     if(newCta && ctaGroup) ctaGroup.replaceWith(newCta);
     if(newDisclaimer && disclaimer) disclaimer.replaceWith(newDisclaimer);
+    renderRouteMapIfNeeded();
     bindCopyUrlButton();
   }
 
