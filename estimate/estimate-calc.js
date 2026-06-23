@@ -329,9 +329,6 @@
       waitingFee: waitingFee,
       escortFee: escortFee
     };
-
-      fixedFareTotal: fixedFareData.fixedFareTotal
-    };
     const total = fixedFareData.fixedFareTotal + serviceTotal;
     const quoteSnapshot = {
       fareMode: fixedFareData.fareMode,
