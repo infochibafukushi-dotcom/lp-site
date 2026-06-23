@@ -1263,7 +1263,9 @@
         total: result.total,
         resultNotes: getResultNotes(),
         pdfFooter: state.config.pdfFooter || {},
-        pageTitle: state.config.page?.title || ""
+        pageTitle: state.config.page?.title || "",
+        routePlan: state.routePlan || result.routePlan || null,
+        googleMaps: state.config.googleMaps || {}
       });
       if(feedback) feedback.textContent = "PDF を保存しました（" + state.estimateNumber + "）";
       refreshResultSection(result);

@@ -5,6 +5,8 @@
     marginMm: 8
   };
 
+  const STATIC_MAP_BASE_URL = "https://maps.googleapis.com/maps/api/staticmap";
+
   function mmToPx(mm){
     return mm * 96 / 25.4;
   }
@@ -37,6 +39,67 @@
       .replaceAll('"', "&quot;");
   }
 
+  function decodePolyline(encoded){
+    const poly = String(encoded || "");
+    if(!poly) return [];
+    let index = 0;
+    const len = poly.length;
+    let lat = 0;
+    let lng = 0;
+    const points = [];
+
+    while(index < len){
+      let b;
+      let shift = 0;
+      let result = 0;
+      do{
+        b = poly.charCodeAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      }while(b >= 0x20 && index < len);
+      const dlat = (result & 1) ? ~(result >> 1) : (result >> 1);
+      lat += dlat;
+
+      shift = 0;
+      result = 0;
+      do{
+        b = poly.charCodeAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      }while(b >= 0x20 && index < len);
+      const dlng = (result & 1) ? ~(result >> 1) : (result >> 1);
+      lng += dlng;
+
+      points.push({ lat: lat / 1e5, lng: lng / 1e5 });
+    }
+    return points;
+  }
+
+  function getRoutePlanPrimaryRoute(routePlan){
+    if(!routePlan) return null;
+    if(Array.isArray(routePlan.routes) && routePlan.routes.length){
+      const selectedId = String(routePlan.selectedRouteId || "");
+      const selected = routePlan.routes.find(function(route){
+        return String(route?.routeId || "") === selectedId;
+      });
+      return selected || routePlan.routes[0];
+    }
+    return {
+      encodedPolyline: String(routePlan.encodedPolyline || ""),
+      distanceMeters: Number(routePlan.distanceMeters) || 0,
+      durationSeconds: Number(routePlan.durationSeconds) || 0
+    };
+  }
+
+  function getRouteEncodedPolyline(routePlan){
+    const primaryRoute = getRoutePlanPrimaryRoute(routePlan);
+    return String(primaryRoute?.encodedPolyline || routePlan?.encodedPolyline || "");
+  }
+
+  function hasRouteMapData(data){
+    return Boolean(data?.routeMapDataUrl) || Boolean(getRouteEncodedPolyline(data?.routePlan));
+  }
+
   function getDefaultLayout(){
     return {
       baseFont: 11,
@@ -63,15 +126,17 @@
       totalTopGap: 8,
       resultNotesGap: 4,
       footerGap: 4,
-      footerQrSize: 46,
-      qrRowGap: 24,
+      footerQrSize: 44,
+      qrRowGap: 20,
       qrLabelGap: 3,
       titleGap: 4,
       headingGap: 3,
-      footerTopGap: 10,
+      footerTopGap: 8,
       pagePadTop: 2,
       pagePadBottom: 0,
-      fillPage: false
+      routeMapHeight: 132,
+      routeMapTitleGap: 4,
+      routeMapBottomGap: 6
     };
   }
 
@@ -97,21 +162,22 @@
     const usageCount = (data.usageSummary || []).length;
     const hasNotes = Boolean(String(data.resultNotes || "").trim());
     const hasFooter = !data.pdfFooter || data.pdfFooter.enabled !== false;
+    const hasMap = hasRouteMapData(data);
 
     next.breakdownTableWidth = 100;
 
     if(breakdownCount <= 3){
-      next.breakdownFont = 12.5;
-      next.breakdownCellPadV = 7;
-      next.breakdownLineHeight = 1.5;
-      next.sectionGap = 7;
-      next.totalTopGap = 10;
-      next.totalFont = 27;
+      next.breakdownFont = 12;
+      next.breakdownCellPadV = 6;
+      next.breakdownLineHeight = 1.45;
+      next.sectionGap = 6;
+      next.totalTopGap = 8;
+      next.totalFont = 26;
     }else if(breakdownCount <= 5){
       next.breakdownFont = 11.5;
       next.breakdownCellPadV = 5;
       next.breakdownLineHeight = 1.42;
-      next.totalFont = 26;
+      next.totalFont = 25;
     }else if(breakdownCount <= 7){
       next.breakdownFont = 10.5;
       next.breakdownCellPadV = 3;
@@ -126,7 +192,8 @@
       next.baseFont = 10;
       next.sectionFont = 12.5;
       next.totalFont = 22;
-      next.footerQrSize = 40;
+      next.footerQrSize = 38;
+      next.routeMapHeight = 110;
     }
 
     if(usageCount >= 7){
@@ -139,10 +206,15 @@
       next.resultNotesLineHeight = 1.35;
     }
 
-    if(hasFooter && breakdownCount <= 4 && usageCount <= 6){
-      next.footerQrSize = 48;
-      next.footerBusinessFont = 14;
-      next.fillPage = true;
+    if(hasMap){
+      next.routeMapHeight = breakdownCount >= 6 ? 108 : 128;
+      next.sectionGap = Math.max(4, next.sectionGap - 1);
+      next.footerTopGap = Math.max(6, next.footerTopGap - 2);
+    }
+
+    if(hasFooter && hasMap && breakdownCount >= 5){
+      next.footerQrSize = 40;
+      next.routeMapHeight = 104;
     }
 
     return next;
@@ -151,33 +223,19 @@
   function scaleLayout(layout, factor){
     const next = {};
     Object.keys(layout).forEach(function(key){
-      if(key === "fillPage"){
-        next[key] = layout[key];
-        return;
-      }
       let min = 6;
       if(key === "breakdownLabelPadRight"){
         min = 6;
       }else if(key === "breakdownTableWidth"){
         min = 88;
       }else if(key === "footerQrSize"){
-        min = 36;
+        min = 32;
+      }else if(key === "routeMapHeight"){
+        min = 72;
       }else if(key === "breakdownFont" || key === "baseFont"){
         min = 9;
       }
       next[key] = Math.max(min, Math.round(layout[key] * factor * 10) / 10);
-    });
-    return next;
-  }
-
-  function expandLayout(layout, factor){
-    const next = {};
-    Object.keys(layout).forEach(function(key){
-      if(key === "fillPage"){
-        next[key] = layout[key];
-        return;
-      }
-      next[key] = Math.round(layout[key] * factor * 10) / 10;
     });
     return next;
   }
@@ -280,8 +338,135 @@
     );
   }
 
+  function buildRouteMapHtml(routeMapDataUrl, layout){
+    if(!routeMapDataUrl){
+      return "";
+    }
+    return (
+      "<div class=\"estimate-pdf-route-map\" style=\"margin:0 0 " + layout.routeMapBottomGap + "px;\">" +
+        "<div style=\"margin:0 0 " + layout.routeMapTitleGap + "px;font-size:" + Math.max(11, layout.sectionFont - 1) + "px;" +
+        "font-weight:700;color:#9a6b16;line-height:1.22;\">走行予定ルート</div>" +
+        "<img src=\"" + routeMapDataUrl + "\" alt=\"走行予定ルート地図\" " +
+        "style=\"display:block;width:100%;height:auto;max-height:" + layout.routeMapHeight + "px;object-fit:contain;" +
+        "object-position:left bottom;border-radius:8px;background:#f5f5f5;\">" +
+      "</div>"
+    );
+  }
+
   function emptyQrDataUrls(){
     return { homepage: "", line: "" };
+  }
+
+  function buildStaticMapUrl(options){
+    const apiKey = String(options?.apiKey || "").trim();
+    const encodedPolyline = String(options?.encodedPolyline || "").trim();
+    const startPoint = options?.startPoint;
+    const endPoint = options?.endPoint;
+    const widthPx = Math.min(640, Math.max(320, Math.round(Number(options?.widthPx) || CONTENT_WIDTH_PX)));
+    const heightPx = Math.round(Number(options?.heightPx) || layoutRouteMapHeight(widthPx));
+
+    if(!apiKey || !encodedPolyline || !startPoint || !endPoint){
+      return "";
+    }
+
+    const params = [
+      "size=" + widthPx + "x" + heightPx,
+      "scale=2",
+      "maptype=roadmap",
+      "language=" + encodeURIComponent(options?.language || "ja"),
+      "region=" + encodeURIComponent(options?.region || "JP"),
+      "path=" + encodeURIComponent("color:0xE87F00FF|weight:5|enc:" + encodedPolyline),
+      "markers=" + encodeURIComponent("color:0x2E7D32|" + startPoint.lat + "," + startPoint.lng),
+      "markers=" + encodeURIComponent("color:0xC62828|" + endPoint.lat + "," + endPoint.lng),
+      "key=" + encodeURIComponent(apiKey)
+    ];
+    return STATIC_MAP_BASE_URL + "?" + params.join("&");
+  }
+
+  function layoutRouteMapHeight(widthPx){
+    return Math.max(96, Math.round(widthPx * 0.34));
+  }
+
+  function loadImageAsDataUrl(url){
+    return new Promise(function(resolve, reject){
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = function(){
+        const canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext("2d");
+        if(!ctx){
+          reject(new Error("地図画像の変換に失敗しました。"));
+          return;
+        }
+        ctx.drawImage(img, 0, 0);
+        try{
+          resolve(canvas.toDataURL("image/png"));
+        }catch(error){
+          reject(error);
+        }
+      };
+      img.onerror = function(){
+        reject(new Error("地図画像の読み込みに失敗しました。"));
+      };
+      img.src = url;
+    });
+  }
+
+  function canLoadImageUrl(url){
+    return new Promise(function(resolve){
+      const img = new Image();
+      img.onload = function(){
+        resolve(img.naturalWidth >= 200 && img.naturalHeight >= 80);
+      };
+      img.onerror = function(){ resolve(false); };
+      img.src = url;
+    });
+  }
+
+  async function resolveRouteMapDataUrl(routePlan, googleMaps, layout){
+    const mapsConfig = googleMaps || {};
+    if(mapsConfig.enabled === false){
+      return "";
+    }
+    const apiKey = String(mapsConfig.apiKey || "").trim();
+    const encodedPolyline = getRouteEncodedPolyline(routePlan);
+    if(!routePlan || !apiKey || !encodedPolyline){
+      return "";
+    }
+
+    const path = decodePolyline(encodedPolyline);
+    if(path.length < 2){
+      return "";
+    }
+
+    const mapHeight = layout ? layout.routeMapHeight : 132;
+    const staticMapUrl = buildStaticMapUrl({
+      apiKey: apiKey,
+      encodedPolyline: encodedPolyline,
+      startPoint: path[0],
+      endPoint: path[path.length - 1],
+      widthPx: CONTENT_WIDTH_PX,
+      heightPx: mapHeight,
+      language: mapsConfig.language || "ja",
+      region: mapsConfig.region || "JP"
+    });
+    if(!staticMapUrl){
+      return "";
+    }
+
+    try{
+      const dataUrl = await loadImageAsDataUrl(staticMapUrl);
+      if(dataUrl){
+        return dataUrl;
+      }
+    }catch(error){
+      console.warn("[EstimatePdf] route map data URL conversion failed", error);
+    }
+
+    const canLoad = await canLoadImageUrl(staticMapUrl);
+    return canLoad ? staticMapUrl : "";
   }
 
   function buildHiddenCaptureContainerStyle(){
@@ -305,37 +490,6 @@
       element.clientHeight || 0,
       element.getBoundingClientRect().height || 0
     );
-  }
-
-  function resolveFinalContentHeight(element, measuredContentHeight){
-    const scrollHeight = element ? element.scrollHeight : 0;
-    const offsetHeight = element ? element.offsetHeight : 0;
-    const clientHeight = element ? element.clientHeight : 0;
-    const rectHeight = element ? element.getBoundingClientRect().height : 0;
-    let finalContentHeight = Number(measuredContentHeight) > 0
-      ? Number(measuredContentHeight)
-      : readElementContentHeight(element);
-
-    if(finalContentHeight <= 0){
-      finalContentHeight = readElementContentHeight(element);
-    }
-    if(finalContentHeight > 0){
-      finalContentHeight = Math.min(finalContentHeight, CONTENT_HEIGHT_PX);
-    }
-    if(finalContentHeight <= 0){
-      finalContentHeight = CONTENT_HEIGHT_PX;
-    }
-
-    console.log("PDF_DEBUG_HEIGHT", {
-      scrollHeight: scrollHeight,
-      offsetHeight: offsetHeight,
-      clientHeight: clientHeight,
-      rectHeight: rectHeight,
-      measuredContentHeight: measuredContentHeight,
-      finalContentHeight: finalContentHeight
-    });
-
-    return finalContentHeight;
   }
 
   function buildPdfElement(data, layout, qrDataUrls){
@@ -432,6 +586,7 @@
       : "";
 
     const footerHtml = buildPdfFooterHtml(data.pdfFooter, layout, qrDataUrls);
+    const routeMapHtml = buildRouteMapHtml(data.routeMapDataUrl, layout);
 
     const bodyFont = layout.baseFont + "px";
     const breakdownFont = layout.breakdownFont + "px";
@@ -449,9 +604,8 @@
       "</div>" +
       footerRule(layout);
 
-    const pageShellStyle = layout.fillPage
-      ? "box-sizing:border-box;display:flex;flex-direction:column;min-height:" + CONTENT_HEIGHT_PX + "px;width:100%;padding-top:" + layout.pagePadTop + "px;padding-bottom:" + layout.pagePadBottom + "px;"
-      : "box-sizing:border-box;width:100%;padding-top:" + layout.pagePadTop + "px;padding-bottom:" + layout.pagePadBottom + "px;";
+    const pageShellStyle =
+      "box-sizing:border-box;width:100%;padding-top:" + layout.pagePadTop + "px;padding-bottom:" + layout.pagePadBottom + "px;";
 
     const mainContentHtml =
         "<h1 style=\"margin:0 0 " + layout.titleGap + "px;font-size:" + layout.titleFont + "px;line-height:1.18;letter-spacing:.02em;\">概算見積書</h1>" +
@@ -462,6 +616,7 @@
           "<tr><td style=\"padding:" + layout.cellPadV + "px 0;color:#666;width:26%;\">見積番号</td><td style=\"padding:" + layout.cellPadV + "px 0;font-weight:700;\">" + escapeHtml(data.estimateNumber || "") + "</td></tr>" +
           "<tr><td style=\"padding:" + layout.cellPadV + "px 0;color:#666;\">見積日時</td><td style=\"padding:" + layout.cellPadV + "px 0;\">" + escapeHtml(formatDateTime(data.createdAt)) + "</td></tr>" +
         "</table>" +
+        routeMapHtml +
         "<h2 style=\"margin:0 0 " + layout.headingGap + "px;font-size:" + layout.sectionFont + "px;color:#9a6b16;line-height:1.22;\">ご利用内容</h2>" +
         "<table style=\"" + tableStyle + "\">" + (usageRows || "<tr><td colspan=\"2\" style=\"padding:" + layout.cellPadV + "px " + layout.cellPadH + "px;\">—</td></tr>") + "</table>" +
         "<div class=\"estimate-pdf-breakdown-section\">" +
@@ -475,12 +630,12 @@
         resultNotesHtml;
 
     const footerBlockHtml = footerHtml
-      ? "<div class=\"estimate-pdf-footer-section\" style=\"" + (layout.fillPage ? "margin-top:auto;padding-top:" : "margin-top:") + layout.footerTopGap + "px;\">" + footerHtml + "</div>"
+      ? "<div class=\"estimate-pdf-footer-section\" style=\"margin-top:" + layout.footerTopGap + "px;\">" + footerHtml + "</div>"
       : "";
 
     el.innerHTML =
       "<div style=\"" + pageShellStyle + "\">" +
-        "<div style=\"flex:0 0 auto;\">" + mainContentHtml + "</div>" +
+        mainContentHtml +
         footerBlockHtml +
       "</div>";
     return el;
@@ -494,7 +649,7 @@
     let layout = tuneLayoutForContent(data, getDefaultLayout());
     let contentHeight = 0;
     try{
-      for(let i = 0; i < 24; i++){
+      for(let i = 0; i < 28; i++){
         const probe = buildPdfElement(data, layout, qrDataUrls);
         container.appendChild(probe);
         contentHeight = readElementContentHeight(probe);
@@ -503,22 +658,6 @@
           break;
         }
         layout = scaleLayout(layout, 0.94);
-      }
-
-      if(contentHeight > 0 && contentHeight <= CONTENT_HEIGHT_PX * 0.78 && layout.fillPage){
-        for(let j = 0; j < 10; j++){
-          const expanded = expandLayout(layout, 1.03);
-          const probe = buildPdfElement(data, expanded, qrDataUrls);
-          container.appendChild(probe);
-          const expandedHeight = readElementContentHeight(probe);
-          container.removeChild(probe);
-          if(expandedHeight > 0 && expandedHeight <= CONTENT_HEIGHT_PX){
-            layout = expanded;
-            contentHeight = expandedHeight;
-          }else{
-            break;
-          }
-        }
       }
 
       if(contentHeight <= 0 || contentHeight > CONTENT_HEIGHT_PX){
@@ -569,11 +708,31 @@
     };
   }
 
+  async function preparePdfRenderData(data){
+    let layout = tuneLayoutForContent(data, getDefaultLayout());
+    const qrDataUrls = await resolveQrDataUrls(data.pdfFooter, layout.footerQrSize);
+    let routeMapDataUrl = await resolveRouteMapDataUrl(data.routePlan, data.googleMaps, layout);
+    let enriched = Object.assign({}, data, { routeMapDataUrl: routeMapDataUrl });
+    let measured = measureContentHeight(enriched, qrDataUrls);
+
+    if(routeMapDataUrl && measured.contentHeight > CONTENT_HEIGHT_PX){
+      layout = measured.layout;
+      routeMapDataUrl = await resolveRouteMapDataUrl(data.routePlan, data.googleMaps, layout);
+      enriched = Object.assign({}, data, { routeMapDataUrl: routeMapDataUrl });
+      measured = measureContentHeight(enriched, qrDataUrls);
+    }
+
+    return {
+      data: enriched,
+      layout: measured.layout,
+      contentHeight: measured.contentHeight,
+      qrDataUrls: qrDataUrls
+    };
+  }
+
   async function buildPreviewElement(data){
-    const tuned = tuneLayoutForContent(data, getDefaultLayout());
-    const qrDataUrls = await resolveQrDataUrls(data.pdfFooter, tuned.footerQrSize);
-    const measured = measureContentHeight(data, qrDataUrls);
-    return buildPdfElement(data, measured.layout, qrDataUrls);
+    const prepared = await preparePdfRenderData(data);
+    return buildPdfElement(prepared.data, prepared.layout, prepared.qrDataUrls);
   }
 
   async function savePdf(data){
@@ -581,12 +740,8 @@
       throw new Error("PDF ライブラリが読み込まれていません。");
     }
 
-    console.log("PDF_DEBUG_4 PDF DOM生成");
-    const tuned = tuneLayoutForContent(data, getDefaultLayout());
-    const qrDataUrls = await resolveQrDataUrls(data.pdfFooter, tuned.footerQrSize);
-    const measured = measureContentHeight(data, qrDataUrls);
-    const layout = measured.layout;
-    const element = buildPdfElement(data, layout, qrDataUrls);
+    const prepared = await preparePdfRenderData(data);
+    const element = buildPdfElement(prepared.data, prepared.layout, prepared.qrDataUrls);
     const container = document.createElement("div");
     container.style.cssText = buildHiddenCaptureContainerStyle();
     container.appendChild(element);
@@ -594,25 +749,23 @@
 
     await waitForNextFrame();
 
-    const contentHeight = resolveFinalContentHeight(element, measured.contentHeight);
     const filename = (data.estimateNumber || "estimate") + ".pdf";
     try{
-      console.log("PDF_DEBUG_5 html2canvas開始");
       const worker = html2pdf().set({
         margin: A4.marginMm,
         filename: filename,
-        pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+        pagebreak: { mode: ["css"] },
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: {
           scale: 2,
           useCORS: true,
+          allowTaint: true,
           scrollX: 0,
           scrollY: 0,
           backgroundColor: "#ffffff"
         },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
       }).from(element);
-      console.log("PDF_DEBUG_6 PDF保存開始");
       await worker.save();
     }finally{
       container.remove();
@@ -624,6 +777,8 @@
     buildPreviewElement: buildPreviewElement,
     formatDateTime: formatDateTime,
     CONTENT_HEIGHT_PX: CONTENT_HEIGHT_PX,
-    CONTENT_WIDTH_PX: CONTENT_WIDTH_PX
+    CONTENT_WIDTH_PX: CONTENT_WIDTH_PX,
+    buildStaticMapUrl: buildStaticMapUrl,
+    resolveRouteMapDataUrl: resolveRouteMapDataUrl
   };
 })(typeof window !== "undefined" ? window : globalThis);
