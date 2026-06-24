@@ -1,4 +1,6 @@
 (function(global){
+  const ESTIMATE_CALCULATION_VERSION = "v1";
+
   function visibleItems(list){
     if(!Array.isArray(list)) return [];
     return list
@@ -114,10 +116,35 @@
 
   function getCurrentFareMode(config){
     const mode = String(config?.fareMode || "").trim();
-    if(mode === "time" || mode === "distance" || mode === "distance_time"){
+    if(mode === "time" || mode === "distance" || mode === "distance_time" || mode === "pre_fixed_fare"){
       return mode;
     }
     return "time";
+  }
+
+  function isPreFixedFareMode(config){
+    return getCurrentFareMode(config) === "pre_fixed_fare";
+  }
+
+  function resolveTrafficZone(config, state){
+    const zoneId = String(
+      state?.selectedTrafficZoneId
+      || config?.preFixedFare?.trafficZoneId
+      || ""
+    ).trim();
+    if(!zoneId){
+      return null;
+    }
+    return findItem(config?.trafficZones?.items, zoneId) || null;
+  }
+
+  function applyTrafficZoneCoefficient(baseDistanceFareAmount, coefficient){
+    const base = Math.max(0, Math.round(Number(baseDistanceFareAmount) || 0));
+    const factor = Number(coefficient);
+    if(!(base > 0) || !(factor > 0)){
+      return base;
+    }
+    return Math.round(base * factor);
   }
 
   function pickupFeeComponent(config){
@@ -150,6 +177,21 @@
         { key: "distanceFare", label: "距離運賃", calculator: "distance_pricing_ref", pricingRef: "distancePricing" }
       ],
       distance_time: [
+        pickupFeeComponent(config),
+        { key: "distanceFare", label: "距離運賃", calculator: "distance_pricing_ref", pricingRef: "distancePricing" },
+        {
+          key: "timeAdjustment",
+          label: "予定時間加算（概算）",
+          calculator: "time_block",
+          params: {
+            baseMinutes: 20,
+            baseAmount: 0,
+            perBlockMinutes: 10,
+            perBlockAmount: 300
+          }
+        }
+      ],
+      pre_fixed_fare: [
         pickupFeeComponent(config),
         { key: "distanceFare", label: "距離運賃", calculator: "distance_pricing_ref", pricingRef: "distancePricing" },
         {
@@ -230,7 +272,8 @@
     const labelMap = {
       time: config.resultLabels?.fareModeTime || "時間定額運賃",
       distance: config.resultLabels?.fareModeDistance || "距離定額運賃",
-      distance_time: config.resultLabels?.fareModeDistanceTime || "距離＋予定時間加算（概算）"
+      distance_time: config.resultLabels?.fareModeDistanceTime || "距離＋予定時間加算（概算）",
+      pre_fixed_fare: config.resultLabels?.fareModePreFixed || "事前確定運賃"
     };
     return labelMap[fareMode] || labelMap.time;
   }
@@ -293,13 +336,20 @@
     return "使用時間: 未取得（住所検索で距離を計算すると予定時間が設定されます）";
   }
 
-  function buildFareBasisNotices(fareMode){
+  function buildFareBasisNotices(fareMode, preFixedFareMeta){
     const notices = ["表示は見積時点の運賃設定に基づく計算根拠です。"];
-    if(fareMode === "distance_time"){
+    if(fareMode === "distance_time" || fareMode === "pre_fixed_fare"){
       notices.push("時間加算はルート予定時間に基づく概算です。実走行では認可メーター（低速走行時の時間距離併用）が適用されます。");
       notices.push("待機時間は運賃計算に含まれません。");
     }else{
       notices.push("待機時間・低速走行時間は運賃計算に含まれません。");
+    }
+    if(fareMode === "pre_fixed_fare" && preFixedFareMeta?.trafficZoneCoefficient > 0){
+      notices.push(
+        "距離運賃には交通圏平準化係数（"
+        + preFixedFareMeta.trafficZoneCoefficient
+        + "）を適用しています。介助料・待機料・実費には適用しません。"
+      );
     }
     return notices;
   }
@@ -311,7 +361,7 @@
     const pricing = config.distancePricing;
     const components = getFareComponents(config, fareMode);
     const sections = [];
-    const notices = buildFareBasisNotices(fareMode);
+    const notices = buildFareBasisNotices(fareMode, fixedFareData.preFixedFareMeta);
     const rideMinutes = Number(state?.routeCalcResult?.durationMinutes) || 0;
     let hasTimeBlock = false;
 
@@ -336,10 +386,28 @@
 
       if(calculator === "distance_pricing_ref"){
         const distanceUsage = buildDistanceUsageLines(config, state, distanceMultiplier);
+        const rules = buildDistancePricingRules(pricing);
+        const preFixedMeta = fixedFareData.preFixedFareMeta;
+        if(
+          fareMode === "pre_fixed_fare"
+          && preFixedMeta
+          && preFixedMeta.trafficZoneCoefficient > 0
+          && preFixedMeta.baseDistanceFareAmount > 0
+        ){
+          rules.push(
+            "認可距離制運賃 "
+            + preFixedMeta.baseDistanceFareAmount
+            + "円 × 平準化係数 "
+            + preFixedMeta.trafficZoneCoefficient
+            + " = "
+            + preFixedMeta.adjustedDistanceFareAmount
+            + "円"
+          );
+        }
         sections.push({
           key: key,
-          title: fareMode === "distance_time" ? "距離部分" : "距離定額",
-          rules: buildDistancePricingRules(pricing),
+          title: fareMode === "distance_time" || fareMode === "pre_fixed_fare" ? "距離部分" : "距離定額",
+          rules: rules,
           usage: distanceUsage.usage,
           usageLines: distanceUsage.lines,
           amountLabel: String(component.label || "距離運賃"),
@@ -384,6 +452,10 @@
     const rideMinutes = Number(state?.routeCalcResult?.durationMinutes) || 0;
     const rows = [];
 
+    let baseDistanceFareAmount = 0;
+    let adjustedDistanceFareAmount = 0;
+    let preFixedFareMeta = null;
+
     components.forEach(function(component, index){
       const calculator = String(component?.calculator || "").trim();
       const key = String(component?.key || "component-" + index);
@@ -396,6 +468,20 @@
         const pricingRef = String(component?.pricingRef || "").trim() || "distancePricing";
         const pricing = config?.[pricingRef] || config?.distancePricing;
         amount = calcDistanceFare(state.distanceKm, pricing) * distanceMultiplier;
+        if(isPreFixedFareMode(config)){
+          baseDistanceFareAmount = Math.max(0, Math.round(Number(amount) || 0));
+          const trafficZone = resolveTrafficZone(config, state);
+          const coefficient = trafficZone ? Number(trafficZone.coefficient) : 0;
+          adjustedDistanceFareAmount = applyTrafficZoneCoefficient(baseDistanceFareAmount, coefficient);
+          amount = adjustedDistanceFareAmount;
+          preFixedFareMeta = {
+            baseDistanceFareAmount: baseDistanceFareAmount,
+            adjustedDistanceFareAmount: adjustedDistanceFareAmount,
+            selectedTrafficZoneId: trafficZone?.id || null,
+            selectedTrafficZoneLabel: trafficZone?.label || null,
+            trafficZoneCoefficient: coefficient > 0 ? coefficient : null
+          };
+        }
       }else if(calculator === "time_block"){
         amount = calcTimeBlockFare(rideMinutes, component?.params);
       }
@@ -408,7 +494,8 @@
     return {
       fareMode: fareMode,
       fixedFareBreakdown: rows,
-      fixedFareTotal: rows.reduce(function(sum, row){ return sum + row.amount; }, 0)
+      fixedFareTotal: rows.reduce(function(sum, row){ return sum + row.amount; }, 0),
+      preFixedFareMeta: preFixedFareMeta
     };
   }
 
@@ -448,7 +535,8 @@
     const fareModeLabelMap = {
       time: config.resultLabels?.fareModeTime || "時間定額運賃",
       distance: config.resultLabels?.fareModeDistance || "距離定額運賃",
-      distance_time: config.resultLabels?.fareModeDistanceTime || "距離＋予定時間加算（概算）"
+      distance_time: config.resultLabels?.fareModeDistanceTime || "距離＋予定時間加算（概算）",
+      pre_fixed_fare: config.resultLabels?.fareModePreFixed || "事前確定運賃"
     };
     lines.push({
       label: "運賃方式",
@@ -462,6 +550,58 @@
     }
 
     return lines;
+  }
+
+  function getRoutePlanPrimaryRoute(routePlan){
+    if(!routePlan) return null;
+    if(Array.isArray(routePlan.routes) && routePlan.routes.length){
+      const selectedId = String(routePlan.selectedRouteId || "");
+      const selected = routePlan.routes.find(function(route){
+        return String(route?.routeId || "") === selectedId;
+      });
+      return selected || routePlan.routes[0];
+    }
+    return {
+      distanceMeters: Number(routePlan.distanceMeters) || 0,
+      durationSeconds: Number(routePlan.durationSeconds) || 0
+    };
+  }
+
+  function resolveRouteProvider(state){
+    const provider = String(state?.routePlan?.provider || "").trim();
+    if(provider === "google_routes"){
+      return "google_routes";
+    }
+    if(String(state?.distanceInputMode || "") === "manual" || !state?.routePlan){
+      return "manual_distance";
+    }
+    return provider || "manual_distance";
+  }
+
+  function resolveDistanceMeters(state){
+    const routePlan = state?.routePlan;
+    if(routePlan){
+      const primaryRoute = getRoutePlanPrimaryRoute(routePlan);
+      const meters = Number(primaryRoute?.distanceMeters || routePlan.distanceMeters) || 0;
+      if(meters > 0){
+        return meters;
+      }
+    }
+    const km = Number(state?.distanceKm) || 0;
+    return km > 0 ? Math.round(km * 1000) : 0;
+  }
+
+  function resolveDurationSeconds(state){
+    const routePlan = state?.routePlan;
+    if(routePlan){
+      const primaryRoute = getRoutePlanPrimaryRoute(routePlan);
+      const seconds = Number(primaryRoute?.durationSeconds || routePlan.durationSeconds) || 0;
+      if(seconds > 0){
+        return seconds;
+      }
+    }
+    const minutes = Number(state?.routeCalcResult?.durationMinutes) || 0;
+    return minutes > 0 ? Math.round(minutes * 60) : 0;
   }
 
   function computeEstimate(config, state){
@@ -508,6 +648,9 @@
     distanceFare = distanceFare * distanceMultiplier;
 
     const fixedFareData = computeFixedFareBreakdown(config, state);
+    if(fixedFareData.preFixedFareMeta?.adjustedDistanceFareAmount > 0){
+      distanceFare = fixedFareData.preFixedFareMeta.adjustedDistanceFareAmount;
+    }
     const serviceFees = [
       { key: "wheelchairFee", label: config.resultLabels?.wheelchairFee || "車いす料金", amount: wheelchairFee },
       { key: "assistanceFee", label: config.resultLabels?.assistanceFee || "介助料金", amount: assistanceFee },
@@ -540,6 +683,7 @@
     };
     const total = fixedFareData.fixedFareTotal + serviceTotal;
     const fareBasis = buildFareBasis(config, state, fixedFareData);
+    const preFixedMeta = fixedFareData.preFixedFareMeta;
     const quoteSnapshot = {
       fareMode: fixedFareData.fareMode,
       distancePricing: config.distancePricing ? JSON.parse(JSON.stringify(config.distancePricing)) : null,
@@ -553,10 +697,16 @@
       roadType: String(state.roadType || "general") === "toll" ? "toll" : "general",
       distanceKm: Number(state.distanceKm) || 0,
       selectedRouteId: String(state.routePlan?.selectedRouteId || ""),
-      selectedTrafficZoneId: null,
-      selectedTrafficZoneLabel: null,
-      trafficZoneCoefficient: null,
-      preFixedFareMode: false
+      selectedTrafficZoneId: preFixedMeta?.selectedTrafficZoneId || null,
+      selectedTrafficZoneLabel: preFixedMeta?.selectedTrafficZoneLabel || null,
+      trafficZoneCoefficient: preFixedMeta?.trafficZoneCoefficient ?? null,
+      baseDistanceFareAmount: preFixedMeta?.baseDistanceFareAmount ?? null,
+      adjustedDistanceFareAmount: preFixedMeta?.adjustedDistanceFareAmount ?? null,
+      preFixedFareMode: isPreFixedFareMode(config),
+      routeProvider: resolveRouteProvider(state),
+      distanceMeters: resolveDistanceMeters(state),
+      durationSeconds: resolveDurationSeconds(state),
+      estimateCalculationVersion: ESTIMATE_CALCULATION_VERSION
     };
 
     return {

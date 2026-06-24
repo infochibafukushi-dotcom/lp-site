@@ -36,7 +36,7 @@
     },
     "fareMode": {
       "type": "string",
-      "enum": ["time", "distance", "distance_time"]
+      "enum": ["time", "distance", "distance_time", "pre_fixed_fare"]
     },
     "fareModeOptions": {
       "type": "array",

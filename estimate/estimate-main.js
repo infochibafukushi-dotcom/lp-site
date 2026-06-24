@@ -7,7 +7,6 @@
     stairId: "",
     tripTypeId: "",
     roundTripAddonId: "",
-    roundTripAddonStepComplete: false,
     distanceKm: 0,
     distanceInputText: "",
     distanceInputMode: "address",
@@ -145,13 +144,11 @@
   function syncRoundTripAddon(){
     if(!window.EstimateCalc.isRoundTripSelected(state.config, state)){
       state.roundTripAddonId = "";
-      state.roundTripAddonStepComplete = false;
       return;
     }
     const options = window.EstimateCalc.getRoundTripAddonItems(state.config);
     if(state.roundTripAddonId && !options.some(function(item){ return item.id === state.roundTripAddonId; })){
       state.roundTripAddonId = "";
-      state.roundTripAddonStepComplete = false;
     }
   }
 
@@ -219,7 +216,7 @@
       case "trip":
         return Boolean(state.tripTypeId);
       case "addon":
-        return state.roundTripAddonStepComplete;
+        return Boolean(state.roundTripAddonId);
       case "distance":
         return Number(state.distanceKm) > 0;
       default:
@@ -258,9 +255,6 @@
         return item?.label || "";
       }
       case "addon": {
-        if(!state.roundTripAddonId){
-          return state.roundTripAddonStepComplete ? "なし" : "";
-        }
         const item = window.EstimateCalc.findItem(
           state.config.categories?.roundTripAddon?.items,
           state.roundTripAddonId
@@ -296,7 +290,6 @@
           break;
         case "addon":
           state.roundTripAddonId = "";
-          state.roundTripAddonStepComplete = false;
           break;
         case "distance":
           state.distanceKm = 0;
@@ -333,11 +326,9 @@
       case "trip":
         state.tripTypeId = "";
         state.roundTripAddonId = "";
-        state.roundTripAddonStepComplete = false;
         break;
       case "addon":
         state.roundTripAddonId = "";
-        state.roundTripAddonStepComplete = false;
         break;
       case "distance":
         state.distanceKm = 0;
@@ -379,7 +370,6 @@
     state.stairId = "";
     state.tripTypeId = "";
     state.roundTripAddonId = "";
-    state.roundTripAddonStepComplete = false;
     state.distanceKm = 0;
     state.distanceInputText = "";
     state.distanceInputMode = "address";
@@ -482,18 +472,6 @@
 
   function renderAddonStep(stepNum, step){
     const title = step.title;
-    const noneItem = {
-      id: "__none__",
-      label: "なし",
-      description: "待機・付き添いは不要です。",
-      amount: 0
-    };
-    const noneChecked = state.roundTripAddonStepComplete && !state.roundTripAddonId;
-    const noneChoice = window.EstimateHelp.renderChoiceCard(noneItem, {
-      name: step.choiceName,
-      checked: noneChecked,
-      showAmount: false
-    });
     const addonItems = window.EstimateCalc.getRoundTripAddonItems(state.config);
     const addonChoices = addonItems.map(function(item){
       return window.EstimateHelp.renderChoiceCard(item, {
@@ -511,8 +489,8 @@
             <h2 class="estimate-step-title">${escapeHtml(title)}</h2>
           </div>
         </div>
-        <div class="estimate-choice-group">${noneChoice}${addonChoices}</div>
-        <p class="estimate-step-note">いずれかを選択してください。</p>
+        <div class="estimate-choice-group">${addonChoices}</div>
+        <p class="estimate-step-note">待機または付き添いのいずれかを選択してください。</p>
       </section>
     `;
   }
@@ -1083,6 +1061,133 @@
     return "";
   }
 
+  function formatCalcBasisYen(amount){
+    const n = Number(amount) || 0;
+    return n.toLocaleString("ja-JP") + "円";
+  }
+
+  function getRouteProviderLabel(provider){
+    if(provider === "google_routes"){
+      return "Google Maps Platform Routes API";
+    }
+    if(provider === "manual_distance"){
+      return "距離手入力";
+    }
+    return String(provider || "-");
+  }
+
+  function getTollRoadUsageLabel(roadType){
+    return String(roadType || "") === "toll" ? "利用する" : "利用しない";
+  }
+
+  function renderCalcBasisRow(label, value){
+    return (
+      "<div class=\"estimate-calc-basis-row\">" +
+      "<dt>" + escapeHtml(label) + "</dt>" +
+      "<dd>" + escapeHtml(value) + "</dd>" +
+      "</div>"
+    );
+  }
+
+  function renderCalcBasisSection(title, rows){
+    const rowsHtml = rows.map(function(row){
+      return renderCalcBasisRow(row[0], row[1]);
+    }).join("");
+    return (
+      "<section class=\"estimate-calc-basis-section\">" +
+      "<h4 class=\"estimate-calc-basis-section-title\">" + escapeHtml(title) + "</h4>" +
+      "<dl class=\"estimate-calc-basis-list\">" + rowsHtml + "</dl>" +
+      "</section>"
+    );
+  }
+
+  function renderCalculationBasis(result){
+    const snapshot = result.quoteSnapshot || {};
+    const breakdown = result.breakdown || {};
+
+    const distanceMeters = Number(snapshot.distanceMeters) || 0;
+    const distanceLabel = distanceMeters > 0
+      ? formatRouteDistanceMeters(distanceMeters)
+      : (formatRouteDistance(snapshot.distanceKm || state.distanceKm) || "-");
+
+    const durationSeconds = Number(snapshot.durationSeconds) || 0;
+    const durationLabel = durationSeconds > 0
+      ? formatRouteDurationSeconds(durationSeconds)
+      : (formatRouteDuration(state.routeCalcResult?.durationMinutes || 0) || "-");
+
+    const routeTypeLabel = snapshot.routeProvider === "google_routes" ? "最短時間ルート" : "-";
+    const routeRows = [
+      ["推計走行距離", distanceLabel],
+      ["推計所要時間", durationLabel],
+      ["距離算出システム", getRouteProviderLabel(snapshot.routeProvider)],
+      ["ルート種別", routeTypeLabel],
+      ["有料道路", getTollRoadUsageLabel(snapshot.roadType || state.roadType)]
+    ];
+
+    const fareRows = [];
+    if(snapshot.preFixedFareMode){
+      if(snapshot.baseDistanceFareAmount != null){
+        fareRows.push(["認可距離制運賃", formatCalcBasisYen(snapshot.baseDistanceFareAmount)]);
+      }
+      if(snapshot.selectedTrafficZoneLabel){
+        fareRows.push(["適用交通圏", snapshot.selectedTrafficZoneLabel]);
+      }
+      if(snapshot.trafficZoneCoefficient != null){
+        fareRows.push(["平準化係数", String(snapshot.trafficZoneCoefficient)]);
+      }
+      if(snapshot.adjustedDistanceFareAmount != null){
+        fareRows.push(["事前確定運賃", formatCalcBasisYen(snapshot.adjustedDistanceFareAmount)]);
+      }
+      (snapshot.fixedFareBreakdown || []).forEach(function(row){
+        if(row.key === "pickupFee"){
+          fareRows.push([row.label || "迎車料金", formatCalcBasisYen(row.amount)]);
+        }else if(row.key === "timeAdjustment"){
+          fareRows.push([row.label || "予定時間加算", formatCalcBasisYen(row.amount)]);
+        }
+      });
+    }else{
+      (snapshot.fixedFareBreakdown || []).forEach(function(row){
+        fareRows.push([row.label || row.key || "", formatCalcBasisYen(row.amount)]);
+      });
+    }
+
+    const serviceRows = [
+      ["乗降介助", formatCalcBasisYen(breakdown.assistanceFee)],
+      ["階段介助", formatCalcBasisYen(breakdown.stairFee)],
+      [
+        "待機・付き添い",
+        formatCalcBasisYen((Number(breakdown.waitingFee) || 0) + (Number(breakdown.escortFee) || 0))
+      ]
+    ];
+
+    const basisNotes = [
+      "※本見積は出発地・目的地から算出した推計ルートに基づいています。",
+      "※道路状況、交通規制、利用者様のご要望等により実際の運行内容が変更となる場合があります。",
+      "※有料道路料金、駐車料金等の実費は別途ご負担となる場合があります。",
+      "※事前確定運賃は認可運賃および適用係数に基づき算出しています。"
+    ];
+
+    return (
+      "<div class=\"estimate-calc-basis\">" +
+      "<button type=\"button\" class=\"estimate-calc-basis-toggle\" id=\"estimateCalcBasisToggle\" aria-expanded=\"false\" aria-controls=\"estimateCalcBasisPanel\">" +
+      "料金算出根拠を見る" +
+      "</button>" +
+      "<div class=\"estimate-calc-basis-panel\" id=\"estimateCalcBasisPanel\" hidden>" +
+      "<h4 class=\"estimate-calc-basis-title\">料金算出根拠</h4>" +
+      renderCalcBasisSection("ルート算出情報", routeRows) +
+      renderCalcBasisSection("運賃計算情報", fareRows) +
+      renderCalcBasisSection("サービス料金", serviceRows) +
+      renderCalcBasisSection("合計", [["見積金額", formatCalcBasisYen(result.total)]]) +
+      "<div class=\"estimate-calc-basis-notes\">" +
+      basisNotes.map(function(note){
+        return "<p>" + escapeHtml(note) + "</p>";
+      }).join("") +
+      "</div>" +
+      "</div>" +
+      "</div>"
+    );
+  }
+
   function renderFareBasis(result){
     const basis = result.quoteSnapshot?.fareBasis;
     if(!basis || !Array.isArray(basis.sections) || !basis.sections.length){
@@ -1244,6 +1349,7 @@
           <div class="estimate-total-rule" aria-hidden="true"></div>
           <div class="estimate-result-notes">${escapeHtml(getResultNotes())}</div>
         </div>
+        ${renderCalculationBasis(result)}
         <button type="button" class="estimate-pdf-btn" id="estimatePdfBtn">見積書PDFを保存</button>
         <div class="estimate-pdf-feedback" id="estimatePdfFeedback" aria-live="polite"></div>
         <button type="button" class="estimate-copy-url-btn" id="estimateCopyUrlBtn">見積URLをコピー</button>
@@ -1347,6 +1453,16 @@
         if(pdfBtn.disabled) return;
         console.log("PDF_DEBUG_2 ボタンクリック");
         saveEstimatePdf();
+        return;
+      }
+      const basisToggle = event.target.closest("#estimateCalcBasisToggle");
+      if(basisToggle){
+        event.preventDefault();
+        const panel = document.getElementById("estimateCalcBasisPanel");
+        const expanded = basisToggle.getAttribute("aria-expanded") === "true";
+        basisToggle.setAttribute("aria-expanded", expanded ? "false" : "true");
+        basisToggle.textContent = expanded ? "料金算出根拠を見る" : "料金算出根拠を閉じる";
+        if(panel) panel.hidden = expanded;
       }
     });
   }
@@ -1499,7 +1615,6 @@
     bindChoiceGroup("tripChoice", function(value){
       state.tripTypeId = value;
       state.roundTripAddonId = "";
-      state.roundTripAddonStepComplete = false;
       clearStepsAfter("trip");
       syncRoundTripAddon();
       state.lastActiveStepId = "";
@@ -1507,12 +1622,7 @@
     });
 
     bindChoiceGroup("addonChoice", function(value){
-      if(value === "__none__"){
-        state.roundTripAddonId = "";
-      }else{
-        state.roundTripAddonId = value;
-      }
-      state.roundTripAddonStepComplete = true;
+      state.roundTripAddonId = value;
       clearStepsAfter("addon");
       state.lastActiveStepId = "";
       renderPage();
@@ -1604,9 +1714,6 @@
 
       syncAssistanceForMobility();
       syncRoundTripAddon();
-      if(state.roundTripAddonId){
-        state.roundTripAddonStepComplete = true;
-      }
 
       renderPage();
     }catch(error){

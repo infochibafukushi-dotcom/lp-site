@@ -72,6 +72,9 @@
     if(defaults.fareComponents){
       data.fareComponents = Object.assign({}, defaults.fareComponents, data.fareComponents || {});
     }
+    if(defaults.preFixedFare){
+      data.preFixedFare = Object.assign({}, defaults.preFixedFare, data.preFixedFare || {});
+    }
     if(defaults.trafficZones){
       const defaultItems = Array.isArray(defaults.trafficZones.items) ? defaults.trafficZones.items : [];
       const currentItems = Array.isArray(data.trafficZones?.items) ? data.trafficZones.items : [];
@@ -85,7 +88,7 @@
         })
       };
     }
-    const modes = ["time", "distance", "distance_time"];
+    const modes = ["time", "distance", "distance_time", "pre_fixed_fare"];
     const modeExists = modes.includes(String(data.fareMode || ""));
     data.fareMode = modeExists ? String(data.fareMode) : String(defaults.fareMode || "time");
     return data;

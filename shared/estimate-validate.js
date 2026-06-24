@@ -87,8 +87,8 @@
       pushError(errors, 'distancePricing.mode must be "patternA" or "patternB"');
     }
 
-    if(data.fareMode != null && !["time", "distance", "distance_time"].includes(data.fareMode)){
-      pushError(errors, 'fareMode must be "time", "distance", or "distance_time"');
+    if(data.fareMode != null && !["time", "distance", "distance_time", "pre_fixed_fare"].includes(data.fareMode)){
+      pushError(errors, 'fareMode must be "time", "distance", "distance_time", or "pre_fixed_fare"');
     }
     if(data.fareModeOptions != null && !Array.isArray(data.fareModeOptions)){
       pushError(errors, "fareModeOptions must be an array");

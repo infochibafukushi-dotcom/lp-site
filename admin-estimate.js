@@ -179,7 +179,8 @@
   const FARE_MODE_DESCRIPTIONS = {
     distance: "出発地・目的地間の距離を基に算出します",
     time: "予定所要時間を基に算出します",
-    distance_time: "距離運賃に加え、ルート予定時間に基づく概算加算を行います（認可メーターの低速走行加算とは異なります）"
+    distance_time: "距離運賃に加え、ルート予定時間に基づく概算加算を行います（認可メーターの低速走行加算とは異なります）",
+    pre_fixed_fare: "認可距離制運賃に交通圏平準化係数を適用します。介助料・待機料・実費には係数を適用しません"
   };
 
   function findTimeBlockComponent(components, key){
@@ -220,6 +221,28 @@
         <div class="row"><label>初乗運賃（円）</label><input type="number" min="0" step="1" id="estimateInitialFare" value="${escapeAttr(patternA.initialFare ?? 0)}"></div>
         <div class="row"><label>加算距離（km）</label><input type="number" min="0" step="0.001" id="estimateIncrementDistanceKm" value="${escapeAttr(patternA.incrementDistanceKm ?? 0)}"></div>
         <div class="row"><label>加算運賃（円）</label><input type="number" min="0" step="1" id="estimateIncrementFare" value="${escapeAttr(patternA.incrementFare ?? 0)}"></div>
+      </div>
+    `;
+  }
+
+  function renderPreFixedFareSettings(){
+    const zones = Array.isArray(estimateDraft.trafficZones?.items)
+      ? estimateDraft.trafficZones.items.slice().sort(function(a, b){ return (a.order || 0) - (b.order || 0); })
+      : [];
+    const selectedId = String(estimateDraft.preFixedFare?.trafficZoneId || "");
+    const options = zones.map(function(zone){
+      const id = String(zone.id || "");
+      return `<option value="${escapeAttr(id)}" ${id === selectedId ? "selected" : ""}>${escapeHtml(zone.label || id)}</option>`;
+    }).join("");
+    return `
+      <h3>事前確定運賃</h3>
+      <p class="note">交通圏自動判定は未実装です。事前確定運賃モード時に適用する既定交通圏を選択してください。</p>
+      <div class="row">
+        <label for="estimatePreFixedTrafficZoneId">適用交通圏</label>
+        <select id="estimatePreFixedTrafficZoneId">
+          <option value="">未設定</option>
+          ${options}
+        </select>
       </div>
     `;
   }
@@ -280,7 +303,7 @@
   function ensureFareComponents(draft){
     const defaults = window.EstimateDefaults?.createDefaultEstimateConfig?.()?.fareComponents || {};
     draft.fareComponents = draft.fareComponents || {};
-    ["time", "distance", "distance_time"].forEach(function(mode){
+    ["time", "distance", "distance_time", "pre_fixed_fare"].forEach(function(mode){
       if(!Array.isArray(draft.fareComponents[mode]) || !draft.fareComponents[mode].length){
         draft.fareComponents[mode] = deepClone(defaults[mode] || []);
       }
@@ -354,8 +377,9 @@
       ${renderFeeEditor("迎車料金", estimateDraft.basicFees?.pickupFee, "basicFees.pickupFee")}
 
       <h3>交通圏係数</h3>
-      <p class="note">交通圏係数は将来の事前確定運賃対応用です。現在の見積計算には反映されません。</p>
+      <p class="note">運輸局公示の平準化係数です。事前確定運賃モードの距離運賃にのみ適用されます。</p>
       ${renderTrafficZoneItems()}
+      ${renderPreFixedFareSettings()}
 
       <h3>運賃方式</h3>
       <div class="row">
@@ -364,12 +388,13 @@
           <option value="distance" ${fareMode === "distance" ? "selected" : ""}>距離定額</option>
           <option value="time" ${fareMode === "time" ? "selected" : ""}>時間定額</option>
           <option value="distance_time" ${fareMode === "distance_time" ? "selected" : ""}>距離＋予定時間加算（概算）</option>
+          <option value="pre_fixed_fare" ${fareMode === "pre_fixed_fare" ? "selected" : ""}>事前確定運賃</option>
         </select>
       </div>
       <p class="note" id="estimateFareModeDescription">${escapeHtml(fareModeDescription)}</p>
 
       <div id="estimateFareDistancePanel">
-        <h4 id="estimateFareDistanceHeading">${fareMode === "distance_time" ? "距離部分" : "距離定額設定"}</h4>
+        <h4 id="estimateFareDistanceHeading">${fareMode === "distance_time" || fareMode === "pre_fixed_fare" ? "距離部分" : "距離定額設定"}</h4>
         ${renderDistancePatternAFields()}
       </div>
 
@@ -430,7 +455,7 @@
     }
     const distanceHeading = document.querySelector("#estimateFareDistanceHeading");
     if(distanceHeading){
-      distanceHeading.textContent = mode === "distance_time" ? "距離部分" : "距離定額設定";
+      distanceHeading.textContent = mode === "distance_time" || mode === "pre_fixed_fare" ? "距離部分" : "距離定額設定";
     }
   }
 
@@ -439,9 +464,9 @@
     const distancePanel = document.getElementById("estimateFareDistancePanel");
     const timeSection = document.getElementById("estimateFareModeTimeSection");
     const distanceTimeSection = document.getElementById("estimateFareDtTimeSection");
-    if(distancePanel) distancePanel.style.display = (mode === "distance" || mode === "distance_time") ? "block" : "none";
+    if(distancePanel) distancePanel.style.display = (mode === "distance" || mode === "distance_time" || mode === "pre_fixed_fare") ? "block" : "none";
     if(timeSection) timeSection.style.display = mode === "time" ? "block" : "none";
-    if(distanceTimeSection) distanceTimeSection.style.display = mode === "distance_time" ? "block" : "none";
+    if(distanceTimeSection) distanceTimeSection.style.display = (mode === "distance_time" || mode === "pre_fixed_fare") ? "block" : "none";
     updateFareModeDescription(mode);
   }
 
@@ -507,11 +532,17 @@
     draft.distancePricing.patternB = deepClone(estimateDraft.distancePricing?.patternB || { perKmRate: 0 });
 
     const selectedFareMode = document.getElementById("estimateFareMode")?.value || "time";
-    draft.fareMode = ["time", "distance", "distance_time"].includes(selectedFareMode) ? selectedFareMode : "time";
+    draft.fareMode = ["time", "distance", "distance_time", "pre_fixed_fare"].includes(selectedFareMode) ? selectedFareMode : "time";
 
     ensureFareComponents(draft);
     applyTimeBlockParams(draft.fareComponents.time, "timeBaseFare", collectTimeBlockParams("estimateTime"));
     applyTimeBlockParams(draft.fareComponents.distance_time, "timeAdjustment", collectTimeBlockParams("estimateDtTime"));
+    applyTimeBlockParams(draft.fareComponents.pre_fixed_fare, "timeAdjustment", collectTimeBlockParams("estimateDtTime"));
+
+    draft.preFixedFare = draft.preFixedFare || {};
+    draft.preFixedFare.trafficZoneId = String(
+      document.getElementById("estimatePreFixedTrafficZoneId")?.value || ""
+    ).trim();
 
     draft.googleMaps = {
       enabled: document.getElementById("estimateGoogleMapsEnabled")?.checked !== false,
@@ -684,10 +715,13 @@
     if(defaults.fareComponents){
       draft.fareComponents = Object.assign({}, deepClone(defaults.fareComponents), draft.fareComponents || {});
     }
-    if(!["time", "distance", "distance_time"].includes(String(draft.fareMode || ""))){
+    if(!["time", "distance", "distance_time", "pre_fixed_fare"].includes(String(draft.fareMode || ""))){
       draft.fareMode = String(defaults.fareMode || "time");
     }
     ensureTrafficZones(draft);
+    if(defaults.preFixedFare){
+      draft.preFixedFare = Object.assign({}, defaults.preFixedFare, draft.preFixedFare || {});
+    }
     return ensurePdfFooter(draft);
   }
 

@@ -83,11 +83,15 @@
         }
       },
       trafficZones: createDefaultTrafficZones(),
+      preFixedFare: {
+        trafficZoneId: "keiyo"
+      },
       fareMode: "time",
       fareModeOptions: [
         { id: "time", label: "時間制運賃", enabled: true },
         { id: "distance", label: "距離制運賃", enabled: true },
-        { id: "distance_time", label: "距離＋予定時間加算（概算）", enabled: true }
+        { id: "distance_time", label: "距離＋予定時間加算（概算）", enabled: true },
+        { id: "pre_fixed_fare", label: "事前確定運賃", enabled: true }
       ],
       fareComponents: {
         time: [
@@ -109,6 +113,21 @@
           { key: "distanceFare", label: "距離運賃", calculator: "distance_pricing_ref", pricingRef: "distancePricing" }
         ],
         distance_time: [
+          { key: "pickupFee", label: "迎車料金", calculator: "fixed_fee_ref", feeRef: "pickupFee" },
+          { key: "distanceFare", label: "距離運賃", calculator: "distance_pricing_ref", pricingRef: "distancePricing" },
+          {
+            key: "timeAdjustment",
+            label: "予定時間加算（概算）",
+            calculator: "time_block",
+            params: {
+              baseMinutes: 20,
+              baseAmount: 0,
+              perBlockMinutes: 10,
+              perBlockAmount: 300
+            }
+          }
+        ],
+        pre_fixed_fare: [
           { key: "pickupFee", label: "迎車料金", calculator: "fixed_fee_ref", feeRef: "pickupFee" },
           { key: "distanceFare", label: "距離運賃", calculator: "distance_pricing_ref", pricingRef: "distancePricing" },
           {
@@ -216,6 +235,7 @@
         fareModeTime: "時間定額運賃",
         fareModeDistance: "距離定額運賃",
         fareModeDistanceTime: "距離＋予定時間加算（概算）",
+        fareModePreFixed: "事前確定運賃",
         fareBasisSection: "運賃計算根拠",
         usageSummary: "ご利用内容",
         total: "概算料金",

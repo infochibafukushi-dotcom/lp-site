@@ -571,6 +571,23 @@
     );
   }
 
+  function buildQuoteSnapshotMetaHtml(quoteSnapshot){
+    if(!quoteSnapshot){
+      return "";
+    }
+    let json = "";
+    try{
+      json = JSON.stringify(quoteSnapshot);
+    }catch(error){
+      return "";
+    }
+    return (
+      "<script type=\"application/json\" class=\"estimate-quote-snapshot-meta\" style=\"display:none!important\">" +
+      escapeHtml(json) +
+      "</script>"
+    );
+  }
+
   function buildPdfElement(data, layout, qrDataUrls){
     layout = layout || getDefaultLayout();
     qrDataUrls = qrDataUrls || emptyQrDataUrls();
@@ -716,7 +733,8 @@
       "<div style=\"" + pageShellStyle + "\">" +
         mainContentHtml +
         footerBlockHtml +
-      "</div>";
+      "</div>" +
+      buildQuoteSnapshotMetaHtml(data.quoteSnapshot);
     return el;
   }
 
