@@ -191,9 +191,10 @@
         careServiceSection: "介助・サービス料金",
         expenseSection: "実費・別途費用",
         tollRoadExpense: "有料道路・高速道路通行料金",
-        fareModeTime: "時間制運賃",
-        fareModeDistance: "距離制運賃",
+        fareModeTime: "時間定額運賃",
+        fareModeDistance: "距離定額運賃",
         fareModeDistanceTime: "距離時間併用運賃",
+        fareBasisSection: "運賃計算根拠",
         usageSummary: "ご利用内容",
         total: "概算料金",
         totalEstimateSection: "合計目安"

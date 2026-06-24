@@ -1028,6 +1028,53 @@
     `;
   }
 
+  function renderFareBasis(result){
+    const basis = result.quoteSnapshot?.fareBasis;
+    if(!basis || !Array.isArray(basis.sections) || !basis.sections.length){
+      return "";
+    }
+    const title = state.config.resultLabels?.fareBasisSection || "運賃計算根拠";
+    const sectionsHtml = basis.sections.map(function(section){
+      const rules = Array.isArray(section.rules)
+        ? section.rules.map(function(rule){
+          return `<li>${escapeHtml(rule)}</li>`;
+        }).join("")
+        : "";
+      const usage = section.usage
+        ? `<p class="estimate-fare-basis-usage">${escapeHtml(section.usage)}</p>`
+        : "";
+      const amountLabel = String(section.amountLabel || section.title || "");
+      const amountHtml = amountLabel
+        ? `<p class="estimate-fare-basis-amount"><span>${escapeHtml(amountLabel)}</span><strong>${formatYen(Number(section.amount) || 0)}</strong></p>`
+        : "";
+      return `
+        <div class="estimate-fare-basis-block">
+          <div class="estimate-fare-basis-block-title">${escapeHtml(section.title || "")}</div>
+          ${rules ? `<ul class="estimate-fare-basis-rules">${rules}</ul>` : ""}
+          ${usage}
+          ${amountHtml}
+        </div>
+      `;
+    }).join("");
+    const noticesHtml = Array.isArray(basis.notices) && basis.notices.length
+      ? basis.notices.map(function(notice){
+        return `<p class="estimate-fare-basis-notice">${escapeHtml(notice)}</p>`;
+      }).join("")
+      : "";
+    return `
+      <div class="estimate-fare-basis">
+        <div class="estimate-fare-basis-head">
+          <div class="estimate-fare-basis-title">${escapeHtml(title)}</div>
+          <div class="estimate-fare-basis-mode">${escapeHtml(basis.fareModeLabel || "")}</div>
+        </div>
+        <div class="estimate-fare-basis-blocks">
+          ${sectionsHtml}
+        </div>
+        ${noticesHtml ? `<div class="estimate-fare-basis-notices">${noticesHtml}</div>` : ""}
+      </div>
+    `;
+  }
+
   function renderEstimateNumberBox(){
     if(!state.estimateNumber){
       return "";
@@ -1131,6 +1178,7 @@
         ${renderEstimateNumberBox()}
         ${routeCardHtml}
         ${renderUsageSummary(result)}
+        ${renderFareBasis(result)}
         <div class="estimate-breakdown-groups">
           ${renderFareSections(result)}
         </div>

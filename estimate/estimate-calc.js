@@ -166,6 +166,167 @@
     return Array.isArray(list) ? list : [];
   }
 
+  function formatDisplayKm(km){
+    const n = Number(km) || 0;
+    return n.toFixed(1) + "km";
+  }
+
+  function formatIncrementLabel(incrementKm){
+    const n = Number(incrementKm) || 0;
+    if(n > 0 && n < 1){
+      return Math.round(n * 1000) + "m";
+    }
+    return n + "km";
+  }
+
+  function buildDistancePricingRules(pricing){
+    if(!pricing){
+      return [];
+    }
+    if(pricing.mode === "patternB"){
+      const rate = Number(pricing.patternB?.perKmRate) || 0;
+      return ["1km あたり " + rate + "円"];
+    }
+    const pattern = pricing.patternA || {};
+    const initialDistanceKm = Number(pattern.initialDistanceKm) || 0;
+    const initialFare = Number(pattern.initialFare) || 0;
+    const incrementDistanceKm = Number(pattern.incrementDistanceKm) || 0;
+    const incrementFare = Number(pattern.incrementFare) || 0;
+    const rules = [];
+    if(initialDistanceKm > 0 || initialFare > 0){
+      rules.push("初乗 " + initialDistanceKm + "km まで " + initialFare + "円");
+    }
+    if(incrementDistanceKm > 0 && incrementFare > 0){
+      rules.push("以後 " + formatIncrementLabel(incrementDistanceKm) + " ごとに " + incrementFare + "円加算");
+    }
+    return rules;
+  }
+
+  function buildTimeBlockRules(params){
+    const p = params || {};
+    const baseMinutes = Number(p.baseMinutes) || 0;
+    const baseAmount = Number(p.baseAmount) || 0;
+    const perBlockMinutes = Number(p.perBlockMinutes) || 0;
+    const perBlockAmount = Number(p.perBlockAmount) || 0;
+    const rules = [];
+    if(baseMinutes > 0 || baseAmount > 0){
+      rules.push("初回 " + baseMinutes + "分 " + baseAmount + "円");
+    }
+    if(perBlockMinutes > 0 && perBlockAmount > 0){
+      rules.push("以後 " + perBlockMinutes + "分ごとに " + perBlockAmount + "円加算");
+    }
+    return rules;
+  }
+
+  function getFareModeLabel(config, fareMode){
+    const labelMap = {
+      time: config.resultLabels?.fareModeTime || "時間定額運賃",
+      distance: config.resultLabels?.fareModeDistance || "距離定額運賃",
+      distance_time: config.resultLabels?.fareModeDistanceTime || "距離時間併用運賃"
+    };
+    return labelMap[fareMode] || labelMap.time;
+  }
+
+  function getBreakdownAmount(rows, key){
+    const row = Array.isArray(rows) ? rows.find(function(item){ return item && item.key === key; }) : null;
+    return row ? Number(row.amount) || 0 : 0;
+  }
+
+  function buildDistanceUsageLine(config, state, distanceMultiplier){
+    const distance = Number(state.distanceKm) || 0;
+    if(!(distance > 0)){
+      return "";
+    }
+    const label = String(config.page?.distanceLabel || "片道距離").replace(/（km）|\(km\)/gi, "").trim();
+    let value = formatDisplayKm(distance);
+    if(distanceMultiplier > 1){
+      value += "（運賃距離 " + formatDisplayKm(distance * distanceMultiplier) + "）";
+    }
+    return label + ": " + value;
+  }
+
+  function buildDurationUsageLine(state){
+    const minutes = Number(state?.routeCalcResult?.durationMinutes) || 0;
+    if(minutes > 0){
+      return "使用時間: " + minutes + "分（ルート予定時間）";
+    }
+    return "使用時間: 未取得（住所検索で距離を計算すると予定時間が設定されます）";
+  }
+
+  function buildFareBasis(config, state, fixedFareData){
+    const fareMode = fixedFareData.fareMode;
+    const rows = fixedFareData.fixedFareBreakdown || [];
+    const distanceMultiplier = getDistanceMultiplier(config, state);
+    const pricing = config.distancePricing;
+    const components = getFareComponents(config, fareMode);
+    const sections = [];
+    const notices = [
+      "表示は見積時点の運賃設定に基づく計算根拠です。",
+      "待機時間・低速走行時間は運賃計算に含まれません。"
+    ];
+    const rideMinutes = Number(state?.routeCalcResult?.durationMinutes) || 0;
+    let hasTimeBlock = false;
+
+    components.forEach(function(component){
+      const calculator = String(component?.calculator || "").trim();
+      const key = String(component?.key || "");
+      const amount = getBreakdownAmount(rows, key);
+
+      if(calculator === "fixed_fee_ref"){
+        const feeRef = String(component?.feeRef || "").trim();
+        const feeAmount = getFeeAmount(config?.basicFees?.[feeRef]);
+        sections.push({
+          key: key,
+          title: String(component.label || key),
+          rules: [String(component.label || key) + " " + feeAmount + "円"],
+          usage: "",
+          amountLabel: String(component.label || key),
+          amount: amount
+        });
+        return;
+      }
+
+      if(calculator === "distance_pricing_ref"){
+        sections.push({
+          key: key,
+          title: fareMode === "distance_time" ? "距離部分" : "距離定額",
+          rules: buildDistancePricingRules(pricing),
+          usage: buildDistanceUsageLine(config, state, distanceMultiplier),
+          amountLabel: String(component.label || "距離運賃"),
+          amount: amount
+        });
+        return;
+      }
+
+      if(calculator === "time_block"){
+        hasTimeBlock = true;
+        const isAdjustment = key === "timeAdjustment";
+        sections.push({
+          key: key,
+          title: isAdjustment ? "時間加算部分" : "時間定額",
+          rules: buildTimeBlockRules(component?.params),
+          usage: buildDurationUsageLine(state),
+          amountLabel: String(component.label || (isAdjustment ? "時間加算" : "時間定額運賃")),
+          amount: amount
+        });
+      }
+    });
+
+    if(hasTimeBlock && rideMinutes <= 0){
+      notices.push("予定時間が未取得のため、時間に基づく運賃は算出できていない可能性があります。");
+    }
+
+    return {
+      fareMode: fareMode,
+      fareModeLabel: getFareModeLabel(config, fareMode),
+      durationMinutes: rideMinutes,
+      distanceKm: Number(state.distanceKm) || 0,
+      distanceMultiplier: distanceMultiplier,
+      sections: sections,
+      notices: notices
+    };
+  }
+
   function computeFixedFareBreakdown(config, state){
     const fareMode = getCurrentFareMode(config);
     const components = getFareComponents(config, fareMode);
@@ -235,8 +396,8 @@
 
     const fareMode = getCurrentFareMode(config);
     const fareModeLabelMap = {
-      time: config.resultLabels?.fareModeTime || "時間制運賃",
-      distance: config.resultLabels?.fareModeDistance || "距離制運賃",
+      time: config.resultLabels?.fareModeTime || "時間定額運賃",
+      distance: config.resultLabels?.fareModeDistance || "距離定額運賃",
       distance_time: config.resultLabels?.fareModeDistanceTime || "距離時間併用運賃"
     };
     lines.push({
@@ -330,8 +491,12 @@
       escortFee: escortFee
     };
     const total = fixedFareData.fixedFareTotal + serviceTotal;
+    const fareBasis = buildFareBasis(config, state, fixedFareData);
     const quoteSnapshot = {
       fareMode: fixedFareData.fareMode,
+      distancePricing: config.distancePricing ? JSON.parse(JSON.stringify(config.distancePricing)) : null,
+      fareComponents: config.fareComponents ? JSON.parse(JSON.stringify(config.fareComponents)) : null,
+      fareBasis: fareBasis,
       fixedFareTotal: fixedFareData.fixedFareTotal,
       fixedFareBreakdown: fixedFareData.fixedFareBreakdown,
       serviceFees: serviceFees,
@@ -356,6 +521,7 @@
     calcDistanceFare: calcDistanceFare,
     computeEstimate: computeEstimate,
     buildUsageSummary: buildUsageSummary,
+    buildFareBasis: buildFareBasis,
     getAssistanceOptions: getAssistanceOptions,
     getMobilityAssistanceRule: getMobilityAssistanceRule,
     resolveAssistanceId: resolveAssistanceId,

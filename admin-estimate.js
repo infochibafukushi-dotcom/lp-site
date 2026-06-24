@@ -176,6 +176,84 @@
       "</div>";
   }
 
+  const FARE_MODE_DESCRIPTIONS = {
+    distance: "出発地・目的地間の距離を基に算出します",
+    time: "予定所要時間を基に算出します",
+    distance_time: "距離と時間の両方を基に算出します"
+  };
+
+  function findTimeBlockComponent(components, key){
+    const list = Array.isArray(components) ? components : [];
+    return list.find(function(component){
+      return component && component.calculator === "time_block" && (!key || component.key === key);
+    }) || null;
+  }
+
+  function getTimeBlockParamsFromDraft(draft, mode, componentKey){
+    const components = draft?.fareComponents?.[mode] || [];
+    const component = findTimeBlockComponent(components, componentKey);
+    const params = component?.params || {};
+    return {
+      baseMinutes: params.baseMinutes ?? 0,
+      baseAmount: params.baseAmount ?? 0,
+      perBlockMinutes: params.perBlockMinutes ?? 0,
+      perBlockAmount: params.perBlockAmount ?? 0
+    };
+  }
+
+  function renderTimeBlockFields(idPrefix, params){
+    return `
+      <div class="grid2">
+        <div class="row"><label>初回時間（分）</label><input type="number" min="0" step="1" id="${idPrefix}BaseMinutes" value="${escapeAttr(params.baseMinutes ?? 0)}"></div>
+        <div class="row"><label>初回運賃（円）</label><input type="number" min="0" step="1" id="${idPrefix}BaseAmount" value="${escapeAttr(params.baseAmount ?? 0)}"></div>
+        <div class="row"><label>超過時間（分）</label><input type="number" min="0" step="1" id="${idPrefix}PerBlockMinutes" value="${escapeAttr(params.perBlockMinutes ?? 0)}"></div>
+        <div class="row"><label>超過運賃（円）</label><input type="number" min="0" step="1" id="${idPrefix}PerBlockAmount" value="${escapeAttr(params.perBlockAmount ?? 0)}"></div>
+      </div>
+    `;
+  }
+
+  function renderDistancePatternAFields(){
+    const patternA = estimateDraft.distancePricing?.patternA || {};
+    return `
+      <div class="grid2">
+        <div class="row"><label>初乗距離（km）</label><input type="number" min="0" step="0.001" id="estimateInitialDistanceKm" value="${escapeAttr(patternA.initialDistanceKm ?? 0)}"></div>
+        <div class="row"><label>初乗運賃（円）</label><input type="number" min="0" step="1" id="estimateInitialFare" value="${escapeAttr(patternA.initialFare ?? 0)}"></div>
+        <div class="row"><label>加算距離（km）</label><input type="number" min="0" step="0.001" id="estimateIncrementDistanceKm" value="${escapeAttr(patternA.incrementDistanceKm ?? 0)}"></div>
+        <div class="row"><label>加算運賃（円）</label><input type="number" min="0" step="1" id="estimateIncrementFare" value="${escapeAttr(patternA.incrementFare ?? 0)}"></div>
+      </div>
+    `;
+  }
+
+  function collectTimeBlockParams(idPrefix){
+    return {
+      baseMinutes: Number(document.getElementById(idPrefix + "BaseMinutes")?.value) || 0,
+      baseAmount: Number(document.getElementById(idPrefix + "BaseAmount")?.value) || 0,
+      perBlockMinutes: Number(document.getElementById(idPrefix + "PerBlockMinutes")?.value) || 0,
+      perBlockAmount: Number(document.getElementById(idPrefix + "PerBlockAmount")?.value) || 0
+    };
+  }
+
+  function applyTimeBlockParams(components, componentKey, params){
+    if(!Array.isArray(components)) return;
+    const component = components.find(function(item){
+      return item && item.key === componentKey;
+    });
+    if(component){
+      component.params = Object.assign({}, component.params || {}, params);
+    }
+  }
+
+  function ensureFareComponents(draft){
+    const defaults = window.EstimateDefaults?.createDefaultEstimateConfig?.()?.fareComponents || {};
+    draft.fareComponents = draft.fareComponents || {};
+    ["time", "distance", "distance_time"].forEach(function(mode){
+      if(!Array.isArray(draft.fareComponents[mode]) || !draft.fareComponents[mode].length){
+        draft.fareComponents[mode] = deepClone(defaults[mode] || []);
+      }
+    });
+    return draft;
+  }
+
   function renderMobilityAssistanceEditor(){
     const root = document.getElementById("estimateMappingsEditor");
     if(!root || !estimateDraft) return;
@@ -214,10 +292,10 @@
     const root = document.getElementById("estimateSettingsEditor");
     if(!root || !estimateDraft) return;
 
-    const dp = estimateDraft.distancePricing || {};
-    const patternA = dp.patternA || {};
-    const patternB = dp.patternB || {};
     const fareMode = String(estimateDraft.fareMode || "time");
+    const timeParams = getTimeBlockParamsFromDraft(estimateDraft, "time", "timeBaseFare");
+    const distanceTimeParams = getTimeBlockParamsFromDraft(estimateDraft, "distance_time", "timeAdjustment");
+    const fareModeDescription = FARE_MODE_DESCRIPTIONS[fareMode] || FARE_MODE_DESCRIPTIONS.time;
 
     root.innerHTML = `
       <div class="row"><label><input type="checkbox" id="estimateEnabledToggle" ${estimateDraft.enabled !== false ? "checked" : ""}> 概算見積ページを公開する</label></div>
@@ -242,35 +320,30 @@
       ${renderFeeEditor("予約料金", estimateDraft.basicFees?.reservationFee, "basicFees.reservationFee")}
       ${renderFeeEditor("迎車料金", estimateDraft.basicFees?.pickupFee, "basicFees.pickupFee")}
 
-      <h3>距離料金</h3>
-      <div class="row">
-        <label>計算パターン</label>
-        <select id="estimateDistanceMode">
-          <option value="patternA" ${dp.mode === "patternA" ? "selected" : ""}>パターンA（初乗＋加算）</option>
-          <option value="patternB" ${dp.mode === "patternB" ? "selected" : ""}>パターンB（1km単価）</option>
-        </select>
-      </div>
-      <div id="estimatePatternAFields">
-        <div class="grid2">
-          <div class="row"><label>初乗距離（km）</label><input type="number" min="0" step="0.001" id="estimateInitialDistanceKm" value="${escapeAttr(patternA.initialDistanceKm ?? 0)}"></div>
-          <div class="row"><label>初乗運賃（円）</label><input type="number" min="0" step="1" id="estimateInitialFare" value="${escapeAttr(patternA.initialFare ?? 0)}"></div>
-          <div class="row"><label>加算距離（km）</label><input type="number" min="0" step="0.001" id="estimateIncrementDistanceKm" value="${escapeAttr(patternA.incrementDistanceKm ?? 0)}"></div>
-          <div class="row"><label>加算運賃（円）</label><input type="number" min="0" step="1" id="estimateIncrementFare" value="${escapeAttr(patternA.incrementFare ?? 0)}"></div>
-        </div>
-      </div>
-      <div id="estimatePatternBFields">
-        <div class="row"><label>1km単価（円）</label><input type="number" min="0" step="1" id="estimatePerKmRate" value="${escapeAttr(patternB.perKmRate ?? 0)}"></div>
-      </div>
-
       <h3>運賃方式</h3>
       <div class="row">
-        <label><input type="radio" name="estimateFareMode" value="time" ${fareMode === "time" ? "checked" : ""}> 時間制運賃</label>
+        <label for="estimateFareMode">運賃方式</label>
+        <select id="estimateFareMode">
+          <option value="distance" ${fareMode === "distance" ? "selected" : ""}>距離定額</option>
+          <option value="time" ${fareMode === "time" ? "selected" : ""}>時間定額</option>
+          <option value="distance_time" ${fareMode === "distance_time" ? "selected" : ""}>距離時間併用</option>
+        </select>
       </div>
-      <div class="row">
-        <label><input type="radio" name="estimateFareMode" value="distance" ${fareMode === "distance" ? "checked" : ""}> 距離制運賃</label>
+      <p class="note" id="estimateFareModeDescription">${escapeHtml(fareModeDescription)}</p>
+
+      <div id="estimateFareDistancePanel">
+        <h4 id="estimateFareDistanceHeading">${fareMode === "distance_time" ? "距離部分" : "距離定額設定"}</h4>
+        ${renderDistancePatternAFields()}
       </div>
-      <div class="row">
-        <label><input type="radio" name="estimateFareMode" value="distance_time" ${fareMode === "distance_time" ? "checked" : ""}> 距離時間併用運賃</label>
+
+      <div id="estimateFareModeTimeSection">
+        <h4>時間定額設定</h4>
+        ${renderTimeBlockFields("estimateTime", timeParams)}
+      </div>
+
+      <div id="estimateFareDtTimeSection">
+        <h4>時間部分</h4>
+        ${renderTimeBlockFields("estimateDtTime", distanceTimeParams)}
       </div>
 
       <h3>車いす料金（移動方法）</h3>
@@ -308,16 +381,30 @@
     `;
 
     renderMobilityAssistanceEditor();
-    toggleDistanceModeFields();
+    toggleFareModeFields();
     updatePdfFooterQrPreview();
   }
 
-  function toggleDistanceModeFields(){
-    const mode = document.getElementById("estimateDistanceMode")?.value || "patternA";
-    const a = document.getElementById("estimatePatternAFields");
-    const b = document.getElementById("estimatePatternBFields");
-    if(a) a.style.display = mode === "patternA" ? "block" : "none";
-    if(b) b.style.display = mode === "patternB" ? "block" : "none";
+  function updateFareModeDescription(mode){
+    const description = document.getElementById("estimateFareModeDescription");
+    if(description){
+      description.textContent = FARE_MODE_DESCRIPTIONS[mode] || FARE_MODE_DESCRIPTIONS.time;
+    }
+    const distanceHeading = document.querySelector("#estimateFareDistanceHeading");
+    if(distanceHeading){
+      distanceHeading.textContent = mode === "distance_time" ? "距離部分" : "距離定額設定";
+    }
+  }
+
+  function toggleFareModeFields(){
+    const mode = document.getElementById("estimateFareMode")?.value || "time";
+    const distancePanel = document.getElementById("estimateFareDistancePanel");
+    const timeSection = document.getElementById("estimateFareModeTimeSection");
+    const distanceTimeSection = document.getElementById("estimateFareDtTimeSection");
+    if(distancePanel) distancePanel.style.display = (mode === "distance" || mode === "distance_time") ? "block" : "none";
+    if(timeSection) timeSection.style.display = mode === "time" ? "block" : "none";
+    if(distanceTimeSection) distanceTimeSection.style.display = mode === "distance_time" ? "block" : "none";
+    updateFareModeDescription(mode);
   }
 
   function setByPath(obj, path, value){
@@ -372,19 +459,21 @@
     });
 
     draft.distancePricing = draft.distancePricing || {};
-    draft.distancePricing.mode = document.getElementById("estimateDistanceMode")?.value || "patternA";
+    draft.distancePricing.mode = estimateDraft.distancePricing?.mode || "patternA";
     draft.distancePricing.patternA = {
       initialDistanceKm: Number(document.getElementById("estimateInitialDistanceKm")?.value) || 0,
       initialFare: Number(document.getElementById("estimateInitialFare")?.value) || 0,
       incrementDistanceKm: Number(document.getElementById("estimateIncrementDistanceKm")?.value) || 0,
       incrementFare: Number(document.getElementById("estimateIncrementFare")?.value) || 0
     };
-    draft.distancePricing.patternB = {
-      perKmRate: Number(document.getElementById("estimatePerKmRate")?.value) || 0
-    };
+    draft.distancePricing.patternB = deepClone(estimateDraft.distancePricing?.patternB || { perKmRate: 0 });
 
-    const selectedFareMode = document.querySelector('input[name="estimateFareMode"]:checked')?.value || "time";
+    const selectedFareMode = document.getElementById("estimateFareMode")?.value || "time";
     draft.fareMode = ["time", "distance", "distance_time"].includes(selectedFareMode) ? selectedFareMode : "time";
+
+    ensureFareComponents(draft);
+    applyTimeBlockParams(draft.fareComponents.time, "timeBaseFare", collectTimeBlockParams("estimateTime"));
+    applyTimeBlockParams(draft.fareComponents.distance_time, "timeAdjustment", collectTimeBlockParams("estimateDtTime"));
 
     draft.googleMaps = {
       enabled: document.getElementById("estimateGoogleMapsEnabled")?.checked !== false,
@@ -688,8 +777,8 @@
   }
 
   function handleEstimateEditorChange(event){
-    if(event.target && event.target.id === "estimateDistanceMode"){
-      toggleDistanceModeFields();
+    if(event.target && event.target.id === "estimateFareMode"){
+      toggleFareModeFields();
     }
     if(
       event.target &&

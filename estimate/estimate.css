@@ -430,6 +430,91 @@
   background:#faf8f4;
   border-radius:12px;
 }
+.estimate-fare-basis{
+  margin-bottom:16px;
+  padding:14px;
+  background:#f8faf8;
+  border:1px solid #e2ebe2;
+  border-radius:12px;
+}
+.estimate-fare-basis-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:12px;
+}
+.estimate-fare-basis-title{
+  font-size:15px;
+  font-weight:700;
+  color:#2d5a3d;
+}
+.estimate-fare-basis-mode{
+  font-size:13px;
+  font-weight:600;
+  color:#4a7a58;
+  text-align:right;
+  line-height:1.4;
+}
+.estimate-fare-basis-blocks{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.estimate-fare-basis-block{
+  padding:12px;
+  background:#fff;
+  border:1px solid #e8efe8;
+  border-radius:10px;
+}
+.estimate-fare-basis-block-title{
+  margin-bottom:8px;
+  font-size:14px;
+  font-weight:700;
+  color:#3d6b4a;
+}
+.estimate-fare-basis-rules{
+  margin:0 0 8px;
+  padding-left:1.2em;
+  font-size:13px;
+  line-height:1.6;
+  color:#444;
+}
+.estimate-fare-basis-usage{
+  margin:0 0 6px;
+  font-size:13px;
+  line-height:1.6;
+  color:#555;
+}
+.estimate-fare-basis-amount{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin:0;
+  padding-top:6px;
+  border-top:1px solid #eef4ee;
+  font-size:13px;
+  color:#333;
+}
+.estimate-fare-basis-amount strong{
+  font-size:14px;
+  color:#2d5a3d;
+}
+.estimate-fare-basis-notices{
+  margin-top:12px;
+  padding-top:10px;
+  border-top:1px solid #e2ebe2;
+}
+.estimate-fare-basis-notice{
+  margin:0 0 6px;
+  font-size:12px;
+  line-height:1.6;
+  color:#666;
+}
+.estimate-fare-basis-notice:last-child{
+  margin-bottom:0;
+}
 .estimate-route-preview{
   margin:0 0 16px;
   padding:14px;
