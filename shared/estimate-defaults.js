@@ -42,15 +42,15 @@
         tollRoadNote: "通行料金は実費負担となります。"
       },
       basicFees: {
-        baseFare: item("baseFare", "基本運賃", 730, "", 1),
+        baseFare: item("baseFare", "基本運賃", 0, "distance・distance_time 方式では初乗運賃は距離運賃に含まれます（本項目は未使用）。", 1, { visible: false }),
         reservationFee: item("reservationFee", "予約料金", 400, "", 2),
         pickupFee: item("pickupFee", "迎車料金", 500, "", 3)
       },
       distancePricing: {
         mode: "patternA",
         patternA: {
-          initialDistanceKm: 1.096,
-          initialFare: 730,
+          initialDistanceKm: 1.06,
+          initialFare: 500,
           incrementDistanceKm: 0.221,
           incrementFare: 100
         },
@@ -62,10 +62,16 @@
       fareModeOptions: [
         { id: "time", label: "時間制運賃", enabled: true },
         { id: "distance", label: "距離制運賃", enabled: true },
-        { id: "distance_time", label: "距離時間併用運賃", enabled: true }
+        { id: "distance_time", label: "距離＋予定時間加算（概算）", enabled: true }
       ],
       fareComponents: {
         time: [
+          {
+            key: "reservationFee",
+            label: "予約料金",
+            calculator: "fixed_fee_ref",
+            feeRef: "reservationFee"
+          },
           {
             key: "timeBaseFare",
             label: "時間制運賃",
@@ -80,16 +86,17 @@
           { key: "pickupFee", label: "迎車料金", calculator: "fixed_fee_ref", feeRef: "pickupFee" }
         ],
         distance: [
-          { key: "baseFare", label: "基本運賃", calculator: "fixed_fee_ref", feeRef: "baseFare" },
+          { key: "reservationFee", label: "予約料金", calculator: "fixed_fee_ref", feeRef: "reservationFee" },
           { key: "pickupFee", label: "迎車料金", calculator: "fixed_fee_ref", feeRef: "pickupFee" },
           { key: "distanceFare", label: "距離運賃", calculator: "distance_pricing_ref", pricingRef: "distancePricing" }
         ],
         distance_time: [
-          { key: "baseFare", label: "基本運賃", calculator: "fixed_fee_ref", feeRef: "baseFare" },
+          { key: "reservationFee", label: "予約料金", calculator: "fixed_fee_ref", feeRef: "reservationFee" },
+          { key: "pickupFee", label: "迎車料金", calculator: "fixed_fee_ref", feeRef: "pickupFee" },
           { key: "distanceFare", label: "距離運賃", calculator: "distance_pricing_ref", pricingRef: "distancePricing" },
           {
             key: "timeAdjustment",
-            label: "時間加算",
+            label: "予定時間加算（概算）",
             calculator: "time_block",
             params: {
               baseMinutes: 20,
@@ -193,7 +200,7 @@
         tollRoadExpense: "有料道路・高速道路通行料金",
         fareModeTime: "時間定額運賃",
         fareModeDistance: "距離定額運賃",
-        fareModeDistanceTime: "距離時間併用運賃",
+        fareModeDistanceTime: "距離＋予定時間加算（概算）",
         fareBasisSection: "運賃計算根拠",
         usageSummary: "ご利用内容",
         total: "概算料金",

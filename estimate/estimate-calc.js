@@ -120,9 +120,28 @@
     return "time";
   }
 
+  function reservationFeeComponent(config){
+    return {
+      key: "reservationFee",
+      label: config?.resultLabels?.reservationFee || "予約料金",
+      calculator: "fixed_fee_ref",
+      feeRef: "reservationFee"
+    };
+  }
+
+  function pickupFeeComponent(config){
+    return {
+      key: "pickupFee",
+      label: config?.resultLabels?.pickupFee || "迎車料金",
+      calculator: "fixed_fee_ref",
+      feeRef: "pickupFee"
+    };
+  }
+
   function getDefaultFareComponents(config){
     return {
       time: [
+        reservationFeeComponent(config),
         {
           key: "timeBaseFare",
           label: "時間制運賃",
@@ -134,19 +153,20 @@
             perBlockAmount: 1200
           }
         },
-        { key: "pickupFee", label: "迎車料金", calculator: "fixed_fee_ref", feeRef: "pickupFee" }
+        pickupFeeComponent(config)
       ],
       distance: [
-        { key: "baseFare", label: "基本運賃", calculator: "fixed_fee_ref", feeRef: "baseFare" },
-        { key: "pickupFee", label: "迎車料金", calculator: "fixed_fee_ref", feeRef: "pickupFee" },
+        reservationFeeComponent(config),
+        pickupFeeComponent(config),
         { key: "distanceFare", label: "距離運賃", calculator: "distance_pricing_ref", pricingRef: "distancePricing" }
       ],
       distance_time: [
-        { key: "baseFare", label: "基本運賃", calculator: "fixed_fee_ref", feeRef: "baseFare" },
+        reservationFeeComponent(config),
+        pickupFeeComponent(config),
         { key: "distanceFare", label: "距離運賃", calculator: "distance_pricing_ref", pricingRef: "distancePricing" },
         {
           key: "timeAdjustment",
-          label: "時間加算",
+          label: "予定時間加算（概算）",
           calculator: "time_block",
           params: {
             baseMinutes: 20,
@@ -222,7 +242,7 @@
     const labelMap = {
       time: config.resultLabels?.fareModeTime || "時間定額運賃",
       distance: config.resultLabels?.fareModeDistance || "距離定額運賃",
-      distance_time: config.resultLabels?.fareModeDistanceTime || "距離時間併用運賃"
+      distance_time: config.resultLabels?.fareModeDistanceTime || "距離＋予定時間加算（概算）"
     };
     return labelMap[fareMode] || labelMap.time;
   }
@@ -269,12 +289,31 @@
     return { lines: lines, usage: usage };
   }
 
-  function buildDurationUsageLine(state){
+  function buildDurationUsageLine(state, options){
+    const opts = options || {};
     const minutes = Number(state?.routeCalcResult?.durationMinutes) || 0;
+    const routeEstimate = opts.routeEstimate === true;
     if(minutes > 0){
+      if(routeEstimate){
+        return "ルート予定時間: " + minutes + "分（Google Routes API の概算。認可メーターの低速走行加算とは異なります）";
+      }
       return "使用時間: " + minutes + "分（ルート予定時間）";
     }
+    if(routeEstimate){
+      return "ルート予定時間: 未取得（住所検索で距離を計算すると予定時間が設定されます）";
+    }
     return "使用時間: 未取得（住所検索で距離を計算すると予定時間が設定されます）";
+  }
+
+  function buildFareBasisNotices(fareMode){
+    const notices = ["表示は見積時点の運賃設定に基づく計算根拠です。"];
+    if(fareMode === "distance_time"){
+      notices.push("時間加算はルート予定時間に基づく概算です。実走行では認可メーター（低速走行時の時間距離併用）が適用されます。");
+      notices.push("待機時間は運賃計算に含まれません。");
+    }else{
+      notices.push("待機時間・低速走行時間は運賃計算に含まれません。");
+    }
+    return notices;
   }
 
   function buildFareBasis(config, state, fixedFareData){
@@ -284,10 +323,7 @@
     const pricing = config.distancePricing;
     const components = getFareComponents(config, fareMode);
     const sections = [];
-    const notices = [
-      "表示は見積時点の運賃設定に基づく計算根拠です。",
-      "待機時間・低速走行時間は運賃計算に含まれません。"
-    ];
+    const notices = buildFareBasisNotices(fareMode);
     const rideMinutes = Number(state?.routeCalcResult?.durationMinutes) || 0;
     let hasTimeBlock = false;
 
@@ -329,10 +365,10 @@
         const isAdjustment = key === "timeAdjustment";
         sections.push({
           key: key,
-          title: isAdjustment ? "時間加算部分" : "時間定額",
+          title: isAdjustment ? "予定時間加算（概算）" : "時間定額",
           rules: buildTimeBlockRules(component?.params),
-          usage: buildDurationUsageLine(state),
-          amountLabel: String(component.label || (isAdjustment ? "時間加算" : "時間定額運賃")),
+          usage: buildDurationUsageLine(state, { routeEstimate: isAdjustment }),
+          amountLabel: String(component.label || (isAdjustment ? "予定時間加算（概算）" : "時間定額運賃")),
           amount: amount
         });
       }
@@ -424,7 +460,7 @@
     const fareModeLabelMap = {
       time: config.resultLabels?.fareModeTime || "時間定額運賃",
       distance: config.resultLabels?.fareModeDistance || "距離定額運賃",
-      distance_time: config.resultLabels?.fareModeDistanceTime || "距離時間併用運賃"
+      distance_time: config.resultLabels?.fareModeDistanceTime || "距離＋予定時間加算（概算）"
     };
     lines.push({
       label: "運賃方式",
@@ -525,6 +561,8 @@
       fareBasis: fareBasis,
       fixedFareTotal: fixedFareData.fixedFareTotal,
       fixedFareBreakdown: fixedFareData.fixedFareBreakdown,
+      reservationFee: reservationFee,
+      pickupFee: pickupFee,
       serviceFees: serviceFees,
       expenses: expenses,
       roadType: String(state.roadType || "general") === "toll" ? "toll" : "general",

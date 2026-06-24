@@ -179,7 +179,7 @@
   const FARE_MODE_DESCRIPTIONS = {
     distance: "出発地・目的地間の距離を基に算出します",
     time: "予定所要時間を基に算出します",
-    distance_time: "距離と時間の両方を基に算出します"
+    distance_time: "距離運賃に加え、ルート予定時間に基づく概算加算を行います（認可メーターの低速走行加算とは異なります）"
   };
 
   function findTimeBlockComponent(components, key){
@@ -326,7 +326,7 @@
         <select id="estimateFareMode">
           <option value="distance" ${fareMode === "distance" ? "selected" : ""}>距離定額</option>
           <option value="time" ${fareMode === "time" ? "selected" : ""}>時間定額</option>
-          <option value="distance_time" ${fareMode === "distance_time" ? "selected" : ""}>距離時間併用</option>
+          <option value="distance_time" ${fareMode === "distance_time" ? "selected" : ""}>距離＋予定時間加算（概算）</option>
         </select>
       </div>
       <p class="note" id="estimateFareModeDescription">${escapeHtml(fareModeDescription)}</p>
@@ -342,7 +342,8 @@
       </div>
 
       <div id="estimateFareDtTimeSection">
-        <h4>時間部分</h4>
+        <h4>予定時間加算（概算）</h4>
+        <p class="note">ルート予定時間に基づく概算加算です。実走行時の認可メーター（低速走行時 1分20秒/100円）とは別の計算です。</p>
         ${renderTimeBlockFields("estimateDtTime", distanceTimeParams)}
       </div>
 
