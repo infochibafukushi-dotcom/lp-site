@@ -552,7 +552,11 @@
       expenses: expenses,
       roadType: String(state.roadType || "general") === "toll" ? "toll" : "general",
       distanceKm: Number(state.distanceKm) || 0,
-      selectedRouteId: String(state.routePlan?.selectedRouteId || "")
+      selectedRouteId: String(state.routePlan?.selectedRouteId || ""),
+      selectedTrafficZoneId: null,
+      selectedTrafficZoneLabel: null,
+      trafficZoneCoefficient: null,
+      preFixedFareMode: false
     };
 
     return {

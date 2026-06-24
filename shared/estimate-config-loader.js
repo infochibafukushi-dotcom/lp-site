@@ -72,6 +72,19 @@
     if(defaults.fareComponents){
       data.fareComponents = Object.assign({}, defaults.fareComponents, data.fareComponents || {});
     }
+    if(defaults.trafficZones){
+      const defaultItems = Array.isArray(defaults.trafficZones.items) ? defaults.trafficZones.items : [];
+      const currentItems = Array.isArray(data.trafficZones?.items) ? data.trafficZones.items : [];
+      const map = {};
+      currentItems.forEach(function(item){
+        if(item?.id) map[item.id] = item;
+      });
+      data.trafficZones = {
+        items: defaultItems.map(function(item){
+          return Object.assign({}, item, map[item.id] || {});
+        })
+      };
+    }
     const modes = ["time", "distance", "distance_time"];
     const modeExists = modes.includes(String(data.fareMode || ""));
     data.fareMode = modeExists ? String(data.fareMode) : String(defaults.fareMode || "time");

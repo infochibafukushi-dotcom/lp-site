@@ -48,6 +48,19 @@
       "perKmRate": 450
     }
   },
+  "trafficZones": {
+    "items": [
+      { "id": "keiyo", "label": "京葉交通圏", "coefficient": 1.20, "order": 1 },
+      { "id": "togashi", "label": "東葛交通圏", "coefficient": 1.15, "order": 2 },
+      { "id": "chiba", "label": "千葉交通圏", "coefficient": 1.18, "order": 3 },
+      { "id": "hokuso", "label": "北総交通圏", "coefficient": 1.13, "order": 4 },
+      { "id": "toso", "label": "東総交通圏", "coefficient": 1.13, "order": 5 },
+      { "id": "sanmu-togane", "label": "山武東金交通圏", "coefficient": 1.13, "order": 6 },
+      { "id": "ichihara", "label": "市原交通圏", "coefficient": 1.15, "order": 7 },
+      { "id": "gaihou", "label": "外房交通圏", "coefficient": 1.13, "order": 8 },
+      { "id": "nanbou", "label": "南房交通圏", "coefficient": 1.13, "order": 9 }
+    ]
+  },
   "fareMode": "distance_time",
   "fareModeOptions": [
     {

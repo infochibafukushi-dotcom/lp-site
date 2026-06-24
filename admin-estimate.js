@@ -224,6 +224,40 @@
     `;
   }
 
+  function renderTrafficZoneItems(){
+    const items = Array.isArray(estimateDraft.trafficZones?.items)
+      ? estimateDraft.trafficZones.items.slice().sort(function(a, b){ return (a.order || 0) - (b.order || 0); })
+      : [];
+    if(!items.length){
+      return `<p class="note">交通圏係数が設定されていません。</p>`;
+    }
+    const rows = items.map(function(zone, index){
+      return `
+        <tr>
+          <td><input type="text" data-traffic-zone-field="id" data-traffic-zone-index="${index}" value="${escapeAttr(zone.id || "")}" readonly></td>
+          <td><input type="text" data-traffic-zone-field="label" data-traffic-zone-index="${index}" value="${escapeAttr(zone.label || "")}"></td>
+          <td><input type="number" min="0" step="0.01" data-traffic-zone-field="coefficient" data-traffic-zone-index="${index}" value="${escapeAttr(zone.coefficient ?? 0)}"></td>
+          <td><input type="number" min="0" step="1" data-traffic-zone-field="order" data-traffic-zone-index="${index}" value="${escapeAttr(zone.order ?? (index + 1))}"></td>
+        </tr>
+      `;
+    }).join("");
+    return `
+      <div class="estimate-traffic-zones-table-wrap">
+        <table class="estimate-traffic-zones-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>交通圏名</th>
+              <th>係数</th>
+              <th>並び順</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    `;
+  }
+
   function collectTimeBlockParams(idPrefix){
     return {
       baseMinutes: Number(document.getElementById(idPrefix + "BaseMinutes")?.value) || 0,
@@ -318,6 +352,10 @@
       <h3>基本料金</h3>
       ${renderFeeEditor("基本運賃", estimateDraft.basicFees?.baseFare, "basicFees.baseFare")}
       ${renderFeeEditor("迎車料金", estimateDraft.basicFees?.pickupFee, "basicFees.pickupFee")}
+
+      <h3>交通圏係数</h3>
+      <p class="note">交通圏係数は将来の事前確定運賃対応用です。現在の見積計算には反映されません。</p>
+      ${renderTrafficZoneItems()}
 
       <h3>運賃方式</h3>
       <div class="row">
@@ -553,6 +591,21 @@
       });
     }
 
+    draft.trafficZones = draft.trafficZones || { items: [] };
+    if(!Array.isArray(draft.trafficZones.items)){
+      draft.trafficZones.items = [];
+    }
+    document.querySelectorAll("[data-traffic-zone-field]").forEach(function(el){
+      const index = Number(el.getAttribute("data-traffic-zone-index"));
+      const field = el.getAttribute("data-traffic-zone-field");
+      if(Number.isNaN(index) || !field || !draft.trafficZones.items[index]) return;
+      if(el.type === "number"){
+        draft.trafficZones.items[index][field] = Number(el.value);
+      }else{
+        draft.trafficZones.items[index][field] = el.value;
+      }
+    });
+
     draft.version = typeof draft.version === "number" ? draft.version : 1;
     draft.updatedAt = new Date().toISOString();
     return draft;
@@ -593,6 +646,30 @@
     return draft;
   }
 
+  function ensureTrafficZones(draft){
+    const defaults = window.EstimateDefaults?.createDefaultTrafficZones?.()
+      || window.EstimateDefaults?.createDefaultEstimateConfig?.()?.trafficZones
+      || { items: [] };
+    const defaultItems = Array.isArray(defaults.items) ? defaults.items : [];
+    const currentItems = Array.isArray(draft.trafficZones?.items) ? draft.trafficZones.items : [];
+    const map = {};
+    currentItems.forEach(function(item){
+      if(item?.id) map[item.id] = item;
+    });
+    draft.trafficZones = {
+      items: defaultItems.map(function(item){
+        return Object.assign({}, item, map[item.id] || {});
+      })
+    };
+    draft.trafficZones.items.forEach(function(item, index){
+      item.id = String(item.id || "zone-" + index);
+      item.label = String(item.label || item.id);
+      item.coefficient = Number(item.coefficient) || 0;
+      item.order = Number(item.order) || (index + 1);
+    });
+    return draft;
+  }
+
   function normalizeEstimateConfig(data){
     const draft = deepClone(data || {});
     const defaults = window.EstimateDefaults?.createDefaultEstimateConfig?.() || {};
@@ -610,6 +687,7 @@
     if(!["time", "distance", "distance_time"].includes(String(draft.fareMode || ""))){
       draft.fareMode = String(defaults.fareMode || "time");
     }
+    ensureTrafficZones(draft);
     return ensurePdfFooter(draft);
   }
 

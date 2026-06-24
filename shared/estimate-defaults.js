@@ -26,6 +26,31 @@
     });
   }
 
+  function trafficZoneItem(id, label, coefficient, order){
+    return {
+      id: id,
+      label: label,
+      coefficient: Number(coefficient) || 0,
+      order: order
+    };
+  }
+
+  function createDefaultTrafficZones(){
+    return {
+      items: [
+        trafficZoneItem("keiyo", "京葉交通圏", 1.20, 1),
+        trafficZoneItem("togashi", "東葛交通圏", 1.15, 2),
+        trafficZoneItem("chiba", "千葉交通圏", 1.18, 3),
+        trafficZoneItem("hokuso", "北総交通圏", 1.13, 4),
+        trafficZoneItem("toso", "東総交通圏", 1.13, 5),
+        trafficZoneItem("sanmu-togane", "山武東金交通圏", 1.13, 6),
+        trafficZoneItem("ichihara", "市原交通圏", 1.15, 7),
+        trafficZoneItem("gaihou", "外房交通圏", 1.13, 8),
+        trafficZoneItem("nanbou", "南房交通圏", 1.13, 9)
+      ]
+    };
+  }
+
   function createDefaultEstimateConfig(){
     return {
       enabled: true,
@@ -57,6 +82,7 @@
           perKmRate: 450
         }
       },
+      trafficZones: createDefaultTrafficZones(),
       fareMode: "time",
       fareModeOptions: [
         { id: "time", label: "時間制運賃", enabled: true },
@@ -199,6 +225,7 @@
   }
 
   global.EstimateDefaults = {
-    createDefaultEstimateConfig: createDefaultEstimateConfig
+    createDefaultEstimateConfig: createDefaultEstimateConfig,
+    createDefaultTrafficZones: createDefaultTrafficZones
   };
 })(typeof window !== "undefined" ? window : globalThis);

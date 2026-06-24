@@ -97,6 +97,21 @@
       pushError(errors, "fareComponents must be an object");
     }
 
+    if(data.trafficZones != null){
+      if(!isObject(data.trafficZones)){
+        pushError(errors, "trafficZones must be an object");
+      }else{
+        validateCategoryItems(errors, "trafficZones.items", data.trafficZones.items, false);
+        if(Array.isArray(data.trafficZones.items)){
+          data.trafficZones.items.forEach(function(item, index){
+            if(item?.coefficient != null && typeof item.coefficient !== "number"){
+              pushError(errors, "trafficZones.items[" + index + "].coefficient must be a number");
+            }
+          });
+        }
+      }
+    }
+
     if(!isObject(data.categories)){
       pushError(errors, "categories is required");
     }else{
