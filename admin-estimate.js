@@ -37,16 +37,22 @@
     }
   }
 
-  function renderFeeEditor(label, obj, path){
+  function renderFeeEditor(label, obj, path, options){
+    options = options || {};
     obj = obj || { label: label, amount: 0, description: "", visible: true, order: 1 };
+    const enabledLabel = options.enabledLabel || "表示する";
+    const noteHtml = options.note
+      ? `<p class="note">${escapeHtml(options.note)}</p>`
+      : "";
     return `
       <div class="estimate-admin-fee">
+        ${noteHtml}
         <div class="grid2">
           <div class="row"><label>名称</label><input type="text" data-estimate-path="${escapeAttr(path)}.label" value="${escapeAttr(obj.label || label)}"></div>
           <div class="row"><label>金額（円）</label><input type="number" min="0" step="1" data-estimate-path="${escapeAttr(path)}.amount" value="${escapeAttr(obj.amount ?? 0)}"></div>
         </div>
         <div class="row"><label>説明文</label><textarea rows="2" data-estimate-path="${escapeAttr(path)}.description">${escapeHtml(obj.description || "")}</textarea></div>
-        <label><input type="checkbox" data-estimate-path="${escapeAttr(path)}.visible" ${obj.visible !== false ? "checked" : ""}> 表示する</label>
+        <label><input type="checkbox" data-estimate-path="${escapeAttr(path)}.visible" ${obj.visible !== false ? "checked" : ""}> ${escapeHtml(enabledLabel)}</label>
       </div>
     `;
   }
@@ -380,6 +386,10 @@
       <h3>基本料金</h3>
       ${renderFeeEditor("基本運賃", estimateDraft.basicFees?.baseFare, "basicFees.baseFare")}
       ${renderFeeEditor("迎車料金", estimateDraft.basicFees?.pickupFee, "basicFees.pickupFee")}
+      ${renderFeeEditor("特殊車両使用料", estimateDraft.basicFees?.specialVehicleFee, "basicFees.specialVehicleFee", {
+        enabledLabel: "有効",
+        note: "特殊車両（リフト車・スロープ車・車いす固定装置搭載車等）の維持管理費として加算する料金です。"
+      })}
 
       <h3>交通圏係数</h3>
       <p class="note">運輸局公示の平準化係数です。事前確定運賃モードの距離運賃にのみ適用されます。</p>
@@ -737,6 +747,12 @@
     ensureTrafficZones(draft);
     if(defaults.preFixedFare){
       draft.preFixedFare = Object.assign({}, defaults.preFixedFare, draft.preFixedFare || {});
+    }
+    if(defaults.basicFees){
+      draft.basicFees = Object.assign({}, defaults.basicFees, draft.basicFees || {});
+      Object.keys(defaults.basicFees).forEach(function(key){
+        draft.basicFees[key] = Object.assign({}, defaults.basicFees[key], draft.basicFees[key] || {});
+      });
     }
     return ensurePdfFooter(draft);
   }

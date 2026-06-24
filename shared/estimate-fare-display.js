@@ -112,6 +112,7 @@
 
     const pickupFee = getBreakdownAmount(snapshot.fixedFareBreakdown, "pickupFee")
       || Number(breakdown.pickupFee) || 0;
+    const specialVehicleFee = Number(snapshot.specialVehicleFeeAmount) || 0;
     const distanceFare = getBreakdownAmount(snapshot.fixedFareBreakdown, "distanceFare")
       || Number(breakdown.distanceFare) || 0;
     const timeAdjustment = getBreakdownAmount(snapshot.fixedFareBreakdown, "timeAdjustment") || 0;
@@ -129,8 +130,11 @@
       { label: routeLabel, value: getRouteProviderLabel(snapshot.routeProvider) }
     ];
     lines.push.apply(lines, buildTrafficZoneCalculationLines(snapshot));
+    lines.push({ label: "迎車料金", value: formatYen(pickupFee) });
+    if(specialVehicleFee > 0 || snapshot.specialVehicleFeeEnabled){
+      lines.push({ label: "特殊車両使用料", value: formatYen(specialVehicleFee) });
+    }
     lines.push(
-      { label: "迎車料金", value: formatYen(pickupFee) },
       { label: "距離運賃", value: formatYen(distanceFare) },
       { label: "時間加算", value: formatYen(timeAdjustment) },
       { label: "介助料金", value: formatYen(assistanceFee + stairFee) },

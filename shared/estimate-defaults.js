@@ -87,7 +87,14 @@
       },
       basicFees: {
         baseFare: item("baseFare", "基本運賃", 0, "distance・distance_time 方式では初乗運賃は距離運賃に含まれます（本項目は未使用）。", 1, { visible: false }),
-        pickupFee: item("pickupFee", "迎車料金", 800, "", 2)
+        pickupFee: item("pickupFee", "迎車料金", 800, "", 2),
+        specialVehicleFee: item(
+          "specialVehicleFee",
+          "特殊車両使用料",
+          1000,
+          "特殊車両（リフト車・スロープ車・車いす固定装置搭載車等）の維持管理費として加算する料金です。",
+          3
+        )
       },
       distancePricing: {
         mode: "patternA",
@@ -125,14 +132,17 @@
               perBlockAmount: 1200
             }
           },
-          { key: "pickupFee", label: "迎車料金", calculator: "fixed_fee_ref", feeRef: "pickupFee" }
+          { key: "pickupFee", label: "迎車料金", calculator: "fixed_fee_ref", feeRef: "pickupFee" },
+          { key: "specialVehicleFee", label: "特殊車両使用料", calculator: "fixed_fee_ref", feeRef: "specialVehicleFee" }
         ],
         distance: [
           { key: "pickupFee", label: "迎車料金", calculator: "fixed_fee_ref", feeRef: "pickupFee" },
+          { key: "specialVehicleFee", label: "特殊車両使用料", calculator: "fixed_fee_ref", feeRef: "specialVehicleFee" },
           { key: "distanceFare", label: "距離運賃", calculator: "distance_pricing_ref", pricingRef: "distancePricing" }
         ],
         distance_time: [
           { key: "pickupFee", label: "迎車料金", calculator: "fixed_fee_ref", feeRef: "pickupFee" },
+          { key: "specialVehicleFee", label: "特殊車両使用料", calculator: "fixed_fee_ref", feeRef: "specialVehicleFee" },
           { key: "distanceFare", label: "距離運賃", calculator: "distance_pricing_ref", pricingRef: "distancePricing" },
           {
             key: "timeAdjustment",
@@ -148,6 +158,7 @@
         ],
         pre_fixed_fare: [
           { key: "pickupFee", label: "迎車料金", calculator: "fixed_fee_ref", feeRef: "pickupFee" },
+          { key: "specialVehicleFee", label: "特殊車両使用料", calculator: "fixed_fee_ref", feeRef: "specialVehicleFee" },
           { key: "distanceFare", label: "距離運賃", calculator: "distance_pricing_ref", pricingRef: "distancePricing" },
           {
             key: "timeAdjustment",
@@ -241,6 +252,7 @@
       resultLabels: {
         baseFare: "基本運賃",
         pickupFee: "迎車料金",
+        specialVehicleFee: "特殊車両使用料",
         distanceFare: "距離運賃",
         wheelchairFee: "車いす料金",
         assistanceFee: "介助料金",

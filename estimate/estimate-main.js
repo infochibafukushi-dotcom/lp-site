@@ -411,10 +411,13 @@
     const fixedFareRows = Array.isArray(snapshot.fixedFareBreakdown)
       ? snapshot.fixedFareBreakdown.map(function(row){
         return {
+          key: row.key || "",
           label: row.label || row.key || "",
           amount: Number(row.amount) || 0
         };
-      }).filter(function(row){ return row.amount > 0; })
+      }).filter(function(row){
+        return row.amount > 0 && row.key !== "specialVehicleFee";
+      })
       : [];
     const careServiceRows = Array.isArray(snapshot.serviceFees)
       ? snapshot.serviceFees.map(function(row){
@@ -1187,14 +1190,19 @@
       });
     }
 
-    const serviceRows = [
+    const serviceRows = [];
+    const specialVehicleFee = Number(breakdown.specialVehicleFee) || Number(snapshot.specialVehicleFeeAmount) || 0;
+    if(specialVehicleFee > 0){
+      serviceRows.push(["特殊車両使用料", formatCalcBasisYen(specialVehicleFee)]);
+    }
+    serviceRows.push(
       ["乗降介助", formatCalcBasisYen(breakdown.assistanceFee)],
       ["階段介助", formatCalcBasisYen(breakdown.stairFee)],
       [
         "待機・付き添い",
         formatCalcBasisYen((Number(breakdown.waitingFee) || 0) + (Number(breakdown.escortFee) || 0))
       ]
-    ];
+    );
 
     const labels = state.config.resultLabels || {};
     const basisToggleOpen = labels.calcBasisToggleOpen || "料金の計算方法を見る";

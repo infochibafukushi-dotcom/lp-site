@@ -28,6 +28,14 @@
       "amount": 800,
       "visible": true,
       "order": 2
+    },
+    "specialVehicleFee": {
+      "id": "specialVehicleFee",
+      "label": "特殊車両使用料",
+      "description": "特殊車両（リフト車・スロープ車・車いす固定装置搭載車等）の維持管理費として加算する料金です。",
+      "amount": 1000,
+      "visible": true,
+      "order": 3
     }
   },
   "googleMaps": {
@@ -159,6 +167,12 @@
         "label": "迎車料金",
         "calculator": "fixed_fee_ref",
         "feeRef": "pickupFee"
+      },
+      {
+        "key": "specialVehicleFee",
+        "label": "特殊車両使用料",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "specialVehicleFee"
       }
     ],
     "distance": [
@@ -167,6 +181,12 @@
         "label": "迎車料金",
         "calculator": "fixed_fee_ref",
         "feeRef": "pickupFee"
+      },
+      {
+        "key": "specialVehicleFee",
+        "label": "特殊車両使用料",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "specialVehicleFee"
       },
       {
         "key": "distanceFare",
@@ -181,6 +201,12 @@
         "label": "迎車料金",
         "calculator": "fixed_fee_ref",
         "feeRef": "pickupFee"
+      },
+      {
+        "key": "specialVehicleFee",
+        "label": "特殊車両使用料",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "specialVehicleFee"
       },
       {
         "key": "distanceFare",
@@ -206,6 +232,12 @@
         "label": "迎車料金",
         "calculator": "fixed_fee_ref",
         "feeRef": "pickupFee"
+      },
+      {
+        "key": "specialVehicleFee",
+        "label": "特殊車両使用料",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "specialVehicleFee"
       },
       {
         "key": "distanceFare",
@@ -498,6 +530,7 @@
   "resultLabels": {
     "baseFare": "基本運賃",
     "pickupFee": "迎車料金",
+    "specialVehicleFee": "特殊車両使用料",
     "distanceFare": "距離運賃",
     "wheelchairFee": "車いす料金",
     "assistanceFee": "介助料金",

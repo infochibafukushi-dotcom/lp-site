@@ -59,6 +59,12 @@
     if(defaults.resultLabels){
       data.resultLabels = Object.assign({}, defaults.resultLabels, data.resultLabels || {});
     }
+    if(defaults.basicFees){
+      data.basicFees = Object.assign({}, defaults.basicFees, data.basicFees || {});
+      Object.keys(defaults.basicFees).forEach(function(key){
+        data.basicFees[key] = Object.assign({}, defaults.basicFees[key], data.basicFees[key] || {});
+      });
+    }
     if(Array.isArray(defaults.fareModeOptions)){
       const options = Array.isArray(data.fareModeOptions) ? data.fareModeOptions : [];
       const map = {};

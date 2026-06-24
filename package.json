@@ -6,6 +6,7 @@
     "validate:json": "node scripts/validate-json.mjs",
     "check:links": "node scripts/check-links.mjs",
     "quality": "npm run validate:json && npm run check:links",
-    "test:traffic-zone": "node scripts/test-traffic-zone-detection.mjs"
+    "test:traffic-zone": "node scripts/test-traffic-zone-detection.mjs",
+    "test:special-vehicle-fee": "node scripts/test-special-vehicle-fee.mjs"
   }
 }

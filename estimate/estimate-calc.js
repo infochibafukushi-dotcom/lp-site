@@ -175,6 +175,34 @@
     };
   }
 
+  function specialVehicleFeeComponent(config){
+    return {
+      key: "specialVehicleFee",
+      label: config?.resultLabels?.specialVehicleFee || "特殊車両使用料",
+      calculator: "fixed_fee_ref",
+      feeRef: "specialVehicleFee"
+    };
+  }
+
+  function injectSpecialVehicleFeeComponent(config, components){
+    if(!Array.isArray(components)){
+      return components;
+    }
+    if(components.some(function(component){
+      return String(component?.key || "") === "specialVehicleFee";
+    })){
+      return components;
+    }
+    const result = [];
+    components.forEach(function(component){
+      result.push(component);
+      if(String(component?.key || "") === "pickupFee"){
+        result.push(specialVehicleFeeComponent(config));
+      }
+    });
+    return result;
+  }
+
   function getDefaultFareComponents(config){
     return {
       time: [
@@ -189,14 +217,17 @@
             perBlockAmount: 1200
           }
         },
-        pickupFeeComponent(config)
+        pickupFeeComponent(config),
+        specialVehicleFeeComponent(config)
       ],
       distance: [
         pickupFeeComponent(config),
+        specialVehicleFeeComponent(config),
         { key: "distanceFare", label: "距離運賃", calculator: "distance_pricing_ref", pricingRef: "distancePricing" }
       ],
       distance_time: [
         pickupFeeComponent(config),
+        specialVehicleFeeComponent(config),
         { key: "distanceFare", label: "距離運賃", calculator: "distance_pricing_ref", pricingRef: "distancePricing" },
         {
           key: "timeAdjustment",
@@ -212,6 +243,7 @@
       ],
       pre_fixed_fare: [
         pickupFeeComponent(config),
+        specialVehicleFeeComponent(config),
         { key: "distanceFare", label: "距離運賃", calculator: "distance_pricing_ref", pricingRef: "distancePricing" },
         {
           key: "timeAdjustment",
@@ -232,7 +264,7 @@
     const all = config?.fareComponents;
     const defaults = getDefaultFareComponents(config);
     const list = Array.isArray(all?.[mode]) ? all[mode] : defaults[mode];
-    return Array.isArray(list) ? list : [];
+    return injectSpecialVehicleFeeComponent(config, Array.isArray(list) ? list : []);
   }
 
   function formatDisplayKm(km){
@@ -631,6 +663,8 @@
     const basic = config.basicFees || {};
     const baseFare = getFeeAmount(basic.baseFare);
     const pickupFee = getFeeAmount(basic.pickupFee);
+    const specialVehicleFee = getFeeAmount(basic.specialVehicleFee);
+    const specialVehicleFeeEnabled = basic.specialVehicleFee?.visible !== false;
     let distanceFare = calcDistanceFare(state.distanceKm, config.distancePricing);
 
     const mobility = findItem(config.categories?.mobility?.items, state.mobilityId);
@@ -680,6 +714,11 @@
       distanceFare = fixedFareData.preFixedFareMeta.adjustedDistanceFareAmount;
     }
     const serviceFees = [
+      {
+        key: "specialVehicleFee",
+        label: config.resultLabels?.specialVehicleFee || "特殊車両使用料",
+        amount: specialVehicleFee
+      },
       { key: "wheelchairFee", label: config.resultLabels?.wheelchairFee || "車いす料金", amount: wheelchairFee },
       { key: "assistanceFee", label: config.resultLabels?.assistanceFee || "介助料金", amount: assistanceFee },
       { key: "stairFee", label: config.resultLabels?.stairFee || "階段介助料金", amount: stairFee },
@@ -688,7 +727,12 @@
     ].filter(function(row){
       return row.amount > 0;
     });
-    const serviceTotal = serviceFees.reduce(function(sum, row){ return sum + row.amount; }, 0);
+    const serviceTotal = serviceFees.reduce(function(sum, row){
+      if(row.key === "specialVehicleFee"){
+        return sum;
+      }
+      return sum + row.amount;
+    }, 0);
 
     const expenses = [];
     if(String(state.roadType || "") === "toll"){
@@ -702,6 +746,7 @@
     const breakdown = {
       baseFare: baseFare,
       pickupFee: pickupFee,
+      specialVehicleFee: specialVehicleFee,
       distanceFare: distanceFare,
       wheelchairFee: wheelchairFee,
       assistanceFee: assistanceFee,
@@ -720,6 +765,8 @@
       fixedFareTotal: fixedFareData.fixedFareTotal,
       fixedFareBreakdown: fixedFareData.fixedFareBreakdown,
       pickupFee: pickupFee,
+      specialVehicleFeeEnabled: specialVehicleFeeEnabled,
+      specialVehicleFeeAmount: specialVehicleFee,
       serviceFees: serviceFees,
       expenses: expenses,
       roadType: String(state.roadType || "general") === "toll" ? "toll" : "general",
