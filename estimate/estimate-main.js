@@ -346,6 +346,9 @@
   function openStepForEdit(stepId){
     clearStepsAfter(stepId);
     clearStepValue(stepId);
+    if(stepId === "distance"){
+      state.routeCalcLoading = false;
+    }
     state.estimateNumber = "";
     state.estimateCreatedAt = "";
     state.selectionFingerprint = "";
@@ -791,6 +794,7 @@
     state.routeCalcError = "";
     updateRouteCalcFeedback();
 
+    let shouldRenderPage = false;
     try{
       const result = await window.EstimateDistanceApi.computeRouteDistance({
         apiKey: apiKey,
@@ -829,12 +833,18 @@
       state.routeCalcError = "";
       invalidateEstimateNumberIfChanged();
       state.lastActiveStepId = "";
-      renderPage();
+      shouldRenderPage = true;
     }catch(error){
       state.routeCalcResult = null;
       state.routePlan = null;
       state.routeCalcError = error?.message || "距離の計算に失敗しました。";
+    }finally{
       state.routeCalcLoading = false;
+    }
+
+    if(shouldRenderPage){
+      renderPage();
+    }else{
       updateRouteCalcFeedback();
     }
   }
