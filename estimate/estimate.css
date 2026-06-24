@@ -486,6 +486,33 @@
   line-height:1.6;
   color:#555;
 }
+.estimate-fare-basis-usage-list{
+  margin:0 0 8px;
+  padding:0;
+  list-style:none;
+}
+.estimate-fare-basis-usage-list li{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  padding:4px 0;
+  font-size:13px;
+  line-height:1.6;
+  color:#555;
+}
+.estimate-fare-basis-usage-label{
+  flex:0 0 auto;
+  color:#666;
+}
+.estimate-fare-basis-usage-value{
+  flex:1 1 auto;
+  text-align:right;
+  color:#333;
+}
+.estimate-fare-basis-usage-note{
+  white-space:nowrap;
+}
 .estimate-fare-basis-amount{
   display:flex;
   justify-content:space-between;

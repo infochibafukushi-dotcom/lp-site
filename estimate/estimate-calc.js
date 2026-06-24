@@ -232,17 +232,41 @@
     return row ? Number(row.amount) || 0 : 0;
   }
 
-  function buildDistanceUsageLine(config, state, distanceMultiplier){
+  function buildDistanceUsageLines(config, state, distanceMultiplier){
     const distance = Number(state.distanceKm) || 0;
     if(!(distance > 0)){
-      return "";
+      return { lines: [], usage: "" };
     }
-    const label = String(config.page?.distanceLabel || "片道距離").replace(/（km）|\(km\)/gi, "").trim();
-    let value = formatDisplayKm(distance);
+
+    const trip = findItem(config?.categories?.tripType?.items, state.tripTypeId);
+    const tripLabel = trip?.label || (distanceMultiplier > 1 ? "往復" : "片道");
+    const lines = [
+      { label: "送迎方法", value: tripLabel }
+    ];
+
     if(distanceMultiplier > 1){
-      value += "（運賃距離 " + formatDisplayKm(distance * distanceMultiplier) + "）";
+      const billedDistance = distance * distanceMultiplier;
+      const multiplierLabel = Number.isInteger(distanceMultiplier)
+        ? String(distanceMultiplier)
+        : String(distanceMultiplier);
+      lines.push({ label: "片道距離", value: formatDisplayKm(distance) });
+      lines.push({
+        label: "計算対象距離",
+        value: formatDisplayKm(billedDistance),
+        note: formatDisplayKm(distance) + " × " + multiplierLabel
+      });
+    }else{
+      lines.push({ label: "計算対象距離", value: formatDisplayKm(distance) });
     }
-    return label + ": " + value;
+
+    const usage = lines.map(function(line){
+      if(line.note){
+        return line.label + "：" + line.value + "（" + line.note + "）";
+      }
+      return line.label + "：" + line.value;
+    }).join("\n");
+
+    return { lines: lines, usage: usage };
   }
 
   function buildDurationUsageLine(state){
@@ -287,11 +311,13 @@
       }
 
       if(calculator === "distance_pricing_ref"){
+        const distanceUsage = buildDistanceUsageLines(config, state, distanceMultiplier);
         sections.push({
           key: key,
           title: fareMode === "distance_time" ? "距離部分" : "距離定額",
           rules: buildDistancePricingRules(pricing),
-          usage: buildDistanceUsageLine(config, state, distanceMultiplier),
+          usage: distanceUsage.usage,
+          usageLines: distanceUsage.lines,
           amountLabel: String(component.label || "距離運賃"),
           amount: amount
         });

@@ -7,6 +7,7 @@
     stairId: "",
     tripTypeId: "",
     roundTripAddonId: "",
+    roundTripAddonStepComplete: false,
     distanceKm: 0,
     distanceInputText: "",
     distanceInputMode: "address",
@@ -144,11 +145,13 @@
   function syncRoundTripAddon(){
     if(!window.EstimateCalc.isRoundTripSelected(state.config, state)){
       state.roundTripAddonId = "";
+      state.roundTripAddonStepComplete = false;
       return;
     }
     const options = window.EstimateCalc.getRoundTripAddonItems(state.config);
     if(state.roundTripAddonId && !options.some(function(item){ return item.id === state.roundTripAddonId; })){
       state.roundTripAddonId = "";
+      state.roundTripAddonStepComplete = false;
     }
   }
 
@@ -187,6 +190,15 @@
       }
     ];
 
+    if(window.EstimateCalc.isRoundTripSelected(state.config, state)){
+      steps.push({
+        id: "addon",
+        title: state.config.categories.roundTripAddon?.label || "待機・付き添い",
+        type: "addon",
+        choiceName: "addonChoice"
+      });
+    }
+
     steps.push({
       id: "distance",
       title: state.config.page?.distanceLabel || "片道距離（km）",
@@ -205,13 +217,9 @@
       case "stair":
         return Boolean(state.stairId);
       case "trip":
-        if(!state.tripTypeId){
-          return false;
-        }
-        if(window.EstimateCalc.isRoundTripSelected(state.config, state)){
-          return Boolean(state.roundTripAddonId);
-        }
-        return true;
+        return Boolean(state.tripTypeId);
+      case "addon":
+        return state.roundTripAddonStepComplete;
       case "distance":
         return Number(state.distanceKm) > 0;
       default:
@@ -247,17 +255,17 @@
       }
       case "trip": {
         const item = window.EstimateCalc.findItem(state.config.categories?.tripType?.items, state.tripTypeId);
-        const parts = [item?.label || ""];
-        if(window.EstimateCalc.isRoundTripSelected(state.config, state)){
-          const addon = window.EstimateCalc.findItem(
-            state.config.categories?.roundTripAddon?.items,
-            state.roundTripAddonId
-          );
-          if(addon?.label){
-            parts.push(addon.label);
-          }
+        return item?.label || "";
+      }
+      case "addon": {
+        if(!state.roundTripAddonId){
+          return state.roundTripAddonStepComplete ? "なし" : "";
         }
-        return parts.filter(Boolean).join(" / ");
+        const item = window.EstimateCalc.findItem(
+          state.config.categories?.roundTripAddon?.items,
+          state.roundTripAddonId
+        );
+        return item?.label || "";
       }
       case "distance":
         return Number(state.distanceKm) > 0 ? Number(state.distanceKm).toFixed(1) + "km" : "";
@@ -288,6 +296,7 @@
           break;
         case "addon":
           state.roundTripAddonId = "";
+          state.roundTripAddonStepComplete = false;
           break;
         case "distance":
           state.distanceKm = 0;
@@ -324,9 +333,11 @@
       case "trip":
         state.tripTypeId = "";
         state.roundTripAddonId = "";
+        state.roundTripAddonStepComplete = false;
         break;
       case "addon":
         state.roundTripAddonId = "";
+        state.roundTripAddonStepComplete = false;
         break;
       case "distance":
         state.distanceKm = 0;
@@ -368,6 +379,7 @@
     state.stairId = "";
     state.tripTypeId = "";
     state.roundTripAddonId = "";
+    state.roundTripAddonStepComplete = false;
     state.distanceKm = 0;
     state.distanceInputText = "";
     state.distanceInputMode = "address";
@@ -455,26 +467,6 @@
       });
     }).join("");
 
-    let addonSection = "";
-    if(window.EstimateCalc.isRoundTripSelected(state.config, state)){
-      const addonLabel = state.config.categories.roundTripAddon?.label || "待機・付き添い";
-      const addonItems = window.EstimateCalc.getRoundTripAddonItems(state.config);
-      const addonChoices = addonItems.map(function(item){
-        return window.EstimateHelp.renderChoiceCard(item, {
-          name: "addonChoice",
-          checked: item.id === state.roundTripAddonId,
-          showAmount: false
-        });
-      }).join("");
-      addonSection = `
-        <div class="estimate-trip-addon">
-          <h3 class="estimate-trip-addon-title">${escapeHtml(addonLabel)}</h3>
-          <div class="estimate-choice-group">${addonChoices}</div>
-          <p class="estimate-step-note">いずれかを選択してください。</p>
-        </div>
-      `;
-    }
-
     return `
       <section class="estimate-step estimate-step--active" data-step-id="${escapeAttr(step.id)}">
         <div class="estimate-step-head">
@@ -484,7 +476,43 @@
           </div>
         </div>
         <div class="estimate-choice-group">${tripChoices}</div>
-        ${addonSection}
+      </section>
+    `;
+  }
+
+  function renderAddonStep(stepNum, step){
+    const title = step.title;
+    const noneItem = {
+      id: "__none__",
+      label: "なし",
+      description: "待機・付き添いは不要です。",
+      amount: 0
+    };
+    const noneChecked = state.roundTripAddonStepComplete && !state.roundTripAddonId;
+    const noneChoice = window.EstimateHelp.renderChoiceCard(noneItem, {
+      name: step.choiceName,
+      checked: noneChecked,
+      showAmount: false
+    });
+    const addonItems = window.EstimateCalc.getRoundTripAddonItems(state.config);
+    const addonChoices = addonItems.map(function(item){
+      return window.EstimateHelp.renderChoiceCard(item, {
+        name: step.choiceName,
+        checked: item.id === state.roundTripAddonId,
+        showAmount: false
+      });
+    }).join("");
+
+    return `
+      <section class="estimate-step estimate-step--active" data-step-id="${escapeAttr(step.id)}">
+        <div class="estimate-step-head">
+          <div>
+            <div class="estimate-step-label">STEP${stepNum}</div>
+            <h2 class="estimate-step-title">${escapeHtml(title)}</h2>
+          </div>
+        </div>
+        <div class="estimate-choice-group">${noneChoice}${addonChoices}</div>
+        <p class="estimate-step-note">いずれかを選択してください。</p>
       </section>
     `;
   }
@@ -956,6 +984,9 @@
     if(step.type === "trip"){
       return renderTripStep(stepNum, step);
     }
+    if(step.type === "addon"){
+      return renderAddonStep(stepNum, step);
+    }
     if(step.type === "distance"){
       return renderDistanceStep(stepNum, step);
     }
@@ -1028,6 +1059,30 @@
     `;
   }
 
+  function renderFareBasisUsage(section){
+    if(Array.isArray(section.usageLines) && section.usageLines.length){
+      return (
+        "<ul class=\"estimate-fare-basis-usage-list\">" +
+        section.usageLines.map(function(line){
+          const note = line.note
+            ? "<span class=\"estimate-fare-basis-usage-note\">（" + escapeHtml(line.note) + "）</span>"
+            : "";
+          return (
+            "<li>" +
+            "<span class=\"estimate-fare-basis-usage-label\">" + escapeHtml(line.label || "") + "</span>" +
+            "<span class=\"estimate-fare-basis-usage-value\">" + escapeHtml(line.value || "") + note + "</span>" +
+            "</li>"
+          );
+        }).join("") +
+        "</ul>"
+      );
+    }
+    if(section.usage){
+      return "<p class=\"estimate-fare-basis-usage\">" + escapeHtml(section.usage) + "</p>";
+    }
+    return "";
+  }
+
   function renderFareBasis(result){
     const basis = result.quoteSnapshot?.fareBasis;
     if(!basis || !Array.isArray(basis.sections) || !basis.sections.length){
@@ -1040,9 +1095,7 @@
           return `<li>${escapeHtml(rule)}</li>`;
         }).join("")
         : "";
-      const usage = section.usage
-        ? `<p class="estimate-fare-basis-usage">${escapeHtml(section.usage)}</p>`
-        : "";
+      const usage = renderFareBasisUsage(section);
       const amountLabel = String(section.amountLabel || section.title || "");
       const amountHtml = amountLabel
         ? `<p class="estimate-fare-basis-amount"><span>${escapeHtml(amountLabel)}</span><strong>${formatYen(Number(section.amount) || 0)}</strong></p>`
@@ -1445,9 +1498,8 @@
 
     bindChoiceGroup("tripChoice", function(value){
       state.tripTypeId = value;
-      if(!window.EstimateCalc.isRoundTripSelected(state.config, state)){
-        state.roundTripAddonId = "";
-      }
+      state.roundTripAddonId = "";
+      state.roundTripAddonStepComplete = false;
       clearStepsAfter("trip");
       syncRoundTripAddon();
       state.lastActiveStepId = "";
@@ -1455,7 +1507,12 @@
     });
 
     bindChoiceGroup("addonChoice", function(value){
-      state.roundTripAddonId = value;
+      if(value === "__none__"){
+        state.roundTripAddonId = "";
+      }else{
+        state.roundTripAddonId = value;
+      }
+      state.roundTripAddonStepComplete = true;
       clearStepsAfter("addon");
       state.lastActiveStepId = "";
       renderPage();
@@ -1547,6 +1604,9 @@
 
       syncAssistanceForMobility();
       syncRoundTripAddon();
+      if(state.roundTripAddonId){
+        state.roundTripAddonStepComplete = true;
+      }
 
       renderPage();
     }catch(error){
