@@ -1,5 +1,6 @@
 (function(global){
   const ROUTES_URL = "https://routes.googleapis.com/directions/v2:computeRoutes";
+  const GEOCODE_URL = "https://maps.googleapis.com/maps/api/geocode/json";
 
   function parseDurationSeconds(durationStr){
     if(!durationStr) return 0;
@@ -88,7 +89,42 @@
     };
   }
 
+  async function geocodeAddress(options){
+    const apiKey = String(options?.apiKey || "").trim();
+    const address = String(options?.address || "").trim();
+
+    if(!apiKey){
+      throw new Error("Google Maps APIキーが設定されていません。");
+    }
+    if(!address){
+      throw new Error("住所を入力してください。");
+    }
+
+    const params = new URLSearchParams({
+      address: address,
+      key: apiKey,
+      language: options?.languageCode || "ja",
+      region: options?.region || "JP"
+    });
+    const response = await fetch(GEOCODE_URL + "?" + params.toString());
+    const data = await response.json().catch(function(){
+      return {};
+    });
+
+    if(!response.ok || data?.status !== "OK" || !Array.isArray(data.results) || !data.results.length){
+      return null;
+    }
+
+    const result = data.results[0];
+    return {
+      formattedAddress: String(result?.formatted_address || ""),
+      addressComponents: Array.isArray(result?.address_components) ? result.address_components : [],
+      location: result?.geometry?.location || null
+    };
+  }
+
   global.EstimateDistanceApi = {
-    computeRouteDistance: computeRouteDistance
+    computeRouteDistance: computeRouteDistance,
+    geocodeAddress: geocodeAddress
   };
 })(typeof window !== "undefined" ? window : globalThis);

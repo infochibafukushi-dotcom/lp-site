@@ -83,6 +83,26 @@
     return configLabels.estimatedFareSection || "概算料金内訳";
   }
 
+  function buildTrafficZoneCalculationLines(snapshot){
+    if(!snapshot?.preFixedFareMode){
+      return [];
+    }
+    const lines = [];
+    if(snapshot.detectedMunicipality){
+      lines.push({ label: "判定市区町村", value: String(snapshot.detectedMunicipality) });
+    }
+    if(snapshot.selectedTrafficZoneLabel){
+      lines.push({ label: "適用交通圏", value: String(snapshot.selectedTrafficZoneLabel) });
+    }
+    if(snapshot.trafficZoneCoefficient != null){
+      const coefficient = global.EstimateTrafficZone
+        ? global.EstimateTrafficZone.formatTrafficZoneCoefficient(snapshot.trafficZoneCoefficient)
+        : String(snapshot.trafficZoneCoefficient);
+      lines.push({ label: "平準化係数", value: coefficient });
+    }
+    return lines;
+  }
+
   function buildFareCalculationLines(options){
     const snapshot = options?.quoteSnapshot || {};
     const breakdown = options?.breakdown || {};
@@ -106,14 +126,17 @@
     const lines = [
       { label: "予定距離", value: formatDistanceKm(snapshot, routePlan) },
       { label: "予定時間", value: formatDurationMinutes(snapshot, routePlan) },
-      { label: routeLabel, value: getRouteProviderLabel(snapshot.routeProvider) },
+      { label: routeLabel, value: getRouteProviderLabel(snapshot.routeProvider) }
+    ];
+    lines.push.apply(lines, buildTrafficZoneCalculationLines(snapshot));
+    lines.push(
       { label: "迎車料金", value: formatYen(pickupFee) },
       { label: "距離運賃", value: formatYen(distanceFare) },
       { label: "時間加算", value: formatYen(timeAdjustment) },
       { label: "介助料金", value: formatYen(assistanceFee + stairFee) },
       { label: "待機・付き添い料金", value: formatYen(waitingEscortFee) },
       { label: totalLabel, value: formatYen(total) + "～", isTotal: true }
-    ];
+    );
 
     return lines;
   }
@@ -146,6 +169,7 @@
     formatDurationMinutes: formatDurationMinutes,
     getRouteProviderLabel: getRouteProviderLabel,
     getFixedFareSectionTitle: getFixedFareSectionTitle,
+    buildTrafficZoneCalculationLines: buildTrafficZoneCalculationLines,
     buildFareCalculationLines: buildFareCalculationLines,
     buildFareCalculationEmailText: buildFareCalculationEmailText
   };

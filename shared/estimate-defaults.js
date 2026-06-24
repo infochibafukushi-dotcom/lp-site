@@ -26,27 +26,46 @@
     });
   }
 
-  function trafficZoneItem(id, label, coefficient, order){
+  function trafficZoneItem(id, label, coefficient, order, municipalities){
     return {
       id: id,
       label: label,
       coefficient: Number(coefficient) || 0,
-      order: order
+      order: order,
+      municipalities: Array.isArray(municipalities) ? municipalities.slice() : []
     };
   }
 
   function createDefaultTrafficZones(){
     return {
       items: [
-        trafficZoneItem("keiyo", "京葉交通圏", 1.20, 1),
-        trafficZoneItem("togashi", "東葛交通圏", 1.15, 2),
-        trafficZoneItem("chiba", "千葉交通圏", 1.18, 3),
-        trafficZoneItem("hokuso", "北総交通圏", 1.13, 4),
-        trafficZoneItem("toso", "東総交通圏", 1.13, 5),
-        trafficZoneItem("sanmu-togane", "山武東金交通圏", 1.13, 6),
-        trafficZoneItem("ichihara", "市原交通圏", 1.15, 7),
-        trafficZoneItem("gaihou", "外房交通圏", 1.13, 8),
-        trafficZoneItem("nanbou", "南房交通圏", 1.13, 9)
+        trafficZoneItem("keiyo", "京葉交通圏", 1.20, 1, [
+          "千葉市", "船橋市", "市川市", "習志野市", "八千代市", "浦安市", "四街道市", "佐倉市"
+        ]),
+        trafficZoneItem("togashi", "東葛交通圏", 1.15, 2, [
+          "松戸市", "柏市", "流山市", "野田市", "我孫子市", "鎌ケ谷市", "白井市"
+        ]),
+        trafficZoneItem("chiba", "千葉交通圏", 1.18, 3, [
+          "成田市", "匝瑳市", "富里市", "芝山町", "多古町", "神崎町", "栄町"
+        ]),
+        trafficZoneItem("hokuso", "北総交通圏", 1.13, 4, [
+          "印西市", "白井市", "富里市", "成田市", "香取市", "佐原町", "多古町"
+        ]),
+        trafficZoneItem("toso", "東総交通圏", 1.13, 5, [
+          "旭市", "匝瑳市", "東金市", "山武市", "大網白里市", "九十九里町", "芝山町"
+        ]),
+        trafficZoneItem("sanmu-togane", "山武東金交通圏", 1.13, 6, [
+          "東金市", "山武市", "大網白里市", "九十九里町", "茂原市", "長生村"
+        ]),
+        trafficZoneItem("ichihara", "市原交通圏", 1.15, 7, [
+          "市原市", "木更津市", "君津市", "富津市", "袖ケ浦市"
+        ]),
+        trafficZoneItem("gaihou", "外房交通圏", 1.13, 8, [
+          "銚子市", "旭市", "匝瑳市", "香取市", "茂原市", "東金市"
+        ]),
+        trafficZoneItem("nanbou", "南房交通圏", 1.13, 9, [
+          "館山市", "鴨川市", "南房総市", "木更津市", "君津市", "富津市"
+        ])
       ]
     };
   }

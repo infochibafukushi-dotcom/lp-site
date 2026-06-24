@@ -138,6 +138,25 @@
     return findItem(config?.trafficZones?.items, zoneId) || null;
   }
 
+  function resolveTrafficZoneDetection(config, state){
+    if(global.EstimateTrafficZone && typeof global.EstimateTrafficZone.detectTrafficZone === "function"){
+      return global.EstimateTrafficZone.detectTrafficZone(config, {
+        originAddress: state?.originAddress || state?.routePlan?.pickup?.address || "",
+        geocoding: state?.routePlan?.pickup?.geocoding || null
+      });
+    }
+    const zoneId = String(config?.preFixedFare?.trafficZoneId || "").trim();
+    const zone = findItem(config?.trafficZones?.items, zoneId);
+    return {
+      detectedMunicipality: null,
+      selectedTrafficZoneId: zone?.id || zoneId || null,
+      selectedTrafficZoneLabel: zone?.label || null,
+      trafficZoneCoefficient: zone ? Number(zone.coefficient) || null : null,
+      trafficZoneDetectionMethod: "fallback_config",
+      trafficZoneDetectionSource: "origin_address"
+    };
+  }
+
   function applyTrafficZoneCoefficient(baseDistanceFareAmount, coefficient){
     const base = Math.max(0, Math.round(Number(baseDistanceFareAmount) || 0));
     const factor = Number(coefficient);
@@ -647,7 +666,16 @@
 
     distanceFare = distanceFare * distanceMultiplier;
 
-    const fixedFareData = computeFixedFareBreakdown(config, state);
+    let trafficZoneDetection = null;
+    let computeState = state;
+    if(isPreFixedFareMode(config)){
+      trafficZoneDetection = resolveTrafficZoneDetection(config, state);
+      computeState = Object.assign({}, state, {
+        selectedTrafficZoneId: trafficZoneDetection.selectedTrafficZoneId
+      });
+    }
+
+    const fixedFareData = computeFixedFareBreakdown(config, computeState);
     if(fixedFareData.preFixedFareMeta?.adjustedDistanceFareAmount > 0){
       distanceFare = fixedFareData.preFixedFareMeta.adjustedDistanceFareAmount;
     }
@@ -697,9 +725,12 @@
       roadType: String(state.roadType || "general") === "toll" ? "toll" : "general",
       distanceKm: Number(state.distanceKm) || 0,
       selectedRouteId: String(state.routePlan?.selectedRouteId || ""),
-      selectedTrafficZoneId: preFixedMeta?.selectedTrafficZoneId || null,
-      selectedTrafficZoneLabel: preFixedMeta?.selectedTrafficZoneLabel || null,
-      trafficZoneCoefficient: preFixedMeta?.trafficZoneCoefficient ?? null,
+      selectedTrafficZoneId: preFixedMeta?.selectedTrafficZoneId || trafficZoneDetection?.selectedTrafficZoneId || null,
+      selectedTrafficZoneLabel: preFixedMeta?.selectedTrafficZoneLabel || trafficZoneDetection?.selectedTrafficZoneLabel || null,
+      trafficZoneCoefficient: preFixedMeta?.trafficZoneCoefficient ?? trafficZoneDetection?.trafficZoneCoefficient ?? null,
+      detectedMunicipality: trafficZoneDetection?.detectedMunicipality || null,
+      trafficZoneDetectionMethod: trafficZoneDetection?.trafficZoneDetectionMethod || null,
+      trafficZoneDetectionSource: trafficZoneDetection?.trafficZoneDetectionSource || null,
       baseDistanceFareAmount: preFixedMeta?.baseDistanceFareAmount ?? null,
       adjustedDistanceFareAmount: preFixedMeta?.adjustedDistanceFareAmount ?? null,
       preFixedFareMode: isPreFixedFareMode(config),

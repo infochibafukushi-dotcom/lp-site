@@ -236,7 +236,7 @@
     }).join("");
     return `
       <h3>事前確定運賃</h3>
-      <p class="note">交通圏自動判定は未実装です。事前確定運賃モード時に適用する既定交通圏を選択してください。</p>
+      <p class="note">出発地住所から交通圏を自動判定します。判定できない場合は、ここで選択した既定交通圏を適用します。</p>
       <div class="row">
         <label for="estimatePreFixedTrafficZoneId">適用交通圏</label>
         <select id="estimatePreFixedTrafficZoneId">
@@ -255,11 +255,15 @@
       return `<p class="note">交通圏係数が設定されていません。</p>`;
     }
     const rows = items.map(function(zone, index){
+      const municipalities = Array.isArray(zone.municipalities)
+        ? zone.municipalities.join("\n")
+        : String(zone.municipalities || "");
       return `
         <tr>
           <td><input type="text" data-traffic-zone-field="id" data-traffic-zone-index="${index}" value="${escapeAttr(zone.id || "")}" readonly></td>
           <td><input type="text" data-traffic-zone-field="label" data-traffic-zone-index="${index}" value="${escapeAttr(zone.label || "")}"></td>
           <td><input type="number" min="0" step="0.01" data-traffic-zone-field="coefficient" data-traffic-zone-index="${index}" value="${escapeAttr(zone.coefficient ?? 0)}"></td>
+          <td><textarea rows="3" data-traffic-zone-field="municipalities" data-traffic-zone-index="${index}" placeholder="1行に1市区町村">${escapeHtml(municipalities)}</textarea></td>
           <td><input type="number" min="0" step="1" data-traffic-zone-field="order" data-traffic-zone-index="${index}" value="${escapeAttr(zone.order ?? (index + 1))}"></td>
         </tr>
       `;
@@ -272,6 +276,7 @@
               <th>ID</th>
               <th>交通圏名</th>
               <th>係数</th>
+              <th>対象市区町村</th>
               <th>並び順</th>
             </tr>
           </thead>
@@ -632,6 +637,11 @@
       if(Number.isNaN(index) || !field || !draft.trafficZones.items[index]) return;
       if(el.type === "number"){
         draft.trafficZones.items[index][field] = Number(el.value);
+      }else if(field === "municipalities"){
+        draft.trafficZones.items[index][field] = String(el.value || "")
+          .split(/[\n,、，]/)
+          .map(function(item){ return String(item || "").trim(); })
+          .filter(Boolean);
       }else{
         draft.trafficZones.items[index][field] = el.value;
       }
@@ -697,6 +707,12 @@
       item.label = String(item.label || item.id);
       item.coefficient = Number(item.coefficient) || 0;
       item.order = Number(item.order) || (index + 1);
+      if(!Array.isArray(item.municipalities)){
+        item.municipalities = String(item.municipalities || "")
+          .split(/[\n,、，]/)
+          .map(function(name){ return String(name || "").trim(); })
+          .filter(Boolean);
+      }
     });
     return draft;
   }

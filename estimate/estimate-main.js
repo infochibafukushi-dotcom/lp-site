@@ -808,7 +808,7 @@
 
     let shouldRenderPage = false;
     try{
-      const result = await window.EstimateDistanceApi.computeRouteDistance({
+      const routePromise = window.EstimateDistanceApi.computeRouteDistance({
         apiKey: apiKey,
         origin: origin,
         destination: destination,
@@ -816,6 +816,19 @@
         languageCode: mapsConfig.language || "ja",
         region: mapsConfig.region || "JP"
       });
+      const geocodePromise = typeof window.EstimateDistanceApi.geocodeAddress === "function"
+        ? window.EstimateDistanceApi.geocodeAddress({
+          apiKey: apiKey,
+          address: origin,
+          languageCode: mapsConfig.language || "ja",
+          region: mapsConfig.region || "JP"
+        }).catch(function(){
+          return null;
+        })
+        : Promise.resolve(null);
+      const results = await Promise.all([routePromise, geocodePromise]);
+      const result = results[0];
+      const geocoding = results[1];
       state.routeCalcResult = {
         distanceKm: result.distanceKm,
         durationMinutes: result.durationMinutes
@@ -833,7 +846,8 @@
         routes: Array.isArray(result.routes) ? result.routes : [],
         pickup: {
           address: origin,
-          latLng: null
+          latLng: geocoding?.location || null,
+          geocoding: geocoding || null
         },
         destination: {
           address: destination,
@@ -1134,15 +1148,28 @@
     ];
 
     const fareRows = [];
+    const trafficZoneRows = [];
     if(snapshot.preFixedFareMode){
       if(snapshot.baseDistanceFareAmount != null){
         fareRows.push(["認可距離制運賃", formatCalcBasisYen(snapshot.baseDistanceFareAmount)]);
       }
+      if(snapshot.detectedMunicipality){
+        trafficZoneRows.push(["判定市区町村", snapshot.detectedMunicipality]);
+      }
       if(snapshot.selectedTrafficZoneLabel){
-        fareRows.push(["適用交通圏", snapshot.selectedTrafficZoneLabel]);
+        trafficZoneRows.push(["適用交通圏", snapshot.selectedTrafficZoneLabel]);
       }
       if(snapshot.trafficZoneCoefficient != null){
-        fareRows.push(["平準化係数", String(snapshot.trafficZoneCoefficient)]);
+        const coefficientLabel = window.EstimateTrafficZone
+          ? window.EstimateTrafficZone.formatTrafficZoneCoefficient(snapshot.trafficZoneCoefficient)
+          : String(snapshot.trafficZoneCoefficient);
+        trafficZoneRows.push(["平準化係数", coefficientLabel]);
+      }
+      if(snapshot.trafficZoneDetectionMethod){
+        const methodLabel = window.EstimateTrafficZone
+          ? window.EstimateTrafficZone.getTrafficZoneDetectionMethodLabel(snapshot.trafficZoneDetectionMethod)
+          : snapshot.trafficZoneDetectionMethod;
+        trafficZoneRows.push(["判定方法", methodLabel]);
       }
       if(snapshot.adjustedDistanceFareAmount != null){
         fareRows.push(["事前確定運賃", formatCalcBasisYen(snapshot.adjustedDistanceFareAmount)]);
@@ -1191,6 +1218,7 @@
       "<div class=\"estimate-calc-basis-panel\" id=\"estimateCalcBasisPanel\" hidden>" +
       "<h4 class=\"estimate-calc-basis-title\">" + escapeHtml(basisTitle) + "</h4>" +
       renderCalcBasisSection("ルート算出情報", routeRows) +
+      (trafficZoneRows.length ? renderCalcBasisSection("交通圏情報", trafficZoneRows) : "") +
       renderCalcBasisSection("運賃計算情報", fareRows) +
       renderCalcBasisSection("サービス料金", serviceRows) +
       renderCalcBasisSection("合計", [["見積金額", formatCalcBasisYen(result.total)]]) +

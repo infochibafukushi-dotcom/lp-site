@@ -84,7 +84,12 @@
       });
       data.trafficZones = {
         items: defaultItems.map(function(item){
-          return Object.assign({}, item, map[item.id] || {});
+          const current = map[item.id] || {};
+          const merged = Object.assign({}, item, current);
+          if(!Array.isArray(merged.municipalities) || !merged.municipalities.length){
+            merged.municipalities = Array.isArray(item.municipalities) ? item.municipalities.slice() : [];
+          }
+          return merged;
         })
       };
     }

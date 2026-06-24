@@ -50,15 +50,69 @@
   },
   "trafficZones": {
     "items": [
-      { "id": "keiyo", "label": "京葉交通圏", "coefficient": 1.20, "order": 1 },
-      { "id": "togashi", "label": "東葛交通圏", "coefficient": 1.15, "order": 2 },
-      { "id": "chiba", "label": "千葉交通圏", "coefficient": 1.18, "order": 3 },
-      { "id": "hokuso", "label": "北総交通圏", "coefficient": 1.13, "order": 4 },
-      { "id": "toso", "label": "東総交通圏", "coefficient": 1.13, "order": 5 },
-      { "id": "sanmu-togane", "label": "山武東金交通圏", "coefficient": 1.13, "order": 6 },
-      { "id": "ichihara", "label": "市原交通圏", "coefficient": 1.15, "order": 7 },
-      { "id": "gaihou", "label": "外房交通圏", "coefficient": 1.13, "order": 8 },
-      { "id": "nanbou", "label": "南房交通圏", "coefficient": 1.13, "order": 9 }
+      {
+        "id": "keiyo",
+        "label": "京葉交通圏",
+        "coefficient": 1.20,
+        "order": 1,
+        "municipalities": ["千葉市", "船橋市", "市川市", "習志野市", "八千代市", "浦安市", "四街道市", "佐倉市"]
+      },
+      {
+        "id": "togashi",
+        "label": "東葛交通圏",
+        "coefficient": 1.15,
+        "order": 2,
+        "municipalities": ["松戸市", "柏市", "流山市", "野田市", "我孫子市", "鎌ケ谷市", "白井市"]
+      },
+      {
+        "id": "chiba",
+        "label": "千葉交通圏",
+        "coefficient": 1.18,
+        "order": 3,
+        "municipalities": ["成田市", "匝瑳市", "富里市", "芝山町", "多古町", "神崎町", "栄町"]
+      },
+      {
+        "id": "hokuso",
+        "label": "北総交通圏",
+        "coefficient": 1.13,
+        "order": 4,
+        "municipalities": ["印西市", "白井市", "富里市", "成田市", "香取市", "佐原町", "多古町"]
+      },
+      {
+        "id": "toso",
+        "label": "東総交通圏",
+        "coefficient": 1.13,
+        "order": 5,
+        "municipalities": ["旭市", "匝瑳市", "東金市", "山武市", "大網白里市", "九十九里町", "芝山町"]
+      },
+      {
+        "id": "sanmu-togane",
+        "label": "山武東金交通圏",
+        "coefficient": 1.13,
+        "order": 6,
+        "municipalities": ["東金市", "山武市", "大網白里市", "九十九里町", "茂原市", "長生村"]
+      },
+      {
+        "id": "ichihara",
+        "label": "市原交通圏",
+        "coefficient": 1.15,
+        "order": 7,
+        "municipalities": ["市原市", "木更津市", "君津市", "富津市", "袖ケ浦市"]
+      },
+      {
+        "id": "gaihou",
+        "label": "外房交通圏",
+        "coefficient": 1.13,
+        "order": 8,
+        "municipalities": ["銚子市", "旭市", "匝瑳市", "香取市", "茂原市", "東金市"]
+      },
+      {
+        "id": "nanbou",
+        "label": "南房交通圏",
+        "coefficient": 1.13,
+        "order": 9,
+        "municipalities": ["館山市", "鴨川市", "南房総市", "木更津市", "君津市", "富津市"]
+      }
     ]
   },
   "preFixedFare": {
