@@ -169,9 +169,9 @@
       titleGap: 4,
       headingGap: 3,
       footerTopGap: 8,
-      pagePadTop: 2,
-      pagePadBottom: 0,
-      routeMapHeight: 240,
+      pagePadTop: 8,
+      pagePadBottom: 8,
+      routeMapHeight: 180,
       routeMapTitleGap: 4,
       routeMapInfoGap: 4,
       routeMapBottomGap: 6
@@ -231,7 +231,7 @@
       next.sectionFont = 12.5;
       next.totalFont = 22;
       next.footerQrSize = 38;
-      next.routeMapHeight = 190;
+      next.routeMapHeight = 170;
     }
 
     if(usageCount >= 7){
@@ -245,14 +245,20 @@
     }
 
     if(hasMap){
-      next.routeMapHeight = breakdownCount >= 8 ? 190 : (breakdownCount >= 6 ? 210 : 240);
-      next.sectionGap = Math.max(4, next.sectionGap - 1);
-      next.footerTopGap = Math.max(6, next.footerTopGap - 2);
+      next.routeMapHeight = breakdownCount >= 8 ? 160 : (breakdownCount >= 6 ? 170 : 180);
+      next.sectionGap = Math.max(3, next.sectionGap - 1);
+      next.footerTopGap = Math.max(4, next.footerTopGap - 2);
+      next.pagePadTop = Math.max(6, next.pagePadTop - 1);
+      next.pagePadBottom = Math.max(6, next.pagePadBottom - 1);
     }
 
     if(hasFooter && hasMap && breakdownCount >= 7){
-      next.footerQrSize = 40;
-      next.routeMapHeight = Math.min(next.routeMapHeight, 200);
+      next.footerQrSize = 36;
+      next.routeMapHeight = Math.min(next.routeMapHeight, 170);
+    }
+
+    if(hasMap || breakdownCount >= 5){
+      next.footerQrSize = Math.min(next.footerQrSize, 40);
     }
 
     return next;
@@ -269,7 +275,7 @@
       }else if(key === "footerQrSize"){
         min = 32;
       }else if(key === "routeMapHeight"){
-        min = 150;
+        min = 130;
       }else if(key === "breakdownFont" || key === "baseFont"){
         min = 9;
       }
@@ -571,6 +577,47 @@
     );
   }
 
+  function buildFareCalculationMethodHtml(data, layout){
+    if(!global.EstimateFareDisplay || typeof global.EstimateFareDisplay.buildFareCalculationLines !== "function"){
+      return "";
+    }
+    const lines = global.EstimateFareDisplay.buildFareCalculationLines({
+      quoteSnapshot: data.quoteSnapshot,
+      breakdown: data.breakdown,
+      total: data.total,
+      routePlan: data.routePlan,
+      routeLabel: "ルート算出システム",
+      totalLabel: "合計料金"
+    });
+    if(!lines.length){
+      return "";
+    }
+    const rowsHtml = lines.map(function(line){
+      return (
+        "<tr>" +
+        "<td style=\"padding:" + Math.max(2, layout.breakdownCellPadV - 1) + "px " + layout.breakdownLabelPadRight + "px " +
+        Math.max(2, layout.breakdownCellPadV - 1) + "px 0;border-bottom:1px solid #e8e8e8;color:#555;\">" +
+        escapeHtml(line.label) +
+        "</td>" +
+        "<td style=\"padding:" + Math.max(2, layout.breakdownCellPadV - 1) + "px 0;border-bottom:1px solid #e8e8e8;" +
+        (line.isTotal ? "font-weight:700;color:#c62828;" : "font-weight:600;") + "\">" +
+        escapeHtml(line.value) +
+        "</td>" +
+        "</tr>"
+      );
+    }).join("");
+    const sectionFont = Math.max(10, layout.sectionFont - 0.5);
+    const bodyFont = Math.max(9, layout.baseFont - 0.5);
+    return (
+      "<div class=\"estimate-pdf-calc-method\" style=\"margin:" + Math.max(4, layout.sectionGap) + "px 0 " + layout.sectionGap + "px;\">" +
+      "<h2 style=\"margin:0 0 " + layout.headingGap + "px;font-size:" + sectionFont + "px;color:#9a6b16;line-height:1.22;\">料金の計算方法</h2>" +
+      "<table style=\"width:100%;border-collapse:collapse;font-size:" + bodyFont + "px;line-height:" + Math.max(1.28, layout.lineHeight - 0.08) + ";\">" +
+      rowsHtml +
+      "</table>" +
+      "</div>"
+    );
+  }
+
   function buildQuoteSnapshotMetaHtml(quoteSnapshot){
     if(!quoteSnapshot){
       return "";
@@ -684,6 +731,8 @@
     const footerHtml = buildPdfFooterHtml(data.pdfFooter, layout, qrDataUrls);
     const routeMapHtml = buildRouteMapHtml(data.routeMapDataUrl, layout, data.routePlan);
 
+    const fareCalculationHtml = buildFareCalculationMethodHtml(data, layout);
+
     const bodyFont = layout.baseFont + "px";
     const breakdownFont = layout.breakdownFont + "px";
     const tableStyle =
@@ -706,7 +755,7 @@
     const mainContentHtml =
         "<h1 style=\"margin:0 0 " + layout.titleGap + "px;font-size:" + layout.titleFont + "px;line-height:1.18;letter-spacing:.02em;\">概算見積書</h1>" +
         "<p style=\"margin:0 0 " + layout.sectionGap + "px;font-size:" + layout.metaFont + "px;color:#666;line-height:" + layout.lineHeight + ";\">" +
-          escapeHtml(data.pageTitle || "概算見積シミュレーター") +
+          escapeHtml(data.pageTitle || "かんたん料金確認") +
         "</p>" +
         "<table style=\"width:100%;border-collapse:collapse;margin-bottom:" + layout.sectionGap + "px;font-size:" + layout.metaFont + "px;line-height:" + layout.lineHeight + ";\">" +
           "<tr><td style=\"padding:" + layout.cellPadV + "px 0;color:#666;width:26%;\">見積番号</td><td style=\"padding:" + layout.cellPadV + "px 0;font-weight:700;\">" + escapeHtml(data.estimateNumber || "") + "</td></tr>" +
@@ -723,6 +772,7 @@
           "</table>" +
         "</div>" +
         "<div class=\"estimate-pdf-total-section\">" + totalHtml + "</div>" +
+        fareCalculationHtml +
         resultNotesHtml;
 
     const footerBlockHtml = footerHtml

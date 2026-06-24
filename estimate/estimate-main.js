@@ -402,6 +402,12 @@
   function getFareSections(result){
     const labels = state.config.resultLabels || {};
     const snapshot = result.quoteSnapshot || {};
+    const fareMode = snapshot.fareMode || state.config.fareMode || "";
+    const fixedFareTitle = window.EstimateFareDisplay
+      ? window.EstimateFareDisplay.getFixedFareSectionTitle(fareMode, labels)
+      : (fareMode === "pre_fixed_fare"
+        ? (labels.fixedFareSection || "事前確定運賃")
+        : (labels.estimatedFareSection || "概算料金内訳"));
     const fixedFareRows = Array.isArray(snapshot.fixedFareBreakdown)
       ? snapshot.fixedFareBreakdown.map(function(row){
         return {
@@ -430,7 +436,7 @@
     return [
       {
         key: "fixedFare",
-        title: labels.fixedFareSection || "事前確定運賃",
+        title: fixedFareTitle,
         rows: fixedFareRows
       },
       {
@@ -1014,7 +1020,10 @@
     const fallback =
       "※表示料金は概算です。\n" +
       "※実際の料金は運行距離、交通状況、待機時間、付き添い時間、介助内容等により変動する場合があります。";
-    const fixedFareNotice = String(state.config.page?.preFixedFareNotice || "").trim();
+    const fareMode = state.config.fareMode || "";
+    const fixedFareNotice = fareMode === "pre_fixed_fare"
+      ? String(state.config.page?.preFixedFareNotice || "").trim()
+      : "";
     const base = state.config.page?.resultNotes || fallback;
     return fixedFareNotice ? (base + "\n\n" + fixedFareNotice) : base;
   }
@@ -1160,20 +1169,27 @@
       ]
     ];
 
+    const labels = state.config.resultLabels || {};
+    const basisToggleOpen = labels.calcBasisToggleOpen || "料金の計算方法を見る";
+    const basisToggleClose = labels.calcBasisToggleClose || "料金の計算方法を閉じる";
+    const basisTitle = labels.calcBasisTitle || "料金の計算方法";
+
     const basisNotes = [
       "※本見積は出発地・目的地から算出した推計ルートに基づいています。",
       "※道路状況、交通規制、利用者様のご要望等により実際の運行内容が変更となる場合があります。",
-      "※有料道路料金、駐車料金等の実費は別途ご負担となる場合があります。",
-      "※事前確定運賃は認可運賃および適用係数に基づき算出しています。"
+      "※有料道路料金、駐車料金等の実費は別途ご負担となる場合があります。"
     ];
+    if(snapshot.preFixedFareMode){
+      basisNotes.push("※事前確定運賃は認可運賃および適用係数に基づき算出しています。");
+    }
 
     return (
       "<div class=\"estimate-calc-basis\">" +
       "<button type=\"button\" class=\"estimate-calc-basis-toggle\" id=\"estimateCalcBasisToggle\" aria-expanded=\"false\" aria-controls=\"estimateCalcBasisPanel\">" +
-      "料金算出根拠を見る" +
+      escapeHtml(basisToggleOpen) +
       "</button>" +
       "<div class=\"estimate-calc-basis-panel\" id=\"estimateCalcBasisPanel\" hidden>" +
-      "<h4 class=\"estimate-calc-basis-title\">料金算出根拠</h4>" +
+      "<h4 class=\"estimate-calc-basis-title\">" + escapeHtml(basisTitle) + "</h4>" +
       renderCalcBasisSection("ルート算出情報", routeRows) +
       renderCalcBasisSection("運賃計算情報", fareRows) +
       renderCalcBasisSection("サービス料金", serviceRows) +
@@ -1405,7 +1421,7 @@
     root.innerHTML = `
       <div class="estimate-wrap">
         <div class="estimate-header">
-          <h1 class="estimate-title">${escapeHtml(state.config.page?.title || "概算見積シミュレーター")}</h1>
+          <h1 class="estimate-title">${escapeHtml(state.config.page?.title || "かんたん料金確認")}</h1>
           <button type="button" class="estimate-reset-btn" id="estimateResetBtn">最初からやり直す</button>
         </div>
         <p class="estimate-lead">${escapeHtml(state.config.page?.description || "")}</p>
@@ -1460,8 +1476,11 @@
         event.preventDefault();
         const panel = document.getElementById("estimateCalcBasisPanel");
         const expanded = basisToggle.getAttribute("aria-expanded") === "true";
+        const labels = state.config.resultLabels || {};
+        const basisToggleOpen = labels.calcBasisToggleOpen || "料金の計算方法を見る";
+        const basisToggleClose = labels.calcBasisToggleClose || "料金の計算方法を閉じる";
         basisToggle.setAttribute("aria-expanded", expanded ? "false" : "true");
-        basisToggle.textContent = expanded ? "料金算出根拠を見る" : "料金算出根拠を閉じる";
+        basisToggle.textContent = expanded ? basisToggleOpen : basisToggleClose;
         if(panel) panel.hidden = expanded;
       }
     });
@@ -1504,6 +1523,7 @@
         resultNotes: getResultNotes(),
         pdfFooter: state.config.pdfFooter || {},
         pageTitle: state.config.page?.title || "",
+        breakdown: result.breakdown,
         routePlan: state.routePlan || result.routePlan || null,
         googleMaps: state.config.googleMaps || {}
       });

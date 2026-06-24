@@ -554,8 +554,8 @@
     "sectionId": "gaisan-mitsumori-simulator",
     "type": "normal",
     "enabled": true,
-    "title": "概算見積シミュレーター",
-    "text": "料金の目安を簡単に確認できます。\n\n移動方法や介助内容、距離を入力すると概算料金を自動計算できます。",
+    "title": "料金確認・ご予約はこちら",
+    "text": "料金の目安を簡単に確認できます。\n\n移動方法や介助内容、距離を入力すると料金の目安をご確認いただけます。",
     "textSize": "medium",
     "bgColor": "#f7f5f0",
     "alignY": "middle",
@@ -567,7 +567,7 @@
     "items": [],
     "links": [
       {
-        "text": "概算見積をする",
+        "text": "料金を確認する",
         "url": "./estimate/",
         "visible": true
       },
