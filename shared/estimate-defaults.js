@@ -43,8 +43,7 @@
       },
       basicFees: {
         baseFare: item("baseFare", "基本運賃", 0, "distance・distance_time 方式では初乗運賃は距離運賃に含まれます（本項目は未使用）。", 1, { visible: false }),
-        reservationFee: item("reservationFee", "予約料金", 400, "", 2),
-        pickupFee: item("pickupFee", "迎車料金", 500, "", 3)
+        pickupFee: item("pickupFee", "迎車料金", 800, "", 2)
       },
       distancePricing: {
         mode: "patternA",
@@ -67,12 +66,6 @@
       fareComponents: {
         time: [
           {
-            key: "reservationFee",
-            label: "予約料金",
-            calculator: "fixed_fee_ref",
-            feeRef: "reservationFee"
-          },
-          {
             key: "timeBaseFare",
             label: "時間制運賃",
             calculator: "time_block",
@@ -86,12 +79,10 @@
           { key: "pickupFee", label: "迎車料金", calculator: "fixed_fee_ref", feeRef: "pickupFee" }
         ],
         distance: [
-          { key: "reservationFee", label: "予約料金", calculator: "fixed_fee_ref", feeRef: "reservationFee" },
           { key: "pickupFee", label: "迎車料金", calculator: "fixed_fee_ref", feeRef: "pickupFee" },
           { key: "distanceFare", label: "距離運賃", calculator: "distance_pricing_ref", pricingRef: "distancePricing" }
         ],
         distance_time: [
-          { key: "reservationFee", label: "予約料金", calculator: "fixed_fee_ref", feeRef: "reservationFee" },
           { key: "pickupFee", label: "迎車料金", calculator: "fixed_fee_ref", feeRef: "pickupFee" },
           { key: "distanceFare", label: "距離運賃", calculator: "distance_pricing_ref", pricingRef: "distancePricing" },
           {
@@ -185,8 +176,6 @@
       },
       resultLabels: {
         baseFare: "基本運賃",
-        reservationPickupFee: "予約・迎車料金",
-        reservationFee: "予約料金",
         pickupFee: "迎車料金",
         distanceFare: "距離運賃",
         wheelchairFee: "車いす料金",

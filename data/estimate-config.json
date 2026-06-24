@@ -21,21 +21,13 @@
       "visible": false,
       "order": 1
     },
-    "reservationFee": {
-      "id": "reservationFee",
-      "label": "予約料金",
-      "description": "",
-      "amount": 400,
-      "visible": true,
-      "order": 2
-    },
     "pickupFee": {
       "id": "pickupFee",
       "label": "迎車料金",
       "description": "",
-      "amount": 500,
+      "amount": 800,
       "visible": true,
-      "order": 3
+      "order": 2
     }
   },
   "googleMaps": {
@@ -77,12 +69,6 @@
   "fareComponents": {
     "time": [
       {
-        "key": "reservationFee",
-        "label": "予約料金",
-        "calculator": "fixed_fee_ref",
-        "feeRef": "reservationFee"
-      },
-      {
         "key": "timeBaseFare",
         "label": "時間制運賃",
         "calculator": "time_block",
@@ -102,12 +88,6 @@
     ],
     "distance": [
       {
-        "key": "reservationFee",
-        "label": "予約料金",
-        "calculator": "fixed_fee_ref",
-        "feeRef": "reservationFee"
-      },
-      {
         "key": "pickupFee",
         "label": "迎車料金",
         "calculator": "fixed_fee_ref",
@@ -121,12 +101,6 @@
       }
     ],
     "distance_time": [
-      {
-        "key": "reservationFee",
-        "label": "予約料金",
-        "calculator": "fixed_fee_ref",
-        "feeRef": "reservationFee"
-      },
       {
         "key": "pickupFee",
         "label": "迎車料金",
@@ -423,8 +397,6 @@
   },
   "resultLabels": {
     "baseFare": "基本運賃",
-    "reservationPickupFee": "予約・迎車料金",
-    "reservationFee": "予約料金",
     "pickupFee": "迎車料金",
     "distanceFare": "距離運賃",
     "wheelchairFee": "車いす料金",

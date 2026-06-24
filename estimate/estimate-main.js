@@ -1174,7 +1174,7 @@
         roadType: state.roadType
       },
       handoffSource: "lp-site-estimate",
-      dtoVersion: 1
+      dtoVersion: 2
     });
   }
 

@@ -120,15 +120,6 @@
     return "time";
   }
 
-  function reservationFeeComponent(config){
-    return {
-      key: "reservationFee",
-      label: config?.resultLabels?.reservationFee || "予約料金",
-      calculator: "fixed_fee_ref",
-      feeRef: "reservationFee"
-    };
-  }
-
   function pickupFeeComponent(config){
     return {
       key: "pickupFee",
@@ -141,7 +132,6 @@
   function getDefaultFareComponents(config){
     return {
       time: [
-        reservationFeeComponent(config),
         {
           key: "timeBaseFare",
           label: "時間制運賃",
@@ -156,12 +146,10 @@
         pickupFeeComponent(config)
       ],
       distance: [
-        reservationFeeComponent(config),
         pickupFeeComponent(config),
         { key: "distanceFare", label: "距離運賃", calculator: "distance_pricing_ref", pricingRef: "distancePricing" }
       ],
       distance_time: [
-        reservationFeeComponent(config),
         pickupFeeComponent(config),
         { key: "distanceFare", label: "距離運賃", calculator: "distance_pricing_ref", pricingRef: "distancePricing" },
         {
@@ -483,7 +471,6 @@
 
     const basic = config.basicFees || {};
     const baseFare = getFeeAmount(basic.baseFare);
-    const reservationFee = getFeeAmount(basic.reservationFee);
     const pickupFee = getFeeAmount(basic.pickupFee);
     let distanceFare = calcDistanceFare(state.distanceKm, config.distancePricing);
 
@@ -543,7 +530,6 @@
 
     const breakdown = {
       baseFare: baseFare,
-      reservationFee: reservationFee,
       pickupFee: pickupFee,
       distanceFare: distanceFare,
       wheelchairFee: wheelchairFee,
@@ -561,7 +547,6 @@
       fareBasis: fareBasis,
       fixedFareTotal: fixedFareData.fixedFareTotal,
       fixedFareBreakdown: fixedFareData.fixedFareBreakdown,
-      reservationFee: reservationFee,
       pickupFee: pickupFee,
       serviceFees: serviceFees,
       expenses: expenses,

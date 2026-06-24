@@ -260,7 +260,7 @@ function buildCaseData(config, routePlan, testCase, routeMapDataUrl){
         title: "事前確定運賃",
         rows: [
           { label: "時間制運賃", amount: 6200 },
-          { label: "迎車料金", amount: 900 }
+          { label: "迎車料金", amount: 800 }
         ]
       },
       {
@@ -283,7 +283,7 @@ function buildCaseData(config, routePlan, testCase, routeMapDataUrl){
         title: "事前確定運賃",
         rows: [
           { label: "基本運賃", amount: 730 },
-          { label: "迎車料金", amount: 900 },
+          { label: "迎車料金", amount: 800 },
           { label: "距離運賃", amount: 3460 }
         ]
       },
