@@ -20,7 +20,9 @@
     estimateNumber: "",
     estimateCreatedAt: "",
     selectionFingerprint: "",
-    lastActiveStepId: ""
+    lastActiveStepId: "",
+    quoteRegisterStatus: "",
+    quoteRegisterMessage: ""
   };
 
   let delegatedBound = false;
@@ -107,6 +109,8 @@
     if(state.selectionFingerprint && state.selectionFingerprint !== fp){
       state.estimateNumber = "";
       state.estimateCreatedAt = "";
+      state.quoteRegisterStatus = "";
+      state.quoteRegisterMessage = "";
     }
     state.selectionFingerprint = fp;
   }
@@ -355,6 +359,8 @@
     state.estimateCreatedAt = "";
     state.selectionFingerprint = "";
     state.lastActiveStepId = "";
+    state.quoteRegisterStatus = "";
+    state.quoteRegisterMessage = "";
     renderPage();
     requestAnimationFrame(function(){
       const el = document.querySelector('[data-step-id="' + stepId + '"]');
@@ -384,6 +390,8 @@
     state.estimateCreatedAt = "";
     state.selectionFingerprint = "";
     state.lastActiveStepId = "";
+    state.quoteRegisterStatus = "";
+    state.quoteRegisterMessage = "";
     if(window.EstimateUrl?.clearUrlState){
       window.EstimateUrl.clearUrlState();
     }
@@ -1311,9 +1319,8 @@
     return base;
   }
 
-  function persistHandoff(result){
-    if(!window.EstimateHandoff || !state.estimateNumber) return;
-    window.EstimateHandoff.saveHandoffRecord({
+  function buildHandoffRecord(result){
+    return {
       estimateNumber: state.estimateNumber,
       createdAt: state.estimateCreatedAt,
       total: result.total,
@@ -1332,14 +1339,61 @@
       },
       handoffSource: "lp-site-estimate",
       dtoVersion: 2
-    });
+    };
+  }
+
+  async function persistHandoff(result){
+    if(!window.EstimateHandoff || !state.estimateNumber) return;
+    const handoff = buildHandoffRecord(result);
+    window.EstimateHandoff.saveHandoffRecord(handoff);
+    state.quoteRegisterStatus = "pending";
+    state.quoteRegisterMessage = "";
+    if(!window.EstimateQuoteRegister || typeof window.EstimateQuoteRegister.registerQuoteFromHandoff !== "function"){
+      state.quoteRegisterStatus = "warn";
+      state.quoteRegisterMessage = window.EstimateQuoteRegister?.REGISTER_WARN_MESSAGE
+        || "見積のサーバー登録に失敗しました。予約は可能ですが、表示内容が最新でない場合があります。お困りの際はお電話ください。";
+      return;
+    }
+    try{
+      const registerResult = await window.EstimateQuoteRegister.registerQuoteFromHandoff(handoff);
+      if(registerResult.ok){
+        state.quoteRegisterStatus = "ok";
+        state.quoteRegisterMessage = "";
+        return;
+      }
+      state.quoteRegisterStatus = "warn";
+      state.quoteRegisterMessage = registerResult.userMessage
+        || window.EstimateQuoteRegister.REGISTER_WARN_MESSAGE;
+    }catch(error){
+      state.quoteRegisterStatus = "warn";
+      state.quoteRegisterMessage = window.EstimateQuoteRegister?.REGISTER_WARN_MESSAGE
+        || "見積のサーバー登録に失敗しました。予約は可能ですが、表示内容が最新でない場合があります。お困りの際はお電話ください。";
+    }
   }
 
   function syncHandoffForResult(result){
     if(!window.EstimateHandoff) return;
-    void ensureEstimateNumber(result).then(function(){
+    void (async function(){
+      try{
+        await ensureEstimateNumber(result);
+        if(!state.estimateCreatedAt){
+          state.estimateCreatedAt = new Date().toISOString();
+        }
+        await persistHandoff(result);
+      }catch(error){
+        state.quoteRegisterStatus = "warn";
+        state.quoteRegisterMessage = window.EstimateQuoteRegister?.REGISTER_WARN_MESSAGE
+          || "見積のサーバー登録に失敗しました。予約は可能ですが、表示内容が最新でない場合があります。お困りの際はお電話ください。";
+      }
       refreshResultSection(result);
-    });
+    })();
+  }
+
+  function renderRegisterWarningBox(){
+    if(state.quoteRegisterStatus !== "warn" || !state.quoteRegisterMessage){
+      return "";
+    }
+    return `<div class="estimate-register-warning" role="status">${escapeHtml(state.quoteRegisterMessage)}</div>`;
   }
 
   function renderResult(result){
@@ -1386,6 +1440,7 @@
       <section class="estimate-result" aria-live="polite" aria-atomic="true">
         <h3>見積結果</h3>
         ${renderEstimateNumberBox()}
+        ${renderRegisterWarningBox()}
         ${routeCardHtml}
         ${renderUsageSummary(result)}
         ${renderFareBasis(result)}
@@ -1531,7 +1586,6 @@
     }
     state.estimateNumber = window.EstimateNumber.issueLocalEstimateNumber();
     state.estimateCreatedAt = new Date().toISOString();
-    persistHandoff(result);
     return state.estimateNumber;
   }
 
@@ -1545,6 +1599,7 @@
     try{
       const result = window.EstimateCalc.computeEstimate(state.config, state);
       await ensureEstimateNumber(result);
+      await persistHandoff(result);
       if(!window.EstimatePdf){
         throw new Error("PDF モジュールが読み込まれていません。");
       }
