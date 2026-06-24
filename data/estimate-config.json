@@ -1,7 +1,7 @@
 {
   "enabled": true,
   "version": 1,
-  "updatedAt": "2026-06-21T12:00:00.000Z",
+  "updatedAt": "2026-06-24T02:02:22.827Z",
   "page": {
     "title": "概算見積シミュレーター",
     "description": "ご利用内容を選択すると概算料金を確認できます。\n実際の料金は運行ルートや介助内容等により変動する場合があります。",
@@ -145,9 +145,9 @@
       "label": "移動方法",
       "items": [
         {
-          "id": "cane-walk",
-          "label": "杖・歩行器",
-          "description": "杖や歩行器での移動に対応します。",
+          "id": "free-wheelchair",
+          "label": "無料車いす",
+          "description": "当社の標準車いすを無料でご利用いただけます。",
           "amount": 0,
           "visible": true,
           "order": 1
@@ -161,26 +161,26 @@
           "order": 2
         },
         {
-          "id": "free-wheelchair",
-          "label": "無料車いす",
-          "description": "当社の標準車いすを無料でご利用いただけます。",
-          "amount": 0,
-          "visible": true,
-          "order": 3
-        },
-        {
           "id": "reclining-wheelchair",
           "label": "リクライニング車いす",
           "description": "長時間の移動や座位保持が難しい方向けのリクライニング式車いすです。",
           "amount": 2500,
           "visible": true,
-          "order": 4
+          "order": 3
         },
         {
           "id": "stretcher",
           "label": "ストレッチャー",
           "description": "寝たままの状態で搬送できる設備です。座ることが難しい方に対応します。",
           "amount": 4000,
+          "visible": true,
+          "order": 4
+        },
+        {
+          "id": "cane-walk",
+          "label": "杖・歩行器",
+          "description": "杖や歩行器での移動に対応します。",
+          "amount": 0,
           "visible": true,
           "order": 5
         }
