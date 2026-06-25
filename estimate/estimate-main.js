@@ -207,6 +207,8 @@
     const outbound = routePlan.outboundRoutePlan;
     const primaryRoute = window.EstimateCalc.getLegPrimaryRoute(outbound);
     return Object.assign({}, routePlan, {
+      tripType: routePlan.tripType || null,
+      returnPlanType: routePlan.returnPlanType || null,
       provider: outbound.provider || "google_routes",
       roadType: outbound.roadType || routePlan.roadType || "general",
       selectedRouteId: String(outbound.selectedRouteId || primaryRoute?.routeId || ""),
@@ -2355,7 +2357,10 @@
     const plannedDuration = formatRouteDurationSeconds(routePlan?.totalDurationSeconds || primaryRoute?.durationSeconds || routePlan?.durationSeconds || 0);
     const roadTypeLabel = getRoadTypeLabel(routePlan?.roadType || state.roadType);
     const roundTripStatusHtml = isPreFixedFareMode() && routePlan && window.PreFixedFareStatus
-      ? window.PreFixedFareStatus.buildStatusHtml(routePlan, { escapeHtml: escapeHtml })
+      ? window.PreFixedFareStatus.buildStatusHtml(routePlan, {
+        escapeHtml: escapeHtml,
+        returnPlanType: getActiveReturnPlanType()
+      })
       : "";
     const routeCardHtml = routePlan ? `
       <section class="estimate-route-preview" aria-label="走行予定ルート">
@@ -2606,6 +2611,7 @@
         pageTitle: state.config.page?.title || "",
         breakdown: result.breakdown,
         routePlan: state.routePlan || result.routePlan || null,
+        returnPlanType: getActiveReturnPlanType(),
         googleMaps: state.config.googleMaps || {}
       });
       if(feedback) feedback.textContent = "PDF を保存しました（" + state.estimateNumber + "）";

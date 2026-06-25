@@ -155,6 +155,7 @@ async function main(){
           pageTitle: "かんたん料金確認",
           breakdown: handoff.breakdown || {},
           routePlan: handoff.routePlan || null,
+          returnPlanType: handoff.selections?.returnPlanType || handoff.routePlan?.returnPlanType || null,
           googleMaps: { enabled: false }
         });
         const meta = element?.querySelector(".estimate-quote-snapshot-meta");

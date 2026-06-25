@@ -83,6 +83,7 @@
 **注意**
 
 - 画面では主に `preFixedFareConfirmable` と組み合わせて「確認対応」文言を出す。`fallbackReason` 自体は利用者向けラベルには直接出さない（証跡・分析用）。
+- 表示モジュール（`shared/pre-fixed-fare-status.js`）は候補数判定に `routeCandidates` を優先し、`fallbackReason: "only_one_distinct_route"` も参照する（`routes` 配列との件数不一致を避ける）。
 - 将来、API失敗・ジオコーディング失敗等の理由コードを追加する場合は **既存値を維持** し拡張する。
 
 ---
@@ -190,3 +191,4 @@ fareConfirm=review
 | 日付 | 内容 |
 |------|------|
 | 2026-06-25 | 初版作成（`preFixedFareConfirmable` / `fallbackReason` / `returnFareStatus` の現行意味を明文化） |
+| 2026-06-25 | 表示モジュールの候補数判定・PDF地図なし時の説明表示を追記 |

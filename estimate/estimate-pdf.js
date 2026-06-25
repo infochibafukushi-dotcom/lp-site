@@ -401,8 +401,15 @@
     );
   }
 
-  function buildRouteMapHtml(routeMapDataUrl, layout, routePlan){
-    if(!routeMapDataUrl){
+  function buildRouteMapHtml(routeMapDataUrl, layout, routePlan, options){
+    const statusOptions = Object.assign({}, options || {}, {
+      returnPlanType: options?.returnPlanType || routePlan?.returnPlanType || null
+    });
+    const preFixedStatusHtml = global.PreFixedFareStatus && routePlan
+      ? global.PreFixedFareStatus.buildStatusPdfHtml(routePlan, layout, statusOptions)
+      : "";
+    const hasMap = Boolean(String(routeMapDataUrl || "").trim());
+    if(!hasMap && !preFixedStatusHtml){
       return "";
     }
     const primaryRoute = getRoutePlanPrimaryRoute(routePlan);
@@ -437,25 +444,27 @@
         "line-height:1.5;color:#555;\">" + escapeHtml(infoParts.join("　")) + "</div>"
       )
       : "";
-    const preFixedStatusHtml = global.PreFixedFareStatus && routePlan
-      ? global.PreFixedFareStatus.buildStatusPdfHtml(routePlan, layout)
-      : "";
     const display = global.EstimateRouteMapDisplay;
     const segments = display && routePlan ? display.buildRouteMapSegments(routePlan) : [];
-    const legendHtml = display && display.shouldShowLegend(segments)
+    const legendHtml = hasMap && display && display.shouldShowLegend(segments)
       ? display.buildLegendPdfHtml(segments)
+      : "";
+    const mapImageHtml = hasMap
+      ? (
+        "<div style=\"position:relative;display:inline-block;width:100%;\">" +
+          "<img src=\"" + routeMapDataUrl + "\" alt=\"走行予定ルート地図\" " +
+          "style=\"display:block;width:100%;height:auto;max-height:" + layout.routeMapHeight + "px;object-fit:contain;" +
+          "object-position:left bottom;border-radius:8px;background:#f5f5f5;\">" +
+          legendHtml +
+        "</div>"
+      )
       : "";
     return (
       "<div class=\"estimate-pdf-route-map\" style=\"margin:0 0 " + layout.routeMapBottomGap + "px;\">" +
         "<div style=\"margin:0 0 " + layout.routeMapTitleGap + "px;font-size:" + Math.max(11, layout.sectionFont - 1) + "px;" +
         "font-weight:700;color:#9a6b16;line-height:1.22;\">走行予定ルート</div>" +
         preFixedStatusHtml +
-        "<div style=\"position:relative;display:inline-block;width:100%;\">" +
-          "<img src=\"" + routeMapDataUrl + "\" alt=\"走行予定ルート地図\" " +
-          "style=\"display:block;width:100%;height:auto;max-height:" + layout.routeMapHeight + "px;object-fit:contain;" +
-          "object-position:left bottom;border-radius:8px;background:#f5f5f5;\">" +
-          legendHtml +
-        "</div>" +
+        mapImageHtml +
         infoHtml +
       "</div>"
     );
@@ -836,7 +845,9 @@
       : "";
 
     const footerHtml = buildPdfFooterHtml(data.pdfFooter, layout, qrDataUrls);
-    const routeMapHtml = buildRouteMapHtml(data.routeMapDataUrl, layout, data.routePlan);
+    const routeMapHtml = buildRouteMapHtml(data.routeMapDataUrl, layout, data.routePlan, {
+      returnPlanType: data.returnPlanType || data.routePlan?.returnPlanType || null
+    });
 
     const fareCalculationHtml = buildFareCalculationMethodHtml(data, layout);
 

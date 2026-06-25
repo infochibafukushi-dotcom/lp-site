@@ -6,11 +6,11 @@
     if(!legPlan){
       return [];
     }
-    if(Array.isArray(legPlan.routes) && legPlan.routes.length){
-      return legPlan.routes;
-    }
     if(Array.isArray(legPlan.routeCandidates) && legPlan.routeCandidates.length){
       return legPlan.routeCandidates;
+    }
+    if(Array.isArray(legPlan.routes) && legPlan.routes.length){
+      return legPlan.routes;
     }
     return [];
   }
@@ -24,17 +24,28 @@
   }
 
   function hasSingleNonConfirmableCandidate(legPlan){
-    if(!legPlan){
+    if(!legPlan || isLegConfirmable(legPlan)){
       return false;
     }
-    return getRouteCandidatesFromLeg(legPlan).length === 1 && !isLegConfirmable(legPlan);
+    if(legPlan.fallbackReason === "only_one_distinct_route"){
+      return true;
+    }
+    return getRouteCandidatesFromLeg(legPlan).length === 1;
+  }
+
+  function resolveReturnPlanType(routePlan, options){
+    const fromOptions = String(options?.returnPlanType || "").trim();
+    if(fromOptions){
+      return fromOptions;
+    }
+    return String(routePlan?.returnPlanType || "").trim();
   }
 
   function getSingleCandidateNotice(){
     return "ルート候補が1件のみのため、事前確定運賃としては確定せず、予約後に確認対応となります。";
   }
 
-  function shouldShowSingleCandidateNotice(routePlan){
+  function shouldShowSingleCandidateNotice(routePlan, options){
     if(!routePlan){
       return false;
     }
@@ -42,7 +53,7 @@
     if(hasSingleNonConfirmableCandidate(outbound)){
       return true;
     }
-    const returnPlanType = String(routePlan.returnPlanType || "");
+    const returnPlanType = resolveReturnPlanType(routePlan, options);
     if(returnPlanType !== RETURN_PLAN_PENDING){
       const returnLeg = routePlan.returnRoutePlan || null;
       if(hasSingleNonConfirmableCandidate(returnLeg)){
@@ -52,8 +63,8 @@
     return false;
   }
 
-  function getReturnStopoverExplanation(routePlan){
-    if(String(routePlan?.returnPlanType || "") !== RETURN_WITH_STOP){
+  function getReturnStopoverExplanation(routePlan, options){
+    if(resolveReturnPlanType(routePlan, options) !== RETURN_WITH_STOP){
       return "";
     }
     const returnLeg = routePlan?.returnRoutePlan || null;
@@ -67,19 +78,19 @@
     return routePlan?.tripType === "round_trip" || Boolean(routePlan?.outboundRoutePlan);
   }
 
-  function buildStatusMessages(routePlan){
+  function buildStatusMessages(routePlan, options){
     const messages = [];
     if(!routePlan){
       return messages;
     }
 
-    if(shouldShowSingleCandidateNotice(routePlan)){
+    if(shouldShowSingleCandidateNotice(routePlan, options)){
       messages.push({ type: "single_candidate_notice", text: getSingleCandidateNotice() });
     }
 
     const outbound = routePlan.outboundRoutePlan || routePlan;
     const returnLeg = routePlan.returnRoutePlan || null;
-    const returnPlanType = String(routePlan.returnPlanType || "");
+    const returnPlanType = resolveReturnPlanType(routePlan, options);
 
     if(isStructuredRoundTrip(routePlan)){
       messages.push({ type: "leg_status", text: "往路：" + getLegStatusLabel(outbound) });
@@ -92,7 +103,7 @@
       messages.push({ type: "leg_status", text: getLegStatusLabel(outbound) });
     }
 
-    const stopoverText = getReturnStopoverExplanation(routePlan);
+    const stopoverText = getReturnStopoverExplanation(routePlan, options);
     if(stopoverText){
       messages.push({ type: "stopover", text: stopoverText });
     }
@@ -105,7 +116,7 @@
     const escapeHtml = typeof opts.escapeHtml === "function"
       ? opts.escapeHtml
       : function(text){ return String(text ?? ""); };
-    const messages = buildStatusMessages(routePlan);
+    const messages = buildStatusMessages(routePlan, opts);
     if(!messages.length){
       return "";
     }
@@ -120,8 +131,8 @@
     return "<div class=\"" + escapeHtml(wrapperClass) + "\">" + parts.join("") + "</div>";
   }
 
-  function buildStatusPdfHtml(routePlan, layout){
-    const messages = buildStatusMessages(routePlan);
+  function buildStatusPdfHtml(routePlan, layout, options){
+    const messages = buildStatusMessages(routePlan, options);
     if(!messages.length){
       return "";
     }
@@ -162,6 +173,7 @@
     getSingleCandidateNotice: getSingleCandidateNotice,
     shouldShowSingleCandidateNotice: shouldShowSingleCandidateNotice,
     getReturnStopoverExplanation: getReturnStopoverExplanation,
+    resolveReturnPlanType: resolveReturnPlanType,
     buildStatusMessages: buildStatusMessages,
     buildStatusHtml: buildStatusHtml,
     buildStatusPdfHtml: buildStatusPdfHtml
