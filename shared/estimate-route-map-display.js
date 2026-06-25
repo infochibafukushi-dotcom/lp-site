@@ -84,10 +84,13 @@
     return 2 * earthRadius * Math.asin(Math.sqrt(h));
   }
 
-  function findClosestPathIndex(path, lat, lng){
-    let bestIndex = 0;
+  function findInteriorSplitIndex(path, lat, lng){
+    if(!Array.isArray(path) || path.length < 3){
+      return -1;
+    }
+    let bestIndex = -1;
     let bestDistance = Infinity;
-    for(let i = 0; i < path.length; i++){
+    for(let i = 1; i < path.length - 1; i++){
       const distance = haversineMeters(path[i], { lat: lat, lng: lng });
       if(distance < bestDistance){
         bestDistance = distance;
@@ -123,15 +126,16 @@
 
   function splitPathAtClosest(path, latLng){
     if(!Array.isArray(path) || path.length < 2 || !latLng){
-      return { before: path, after: null };
+      return { before: path, after: null, splitPoint: null };
     }
-    const index = findClosestPathIndex(path, latLng.lat, latLng.lng);
-    if(index <= 0 || index >= path.length - 1){
-      return { before: path, after: null };
+    const index = findInteriorSplitIndex(path, latLng.lat, latLng.lng);
+    if(index < 0){
+      return { before: path, after: null, splitPoint: null };
     }
     return {
       before: path.slice(0, index + 1),
-      after: path.slice(index)
+      after: path.slice(index),
+      splitPoint: path[index]
     };
   }
 
@@ -247,11 +251,12 @@
     }
 
     if(returnLeg && returnPlanType === "return_with_stop"){
-      const waypoint = waypointLatLng || normalizeLatLng(returnLeg.waypoint || returnLeg.intermediateWaypoint);
       const stopSegment = segments.find(function(segment){
         return segment.key === "stop";
       });
-      const stopPosition = waypoint || (stopSegment?.path?.length ? stopSegment.path[stopSegment.path.length - 1] : null);
+      const stopPosition = stopSegment?.path?.length
+        ? stopSegment.path[stopSegment.path.length - 1]
+        : (waypointLatLng || normalizeLatLng(returnLeg.waypoint || returnLeg.intermediateWaypoint));
       if(stopPosition){
         markers.push({
           position: stopPosition,
@@ -414,21 +419,22 @@
     return "color:" + color + "|weight:5|" + coords;
   }
 
-  function getWaypointAddress(routePlan){
+  function getWaypointAddress(routePlan, fallbackAddress){
     const returnLeg = routePlan?.returnRoutePlan;
     if(!returnLeg){
-      return "";
+      return String(fallbackAddress || "").trim();
     }
     return String(
       returnLeg.waypoint?.waypointAddress
       || returnLeg.waypoint?.waypointLabel
       || returnLeg.intermediateWaypoint?.waypointAddress
       || returnLeg.intermediateWaypoint?.waypointLabel
+      || fallbackAddress
       || ""
     ).trim();
   }
 
-  async function resolveWaypointLatLng(routePlan, geocodeFn){
+  async function resolveWaypointLatLng(routePlan, geocodeFn, fallbackAddress){
     if(String(routePlan?.returnPlanType || "") !== "return_with_stop"){
       return null;
     }
@@ -440,7 +446,7 @@
     if(existing){
       return existing;
     }
-    const address = getWaypointAddress(routePlan);
+    const address = getWaypointAddress(routePlan, fallbackAddress);
     if(!address || typeof geocodeFn !== "function"){
       return null;
     }

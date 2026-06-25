@@ -1184,6 +1184,16 @@
     return window.EstimateCalc.computeEstimate(state.config, tempState);
   }
 
+  function getCompactRoadTypeLabel(roadType){
+    return String(roadType || "") === "toll" ? "高速利用" : "一般道";
+  }
+
+  function isFlowComplete(){
+    return getStepFlow().every(function(step){
+      return isStepComplete(step.id);
+    });
+  }
+
   function selectRoute(routeId, legKey){
     const key = legKey === "return" ? "return" : "outbound";
     const legPlan = key === "return"
@@ -1201,6 +1211,11 @@
     });
     if(!route || !state.routePlan){
       return;
+    }
+    if(String(route.roadType || "") === "toll"){
+      state.roadType = "toll";
+    }else if(route.roadType){
+      state.roadType = "general";
     }
     if(state.routePlan.outboundRoutePlan){
       const outboundLeg = key === "outbound"
@@ -1220,11 +1235,11 @@
       };
     }
     invalidateEstimateNumberIfChanged();
-    state.lastActiveStepId = "result";
+    state.lastActiveStepId = isFlowComplete() ? "result" : "distance";
     renderPage();
   }
 
-  function renderRouteSelectionCards(legPlan, legKey, sectionTitle){
+  function renderRouteSelectionCards(legPlan, legKey, sectionTitle, options){
     const routes = getRouteCandidatesFromLeg(legPlan);
     if(!routes.length){
       return "";
@@ -1235,6 +1250,7 @@
       ? '<p class="estimate-route-selection-note">2件以上の走行予定ルートから1つを選択してください。選択したルートの距離で事前確定運賃を算定します。</p>'
       : '<p class="estimate-route-selection-warning">走行予定ルート候補が1件のみのため、事前確定運賃としての自動確定はできません。通常見積として表示し、ご予約時に確認いたします。</p>';
 
+    const compact = options?.compact === true;
     const cards = routes.map(function(route, index){
       const routeId = String(route.routeId || "");
       const isSelected = routeId === selectedId || (!selectedId && index === 0);
@@ -1248,9 +1264,27 @@
       const summary = getRouteDisplayLabel(route, index);
       const description = String(route.routeDescription || "").trim();
       const roadTypeLabel = getRoadTypeLabel(route.roadType || legPlan.roadType || state.roadType);
+      const compactRoadTypeLabel = getCompactRoadTypeLabel(route.roadType || legPlan.roadType || state.roadType);
       const waypointLabel = route.intermediateWaypoint?.waypointLabel
         ? String(route.intermediateWaypoint.waypointLabel)
         : "";
+
+      if(compact){
+        const headline = route.routeStrategy === "recommended" || String(summary).includes("おすすめ")
+          ? "【推奨】"
+          : escapeHtml(summary);
+        return (
+          '<article class="estimate-route-card estimate-route-card--compact' + (isSelected ? " is-selected" : "") + '">' +
+            '<div class="estimate-route-card-compact-head">' + headline + "</div>" +
+            '<div class="estimate-route-card-compact-meta">' +
+              escapeHtml(compactRoadTypeLabel) + "　" + escapeHtml(distanceLabel || "-") + "　" + escapeHtml(durationLabel || "-") +
+            "</div>" +
+            (confirmable
+              ? '<button type="button" class="estimate-route-select-btn" data-select-route-id="' + escapeAttr(routeId) + '" data-select-route-leg="' + escapeAttr(legKey) + '"' + (isSelected ? " disabled" : "") + ">" + (isSelected ? "選択中" : "このルートを選択") + "</button>"
+              : "") +
+          "</article>"
+        );
+      }
 
       return (
         '<article class="estimate-route-card' + (isSelected ? " is-selected" : "") + '">' +
@@ -1284,12 +1318,13 @@
     );
   }
 
-  function renderRouteSelectionSection(result){
+  function renderRouteSelectionSection(result, options){
     logRouteUiState(result);
 
     if(!isPreFixedFareMode()){
       return "";
     }
+    const selectionOptions = Object.assign({ compact: false }, options || {});
     if(!state.routePlan){
       return (
         '<section class="estimate-route-selection estimate-route-selection--fallback" aria-label="ルート候補の選択">' +
@@ -1303,13 +1338,15 @@
       const outboundSection = renderRouteSelectionCards(
         state.routePlan.outboundRoutePlan,
         "outbound",
-        "往路の走行予定ルートの選択"
+        "往路の走行予定ルートの選択",
+        selectionOptions
       );
       const returnSection = state.routePlan.returnRoutePlan
         ? renderRouteSelectionCards(
           state.routePlan.returnRoutePlan,
           "return",
-          "復路の走行予定ルートの選択"
+          "復路の走行予定ルートの選択",
+          selectionOptions
         )
         : "";
       const pendingNotice = getActiveReturnPlanType() === "return_pending"
@@ -1336,7 +1373,14 @@
       );
     }
 
-    return renderRouteSelectionCards(state.routePlan, "outbound", "走行予定ルートの選択");
+    return renderRouteSelectionCards(state.routePlan, "outbound", "走行予定ルートの選択", selectionOptions);
+  }
+
+  function renderStepRouteSelection(){
+    if(!state.routePlan || !isPreFixedFareMode()){
+      return "";
+    }
+    return renderRouteSelectionSection(window.EstimateCalc.computeEstimate(state.config, state), { compact: true });
   }
 
   async function resolveRouteMapWaypointLatLng(routePlan){
@@ -1357,7 +1401,7 @@
         region: mapsConfig.region || "JP"
       });
       return result?.location || null;
-    });
+    }, state.returnStopAddress);
   }
 
   async function renderRouteMapIfNeeded(){
@@ -1535,10 +1579,21 @@
           return null;
         })
         : Promise.resolve(null);
-      const results = await Promise.all([outboundPromise, returnPromise, geocodePromise]);
+      const stopGeocodePromise = returnRequest?.intermediateAddress && typeof window.EstimateDistanceApi.geocodeAddress === "function"
+        ? window.EstimateDistanceApi.geocodeAddress({
+          apiKey: apiKey,
+          address: returnRequest.intermediateAddress,
+          languageCode: mapsConfig.language || "ja",
+          region: mapsConfig.region || "JP"
+        }).catch(function(){
+          return null;
+        })
+        : Promise.resolve(null);
+      const results = await Promise.all([outboundPromise, returnPromise, geocodePromise, stopGeocodePromise]);
       const outboundResult = results[0];
       const returnResult = results[1];
       const geocoding = results[2];
+      const stopGeocoding = results[3];
 
       const outboundLeg = buildLegRoutePlanFromApiResult(origin, destination, null, outboundResult);
       let returnLeg = null;
@@ -1546,8 +1601,7 @@
         const waypoint = returnRequest.intermediateAddress
           ? {
             address: returnRequest.intermediateAddress,
-            label: returnRequest.intermediateAddress,
-            stopType: state.returnStopType || null
+            label: returnRequest.intermediateAddress
           }
           : null;
         returnLeg = buildLegRoutePlanFromApiResult(
@@ -1556,6 +1610,20 @@
           waypoint,
           returnResult
         );
+        if(returnLeg && returnRequest.intermediateAddress){
+          const waypointInfo = {
+            waypointLabel: returnRequest.intermediateAddress,
+            waypointAddress: returnRequest.intermediateAddress
+          };
+          if(stopGeocoding?.location){
+            waypointInfo.waypointLatLng = {
+              latitude: stopGeocoding.location.lat,
+              longitude: stopGeocoding.location.lng
+            };
+          }
+          returnLeg.waypoint = Object.assign({}, returnLeg.waypoint || {}, waypointInfo);
+          returnLeg.intermediateWaypoint = Object.assign({}, returnLeg.intermediateWaypoint || {}, waypointInfo);
+        }
       }
 
       const routePlan = buildStructuredRoutePlan(outboundLeg, returnLeg, {
@@ -1625,29 +1693,10 @@
       );
     }).join("");
 
-    const stopTypeOptions = [
-      { id: "pharmacy", label: "薬局" },
-      { id: "supermarket", label: "スーパー・商業施設" },
-      { id: "facility", label: "施設" },
-      { id: "other", label: "その他" }
-    ];
-    const stopTypeRadios = stopTypeOptions.map(function(option){
-      return (
-        '<label class="estimate-return-stop-type-option">' +
-          '<input type="radio" name="returnStopType" value="' + escapeAttr(option.id) + '"' + (state.returnStopType === option.id ? " checked" : "") + ">" +
-          "<span>" + escapeHtml(option.label) + "</span>" +
-        "</label>"
-      );
-    }).join("");
-
     const stopPanel = planType === "return_with_stop"
       ? (
         '<div class="estimate-return-stop-panel">' +
-          '<fieldset class="estimate-return-stop-type">' +
-            '<legend class="estimate-return-stop-type-legend">立ち寄り先種別</legend>' +
-            stopTypeRadios +
-          "</fieldset>" +
-          '<label for="returnStopAddressInput" class="estimate-distance-label estimate-distance-label--spaced">立ち寄り先住所または施設名</label>' +
+          '<label for="returnStopAddressInput" class="estimate-distance-label">立ち寄り先住所・施設名</label>' +
           '<input type="text" class="estimate-input" id="returnStopAddressInput" autocomplete="street-address" placeholder="例: 近隣薬局、イオン千葉みなと" value="' + escapeAttr(state.returnStopAddress) + '">' +
         "</div>"
       )
@@ -1691,8 +1740,9 @@
     const tollRoadNote =
       state.config.page?.tollRoadNote ||
       "通行料金は実費負担となります。";
+    const hideRoadTypeRadios = isPreFixedFareMode() && Boolean(state.routePlan);
 
-    const roadTypeRadios = `
+    const roadTypeRadios = hideRoadTypeRadios ? "" : `
       <fieldset class="estimate-road-type">
         <legend class="estimate-road-type-legend">道路利用設定</legend>
         <label class="estimate-road-type-option">
@@ -1751,6 +1801,7 @@
                 <div class="estimate-route-map" role="img" aria-label="走行予定ルート地図"></div>
               </div>
             </section>
+            ${renderStepRouteSelection()}
           ` : ""}
         ` : ""}
         <p class="estimate-address-disclaimer">${escapeHtml(addressDisclaimer)}</p>
@@ -1767,7 +1818,7 @@
         </div>
         ${renderReturnPlanSection()}
         ${roadTypeRadios}
-        ${state.roadType === "toll" ? `<p class="estimate-road-type-note">${escapeHtml(tollRoadNote)}</p>` : ""}
+        ${!hideRoadTypeRadios && state.roadType === "toll" ? `<p class="estimate-road-type-note">${escapeHtml(tollRoadNote)}</p>` : ""}
         ${addressPanel}
         <p class="estimate-step-note">${escapeHtml(note)}</p>
       </section>
@@ -2622,7 +2673,6 @@
     bindChoiceGroup("returnPlanType", function(value){
       state.returnPlanType = value;
       if(value !== "return_with_stop"){
-        state.returnStopType = "";
         state.returnStopAddress = "";
       }
       if(value !== "different_return_destination"){
@@ -2637,23 +2687,12 @@
       renderPage();
     });
 
-    bindChoiceGroup("returnStopType", function(value){
-      state.returnStopType = value;
-      state.routePlan = null;
-      state.routeCalcResult = null;
-      state.lastActiveStepId = "";
-      renderPage();
-    });
-
-    bindChoiceGroup("distanceInputMode", function(value){
-      state.distanceInputMode = value === "manual" ? "manual" : "address";
-      state.routeCalcError = "";
-      if(state.distanceInputMode === "manual"){
-        state.routePlan = null;
-      }
-      state.lastActiveStepId = "";
-      renderPage();
-    });
+    const returnStopInput = document.getElementById("returnStopAddressInput");
+    if(returnStopInput){
+      returnStopInput.addEventListener("input", function(){
+        state.returnStopAddress = returnStopInput.value;
+      });
+    }
 
     bindChoiceGroup("roadType", function(value){
       state.roadType = value === "toll" ? "toll" : "general";
@@ -2674,13 +2713,6 @@
     if(destinationInput){
       destinationInput.addEventListener("input", function(){
         state.destinationAddress = destinationInput.value;
-      });
-    }
-
-    const returnStopInput = document.getElementById("returnStopAddressInput");
-    if(returnStopInput){
-      returnStopInput.addEventListener("input", function(){
-        state.returnStopAddress = returnStopInput.value;
       });
     }
 

@@ -103,5 +103,12 @@ const markers = display.buildRouteMapMarkers(stopPlan, stopSegments, { lat: 35.6
 if(!markers.some(function(marker){ return marker.label === "寄"; })){
   throw new Error("waypoint marker expected");
 }
+const stopMarker = markers.find(function(marker){ return marker.label === "寄"; });
+if(!stopSegments[1] || !stopSegments[1].path.some(function(point){
+  return Math.abs(point.lat - stopMarker.position.lat) < 0.0001
+    && Math.abs(point.lng - stopMarker.position.lng) < 0.0001;
+})){
+  throw new Error("waypoint marker should sit on green segment");
+}
 
 console.log("OK: route map display tests passed");
