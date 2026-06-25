@@ -1339,70 +1339,122 @@
     return renderRouteSelectionCards(state.routePlan, "outbound", "走行予定ルートの選択");
   }
 
+  async function resolveRouteMapWaypointLatLng(routePlan){
+    const display = window.EstimateRouteMapDisplay;
+    if(!display || typeof display.resolveWaypointLatLng !== "function"){
+      return null;
+    }
+    const mapsConfig = getGoogleMapsConfig();
+    const apiKey = String(mapsConfig.apiKey || "").trim();
+    if(!apiKey || !window.EstimateDistanceApi || typeof window.EstimateDistanceApi.geocodeAddress !== "function"){
+      return display.resolveWaypointLatLng(routePlan, null);
+    }
+    return display.resolveWaypointLatLng(routePlan, async function(address){
+      const result = await window.EstimateDistanceApi.geocodeAddress({
+        apiKey: apiKey,
+        address: address,
+        languageCode: mapsConfig.language || "ja",
+        region: mapsConfig.region || "JP"
+      });
+      return result?.location || null;
+    });
+  }
+
   async function renderRouteMapIfNeeded(){
-    const mapContainer = document.getElementById("estimateRouteMap");
-    if(!mapContainer) return;
+    const mapContainers = document.querySelectorAll(".estimate-route-map");
+    if(!mapContainers.length) return;
 
     const mapsConfig = getGoogleMapsConfig();
+    const display = window.EstimateRouteMapDisplay;
     if(mapsConfig.enabled === false){
-      mapContainer.innerHTML = '<p class="estimate-route-map-error">地図表示は現在無効です。</p>';
-      return;
-    }
-    const routePlan = state.routePlan;
-    const primaryRoute = getRoutePlanPrimaryRoute(routePlan);
-    const encodedPolyline = String(primaryRoute?.encodedPolyline || routePlan?.encodedPolyline || "");
-    if(!encodedPolyline){
-      mapContainer.innerHTML = '<p class="estimate-route-map-error">ルート情報が取得できないため地図を表示できません。</p>';
+      mapContainers.forEach(function(mapContainer){
+        mapContainer.innerHTML = '<p class="estimate-route-map-error">地図表示は現在無効です。</p>';
+      });
       return;
     }
 
-    const path = decodePolyline(encodedPolyline);
-    if(path.length < 2){
-      mapContainer.innerHTML = '<p class="estimate-route-map-error">ルート情報が不足しているため地図を表示できません。</p>';
+    const routePlan = state.routePlan;
+    if(!display || typeof display.buildRouteMapSegments !== "function"){
+      mapContainers.forEach(function(mapContainer){
+        mapContainer.innerHTML = '<p class="estimate-route-map-error">地図表示機能が読み込まれていません。</p>';
+      });
+      return;
+    }
+    if(!routePlan || !display.hasRenderableRouteMap(routePlan)){
+      mapContainers.forEach(function(mapContainer){
+        mapContainer.innerHTML = '<p class="estimate-route-map-error">ルート情報が取得できないため地図を表示できません。</p>';
+      });
+      return;
+    }
+
+    const waypointLatLng = await resolveRouteMapWaypointLatLng(routePlan);
+    const segments = display.buildRouteMapSegments(routePlan, waypointLatLng);
+    const markers = display.buildRouteMapMarkers(routePlan, segments, waypointLatLng);
+    const allPoints = display.getAllPathPoints(segments);
+    if(allPoints.length < 2){
+      mapContainers.forEach(function(mapContainer){
+        mapContainer.innerHTML = '<p class="estimate-route-map-error">ルート情報が不足しているため地図を表示できません。</p>';
+      });
       return;
     }
 
     try{
       await loadGoogleMapsJsApi();
-      const map = new window.google.maps.Map(mapContainer, {
-        center: path[0],
-        zoom: 14,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: false
-      });
+      mapContainers.forEach(function(mapContainer){
+        const wrap = mapContainer.closest(".estimate-route-map-wrap") || mapContainer.parentElement;
+        mapContainer.innerHTML = "";
+        if(wrap){
+          const existingLegend = wrap.querySelector(".estimate-route-map-legend");
+          if(existingLegend){
+            existingLegend.remove();
+          }
+        }
 
-      const routeLine = new window.google.maps.Polyline({
-        path: path,
-        geodesic: true,
-        strokeColor: "#e87f00",
-        strokeOpacity: 0.95,
-        strokeWeight: 5
-      });
-      routeLine.setMap(map);
+        const map = new window.google.maps.Map(mapContainer, {
+          center: allPoints[0],
+          zoom: 14,
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: false
+        });
 
-      const startPoint = path[0];
-      const endPoint = path[path.length - 1];
-      new window.google.maps.Marker({
-        position: startPoint,
-        map: map,
-        title: "出発地",
-        label: "発"
-      });
-      new window.google.maps.Marker({
-        position: endPoint,
-        map: map,
-        title: "目的地",
-        label: "着"
-      });
+        segments.forEach(function(segment){
+          if(!segment.path || segment.path.length < 2){
+            return;
+          }
+          const routeLine = new window.google.maps.Polyline({
+            path: segment.path,
+            geodesic: true,
+            strokeColor: segment.color,
+            strokeOpacity: 0.95,
+            strokeWeight: 5
+          });
+          routeLine.setMap(map);
+        });
 
-      const bounds = new window.google.maps.LatLngBounds();
-      path.forEach(function(point){
-        bounds.extend(point);
+        markers.forEach(function(markerInfo){
+          new window.google.maps.Marker({
+            position: markerInfo.position,
+            map: map,
+            title: markerInfo.title,
+            label: markerInfo.label
+          });
+        });
+
+        const bounds = new window.google.maps.LatLngBounds();
+        allPoints.forEach(function(point){
+          bounds.extend(point);
+        });
+        map.fitBounds(bounds, 48);
+
+        if(display.shouldShowLegend(segments) && wrap){
+          wrap.insertAdjacentHTML("beforeend", display.buildLegendHtml());
+        }
       });
-      map.fitBounds(bounds, 48);
     }catch(error){
-      mapContainer.innerHTML = '<p class="estimate-route-map-error">' + escapeHtml(error?.message || "地図表示に失敗しました。") + "</p>";
+      mapContainers.forEach(function(mapContainer){
+        mapContainer.innerHTML = '<p class="estimate-route-map-error">' + escapeHtml(error?.message || "地図表示に失敗しました。") + "</p>";
+      });
     }
   }
 
@@ -1706,6 +1758,14 @@
               <span class="estimate-route-result-value">${escapeHtml(formatRouteDuration(calcResult.durationMinutes))}</span>
             </div>
           </div>
+          ${state.routePlan ? `
+            <section class="estimate-route-preview estimate-route-preview--inline" aria-label="走行予定ルート">
+              <h4 class="estimate-route-preview-title">走行予定ルート</h4>
+              <div class="estimate-route-map-wrap">
+                <div class="estimate-route-map" role="img" aria-label="走行予定ルート地図"></div>
+              </div>
+            </section>
+          ` : ""}
         ` : ""}
         <p class="estimate-address-disclaimer">${escapeHtml(addressDisclaimer)}</p>
       </div>
@@ -2216,7 +2276,9 @@
       <section class="estimate-route-preview" aria-label="走行予定ルート">
         <h4 class="estimate-route-preview-title">走行予定ルート（選択中）</h4>
         ${roundTripStatusHtml}
-        <div class="estimate-route-map" id="estimateRouteMap" role="img" aria-label="走行予定ルート地図"></div>
+        <div class="estimate-route-map-wrap">
+          <div class="estimate-route-map" role="img" aria-label="走行予定ルート地図"></div>
+        </div>
         <dl class="estimate-route-info-list">
           <div class="estimate-route-info-row">
             <dt>出発地</dt>
@@ -2351,6 +2413,9 @@
 
     if(!allComplete){
       scrollToActiveStep(flow, activeIndex);
+      if(state.routePlan){
+        renderRouteMapIfNeeded();
+      }
     }else{
       state.lastActiveStepId = "result";
       syncHandoffForResult(result);

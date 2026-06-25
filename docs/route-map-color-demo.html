@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>往復ルート色分けデモ</title>
+<link rel="stylesheet" href="../estimate/estimate.css">
+<style>
+body{font-family:sans-serif;background:#f7f7f7;padding:24px;}
+.demo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;}
+.demo-card{background:#fff;border:1px solid #ddd;border-radius:12px;padding:16px;}
+.demo-card h2{margin:0 0 12px;font-size:16px;}
+.demo-map{position:relative;height:260px;border-radius:10px;background:linear-gradient(180deg,#e8f4fc 0%,#f0ede8 100%);overflow:hidden;}
+.demo-map svg{position:absolute;inset:0;width:100%;height:100%;}
+.demo-pin{font-size:11px;font-weight:700;}
+</style>
+</head>
+<body>
+<h1>往復ルート色分け（表示デモ）</h1>
+<div class="demo-grid">
+  <section class="demo-card">
+    <h2>① 立ち寄りなし（往復）</h2>
+    <div class="estimate-route-map-wrap">
+      <div class="demo-map" aria-label="往復ルート色分けデモ">
+        <svg viewBox="0 0 320 260" preserveAspectRatio="none">
+          <path d="M40,210 C90,170 120,120 170,80" fill="none" stroke="#1565C0" stroke-width="6" stroke-linecap="round"/>
+          <path d="M170,80 C210,120 250,170 280,210" fill="none" stroke="#C62828" stroke-width="6" stroke-linecap="round"/>
+          <circle cx="40" cy="210" r="12" fill="#2E7D32"/><text class="demo-pin" x="36" y="214" fill="#fff">発</text>
+          <circle cx="170" cy="80" r="12" fill="#C62828"/><text class="demo-pin" x="166" y="84" fill="#fff">着</text>
+        </svg>
+      </div>
+      <div class="estimate-route-map-legend" aria-label="ルート凡例">
+        <div class="estimate-route-map-legend-item"><span class="estimate-route-map-legend-swatch estimate-route-map-legend-swatch--outbound"></span><span>往路</span></div>
+        <div class="estimate-route-map-legend-item"><span class="estimate-route-map-legend-swatch estimate-route-map-legend-swatch--stop"></span><span>立ち寄り</span></div>
+        <div class="estimate-route-map-legend-item"><span class="estimate-route-map-legend-swatch estimate-route-map-legend-swatch--return"></span><span>復路</span></div>
+      </div>
+    </div>
+  </section>
+  <section class="demo-card">
+    <h2>② 帰りに立ち寄りあり</h2>
+    <div class="estimate-route-map-wrap">
+      <div class="demo-map" aria-label="立ち寄り付き往復ルート色分けデモ">
+        <svg viewBox="0 0 320 260" preserveAspectRatio="none">
+          <path d="M40,210 C90,170 120,120 170,80" fill="none" stroke="#1565C0" stroke-width="6" stroke-linecap="round"/>
+          <path d="M170,80 C200,110 215,145 220,170" fill="none" stroke="#2E7D32" stroke-width="6" stroke-linecap="round"/>
+          <path d="M220,170 C235,185 255,200 280,210" fill="none" stroke="#C62828" stroke-width="6" stroke-linecap="round"/>
+          <circle cx="40" cy="210" r="12" fill="#2E7D32"/><text class="demo-pin" x="36" y="214" fill="#fff">発</text>
+          <circle cx="170" cy="80" r="12" fill="#C62828"/><text class="demo-pin" x="166" y="84" fill="#fff">着</text>
+          <circle cx="220" cy="170" r="12" fill="#F9A825"/><text class="demo-pin" x="216" y="174" fill="#fff">寄</text>
+        </svg>
+      </div>
+      <div class="estimate-route-map-legend" aria-label="ルート凡例">
+        <div class="estimate-route-map-legend-item"><span class="estimate-route-map-legend-swatch estimate-route-map-legend-swatch--outbound"></span><span>往路</span></div>
+        <div class="estimate-route-map-legend-item"><span class="estimate-route-map-legend-swatch estimate-route-map-legend-swatch--stop"></span><span>立ち寄り</span></div>
+        <div class="estimate-route-map-legend-item"><span class="estimate-route-map-legend-swatch estimate-route-map-legend-swatch--return"></span><span>復路</span></div>
+      </div>
+    </div>
+  </section>
+</div>
+</body>
+</html>

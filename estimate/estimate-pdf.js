@@ -112,6 +112,10 @@
   }
 
   function hasRouteMapData(data){
+    const display = global.EstimateRouteMapDisplay;
+    if(display && typeof display.hasRenderableRouteMap === "function"){
+      return Boolean(data?.routeMapDataUrl) || display.hasRenderableRouteMap(data?.routePlan);
+    }
     return Boolean(data?.routeMapDataUrl) || Boolean(getRouteEncodedPolyline(data?.routePlan));
   }
 
@@ -433,13 +437,29 @@
         "line-height:1.5;color:#555;\">" + escapeHtml(infoParts.join("　")) + "</div>"
       )
       : "";
+    const display = global.EstimateRouteMapDisplay;
+    const segments = display && routePlan ? display.buildRouteMapSegments(routePlan) : [];
+    const legendHtml = display && display.shouldShowLegend(segments)
+      ? (
+        "<div style=\"position:absolute;right:8px;bottom:8px;display:flex;flex-direction:column;gap:4px;" +
+        "padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.92);border:1px solid rgba(0,0,0,0.08);" +
+        "font-size:9px;line-height:1.3;color:#333;\">" +
+          "<div style=\"display:flex;align-items:center;gap:6px;\"><span style=\"width:14px;height:4px;border-radius:2px;background:#1565C0;\"></span>往路</div>" +
+          "<div style=\"display:flex;align-items:center;gap:6px;\"><span style=\"width:14px;height:4px;border-radius:2px;background:#2E7D32;\"></span>立ち寄り</div>" +
+          "<div style=\"display:flex;align-items:center;gap:6px;\"><span style=\"width:14px;height:4px;border-radius:2px;background:#C62828;\"></span>復路</div>" +
+        "</div>"
+      )
+      : "";
     return (
       "<div class=\"estimate-pdf-route-map\" style=\"margin:0 0 " + layout.routeMapBottomGap + "px;\">" +
         "<div style=\"margin:0 0 " + layout.routeMapTitleGap + "px;font-size:" + Math.max(11, layout.sectionFont - 1) + "px;" +
         "font-weight:700;color:#9a6b16;line-height:1.22;\">走行予定ルート</div>" +
-        "<img src=\"" + routeMapDataUrl + "\" alt=\"走行予定ルート地図\" " +
-        "style=\"display:block;width:100%;height:auto;max-height:" + layout.routeMapHeight + "px;object-fit:contain;" +
-        "object-position:left bottom;border-radius:8px;background:#f5f5f5;\">" +
+        "<div style=\"position:relative;display:inline-block;width:100%;\">" +
+          "<img src=\"" + routeMapDataUrl + "\" alt=\"走行予定ルート地図\" " +
+          "style=\"display:block;width:100%;height:auto;max-height:" + layout.routeMapHeight + "px;object-fit:contain;" +
+          "object-position:left bottom;border-radius:8px;background:#f5f5f5;\">" +
+          legendHtml +
+        "</div>" +
         infoHtml +
       "</div>"
     );
@@ -455,18 +475,39 @@
 
   function buildStaticMapUrl(options){
     const apiKey = String(options?.apiKey || "").trim();
-    const encodedPolyline = String(options?.encodedPolyline || "").trim();
-    const startPoint = options?.startPoint;
-    const endPoint = options?.endPoint;
-    const pathPoints = Array.isArray(options?.pathPoints) ? options.pathPoints : [];
+    let segments = Array.isArray(options?.segments) ? options.segments : [];
+    let markers = Array.isArray(options?.markers) ? options.markers : [];
+    let pathPoints = Array.isArray(options?.pathPoints) ? options.pathPoints : [];
     const widthPx = Math.min(640, Math.max(320, Math.round(Number(options?.widthPx) || CONTENT_WIDTH_PX)));
     const heightPx = Math.round(Number(options?.heightPx) || 240);
 
-    if(!apiKey || !encodedPolyline || !startPoint || !endPoint){
+    const encodedPolyline = String(options?.encodedPolyline || "").trim();
+    const startPoint = options?.startPoint;
+    const endPoint = options?.endPoint;
+    if(!segments.length && encodedPolyline && startPoint && endPoint){
+      const legacyPath = pathPoints.length ? pathPoints : decodePolyline(encodedPolyline);
+      segments = [{
+        key: "outbound",
+        color: "#1565C0",
+        path: legacyPath,
+        label: "往路"
+      }];
+      if(!markers.length){
+        markers = [
+          { position: startPoint, title: "出発地", label: "発", color: "0x2E7D32" },
+          { position: endPoint, title: "目的地", label: "着", color: "0xC62828" }
+        ];
+      }
+      if(!pathPoints.length){
+        pathPoints = legacyPath;
+      }
+    }
+
+    if(!apiKey || !segments.length){
       return "";
     }
 
-    const bounds = getPolylineBounds(pathPoints.length ? pathPoints : [startPoint, endPoint]);
+    const bounds = getPolylineBounds(pathPoints.length ? pathPoints : getAllSegmentPoints(segments));
     const params = [
       "size=" + widthPx + "x" + heightPx,
       "scale=2",
@@ -485,17 +526,44 @@
       params.push("visible=" + encodeURIComponent(visibleSouthWest + "|" + visibleNorthEast));
     }
 
-    params.push(
-      "path=" + encodeURIComponent("color:0xE87F00FF|weight:8|enc:" + encodedPolyline),
-      "markers=" + encodeURIComponent(
-        "size:small|color:0x2E7D32|" + formatCoord(startPoint.lat) + "," + formatCoord(startPoint.lng)
-      ),
-      "markers=" + encodeURIComponent(
-        "size:small|color:0xC62828|" + formatCoord(endPoint.lat) + "," + formatCoord(endPoint.lng)
-      ),
-      "key=" + encodeURIComponent(apiKey)
-    );
+    const display = global.EstimateRouteMapDisplay;
+    segments.forEach(function(segment){
+      const pathParam = display && typeof display.pathToStaticMapParam === "function"
+        ? display.pathToStaticMapParam(segment)
+        : "";
+      if(pathParam){
+        params.push("path=" + encodeURIComponent(pathParam));
+      }
+    });
+
+    markers.forEach(function(markerInfo){
+      const position = markerInfo?.position;
+      if(!position){
+        return;
+      }
+      const color = String(markerInfo.color || "0x2E7D32");
+      const label = String(markerInfo.label || "").slice(0, 1);
+      const markerParam = "size:small|color:" + color + (label ? "|label:" + label : "")
+        + "|" + formatCoord(position.lat) + "," + formatCoord(position.lng);
+      params.push("markers=" + encodeURIComponent(markerParam));
+    });
+
+    params.push("key=" + encodeURIComponent(apiKey));
     return STATIC_MAP_BASE_URL + "?" + params.join("&");
+  }
+
+  function getAllSegmentPoints(segments){
+    const display = global.EstimateRouteMapDisplay;
+    if(display && typeof display.getAllPathPoints === "function"){
+      return display.getAllPathPoints(segments);
+    }
+    const points = [];
+    segments.forEach(function(segment){
+      (segment.path || []).forEach(function(point){
+        points.push(point);
+      });
+    });
+    return points;
   }
 
   function loadImageAsDataUrl(url){
@@ -542,23 +610,39 @@
       return "";
     }
     const apiKey = String(mapsConfig.apiKey || "").trim();
-    const encodedPolyline = getRouteEncodedPolyline(routePlan);
-    if(!routePlan || !apiKey || !encodedPolyline){
+    const display = global.EstimateRouteMapDisplay;
+    if(!routePlan || !apiKey || !display || typeof display.buildRouteMapSegments !== "function"){
+      return "";
+    }
+    if(!display.hasRenderableRouteMap(routePlan)){
       return "";
     }
 
-    const path = decodePolyline(encodedPolyline);
-    if(path.length < 2){
+    const waypointLatLng = await display.resolveWaypointLatLng(routePlan, async function(address){
+      if(!global.EstimateDistanceApi || typeof global.EstimateDistanceApi.geocodeAddress !== "function"){
+        return null;
+      }
+      const result = await global.EstimateDistanceApi.geocodeAddress({
+        apiKey: apiKey,
+        address: address,
+        languageCode: mapsConfig.language || "ja",
+        region: mapsConfig.region || "JP"
+      });
+      return result?.location || null;
+    });
+    const segments = display.buildRouteMapSegments(routePlan, waypointLatLng);
+    const markers = display.buildRouteMapMarkers(routePlan, segments, waypointLatLng);
+    const pathPoints = display.getAllPathPoints(segments);
+    if(pathPoints.length < 2){
       return "";
     }
 
     const mapHeight = layout ? layout.routeMapHeight : 240;
     const staticMapUrl = buildStaticMapUrl({
       apiKey: apiKey,
-      encodedPolyline: encodedPolyline,
-      startPoint: path[0],
-      endPoint: path[path.length - 1],
-      pathPoints: path,
+      segments: segments,
+      markers: markers,
+      pathPoints: pathPoints,
       widthPx: CONTENT_WIDTH_PX,
       heightPx: mapHeight,
       language: mapsConfig.language || "ja",

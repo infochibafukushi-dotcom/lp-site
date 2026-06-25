@@ -21,6 +21,7 @@ const scriptOrder = [
   "shared/pre-fixed-fare-route-waypoints.js",
   "estimate/estimate-distance-api.js",
   "estimate/estimate-help.js",
+  "shared/estimate-route-map-display.js",
   "estimate/estimate-pdf.js",
   "estimate/estimate-main.js"
 ];
