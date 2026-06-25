@@ -72,9 +72,10 @@
   function implStatusRows(){
     return {
       multiRoute: [
-        { item: "複数ルート取得", status: "LP側実装済み", basis: "estimate/estimate-distance-api.js（推奨・一般道優先・有料道路利用可・高速回避の複数条件取得＋重複排除）" },
+        { item: "複数ルート取得", status: "LP側実装済み", basis: "estimate/estimate-distance-api.js（4系統候補生成＋重複排除）" },
         { item: "旅客によるルート選択", status: "2件以上取得時は実装済み", basis: "estimate/estimate-main.js（preFixedFareConfirmable=true時のみ選択UI）" },
-        { item: "選択ルート保存", status: "LP側実装済み / API側未確認", basis: "estimate/estimate-calc.js quoteSnapshot（selectedRoute* / alternativeRoutes）" },
+        { item: "ルート候補生成", status: "LP側実装済み", basis: "おすすめ・距離優先・幹線道路・有料道路利用の4系統（shared/pre-fixed-fare-route-waypoints.js）" },
+        { item: "選択ルート保存", status: "LP側実装済み / API側未確認", basis: "estimate/estimate-calc.js quoteSnapshot（routeCandidates / selectedRoute*）" },
         { item: "候補1件時の扱い", status: "通常見積または確認対応", basis: "estimate/estimate-main.js（警告表示・予約URLにfareConfirm=review）" },
         { item: "予約API/DB保存", status: "未確認", basis: "shared/estimate-quote-register.js 経由、API/DB側要確認" },
         { item: "運転者への同一ルート表示", status: "未確認", basis: "reservation-v4 / driver画面（ワークスペース外）" }
@@ -109,7 +110,7 @@
       requirements: [
         { requirement: "電子地図で推計走行距離を算定", policy: "Google Routes API等で距離・ルート取得", current: "実装済み", evidence: "routePlan" },
         { requirement: "距離制運賃×係数で算定", policy: "fareMode=pre_fixed_fareで係数適用", current: "実装済み", evidence: "estimate/estimate-calc.js" },
-        { requirement: "2以上のルートから旅客が選択", policy: "複数ルートUIを用意し2件以上取得時のみ選択可", current: "LP側実装済み。ただし、実質的に異なる2件以上のルートが取得できた場合に事前確定運賃として扱う。候補1件時は通常見積または確認対応。", evidence: "estimate/estimate-distance-api.js, estimate/estimate-main.js（preFixedFareConfirmable）" },
+        { requirement: "2以上のルートから旅客が選択", policy: "4系統候補を生成し2件以上取得時のみ選択可", current: "本システムでは、電子地図APIにより、おすすめルート、取得候補内の距離短めルート、主要道路経由ルート、有料道路利用可ルートを生成し、実質的に異なる2件以上のルートが取得できた場合に、旅客が1つを選択して事前確定運賃を算定する。候補1件時は通常見積または確認対応とする。", evidence: "estimate/estimate-distance-api.js, shared/pre-fixed-fare-route-waypoints.js, estimate/estimate-main.js" },
         { requirement: "有料道路利用有無を選択", policy: "roadTypeを保存しルート算定へ反映", current: "実装済み", evidence: "roadType" },
         { requirement: "運賃額と割引前後を提示", policy: "表示UIとsnapshotに保存", current: "未確認", evidence: "fareBeforeDiscount" },
         { requirement: "注意事項を提示し同意取得", policy: "consentAt等を保存", current: "未確認", evidence: "consentAt" },

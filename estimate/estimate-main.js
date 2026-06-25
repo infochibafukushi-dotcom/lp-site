@@ -757,11 +757,15 @@
         routeToken: String(route.routeToken || ""),
         routeLabels: Array.isArray(route.routeLabels) ? route.routeLabels.slice() : [],
         routeLabel: String(route.routeLabel || ""),
+        routeDescription: String(route.routeDescription || ""),
         routeSummary: String(route.routeSummary || route.routeLabel || ""),
         routeStrategy: route.routeStrategy || null,
         routeSource: route.routeSource || null,
         roadType: String(route.roadType || state.routePlan.roadType || state.roadType || "general"),
-        tollInfo: route.tollInfo || null
+        tollInfo: route.tollInfo || null,
+        tollPreference: route.tollPreference || null,
+        tollExcludedFromFare: route.tollExcludedFromFare === true,
+        intermediateWaypoint: route.intermediateWaypoint || null
       })
     });
     return window.EstimateCalc.computeEstimate(state.config, tempState);
@@ -786,11 +790,15 @@
       routeToken: String(route.routeToken || ""),
       routeLabels: Array.isArray(route.routeLabels) ? route.routeLabels.slice() : [],
       routeLabel: String(route.routeLabel || ""),
+      routeDescription: String(route.routeDescription || ""),
       routeSummary: String(route.routeSummary || route.routeLabel || ""),
       routeStrategy: route.routeStrategy || null,
       routeSource: route.routeSource || null,
       roadType: String(route.roadType || state.routePlan.roadType || state.roadType || "general"),
       tollInfo: route.tollInfo || null,
+      tollPreference: route.tollPreference || null,
+      tollExcludedFromFare: route.tollExcludedFromFare === true,
+      intermediateWaypoint: route.intermediateWaypoint || null,
       selectedAt: new Date().toISOString()
     });
     state.distanceKm = Number(route.distanceKm) || 0;
@@ -830,15 +838,25 @@
       const distanceLabel = formatRouteDistanceMeters(route.distanceMeters);
       const durationLabel = formatRouteDurationSeconds(route.durationSeconds);
       const summary = getRouteDisplayLabel(route, index);
+      const description = String(route.routeDescription || "").trim();
       const roadTypeLabel = getRoadTypeLabel(route.roadType || state.routePlan.roadType || state.roadType);
+      const waypointLabel = route.intermediateWaypoint?.waypointLabel
+        ? String(route.intermediateWaypoint.waypointLabel)
+        : "";
 
       return (
         '<article class="estimate-route-card' + (isSelected ? " is-selected" : "") + '">' +
           '<h5 class="estimate-route-card-title">' + escapeHtml(summary) + "</h5>" +
+          (description
+            ? '<p class="estimate-route-card-description">' + escapeHtml(description) + "</p>"
+            : "") +
           '<dl class="estimate-route-card-meta">' +
             "<div><dt>距離</dt><dd>" + escapeHtml(distanceLabel || "-") + "</dd></div>" +
             "<div><dt>予定時間</dt><dd>" + escapeHtml(durationLabel || "-") + "</dd></div>" +
             "<div><dt>有料道路利用</dt><dd>" + escapeHtml(roadTypeLabel) + "</dd></div>" +
+            (waypointLabel
+              ? "<div><dt>主要経由</dt><dd>" + escapeHtml(waypointLabel) + "</dd></div>"
+              : "") +
             "<div><dt>概要</dt><dd>" + escapeHtml(String(route.routeSummary || summary)) + "</dd></div>" +
             '<div><dt>事前確定運賃</dt><dd class="estimate-route-card-fare">' + escapeHtml(fareLabel) + "</dd></div>" +
           "</dl>" +
@@ -992,6 +1010,7 @@
         encodedPolyline: String(primaryRoute?.encodedPolyline || ""),
         routeLabels: Array.isArray(primaryRoute?.routeLabels) ? primaryRoute.routeLabels.slice() : [],
         routeLabel: String(primaryRoute?.routeLabel || ""),
+        routeDescription: String(primaryRoute?.routeDescription || ""),
         routeSummary: String(primaryRoute?.routeSummary || primaryRoute?.routeLabel || ""),
         routeStrategy: primaryRoute?.routeStrategy || null,
         routeSource: primaryRoute?.routeSource || "google_routes",
@@ -999,10 +1018,16 @@
         distanceMeters: Number(primaryRoute?.distanceMeters) || 0,
         durationSeconds: Number(primaryRoute?.durationSeconds) || 0,
         tollInfo: primaryRoute?.tollInfo || null,
+        tollPreference: primaryRoute?.tollPreference || null,
+        tollExcludedFromFare: primaryRoute?.tollExcludedFromFare === true,
+        intermediateWaypoint: primaryRoute?.intermediateWaypoint || null,
         routes: Array.isArray(result.routes) ? result.routes : [],
+        routeCandidates: Array.isArray(result.routeCandidates) ? result.routeCandidates : (Array.isArray(result.routes) ? result.routes : []),
         selectedAt: new Date().toISOString(),
         preFixedFareConfirmable: result.preFixedFareConfirmable === true,
         multipleRoutesAvailable: result.multipleRoutesAvailable === true,
+        routeCandidateCount: Number(result.routeCandidateCount) || (Array.isArray(result.routes) ? result.routes.length : 0),
+        distinctRouteCount: Number(result.distinctRouteCount) || (Array.isArray(result.routes) ? result.routes.length : 0),
         alternativeRouteCount: Number(result.alternativeRouteCount) || (Array.isArray(result.routes) ? result.routes.length : 0),
         routeDedupedCount: Number(result.routeDedupedCount) || (Array.isArray(result.routes) ? result.routes.length : 0),
         routeGenerationStrategies: Array.isArray(result.routeGenerationStrategies) ? result.routeGenerationStrategies.slice() : [],

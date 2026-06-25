@@ -667,6 +667,31 @@
     return "ルート候補 " + (Number(index) + 1);
   }
 
+  function buildRouteCandidateSnapshot(route, index){
+    return {
+      routeId: String(route.routeId || ""),
+      routeIndex: index,
+      label: formatRouteLabel(route, index),
+      routeLabel: String(route.routeLabel || formatRouteLabel(route, index)),
+      routeDescription: String(route.routeDescription || ""),
+      routeStrategy: route.routeStrategy || null,
+      routeSource: route.routeSource || null,
+      distanceMeters: Number(route.distanceMeters) || 0,
+      durationSeconds: Number(route.durationSeconds) || 0,
+      distanceKm: Number(route.distanceKm) || 0,
+      encodedPolyline: String(route.encodedPolyline || ""),
+      routeToken: String(route.routeToken || ""),
+      routeSummary: String(route.routeSummary || "").trim() || null,
+      roadType: String(route.roadType || "") === "toll" ? "toll" : "general",
+      avoidTolls: route.avoidTolls === true,
+      avoidHighways: route.avoidHighways === true,
+      tollInfo: route.tollInfo || null,
+      tollPreference: route.tollPreference || null,
+      tollExcludedFromFare: route.tollExcludedFromFare === true,
+      intermediateWaypoint: route.intermediateWaypoint || null
+    };
+  }
+
   function buildSelectedRouteSnapshot(state){
     const routePlan = state?.routePlan;
     if(!routePlan){
@@ -684,6 +709,7 @@
       ? formatRouteLabel(selected, selectedIndex >= 0 ? selectedIndex : 0)
       : "";
     const confirmable = routePlan.preFixedFareConfirmable === true;
+    const routeCandidates = routes.map(buildRouteCandidateSnapshot);
 
     return {
       selectedRouteId: selectedId || String(selected?.routeId || ""),
@@ -695,25 +721,14 @@
       routeToken: String(selected?.routeToken || routePlan.routeToken || ""),
       routeSummary: String(selected?.routeSummary || label || "").trim() || null,
       tollInfo: selected?.tollInfo ?? routePlan.tollInfo ?? null,
+      tollPreference: selected?.tollPreference || null,
+      tollExcludedFromFare: selected?.tollExcludedFromFare === true,
+      intermediateWaypoint: selected?.intermediateWaypoint || null,
       roadType: String(selected?.roadType || routePlan.roadType || state.roadType || "general") === "toll" ? "toll" : "general",
-      alternativeRoutes: routes.map(function(route, index){
-        return {
-          routeId: String(route.routeId || ""),
-          routeIndex: index,
-          label: formatRouteLabel(route, index),
-          routeStrategy: route.routeStrategy || null,
-          routeSource: route.routeSource || null,
-          distanceMeters: Number(route.distanceMeters) || 0,
-          durationSeconds: Number(route.durationSeconds) || 0,
-          distanceKm: Number(route.distanceKm) || 0,
-          encodedPolyline: String(route.encodedPolyline || ""),
-          routeToken: String(route.routeToken || ""),
-          routeSummary: String(route.routeSummary || "").trim() || null,
-          roadType: String(route.roadType || "") === "toll" ? "toll" : "general",
-          avoidTolls: route.avoidTolls === true,
-          avoidHighways: route.avoidHighways === true
-        };
-      }),
+      routeCandidates: routeCandidates,
+      alternativeRoutes: routeCandidates,
+      routeCandidateCount: routes.length,
+      distinctRouteCount: Number(routePlan.distinctRouteCount) || routes.length,
       alternativeRouteCount: routes.length,
       multipleRoutesAvailable: confirmable,
       preFixedFareConfirmable: confirmable,
@@ -852,7 +867,13 @@
       routeToken: routeSnapshot.routeToken || "",
       routeSummary: routeSnapshot.routeSummary || null,
       tollInfo: routeSnapshot.tollInfo || null,
-      alternativeRoutes: routeSnapshot.alternativeRoutes || [],
+      tollPreference: routeSnapshot.tollPreference || null,
+      tollExcludedFromFare: routeSnapshot.tollExcludedFromFare === true,
+      intermediateWaypoint: routeSnapshot.intermediateWaypoint || null,
+      routeCandidates: routeSnapshot.routeCandidates || [],
+      alternativeRoutes: routeSnapshot.alternativeRoutes || routeSnapshot.routeCandidates || [],
+      routeCandidateCount: routeSnapshot.routeCandidateCount ?? 0,
+      distinctRouteCount: routeSnapshot.distinctRouteCount ?? 0,
       alternativeRouteCount: routeSnapshot.alternativeRouteCount ?? 0,
       multipleRoutesAvailable: routeSnapshot.multipleRoutesAvailable === true,
       preFixedFareConfirmable: routeSnapshot.preFixedFareConfirmable === true,
