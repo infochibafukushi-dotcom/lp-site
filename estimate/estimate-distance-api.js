@@ -1,7 +1,20 @@
 (function(global){
   const ROUTES_URL = "https://routes.googleapis.com/directions/v2:computeRoutes";
   const GEOCODE_URL = "https://maps.googleapis.com/maps/api/geocode/json";
-  const FIELD_MASK = "routes.distanceMeters,routes.duration,routes.polyline.encodedPolyline,routes.routeLabels,routes.routeToken,routes.travelAdvisory.tollInfo";
+  const FIELD_MASK = [
+    "routes.distanceMeters",
+    "routes.duration",
+    "routes.polyline.encodedPolyline",
+    "routes.routeLabels",
+    "routes.routeToken",
+    "routes.travelAdvisory.tollInfo",
+    "routes.legs.distanceMeters",
+    "routes.legs.duration",
+    "routes.legs.staticDuration",
+    "routes.legs.polyline.encodedPolyline",
+    "routes.legs.startLocation.latLng",
+    "routes.legs.endLocation.latLng"
+  ].join(",");
   const MAX_ROUTE_CANDIDATES = 4;
 
   const ROUTE_PRESENTATION = {
