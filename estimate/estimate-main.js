@@ -723,6 +723,88 @@
     return String(state.config?.fareMode || "") === "pre_fixed_fare";
   }
 
+  function isRouteUiDebugEnabled(){
+    try{
+      if(typeof window !== "undefined"){
+        if(new URLSearchParams(window.location.search).get("routeUiDebug") === "1"){
+          return true;
+        }
+        if(window.localStorage && window.localStorage.getItem("estimateRouteUiDebug") === "1"){
+          return true;
+        }
+      }
+    }catch(error){}
+    return false;
+  }
+
+  function getRouteCandidatesFromPlan(routePlan){
+    if(!routePlan){
+      return [];
+    }
+    const candidates = Array.isArray(routePlan.routeCandidates) && routePlan.routeCandidates.length
+      ? routePlan.routeCandidates.slice()
+      : (Array.isArray(routePlan.routes) && routePlan.routes.length ? routePlan.routes.slice() : []);
+    if(candidates.length){
+      return candidates;
+    }
+    if((Number(routePlan.distanceMeters) || 0) > 0 || String(routePlan.encodedPolyline || "").trim()){
+      const distanceMeters = Number(routePlan.distanceMeters) || 0;
+      const durationSeconds = Number(routePlan.durationSeconds) || 0;
+      return [{
+        routeId: String(routePlan.selectedRouteId || "route_0"),
+        routeLabel: String(routePlan.routeLabel || "おすすめルート"),
+        routeDescription: String(routePlan.routeDescription || ""),
+        routeStrategy: routePlan.routeStrategy || "recommended",
+        routeSource: routePlan.routeSource || routePlan.provider || "google_routes",
+        distanceMeters: distanceMeters,
+        durationSeconds: durationSeconds,
+        distanceKm: Math.round((distanceMeters / 1000) * 10) / 10,
+        durationMinutes: durationSeconds > 0 ? Math.max(1, Math.round(durationSeconds / 60)) : 0,
+        encodedPolyline: String(routePlan.encodedPolyline || ""),
+        routeToken: String(routePlan.routeToken || ""),
+        routeSummary: String(routePlan.routeSummary || routePlan.routeLabel || ""),
+        tollInfo: routePlan.tollInfo || null,
+        tollPreference: routePlan.tollPreference || null,
+        tollExcludedFromFare: routePlan.tollExcludedFromFare === true,
+        intermediateWaypoint: routePlan.intermediateWaypoint || null,
+        roadType: routePlan.roadType || "general",
+        routeLabels: Array.isArray(routePlan.routeLabels) ? routePlan.routeLabels.slice() : []
+      }];
+    }
+    return [];
+  }
+
+  function logRouteUiState(result){
+    const fareMode = String(state.config?.fareMode || result?.quoteSnapshot?.fareMode || "");
+    const routeCandidates = getRouteCandidatesFromPlan(state.routePlan);
+    const snapshot = result?.quoteSnapshot || {};
+    const distinctRouteCount = Number(state.routePlan?.distinctRouteCount ?? routeCandidates.length);
+    const preFixedFareConfirmable = state.routePlan?.preFixedFareConfirmable === true
+      || snapshot.preFixedFareConfirmable === true;
+    const selectionUiVisible = fareMode === "pre_fixed_fare" && routeCandidates.length > 0;
+
+    if(isRouteUiDebugEnabled()){
+      console.log("[route-ui] fareMode", fareMode);
+      console.log("[route-ui] routeCandidates", routeCandidates);
+      console.log("[route-ui] distinctRouteCount", distinctRouteCount);
+      console.log("[route-ui] preFixedFareConfirmable", preFixedFareConfirmable);
+      console.log("[route-ui] detail", {
+        hasRoutePlan: Boolean(state.routePlan),
+        routeCandidateCount: routeCandidates.length,
+        selectionUiVisible: selectionUiVisible,
+        routeCalcError: state.routeCalcError || "",
+        fallbackReason: state.routePlan?.fallbackReason || snapshot.fallbackReason || null
+      });
+    }
+
+    if(fareMode !== "pre_fixed_fare"){
+      console.info(
+        "[route-ui] 現在は概算見積モード（fareMode=" + fareMode + "）のため、事前確定運賃のルート選択UIは非表示。"
+        + " 管理画面の運賃方式を「事前確定運賃」に設定し、estimate-config.json を保存してください。"
+      );
+    }
+  }
+
   function getRouteDisplayLabel(route, index){
     const explicit = String(route?.routeLabel || "").trim();
     if(explicit){
@@ -813,12 +895,28 @@
   }
 
   function renderRouteSelectionSection(result){
-    if(!isPreFixedFareMode() || !state.routePlan){
+    logRouteUiState(result);
+
+    if(!isPreFixedFareMode()){
       return "";
     }
-    const routes = Array.isArray(state.routePlan.routes) ? state.routePlan.routes : [];
+    if(!state.routePlan){
+      return (
+        '<section class="estimate-route-selection estimate-route-selection--fallback" aria-label="ルート候補の選択">' +
+          '<h4 class="estimate-route-selection-title">走行予定ルートの選択</h4>' +
+          '<p class="estimate-route-selection-warning">走行予定ルートを取得できませんでした。出発地・目的地を入力して距離を計算してください。</p>' +
+        "</section>"
+      );
+    }
+
+    const routes = getRouteCandidatesFromPlan(state.routePlan);
     if(!routes.length){
-      return "";
+      return (
+        '<section class="estimate-route-selection estimate-route-selection--fallback" aria-label="ルート候補の選択">' +
+          '<h4 class="estimate-route-selection-title">走行予定ルートの選択</h4>' +
+          '<p class="estimate-route-selection-warning">走行予定ルートを取得できませんでした。距離を手入力するか、住所を確認して再度お試しください。</p>' +
+        "</section>"
+      );
     }
 
     const confirmable = isPreFixedFareConfirmable();
@@ -1220,15 +1318,30 @@
   }
 
   function getResultNotes(){
+    const fareMode = state.config.fareMode || "";
+    if(fareMode === "pre_fixed_fare"){
+      const notice = String(state.config.page?.preFixedFareNotice || "").trim();
+      const serviceNote = "※迎車料金・介助料・待機料・有料道路代等は、事前確定運賃とは別枠でご精算となる場合があります。";
+      return notice ? (notice + "\n\n" + serviceNote) : serviceNote;
+    }
+
     const fallback =
       "※表示料金は概算です。\n" +
       "※実際の料金は運行距離、交通状況、待機時間、付き添い時間、介助内容等により変動する場合があります。";
-    const fareMode = state.config.fareMode || "";
-    const fixedFareNotice = fareMode === "pre_fixed_fare"
-      ? String(state.config.page?.preFixedFareNotice || "").trim()
-      : "";
     const base = state.config.page?.resultNotes || fallback;
-    return fixedFareNotice ? (base + "\n\n" + fixedFareNotice) : base;
+    return base;
+  }
+
+  function getResultTotalLabel(){
+    if(isPreFixedFareMode()){
+      return state.config.resultLabels?.fixedFareSection || "事前確定運賃込み合計";
+    }
+    return state.config.resultLabels?.totalEstimateSection || state.config.resultLabels?.total || "合計目安";
+  }
+
+  function formatResultTotalAmount(total){
+    const amount = formatYen(total);
+    return isPreFixedFareMode() ? amount : amount + "～";
   }
 
   function renderUsageSummary(result){
@@ -1587,7 +1700,7 @@
   }
 
   function renderResult(result){
-    const totalLabel = state.config.resultLabels?.totalEstimateSection || state.config.resultLabels?.total || "合計目安";
+    const totalLabel = getResultTotalLabel();
     const reservationUrl = getReservationUrl();
     const lineUrl = state.ctaUrls.line || "#";
     const phoneUrl = state.ctaUrls.phone || "#";
@@ -1642,7 +1755,7 @@
           <div class="estimate-total-rule" aria-hidden="true"></div>
           <div class="estimate-total-box">
             <div class="estimate-total-label">${escapeHtml(totalLabel)}</div>
-            <div class="estimate-total-amount">${formatYen(result.total)}～</div>
+            <div class="estimate-total-amount">${escapeHtml(formatResultTotalAmount(result.total))}</div>
           </div>
           <div class="estimate-total-rule" aria-hidden="true"></div>
           <div class="estimate-result-notes">${escapeHtml(getResultNotes())}</div>
@@ -2007,6 +2120,10 @@
       const urlState = window.EstimateUrl?.parseUrlState?.() || {};
       state.config = await window.EstimateConfigLoader.loadEstimateConfig();
       logGoogleMapsConfig("init:config-loaded");
+      console.info("[route-ui] loaded fareMode", String(state.config?.fareMode || ""));
+      if(String(state.config?.fareMode || "") !== "pre_fixed_fare"){
+        console.info("[route-ui] 現在は概算見積モードのため、事前確定運賃のルート選択UIは非表示");
+      }
 
       if(window.EstimateUrl?.applyUrlStateToFormState){
         window.EstimateUrl.applyUrlStateToFormState(state, urlState, state.config);
