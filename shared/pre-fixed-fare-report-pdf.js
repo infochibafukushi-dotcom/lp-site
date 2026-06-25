@@ -78,7 +78,12 @@
   }
 
   function section(title, bodyHtml){
-    return "<section><h2>" + escapeHtml(title) + "</h2>" + bodyHtml + "</section>";
+    return (
+      "<section>" +
+      "<div class='report-section-title-block'><h2>" + escapeHtml(title) + "</h2></div>" +
+      "<div class='report-section-body'>" + bodyHtml + "</div>" +
+      "</section>"
+    );
   }
 
   function buildReportHtml(data){
@@ -224,7 +229,7 @@
     container.innerHTML =
       "<style>" +
       ".pre-fixed-fare-report,.pre-fixed-fare-report *{box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Yu Gothic','Meiryo',sans-serif;background:transparent;color:#111111;}" +
-      ".pre-fixed-fare-report{display:block;visibility:visible;opacity:1;position:relative;top:0;left:0;width:720px;background:#ffffff;color:#111111;line-height:1.45;font-size:10.5px;padding:0;margin:0;}" +
+      ".pre-fixed-fare-report{display:block;visibility:visible;opacity:1;position:relative;top:0;left:0;width:720px;background:#ffffff;color:#111111;line-height:1.45;font-size:10.5px;padding:4px 0 0;margin:0;}" +
       ".pre-fixed-fare-report h1{font-size:19px;margin:0 0 8px;color:#111111;line-height:1.3;}" +
       ".pre-fixed-fare-report h2{font-size:13.5px;margin:14px 0 6px;padding-bottom:2px;border-bottom:1px solid #ccc;color:#111111;break-after:avoid;page-break-after:avoid;}" +
       ".pre-fixed-fare-report h3{font-size:11.5px;margin:8px 0 5px;color:#111111;break-after:avoid;page-break-after:avoid;}" +
@@ -235,7 +240,10 @@
       ".pre-fixed-fare-report th,.pre-fixed-fare-report td{border:1px solid #d9d9d9;padding:5px 6px;vertical-align:top;white-space:normal;word-break:break-word;overflow-wrap:anywhere;color:#111111;background:#ffffff;box-sizing:border-box;font-size:9.5px;line-height:1.4;}" +
       ".pre-fixed-fare-report th{background:#f6f6f6;font-weight:700;}" +
       ".pre-fixed-fare-report section{break-inside:auto;page-break-inside:auto;margin:0 0 10px;}" +
-      ".pre-fixed-fare-report tr{break-inside:avoid;page-break-inside:avoid;}" +
+      ".pre-fixed-fare-report .report-section-title-block{break-inside:avoid;page-break-inside:avoid;}" +
+      ".pre-fixed-fare-report .report-section-body{break-inside:auto;page-break-inside:auto;}" +
+      ".pre-fixed-fare-report tr{break-inside:auto;page-break-inside:auto;}" +
+      ".pre-fixed-fare-report .table-meta tr,.pre-fixed-fare-report .table-coefficients tr,.pre-fixed-fare-report .table-fare-fees tr{break-inside:avoid;page-break-inside:avoid;}" +
       ".pre-fixed-fare-report .table-requirements td,.pre-fixed-fare-report .table-requirements th{font-size:9px;}" +
       ".pre-fixed-fare-report .warn{color:#8a1f1f;font-weight:700;}" +
       "</style>" +
@@ -271,14 +279,21 @@
     await waitForRenderReady();
 
     console.log("[PreFixedFareReportPdf] report element exists:", Boolean(reportElement));
+    const sectionTitles = Array.from(reportElement?.querySelectorAll("h2") || []).map(function(el){
+      return String(el.textContent || "").trim();
+    });
+    console.log("[PreFixedFareReportPdf] section count:", sectionTitles.length);
+    console.log("[PreFixedFareReportPdf] section titles:", sectionTitles);
     console.log("[PreFixedFareReportPdf] innerText length:", String(reportElement?.innerText || "").trim().length);
+    console.log("[PreFixedFareReportPdf] has section 15:", String(reportElement?.innerText || "").includes("15. 未実装・未確認事項"));
+    console.log("[PreFixedFareReportPdf] has section 16:", String(reportElement?.innerText || "").includes("16. 今後の実装優先順位"));
     console.log("[PreFixedFareReportPdf] offsetWidth:", Number(reportElement?.offsetWidth) || 0);
     console.log("[PreFixedFareReportPdf] offsetHeight:", Number(reportElement?.offsetHeight) || 0);
     console.log("[PreFixedFareReportPdf] html2pdf loaded:", typeof html2pdf !== "undefined");
 
     try{
       await html2pdf().set({
-        margin: [10, 10, 10, 10],
+        margin: [8, 8, 8, 8],
         filename: "pre-fixed-fare-regulatory-report.pdf",
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollX: 0, scrollY: 0 },

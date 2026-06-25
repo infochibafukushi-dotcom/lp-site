@@ -214,22 +214,25 @@
       ],
       requirementRows: impl.requirements,
       unimplementedOrUnconfirmed: [
-        "reservation-v4側の固定表示確認",
-        "API側のsnapshotHash検証",
-        "DB側のactive/consumed/expired管理",
-        "同意日時・同意文面保存",
-        "メール本文との金額一致",
+        "複数ルート選択UI",
+        "予約API/DBへの選択ルート保存",
+        "利用者同意日時の保存",
+        "同意文面バージョン保存",
+        "snapshotHashのサーバー検証",
+        "active / consumed / expired 状態管理",
+        "予約側でのquoteSnapshot固定表示",
+        "メール・管理画面・PDFの単一ソース化",
         "運転者画面への同一ルート表示"
       ],
       priorities: [
-        "予約側でquoteSnapshot固定表示",
-        "同意日時・同意文面・注意事項バージョン保存",
+        "複数ルート選択UI",
+        "有料道路利用有無選択の保存強化",
+        "利用者同意日時・同意文面保存",
         "snapshotHash / HMAC署名検証",
         "active / consumed / expired 状態管理",
-        "複数ルート選択UI",
-        "有料道路利用有無選択",
+        "予約側quoteSnapshot固定表示",
         "メール・PDF・管理画面の単一ソース化",
-        "認可説明資料PDFのスクリーンショット強化"
+        "運転者画面への同一ルート表示"
       ],
       appendices: {
         configuredTrafficZones: trafficZones.map(function(zone){
