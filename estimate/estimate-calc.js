@@ -170,7 +170,7 @@
   }
 
   function getDistanceMultiplier(config, state){
-    if(usesSeparateReturnRoute(config, state) || isStructuredRoutePlan(state?.routePlan)){
+    if(isRoundTripSelected(config, state) || isStructuredRoutePlan(state?.routePlan)){
       return 1;
     }
     const trip = findItem(config?.categories?.tripType?.items, state.tripTypeId);
@@ -1141,6 +1141,7 @@
       totalDurationSeconds: routeSnapshot.totalDurationSeconds ?? resolveDurationSeconds(state),
       preFixedFareScope: routeSnapshot.preFixedFareScope || null,
       returnFareStatus: routeSnapshot.returnFareStatus || null,
+      returnSelectedRouteId: routeSnapshot.returnRoutePlan?.selectedRouteId || null,
       selectedRouteId: routeSnapshot.selectedRouteId || "",
       selectedRouteLabel: routeSnapshot.selectedRouteLabel || null,
       selectedRouteIndex: routeSnapshot.selectedRouteIndex ?? null,
