@@ -1,0 +1,51 @@
+{
+  "baseUrl": "https://infochibafukushi-dotcom.github.io/lp-site",
+  "step6": {
+    "handoffExists": false,
+    "roundTripStatusText": [],
+    "returnPlanNote": "帰りに立ち寄り先を経由するため、復路は「目的地 → 立ち寄り先 → 出発地」で計算します。立ち寄り内容や待機時間により、実際の料金が変動する場合があります。",
+    "step6Warnings": [
+      "走行予定ルート候補が1件のみのため、事前確定運賃としての自動確定はできません。通常見積として表示し、ご予約時に確認いたします。",
+      "走行予定ルート候補が1件のみのため、事前確定運賃としての自動確定はできません。通常見積として表示し、ご予約時に確認いたします。"
+    ]
+  },
+  "result": {
+    "ui": {
+      "roundTripStatusText": [
+        "往路：確認対応",
+        "復路：確認対応"
+      ],
+      "resultNotes": "事前確定運賃は、乗車前に提示した走行予定ルートまたは主要経由地点、運賃額についてお客様の同意を得た場合に適用します。渋滞・交通規制等により運転者がルート変更する場合も、お客様の同意を得たうえで、運賃は事前確定額のままとなります。ただし、お客様都合で目的地・経由地・ルートを変更する場合は、その時点で事前確定運賃による運送を終了し、以後は別途精算します。介助料・機材料・有料道路料金等は、事前確定運賃とは別に区分してご請求します。\n\n※迎車料金・介助料・待機料・有料道路代等は、事前確定運賃とは別枠でご精算となる場合があります。"
+    },
+    "quoteSnapshot": {
+      "preFixedFareConfirmable": false,
+      "preFixedFareScope": "outbound_and_return",
+      "returnFareStatus": "fixed_candidate",
+      "selectedRouteId": "route_0",
+      "returnSelectedRouteId": "route_0",
+      "totalDistanceMeters": 7082,
+      "totalDurationSeconds": 1487,
+      "returnPlanType": "return_with_stop",
+      "tripType": "round_trip",
+      "outboundRoutePlan": {
+        "selectedRouteId": "route_0",
+        "routeCandidatesLength": 1,
+        "preFixedFareConfirmable": false,
+        "fallbackReason": "only_one_distinct_route"
+      },
+      "returnRoutePlan": {
+        "selectedRouteId": "route_0",
+        "routeCandidatesLength": 1,
+        "preFixedFareConfirmable": false,
+        "fallbackReason": "only_one_distinct_route",
+        "waypointAddress": "イオン千葉みなと"
+      }
+    },
+    "pdfQuoteSnapshot": null,
+    "pdfTextIncludes": {
+      "returnDistance": false,
+      "reviewRequired": false,
+      "stopover": false
+    }
+  }
+}
