@@ -17,24 +17,12 @@
   ].join(",");
   const MAX_ROUTE_CANDIDATES = 4;
 
-  const ROUTE_PRESENTATION = {
-    recommended: {
-      routeLabel: "おすすめルート",
-      routeDescription: "標準的な走行予定ルートです。"
-    },
-    shorter_distance: {
-      routeLabel: "距離優先ルート",
-      routeDescription: "取得候補の中で距離が短い走行予定ルートです。"
-    },
-    arterial_road: {
-      routeLabel: "幹線道路ルート",
-      routeDescription: "主要道路付近を経由する走行予定ルートです。"
-    },
-    toll_allowed: {
-      routeLabel: "有料道路利用ルート",
-      routeDescription: "有料道路を利用できる条件で算定した走行予定ルートです。有料道路代は運賃とは別枠です。"
+  function applyRoutePresentation(route, strategy){
+    if(global.PreFixedFareRoutePresentation && typeof global.PreFixedFareRoutePresentation.resolveRoutePresentation === "function"){
+      return global.PreFixedFareRoutePresentation.resolveRoutePresentation(route, strategy);
     }
-  };
+    return route;
+  }
 
   function parseDurationSeconds(durationStr){
     if(!durationStr) return 0;
@@ -139,26 +127,6 @@
       avoidHighways: avoidHighways,
       rawRouteIndex: Number(context.rawRouteIndex) || 0
     };
-  }
-
-  function applyRoutePresentation(route, strategy){
-    const presentation = ROUTE_PRESENTATION[strategy] || null;
-    if(!route){
-      return null;
-    }
-    const next = Object.assign({}, route, {
-      routeStrategy: strategy
-    });
-    if(presentation){
-      next.routeLabel = presentation.routeLabel;
-      next.routeDescription = presentation.routeDescription;
-      next.routeSummary = getRouteSummaryText(route) || presentation.routeLabel;
-    }else{
-      next.routeLabel = next.routeLabel || "ルート候補";
-      next.routeDescription = next.routeDescription || "";
-      next.routeSummary = getRouteSummaryText(next) || next.routeLabel;
-    }
-    return next;
   }
 
   function isDuplicateRoute(left, right){

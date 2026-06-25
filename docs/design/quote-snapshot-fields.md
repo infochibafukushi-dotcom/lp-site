@@ -63,6 +63,27 @@
 - 候補が1件のとき、偽の第2候補は **作らない**（`estimate-distance-api.js` の重複除去後の件数をそのまま記録）。
 - レッグ単位の `routeCandidates` とトップレベルの `routeCandidates` は、片道/往復・構造化の有無で参照先が異なる場合がある。監査時は `outboundRoutePlan` / `returnRoutePlan` を正とする。
 
+**候補要素の表示用フィールド（後方互換の追加）**
+
+各 `routeCandidates[]` 要素に、利用者向け表示名・説明を記録する。既存の `routeLabel` / `label` は維持する。
+
+| フィールド | 型 | 意味 |
+|------------|-----|------|
+| `routeLabel` | `string` | 表示名（例：おすすめルート、距離優先ルート） |
+| `routeDescription` | `string` | 説明文 |
+| `routeType` | `string` | 分類キー（`recommended` / `shorter_distance` / `toll_allowed` / `arterial_road`） |
+| `strategy` | `string` | `routeStrategy` と同義のエイリアス（監査用） |
+| `usesToll` | `boolean` | 有料道路利用の有無（料金には含めない） |
+
+**選択ルートの表示用フィールド（トップレベル・各レッグ）**
+
+| フィールド | 型 | 意味 |
+|------------|-----|------|
+| `selectedRouteLabel` | `string` | 旅客が選択したルートの表示名 |
+| `selectedRouteDescription` | `string` | 選択ルートの説明文 |
+| `selectedRouteType` | `string` | 選択ルートの分類キー |
+| `selectedUsesToll` | `boolean` | 選択ルートの有料道路利用 |
+
 ---
 
 ### `fallbackReason`

@@ -1069,6 +1069,9 @@
   }
 
   function getRouteDisplayLabel(route, index){
+    if(window.PreFixedFareRoutePresentation && typeof window.PreFixedFareRoutePresentation.getRouteDisplayLabel === "function"){
+      return window.PreFixedFareRoutePresentation.getRouteDisplayLabel(route, index);
+    }
     const explicit = String(route?.routeLabel || "").trim();
     if(explicit){
       return explicit;
@@ -1078,6 +1081,24 @@
       return labels.join(" / ");
     }
     return "ルート候補 " + (Number(index) + 1);
+  }
+
+  function getRouteDisplayDescription(route){
+    if(window.PreFixedFareRoutePresentation && typeof window.PreFixedFareRoutePresentation.getRouteDisplayDescription === "function"){
+      return window.PreFixedFareRoutePresentation.getRouteDisplayDescription(route);
+    }
+    return String(route?.routeDescription || "").trim();
+  }
+
+  function shouldShowRouteSummaryMeta(route, summary){
+    const text = String(summary || "").trim();
+    if(!text){
+      return false;
+    }
+    if(window.PreFixedFareRoutePresentation && typeof window.PreFixedFareRoutePresentation.isInternalRouteSummary === "function"){
+      return !window.PreFixedFareRoutePresentation.isInternalRouteSummary(text);
+    }
+    return text !== String(route?.routeLabel || "").trim();
   }
 
   function isLegPreFixedFareConfirmable(legPlan){
@@ -1102,6 +1123,8 @@
       routeDescription: String(route.routeDescription || ""),
       routeSummary: String(route.routeSummary || route.routeLabel || ""),
       routeStrategy: route.routeStrategy || null,
+      routeType: route.routeType || route.routeStrategy || null,
+      usesToll: route.usesToll === true,
       routeSource: route.routeSource || null,
       roadType: String(route.roadType || legPlan.roadType || state.roadType || "general"),
       tollInfo: route.tollInfo || null,
@@ -1353,20 +1376,24 @@
       const distanceLabel = formatRouteDistanceMeters(route.distanceMeters);
       const durationLabel = formatRouteDurationSeconds(route.durationSeconds);
       const summary = getRouteDisplayLabel(route, index);
-      const description = String(route.routeDescription || "").trim();
+      const description = getRouteDisplayDescription(route);
       const roadTypeLabel = getRoadTypeLabel(route.roadType || legPlan.roadType || state.roadType);
       const compactRoadTypeLabel = getCompactRoadTypeLabel(route.roadType || legPlan.roadType || state.roadType);
+      const tollNote = route.usesToll === true || route.routeStrategy === "toll_allowed"
+        ? "有料道路料金は見積料金に含まれず、別途必要です。"
+        : "";
       const waypointLabel = route.intermediateWaypoint?.waypointLabel
         ? String(route.intermediateWaypoint.waypointLabel)
         : "";
 
       if(compact){
-        const headline = route.routeStrategy === "recommended" || String(summary).includes("おすすめ")
-          ? "【推奨】"
-          : escapeHtml(summary);
+        const headline = escapeHtml(summary);
         return (
           '<article class="estimate-route-card estimate-route-card--compact' + (isSelected ? " is-selected" : "") + '">' +
             '<div class="estimate-route-card-compact-head">' + headline + "</div>" +
+            (description
+              ? '<p class="estimate-route-card-description estimate-route-card-description--compact">' + escapeHtml(description) + "</p>"
+              : "") +
             '<div class="estimate-route-card-compact-meta">' +
               escapeHtml(compactRoadTypeLabel) + "　" + escapeHtml(distanceLabel || "-") + "　" + escapeHtml(durationLabel || "-") +
             "</div>" +
@@ -1383,6 +1410,9 @@
           (description
             ? '<p class="estimate-route-card-description">' + escapeHtml(description) + "</p>"
             : "") +
+          (tollNote
+            ? '<p class="estimate-route-card-toll-note">' + escapeHtml(tollNote) + "</p>"
+            : "") +
           '<dl class="estimate-route-card-meta">' +
             "<div><dt>距離</dt><dd>" + escapeHtml(distanceLabel || "-") + "</dd></div>" +
             "<div><dt>予定時間</dt><dd>" + escapeHtml(durationLabel || "-") + "</dd></div>" +
@@ -1390,7 +1420,6 @@
             (waypointLabel
               ? "<div><dt>主要経由</dt><dd>" + escapeHtml(waypointLabel) + "</dd></div>"
               : "") +
-            "<div><dt>概要</dt><dd>" + escapeHtml(String(route.routeSummary || summary)) + "</dd></div>" +
             '<div><dt>事前確定運賃</dt><dd class="estimate-route-card-fare">' + escapeHtml(fareLabel) + "</dd></div>" +
           "</dl>" +
           (confirmable

@@ -409,13 +409,92 @@
     };
   }
 
+  function buildSelectedRouteLegPdfHtml(legPrefix, legPlan, quoteLeg, layout){
+    if(!legPlan){
+      return "";
+    }
+    const routes = Array.isArray(legPlan.routes) ? legPlan.routes
+      : (Array.isArray(legPlan.routeCandidates) ? legPlan.routeCandidates : []);
+    const selectedId = String(legPlan.selectedRouteId || quoteLeg?.selectedRouteId || "");
+    const selected = routes.find(function(route){
+      return String(route?.routeId || "") === selectedId;
+    }) || routes[0] || null;
+    const label = String(quoteLeg?.selectedRouteLabel || selected?.routeLabel || "").trim();
+    if(!label){
+      return "";
+    }
+    const description = String(quoteLeg?.selectedRouteDescription || selected?.routeDescription || "").trim();
+    const distanceLabel = formatRouteDistanceMeters(
+      Number(selected?.distanceMeters || quoteLeg?.distanceMeters || legPlan.distanceMeters) || 0
+    );
+    const durationLabel = formatRouteDurationSeconds(
+      Number(selected?.durationSeconds || quoteLeg?.durationSeconds || legPlan.durationSeconds) || 0
+    );
+    const prefix = String(legPrefix || "").trim();
+    const title = prefix ? ("選択ルート（" + prefix + "）：" + label) : ("選択ルート：" + label);
+    const gap = Math.max(4, Number(layout?.routeMapTitleGap) || 6);
+    const fontSize = Math.max(9, Number(layout?.metaFont) - 1 || 10);
+    const parts = [
+      "<p style=\"margin:0 0 " + gap + "px;font-size:" + fontSize + "px;line-height:1.55;color:#333;font-weight:700;\">" +
+        escapeHtml(title) +
+      "</p>"
+    ];
+    if(description){
+      parts.push(
+        "<p style=\"margin:0 0 " + gap + "px;font-size:" + fontSize + "px;line-height:1.55;color:#555;\">" +
+          escapeHtml(description) +
+        "</p>"
+      );
+    }
+    const meta = [];
+    if(distanceLabel){
+      meta.push("距離：" + distanceLabel);
+    }
+    if(durationLabel){
+      meta.push("所要時間：" + durationLabel);
+    }
+    if(meta.length){
+      parts.push(
+        "<p style=\"margin:0 0 " + gap + "px;font-size:" + fontSize + "px;line-height:1.55;color:#555;\">" +
+          escapeHtml(meta.join("　")) +
+        "</p>"
+      );
+    }
+    return parts.join("");
+  }
+
+  function buildSelectedRoutesPdfHtml(routePlan, quoteSnapshot, layout){
+    if(!routePlan){
+      return "";
+    }
+    if(routePlan.outboundRoutePlan){
+      const outboundHtml = buildSelectedRouteLegPdfHtml(
+        "往路",
+        routePlan.outboundRoutePlan,
+        quoteSnapshot?.outboundRoutePlan,
+        layout
+      );
+      const returnHtml = routePlan.returnRoutePlan
+        ? buildSelectedRouteLegPdfHtml(
+          "復路",
+          routePlan.returnRoutePlan,
+          quoteSnapshot?.returnRoutePlan,
+          layout
+        )
+        : "";
+      return outboundHtml + returnHtml;
+    }
+    return buildSelectedRouteLegPdfHtml("", routePlan, quoteSnapshot, layout);
+  }
+
   function buildRouteMapHtml(routeMapDataUrl, layout, routePlan, options){
     const statusOptions = buildRouteStatusOptions(routePlan, options, options?.quoteSnapshot);
     const preFixedStatusHtml = global.PreFixedFareStatus && routePlan
       ? global.PreFixedFareStatus.buildStatusPdfHtml(routePlan, layout, statusOptions)
       : "";
+    const selectedRoutesHtml = buildSelectedRoutesPdfHtml(routePlan, options?.quoteSnapshot, layout);
     const hasMap = Boolean(String(routeMapDataUrl || "").trim());
-    if(!hasMap && !preFixedStatusHtml){
+    if(!hasMap && !preFixedStatusHtml && !selectedRoutesHtml){
       return "";
     }
     const primaryRoute = getRoutePlanPrimaryRoute(routePlan);
@@ -470,6 +549,7 @@
         "<div style=\"margin:0 0 " + layout.routeMapTitleGap + "px;font-size:" + Math.max(11, layout.sectionFont - 1) + "px;" +
         "font-weight:700;color:#9a6b16;line-height:1.22;\">走行予定ルート</div>" +
         preFixedStatusHtml +
+        selectedRoutesHtml +
         mapImageHtml +
         infoHtml +
       "</div>"

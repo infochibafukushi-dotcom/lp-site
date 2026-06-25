@@ -799,6 +799,12 @@
     const label = selected
       ? formatRouteLabel(selected, selectedIndex >= 0 ? selectedIndex : 0)
       : "";
+    const description = selected
+      ? ((typeof global !== "undefined" && global.PreFixedFareRoutePresentation
+        && typeof global.PreFixedFareRoutePresentation.getRouteDisplayDescription === "function")
+        ? global.PreFixedFareRoutePresentation.getRouteDisplayDescription(selected)
+        : String(selected.routeDescription || ""))
+      : "";
     const confirmable = legPlan.preFixedFareConfirmable === true;
     const routeCandidates = routes.map(buildRouteCandidateSnapshot);
 
@@ -811,6 +817,9 @@
       selectedRouteId: selectedId || String(selected?.routeId || ""),
       selectedRoute: selected || null,
       selectedRouteLabel: label || null,
+      selectedRouteDescription: description || null,
+      selectedRouteType: selected?.routeType || selected?.routeStrategy || null,
+      selectedUsesToll: selected ? resolveRouteUsesToll(selected) : false,
       selectedRouteIndex: selectedIndex >= 0 ? selectedIndex : 0,
       selectedRouteStrategy: selected?.routeStrategy || null,
       selectedRouteSource: selected?.routeSource || legPlan.provider || null,
@@ -901,6 +910,10 @@
   }
 
   function formatRouteLabel(route, index){
+    if(typeof global !== "undefined" && global.PreFixedFareRoutePresentation
+      && typeof global.PreFixedFareRoutePresentation.getRouteDisplayLabel === "function"){
+      return global.PreFixedFareRoutePresentation.getRouteDisplayLabel(route, index);
+    }
     const explicit = String(route?.routeLabel || "").trim();
     if(explicit){
       return explicit;
@@ -912,14 +925,32 @@
     return "ルート候補 " + (Number(index) + 1);
   }
 
+  function resolveRouteUsesToll(route){
+    if(route?.usesToll === true){
+      return true;
+    }
+    if(typeof global !== "undefined" && global.PreFixedFareRoutePresentation
+      && typeof global.PreFixedFareRoutePresentation.routeUsesToll === "function"){
+      return global.PreFixedFareRoutePresentation.routeUsesToll(route);
+    }
+    return route?.roadType === "toll" || route?.routeStrategy === "toll_allowed";
+  }
+
   function buildRouteCandidateSnapshot(route, index){
+    const label = formatRouteLabel(route, index);
+    const description = (typeof global !== "undefined" && global.PreFixedFareRoutePresentation
+      && typeof global.PreFixedFareRoutePresentation.getRouteDisplayDescription === "function")
+      ? global.PreFixedFareRoutePresentation.getRouteDisplayDescription(route)
+      : String(route.routeDescription || "");
     return {
       routeId: String(route.routeId || ""),
       routeIndex: index,
-      label: formatRouteLabel(route, index),
-      routeLabel: String(route.routeLabel || formatRouteLabel(route, index)),
-      routeDescription: String(route.routeDescription || ""),
+      label: label,
+      routeLabel: String(route.routeLabel || label),
+      routeDescription: description,
+      routeType: String(route.routeType || route.routeStrategy || ""),
       routeStrategy: route.routeStrategy || null,
+      strategy: route.routeStrategy || null,
       routeSource: route.routeSource || null,
       distanceMeters: Number(route.distanceMeters) || 0,
       durationSeconds: Number(route.durationSeconds) || 0,
@@ -930,6 +961,7 @@
       roadType: String(route.roadType || "") === "toll" ? "toll" : "general",
       avoidTolls: route.avoidTolls === true,
       avoidHighways: route.avoidHighways === true,
+      usesToll: resolveRouteUsesToll(route),
       tollInfo: route.tollInfo || null,
       tollPreference: route.tollPreference || null,
       tollExcludedFromFare: route.tollExcludedFromFare === true,
@@ -981,12 +1013,21 @@
     const label = selected
       ? formatRouteLabel(selected, selectedIndex >= 0 ? selectedIndex : 0)
       : "";
+    const description = selected
+      ? ((typeof global !== "undefined" && global.PreFixedFareRoutePresentation
+        && typeof global.PreFixedFareRoutePresentation.getRouteDisplayDescription === "function")
+        ? global.PreFixedFareRoutePresentation.getRouteDisplayDescription(selected)
+        : String(selected.routeDescription || ""))
+      : "";
     const confirmable = routePlan.preFixedFareConfirmable === true;
     const routeCandidates = routes.map(buildRouteCandidateSnapshot);
 
     return {
       selectedRouteId: selectedId || String(selected?.routeId || ""),
       selectedRouteLabel: label || null,
+      selectedRouteDescription: description || null,
+      selectedRouteType: selected?.routeType || selected?.routeStrategy || null,
+      selectedUsesToll: selected ? resolveRouteUsesToll(selected) : false,
       selectedRouteIndex: selectedIndex >= 0 ? selectedIndex : 0,
       selectedRouteStrategy: selected?.routeStrategy || null,
       selectedRouteSource: selected?.routeSource || routePlan.provider || null,
@@ -1144,6 +1185,9 @@
       returnSelectedRouteId: routeSnapshot.returnRoutePlan?.selectedRouteId || null,
       selectedRouteId: routeSnapshot.selectedRouteId || "",
       selectedRouteLabel: routeSnapshot.selectedRouteLabel || null,
+      selectedRouteDescription: routeSnapshot.selectedRouteDescription || null,
+      selectedRouteType: routeSnapshot.selectedRouteType || routeSnapshot.selectedRouteStrategy || null,
+      selectedUsesToll: routeSnapshot.selectedUsesToll === true,
       selectedRouteIndex: routeSnapshot.selectedRouteIndex ?? null,
       selectedRouteStrategy: routeSnapshot.selectedRouteStrategy || null,
       selectedRouteSource: routeSnapshot.selectedRouteSource || null,
