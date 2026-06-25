@@ -60,7 +60,7 @@ async function waitForEstimateReady(page){
     const app = document.getElementById("estimateApp");
     const text = String(app?.textContent || "");
     return text.length > 0 && !text.includes("読み込み中") && !text.includes("設定を読み込んでいます");
-  }, { timeout: 90000 });
+  }, { timeout: 180000 });
 }
 
 async function clickChoice(page, name, value){
@@ -70,7 +70,7 @@ async function clickChoice(page, name, value){
 }
 
 async function runFlow(page){
-  await page.goto(estimateUrl, { waitUntil: "networkidle2", timeout: 90000 });
+  await page.goto(estimateUrl, { waitUntil: "domcontentloaded", timeout: 120000 });
   await waitForEstimateReady(page);
   await clickChoice(page, "mobilityChoice", "stretcher");
   await page.waitForSelector('input[name="stairChoice"]', { timeout: 30000 });
