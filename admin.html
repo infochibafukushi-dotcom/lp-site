@@ -1385,6 +1385,23 @@ body{
     </div>
   </div>
 
+  <div class="card collapsible-card js-collapsible section-anchor" id="card-pre-fixed-fare-report" data-open="false">
+    <button type="button" class="card-toggle js-card-toggle">
+      <span class="toggle-left">
+        <span class="toggle-icon">▶</span>
+        <span class="toggle-title">認可・運賃資料</span>
+      </span>
+      <span class="toggle-state">閉じています</span>
+    </button>
+    <div class="card-body js-card-body">
+      <p class="note">関東運輸局の事前確定運賃公示要件に対するシステム対応、算定式、係数、ルート算定、同意証跡、保存設計をまとめた説明資料をPDFで出力します。</p>
+      <div class="actions" style="margin-top:16px;">
+        <button type="button" id="preFixedFareReportExportBtn">事前確定運賃 認可説明資料PDFを出力</button>
+      </div>
+      <div class="preview" id="preFixedFareReportResult">まだ出力していません。</div>
+    </div>
+  </div>
+
 
   <div class="floating-save-bar">
     <div class="floating-save-inner">
@@ -1407,6 +1424,9 @@ body{
 <script src="./shared/estimate-defaults.js"></script>
 <script src="./shared/estimate-validate.js"></script>
 <script src="./admin-estimate.js"></script>
+<script src="./shared/pre-fixed-fare-report-data.js"></script>
+<script src="./shared/pre-fixed-fare-report-pdf.js"></script>
+<script src="./admin-pre-fixed-fare-report.js"></script>
 <script>
 const CONFIG_PATH = 'data/config.json';
 const SECTIONS_PATH = 'data/sections.json';
