@@ -1,0 +1,69 @@
+{
+  "verifiedAt": "2026-06-25T21:53:12.632Z",
+  "baseUrl": "https://infochibafukushi-dotcom.github.io/lp-site",
+  "commitNote": "de32f23 review",
+  "ui": {
+    "roundTripStatusText": [
+      "ルート候補が1件のみのため、事前確定運賃としては確定せず、予約後に確認対応となります。",
+      "往路：確認対応",
+      "復路：確認対応",
+      "復路は立ち寄り地点を含む指定ルートで算定しています。候補が1件のみのため確認対応となります。"
+    ],
+    "singleCandidateNotice": "ルート候補が1件のみのため、事前確定運賃としては確定せず、予約後に確認対応となります。",
+    "stopoverNote": "復路は立ち寄り地点を含む指定ルートで算定しています。候補が1件のみのため確認対応となります。",
+    "mapLegend": "線往路立ち寄り復路マーカー発出発地着目的地寄立ち寄り地点",
+    "totalLabel": ""
+  },
+  "quoteSnapshotSummary": {
+    "preFixedFareConfirmable": false,
+    "preFixedFareScope": "outbound_and_return",
+    "returnFareStatus": "fixed_candidate",
+    "returnPlanType": "return_with_stop",
+    "tripType": "round_trip",
+    "totalDistanceMeters": 7082,
+    "totalDurationSeconds": 1683,
+    "total": 6060,
+    "outboundRoutePlan": {
+      "preFixedFareConfirmable": false,
+      "fallbackReason": "only_one_distinct_route",
+      "routeCandidatesLength": 1
+    },
+    "returnRoutePlan": {
+      "preFixedFareConfirmable": false,
+      "fallbackReason": "only_one_distinct_route",
+      "routeCandidatesLength": 1,
+      "waypointAddress": "イオン千葉みなと"
+    }
+  },
+  "handoffTotal": 12460,
+  "pdfBuildError": "",
+  "reservationUrl": "https://infochibafukushi-dotcom.github.io/reservation-v4/?source=estimate&estimateNo=EST-20260626-2916&fareConfirm=review",
+  "checks": {
+    "uiSingleCandidateNotice": true,
+    "uiOutboundStatus": true,
+    "uiReturnStatus": true,
+    "uiStopoverNote": true,
+    "mapLegendOutbound": true,
+    "mapLegendStop": true,
+    "mapLegendReturn": true,
+    "mapMarkerOrigin": true,
+    "mapMarkerDestination": true,
+    "mapMarkerWaypoint": true,
+    "pdfOutboundStatus": true,
+    "pdfReturnStatus": true,
+    "pdfSingleCandidateNotice": true,
+    "pdfStopoverNote": true,
+    "snapshotPreFixedFareConfirmable": true,
+    "snapshotOutboundConfirmable": true,
+    "snapshotReturnConfirmable": true,
+    "snapshotOutboundFallback": true,
+    "snapshotReturnFallback": true,
+    "snapshotOutboundCandidates": true,
+    "snapshotReturnCandidates": true,
+    "snapshotReturnPlanType": true,
+    "reservationFareConfirmReview": true,
+    "distanceWithinBaseline": true,
+    "durationWithinBaseline": true,
+    "allPassed": true
+  }
+}

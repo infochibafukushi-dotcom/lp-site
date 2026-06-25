@@ -1,0 +1,815 @@
+{
+  "fareMode": "pre_fixed_fare",
+  "distancePricing": {
+    "mode": "patternA",
+    "patternA": {
+      "initialDistanceKm": 1.06,
+      "initialFare": 500,
+      "incrementDistanceKm": 0.221,
+      "incrementFare": 100
+    },
+    "patternB": {
+      "perKmRate": 450
+    }
+  },
+  "fareComponents": {
+    "time": [
+      {
+        "key": "timeBaseFare",
+        "label": "時間制運賃",
+        "calculator": "time_block",
+        "params": {
+          "baseMinutes": 30,
+          "baseAmount": 5000,
+          "perBlockMinutes": 15,
+          "perBlockAmount": 1200
+        }
+      },
+      {
+        "key": "pickupFee",
+        "label": "迎車料金",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "pickupFee"
+      },
+      {
+        "key": "specialVehicleFee",
+        "label": "特殊車両使用料",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "specialVehicleFee"
+      }
+    ],
+    "distance": [
+      {
+        "key": "pickupFee",
+        "label": "迎車料金",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "pickupFee"
+      },
+      {
+        "key": "specialVehicleFee",
+        "label": "特殊車両使用料",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "specialVehicleFee"
+      },
+      {
+        "key": "distanceFare",
+        "label": "距離運賃",
+        "calculator": "distance_pricing_ref",
+        "pricingRef": "distancePricing"
+      }
+    ],
+    "distance_time": [
+      {
+        "key": "pickupFee",
+        "label": "迎車料金",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "pickupFee"
+      },
+      {
+        "key": "specialVehicleFee",
+        "label": "特殊車両使用料",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "specialVehicleFee"
+      },
+      {
+        "key": "distanceFare",
+        "label": "距離運賃",
+        "calculator": "distance_pricing_ref",
+        "pricingRef": "distancePricing"
+      },
+      {
+        "key": "timeAdjustment",
+        "label": "予定時間加算（概算）",
+        "calculator": "time_block",
+        "params": {
+          "baseMinutes": 20,
+          "baseAmount": 0,
+          "perBlockMinutes": 10,
+          "perBlockAmount": 300
+        }
+      }
+    ],
+    "pre_fixed_fare": [
+      {
+        "key": "pickupFee",
+        "label": "迎車料金",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "pickupFee"
+      },
+      {
+        "key": "specialVehicleFee",
+        "label": "特殊車両使用料",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "specialVehicleFee"
+      },
+      {
+        "key": "distanceFare",
+        "label": "距離運賃",
+        "calculator": "distance_pricing_ref",
+        "pricingRef": "distancePricing"
+      },
+      {
+        "key": "timeAdjustment",
+        "label": "予定時間加算（概算）",
+        "calculator": "time_block",
+        "params": {
+          "baseMinutes": 20,
+          "baseAmount": 0,
+          "perBlockMinutes": 10,
+          "perBlockAmount": 300
+        }
+      }
+    ]
+  },
+  "fareBasis": {
+    "fareMode": "pre_fixed_fare",
+    "fareModeLabel": "事前確定運賃",
+    "durationMinutes": 28,
+    "distanceKm": 7.1,
+    "distanceMultiplier": 1,
+    "sections": [
+      {
+        "key": "pickupFee",
+        "title": "迎車料金",
+        "rules": [
+          "迎車料金 800円"
+        ],
+        "usage": "",
+        "amountLabel": "迎車料金",
+        "amount": 800
+      },
+      {
+        "key": "specialVehicleFee",
+        "title": "特殊車両使用料",
+        "rules": [
+          "特殊車両使用料 1000円"
+        ],
+        "usage": "",
+        "amountLabel": "特殊車両使用料",
+        "amount": 1000
+      },
+      {
+        "key": "distanceFare",
+        "title": "距離部分",
+        "rules": [
+          "初乗 1.06km まで 500円",
+          "以後 221m ごとに 100円加算",
+          "認可距離制運賃 3300円 × 平準化係数 1.2 = 3960円"
+        ],
+        "usage": "送迎方法：往復\n往路距離：2.7km\n復路距離：4.4km\n計算対象距離：7.1km",
+        "usageLines": [
+          {
+            "label": "送迎方法",
+            "value": "往復"
+          },
+          {
+            "label": "往路距離",
+            "value": "2.7km"
+          },
+          {
+            "label": "復路距離",
+            "value": "4.4km"
+          },
+          {
+            "label": "計算対象距離",
+            "value": "7.1km"
+          }
+        ],
+        "amountLabel": "距離運賃",
+        "amount": 3960
+      },
+      {
+        "key": "timeAdjustment",
+        "title": "予定時間加算（概算）",
+        "rules": [
+          "初回 20分 0円",
+          "以後 10分ごとに 300円加算"
+        ],
+        "usage": "ルート予定時間: 28分（Google Routes API の概算。認可メーターの低速走行加算とは異なります）",
+        "amountLabel": "予定時間加算（概算）",
+        "amount": 300
+      }
+    ],
+    "notices": [
+      "表示は見積時点の運賃設定に基づく計算根拠です。",
+      "時間加算はルート予定時間に基づく概算です。実走行では認可メーター（低速走行時の時間距離併用）が適用されます。",
+      "待機時間は運賃計算に含まれません。",
+      "距離運賃には交通圏平準化係数（1.2）を適用しています。介助料・待機料・実費には適用しません。"
+    ]
+  },
+  "fixedFareTotal": 6060,
+  "fixedFareBreakdown": [
+    {
+      "key": "pickupFee",
+      "label": "迎車料金",
+      "amount": 800,
+      "calculator": "fixed_fee_ref"
+    },
+    {
+      "key": "specialVehicleFee",
+      "label": "特殊車両使用料",
+      "amount": 1000,
+      "calculator": "fixed_fee_ref"
+    },
+    {
+      "key": "distanceFare",
+      "label": "距離運賃",
+      "amount": 3960,
+      "calculator": "distance_pricing_ref"
+    },
+    {
+      "key": "timeAdjustment",
+      "label": "予定時間加算（概算）",
+      "amount": 300,
+      "calculator": "time_block"
+    }
+  ],
+  "pickupFee": 800,
+  "specialVehicleFeeEnabled": true,
+  "specialVehicleFeeAmount": 1000,
+  "serviceFees": [
+    {
+      "key": "specialVehicleFee",
+      "label": "特殊車両使用料",
+      "amount": 1000
+    },
+    {
+      "key": "wheelchairFee",
+      "label": "車いす料金",
+      "amount": 4000
+    },
+    {
+      "key": "assistanceFee",
+      "label": "介助料金",
+      "amount": 1600
+    },
+    {
+      "key": "waitingFee",
+      "label": "待機料金",
+      "amount": 800
+    }
+  ],
+  "expenses": [],
+  "roadType": "general",
+  "distanceKm": 7.1,
+  "billedDistanceKm": 7.1,
+  "routePlan": {
+    "tripType": "round_trip",
+    "returnPlanType": "return_with_stop",
+    "outboundRoutePlan": {
+      "origin": {
+        "address": "千葉市中央区富士見2-1-1"
+      },
+      "destination": {
+        "address": "千葉大学医学部附属病院"
+      },
+      "waypoint": null,
+      "distanceMeters": 2721,
+      "durationSeconds": 559,
+      "selectedRouteId": "route_0",
+      "selectedRoute": {
+        "routeId": "route_0",
+        "routeLabel": "おすすめルート",
+        "routeDescription": "標準的な走行予定ルートです。",
+        "routeSource": "google_routes",
+        "routeStrategy": "recommended",
+        "distanceMeters": 2721,
+        "durationSeconds": 559,
+        "distanceKm": 2.7,
+        "durationMinutes": 9,
+        "encodedPolyline": "oljxEckevYaBeAi@vAC^Xn@Td@CPc@`@QCSQCS@kARaA~EoM`DuIP_@\\_@ZMnAIRFpLsBs@gUIkDCa@l@IfA@hCVZwBF[FgA`B]n@Ur@i@d@m@Zw@fAsDToAdBqFZa@d@wAvDwJjAaDYCaA[s@IOI[@MuAIuA",
+        "routeLabels": [
+          "DEFAULT_ROUTE"
+        ],
+        "routeToken": "CokCCpABMo0BGnIKIQIWCTlpvFxDIQDQxhqz6g-sM6T0CPePCozTM5ehNspbABIg2QKzWR20IIR3bCA0muv7TwsbUU_uTV-Qn1jMXDo0eIAaCQChAwAUIBIyHSoICw0BYR1hVAwyAQc95H8CPkUaRBQ_SNzatICs5qWfnAEiF082TTlhcWFPSEoyYWlkNFBfZXlFMkFvEAUaWwpZChgKDQoCCAERAAAAAACAZkAR8KfGS7dHnUASFggAEAMQBhATEBIQARAAGAJCBBoCCAUaBgoECAIQAiIbChdPNk05YW9PX0c1MmFpZDRQX2V5RTJBb3ABKAEiFQCJilHRAFhb4Ok2kDsWfZtpYtwZERoYCgoNQuw5FRW1-4NTEgoNmO05FRUr-YNT",
+        "routeSummary": "DEFAULT_ROUTE",
+        "tollInfo": null,
+        "tollPreference": null,
+        "tollExcludedFromFare": false,
+        "intermediateWaypoint": null,
+        "routeLegs": [
+          {
+            "legIndex": 0,
+            "distanceMeters": 2721,
+            "durationSeconds": 559,
+            "encodedPolyline": "oljxEckevYaBeAi@vAC^Xn@Td@CPc@`@QCSQCS@kARaA~EoM`DuIP_@\\_@ZMnAIRFpLsBs@gUIkDCa@l@IfA@hCVZwBF[FgA`B]n@Ur@i@d@m@Zw@fAsDToAdBqFZa@d@wAvDwJjAaDYCaA[s@IOI[@MuAIuA",
+            "startLatLng": {
+              "lat": 35.611757,
+              "lng": 140.1158581
+            },
+            "endLatLng": {
+              "lat": 35.603519999999996,
+              "lng": 140.1343564
+            }
+          }
+        ],
+        "roadType": "general",
+        "avoidTolls": true,
+        "avoidHighways": true,
+        "rawRouteIndex": 0
+      },
+      "selectedRouteLabel": "おすすめルート",
+      "selectedRouteIndex": 0,
+      "selectedRouteStrategy": "recommended",
+      "selectedRouteSource": "google_routes",
+      "encodedPolyline": "oljxEckevYaBeAi@vAC^Xn@Td@CPc@`@QCSQCS@kARaA~EoM`DuIP_@\\_@ZMnAIRFpLsBs@gUIkDCa@l@IfA@hCVZwBF[FgA`B]n@Ur@i@d@m@Zw@fAsDToAdBqFZa@d@wAvDwJjAaDYCaA[s@IOI[@MuAIuA",
+      "routeToken": "CokCCpABMo0BGnIKIQIWCTlpvFxDIQDQxhqz6g-sM6T0CPePCozTM5ehNspbABIg2QKzWR20IIR3bCA0muv7TwsbUU_uTV-Qn1jMXDo0eIAaCQChAwAUIBIyHSoICw0BYR1hVAwyAQc95H8CPkUaRBQ_SNzatICs5qWfnAEiF082TTlhcWFPSEoyYWlkNFBfZXlFMkFvEAUaWwpZChgKDQoCCAERAAAAAACAZkAR8KfGS7dHnUASFggAEAMQBhATEBIQARAAGAJCBBoCCAUaBgoECAIQAiIbChdPNk05YW9PX0c1MmFpZDRQX2V5RTJBb3ABKAEiFQCJilHRAFhb4Ok2kDsWfZtpYtwZERoYCgoNQuw5FRW1-4NTEgoNmO05FRUr-YNT",
+      "routeSummary": "DEFAULT_ROUTE",
+      "tollInfo": null,
+      "tollPreference": null,
+      "tollExcludedFromFare": false,
+      "intermediateWaypoint": null,
+      "roadType": "general",
+      "routeCandidates": [
+        {
+          "routeId": "route_0",
+          "routeIndex": 0,
+          "label": "おすすめルート",
+          "routeLabel": "おすすめルート",
+          "routeDescription": "標準的な走行予定ルートです。",
+          "routeStrategy": "recommended",
+          "routeSource": "google_routes",
+          "distanceMeters": 2721,
+          "durationSeconds": 559,
+          "distanceKm": 2.7,
+          "encodedPolyline": "oljxEckevYaBeAi@vAC^Xn@Td@CPc@`@QCSQCS@kARaA~EoM`DuIP_@\\_@ZMnAIRFpLsBs@gUIkDCa@l@IfA@hCVZwBF[FgA`B]n@Ur@i@d@m@Zw@fAsDToAdBqFZa@d@wAvDwJjAaDYCaA[s@IOI[@MuAIuA",
+          "routeToken": "CokCCpABMo0BGnIKIQIWCTlpvFxDIQDQxhqz6g-sM6T0CPePCozTM5ehNspbABIg2QKzWR20IIR3bCA0muv7TwsbUU_uTV-Qn1jMXDo0eIAaCQChAwAUIBIyHSoICw0BYR1hVAwyAQc95H8CPkUaRBQ_SNzatICs5qWfnAEiF082TTlhcWFPSEoyYWlkNFBfZXlFMkFvEAUaWwpZChgKDQoCCAERAAAAAACAZkAR8KfGS7dHnUASFggAEAMQBhATEBIQARAAGAJCBBoCCAUaBgoECAIQAiIbChdPNk05YW9PX0c1MmFpZDRQX2V5RTJBb3ABKAEiFQCJilHRAFhb4Ok2kDsWfZtpYtwZERoYCgoNQuw5FRW1-4NTEgoNmO05FRUr-YNT",
+          "routeSummary": "DEFAULT_ROUTE",
+          "roadType": "general",
+          "avoidTolls": true,
+          "avoidHighways": true,
+          "tollInfo": null,
+          "tollPreference": null,
+          "tollExcludedFromFare": false,
+          "intermediateWaypoint": null
+        }
+      ],
+      "preFixedFareConfirmable": false,
+      "routeCandidateCount": 1,
+      "distinctRouteCount": 1,
+      "fallbackReason": "only_one_distinct_route",
+      "selectedAt": "2026-06-25T21:53:00.824Z"
+    },
+    "returnRoutePlan": {
+      "origin": {
+        "address": "千葉大学医学部附属病院"
+      },
+      "destination": {
+        "address": "千葉市中央区富士見2-1-1"
+      },
+      "waypoint": {
+        "waypointLabel": "イオン千葉みなと",
+        "waypointAddress": "イオン千葉みなと",
+        "stopType": null,
+        "waypointLatLng": {
+          "latitude": 35.59963630000001,
+          "longitude": 140.11390889999998
+        }
+      },
+      "distanceMeters": 4361,
+      "durationSeconds": 1124,
+      "selectedRouteId": "route_0",
+      "selectedRoute": {
+        "routeId": "route_0",
+        "routeLabel": "おすすめルート",
+        "routeDescription": "標準的な走行予定ルートです。",
+        "routeSource": "google_routes",
+        "routeStrategy": "recommended",
+        "distanceMeters": 4361,
+        "durationSeconds": 1124,
+        "distanceKm": 4.4,
+        "durationMinutes": 19,
+        "encodedPolyline": "_yhxEw~hvYLnBHz@ZARHv@JbAZN@eEzKuArDM`@[`@eBpFUnAwAtEWd@_@`@m@d@_AZMbCFj@Nl@@~@fEr@pA^t@^PLj@r@Xh@L^fB~GrBlFdFvLXl@f@j@JRCZBpDPdFaB|ApCvCRLTFtDrEuDsEUGc@a@sJyJQMkAQaCUkAJi@N{[lMkFlBa@@RqELwBJyCc@mA]cAi@kAa@~@gDvIKG",
+        "routeLabels": [
+          "DEFAULT_ROUTE"
+        ],
+        "routeToken": "CvMCCvoBMvcBGocBCiUCFgxL6nopRiEADcNFgD2TgTa4mTGG4AnliQvGU7k1v2X4owEAEiw7NHiAdi1nJyn4SQA8H72ddnDHSxMIT9_hMVCpao-Lp8u-Z3g3XyNXCXBp2xoLAAMLEhMkAAACIQMqC1ZbInBkAwAAAGQBMgEAPcx31z5FSPy5PUj244iYv5__h-wBGlIKFwIWBSF30QhGIQC5iAnvyh6s9UqH3Q4AEhQIcGnbEpQhp6hMU6jQW9tA2QKzWRoFAAJSIQgqBQ4AI0sePXfAaD9F5H8CPkjS1Z-Ky4bi0-0BIhdPNk05YW9uY0lOMnBpZDRQMDZiOXVBRRAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEUJg5dBiXLxAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXTzZNOWFyYXZIOTJwaWQ0UDA2Yjl1QUVwASgBIhUAiYpR0V2YLsreTJqHKh1b8j_5tGgaGAoKDYCqOBUVTM6GUxIKDemsOBUVsc2GUw",
+        "routeSummary": "DEFAULT_ROUTE",
+        "tollInfo": null,
+        "tollPreference": null,
+        "tollExcludedFromFare": false,
+        "intermediateWaypoint": {
+          "waypointLabel": "イオン千葉みなと",
+          "waypointAddress": "イオン千葉みなと",
+          "waypointLatLng": {
+            "latitude": 35.59963630000001,
+            "longitude": 140.11390889999998
+          }
+        },
+        "routeLegs": [
+          {
+            "legIndex": 0,
+            "distanceMeters": 2444,
+            "durationSeconds": 620,
+            "encodedPolyline": "_yhxEw~hvYLnBHz@ZARHv@JbAZN@eEzKuArDM`@[`@eBpFUnAwAtEWd@_@`@m@d@_AZMbCFj@Nl@@~@fEr@pA^t@^PLj@r@Xh@L^fB~GrBlFdFvLXl@f@j@JRCZBpDPdFaB|ApCvCRLTFtDrE",
+            "startLatLng": {
+              "lat": 35.603519999999996,
+              "lng": 140.1343564
+            },
+            "endLatLng": {
+              "lat": 35.59963630000001,
+              "lng": 140.11390889999998
+            }
+          },
+          {
+            "legIndex": 1,
+            "distanceMeters": 1917,
+            "durationSeconds": 503,
+            "encodedPolyline": "w`hxE}~dvYuDsEUGc@a@sJyJQMkAQaCUkAJi@N{[lMkFlBa@@RqELwBJyCc@mA]cAi@kAa@~@gDvIKG",
+            "startLatLng": {
+              "lat": 35.59963630000001,
+              "lng": 140.11390889999998
+            },
+            "endLatLng": {
+              "lat": 35.611757,
+              "lng": 140.1158581
+            }
+          }
+        ],
+        "roadType": "general",
+        "avoidTolls": true,
+        "avoidHighways": true,
+        "rawRouteIndex": 0
+      },
+      "selectedRouteLabel": "おすすめルート",
+      "selectedRouteIndex": 0,
+      "selectedRouteStrategy": "recommended",
+      "selectedRouteSource": "google_routes",
+      "encodedPolyline": "_yhxEw~hvYLnBHz@ZARHv@JbAZN@eEzKuArDM`@[`@eBpFUnAwAtEWd@_@`@m@d@_AZMbCFj@Nl@@~@fEr@pA^t@^PLj@r@Xh@L^fB~GrBlFdFvLXl@f@j@JRCZBpDPdFaB|ApCvCRLTFtDrEuDsEUGc@a@sJyJQMkAQaCUkAJi@N{[lMkFlBa@@RqELwBJyCc@mA]cAi@kAa@~@gDvIKG",
+      "routeToken": "CvMCCvoBMvcBGocBCiUCFgxL6nopRiEADcNFgD2TgTa4mTGG4AnliQvGU7k1v2X4owEAEiw7NHiAdi1nJyn4SQA8H72ddnDHSxMIT9_hMVCpao-Lp8u-Z3g3XyNXCXBp2xoLAAMLEhMkAAACIQMqC1ZbInBkAwAAAGQBMgEAPcx31z5FSPy5PUj244iYv5__h-wBGlIKFwIWBSF30QhGIQC5iAnvyh6s9UqH3Q4AEhQIcGnbEpQhp6hMU6jQW9tA2QKzWRoFAAJSIQgqBQ4AI0sePXfAaD9F5H8CPkjS1Z-Ky4bi0-0BIhdPNk05YW9uY0lOMnBpZDRQMDZiOXVBRRAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEUJg5dBiXLxAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXTzZNOWFyYXZIOTJwaWQ0UDA2Yjl1QUVwASgBIhUAiYpR0V2YLsreTJqHKh1b8j_5tGgaGAoKDYCqOBUVTM6GUxIKDemsOBUVsc2GUw",
+      "routeSummary": "DEFAULT_ROUTE",
+      "tollInfo": null,
+      "tollPreference": null,
+      "tollExcludedFromFare": false,
+      "intermediateWaypoint": {
+        "waypointLabel": "イオン千葉みなと",
+        "waypointAddress": "イオン千葉みなと",
+        "waypointLatLng": {
+          "latitude": 35.59963630000001,
+          "longitude": 140.11390889999998
+        }
+      },
+      "roadType": "general",
+      "routeCandidates": [
+        {
+          "routeId": "route_0",
+          "routeIndex": 0,
+          "label": "おすすめルート",
+          "routeLabel": "おすすめルート",
+          "routeDescription": "標準的な走行予定ルートです。",
+          "routeStrategy": "recommended",
+          "routeSource": "google_routes",
+          "distanceMeters": 4361,
+          "durationSeconds": 1124,
+          "distanceKm": 4.4,
+          "encodedPolyline": "_yhxEw~hvYLnBHz@ZARHv@JbAZN@eEzKuArDM`@[`@eBpFUnAwAtEWd@_@`@m@d@_AZMbCFj@Nl@@~@fEr@pA^t@^PLj@r@Xh@L^fB~GrBlFdFvLXl@f@j@JRCZBpDPdFaB|ApCvCRLTFtDrEuDsEUGc@a@sJyJQMkAQaCUkAJi@N{[lMkFlBa@@RqELwBJyCc@mA]cAi@kAa@~@gDvIKG",
+          "routeToken": "CvMCCvoBMvcBGocBCiUCFgxL6nopRiEADcNFgD2TgTa4mTGG4AnliQvGU7k1v2X4owEAEiw7NHiAdi1nJyn4SQA8H72ddnDHSxMIT9_hMVCpao-Lp8u-Z3g3XyNXCXBp2xoLAAMLEhMkAAACIQMqC1ZbInBkAwAAAGQBMgEAPcx31z5FSPy5PUj244iYv5__h-wBGlIKFwIWBSF30QhGIQC5iAnvyh6s9UqH3Q4AEhQIcGnbEpQhp6hMU6jQW9tA2QKzWRoFAAJSIQgqBQ4AI0sePXfAaD9F5H8CPkjS1Z-Ky4bi0-0BIhdPNk05YW9uY0lOMnBpZDRQMDZiOXVBRRAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEUJg5dBiXLxAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXTzZNOWFyYXZIOTJwaWQ0UDA2Yjl1QUVwASgBIhUAiYpR0V2YLsreTJqHKh1b8j_5tGgaGAoKDYCqOBUVTM6GUxIKDemsOBUVsc2GUw",
+          "routeSummary": "DEFAULT_ROUTE",
+          "roadType": "general",
+          "avoidTolls": true,
+          "avoidHighways": true,
+          "tollInfo": null,
+          "tollPreference": null,
+          "tollExcludedFromFare": false,
+          "intermediateWaypoint": {
+            "waypointLabel": "イオン千葉みなと",
+            "waypointAddress": "イオン千葉みなと",
+            "waypointLatLng": {
+              "latitude": 35.59963630000001,
+              "longitude": 140.11390889999998
+            }
+          }
+        }
+      ],
+      "preFixedFareConfirmable": false,
+      "routeCandidateCount": 1,
+      "distinctRouteCount": 1,
+      "fallbackReason": "only_one_distinct_route",
+      "selectedAt": "2026-06-25T21:53:00.824Z"
+    },
+    "totalDistanceMeters": 7082,
+    "totalDurationSeconds": 1683,
+    "preFixedFareScope": "outbound_and_return",
+    "returnFareStatus": "fixed_candidate"
+  },
+  "tripType": "round_trip",
+  "returnPlanType": "return_with_stop",
+  "outboundRoutePlan": {
+    "origin": {
+      "address": "千葉市中央区富士見2-1-1"
+    },
+    "destination": {
+      "address": "千葉大学医学部附属病院"
+    },
+    "waypoint": null,
+    "distanceMeters": 2721,
+    "durationSeconds": 559,
+    "selectedRouteId": "route_0",
+    "selectedRoute": {
+      "routeId": "route_0",
+      "routeLabel": "おすすめルート",
+      "routeDescription": "標準的な走行予定ルートです。",
+      "routeSource": "google_routes",
+      "routeStrategy": "recommended",
+      "distanceMeters": 2721,
+      "durationSeconds": 559,
+      "distanceKm": 2.7,
+      "durationMinutes": 9,
+      "encodedPolyline": "oljxEckevYaBeAi@vAC^Xn@Td@CPc@`@QCSQCS@kARaA~EoM`DuIP_@\\_@ZMnAIRFpLsBs@gUIkDCa@l@IfA@hCVZwBF[FgA`B]n@Ur@i@d@m@Zw@fAsDToAdBqFZa@d@wAvDwJjAaDYCaA[s@IOI[@MuAIuA",
+      "routeLabels": [
+        "DEFAULT_ROUTE"
+      ],
+      "routeToken": "CokCCpABMo0BGnIKIQIWCTlpvFxDIQDQxhqz6g-sM6T0CPePCozTM5ehNspbABIg2QKzWR20IIR3bCA0muv7TwsbUU_uTV-Qn1jMXDo0eIAaCQChAwAUIBIyHSoICw0BYR1hVAwyAQc95H8CPkUaRBQ_SNzatICs5qWfnAEiF082TTlhcWFPSEoyYWlkNFBfZXlFMkFvEAUaWwpZChgKDQoCCAERAAAAAACAZkAR8KfGS7dHnUASFggAEAMQBhATEBIQARAAGAJCBBoCCAUaBgoECAIQAiIbChdPNk05YW9PX0c1MmFpZDRQX2V5RTJBb3ABKAEiFQCJilHRAFhb4Ok2kDsWfZtpYtwZERoYCgoNQuw5FRW1-4NTEgoNmO05FRUr-YNT",
+      "routeSummary": "DEFAULT_ROUTE",
+      "tollInfo": null,
+      "tollPreference": null,
+      "tollExcludedFromFare": false,
+      "intermediateWaypoint": null,
+      "routeLegs": [
+        {
+          "legIndex": 0,
+          "distanceMeters": 2721,
+          "durationSeconds": 559,
+          "encodedPolyline": "oljxEckevYaBeAi@vAC^Xn@Td@CPc@`@QCSQCS@kARaA~EoM`DuIP_@\\_@ZMnAIRFpLsBs@gUIkDCa@l@IfA@hCVZwBF[FgA`B]n@Ur@i@d@m@Zw@fAsDToAdBqFZa@d@wAvDwJjAaDYCaA[s@IOI[@MuAIuA",
+          "startLatLng": {
+            "lat": 35.611757,
+            "lng": 140.1158581
+          },
+          "endLatLng": {
+            "lat": 35.603519999999996,
+            "lng": 140.1343564
+          }
+        }
+      ],
+      "roadType": "general",
+      "avoidTolls": true,
+      "avoidHighways": true,
+      "rawRouteIndex": 0
+    },
+    "selectedRouteLabel": "おすすめルート",
+    "selectedRouteIndex": 0,
+    "selectedRouteStrategy": "recommended",
+    "selectedRouteSource": "google_routes",
+    "encodedPolyline": "oljxEckevYaBeAi@vAC^Xn@Td@CPc@`@QCSQCS@kARaA~EoM`DuIP_@\\_@ZMnAIRFpLsBs@gUIkDCa@l@IfA@hCVZwBF[FgA`B]n@Ur@i@d@m@Zw@fAsDToAdBqFZa@d@wAvDwJjAaDYCaA[s@IOI[@MuAIuA",
+    "routeToken": "CokCCpABMo0BGnIKIQIWCTlpvFxDIQDQxhqz6g-sM6T0CPePCozTM5ehNspbABIg2QKzWR20IIR3bCA0muv7TwsbUU_uTV-Qn1jMXDo0eIAaCQChAwAUIBIyHSoICw0BYR1hVAwyAQc95H8CPkUaRBQ_SNzatICs5qWfnAEiF082TTlhcWFPSEoyYWlkNFBfZXlFMkFvEAUaWwpZChgKDQoCCAERAAAAAACAZkAR8KfGS7dHnUASFggAEAMQBhATEBIQARAAGAJCBBoCCAUaBgoECAIQAiIbChdPNk05YW9PX0c1MmFpZDRQX2V5RTJBb3ABKAEiFQCJilHRAFhb4Ok2kDsWfZtpYtwZERoYCgoNQuw5FRW1-4NTEgoNmO05FRUr-YNT",
+    "routeSummary": "DEFAULT_ROUTE",
+    "tollInfo": null,
+    "tollPreference": null,
+    "tollExcludedFromFare": false,
+    "intermediateWaypoint": null,
+    "roadType": "general",
+    "routeCandidates": [
+      {
+        "routeId": "route_0",
+        "routeIndex": 0,
+        "label": "おすすめルート",
+        "routeLabel": "おすすめルート",
+        "routeDescription": "標準的な走行予定ルートです。",
+        "routeStrategy": "recommended",
+        "routeSource": "google_routes",
+        "distanceMeters": 2721,
+        "durationSeconds": 559,
+        "distanceKm": 2.7,
+        "encodedPolyline": "oljxEckevYaBeAi@vAC^Xn@Td@CPc@`@QCSQCS@kARaA~EoM`DuIP_@\\_@ZMnAIRFpLsBs@gUIkDCa@l@IfA@hCVZwBF[FgA`B]n@Ur@i@d@m@Zw@fAsDToAdBqFZa@d@wAvDwJjAaDYCaA[s@IOI[@MuAIuA",
+        "routeToken": "CokCCpABMo0BGnIKIQIWCTlpvFxDIQDQxhqz6g-sM6T0CPePCozTM5ehNspbABIg2QKzWR20IIR3bCA0muv7TwsbUU_uTV-Qn1jMXDo0eIAaCQChAwAUIBIyHSoICw0BYR1hVAwyAQc95H8CPkUaRBQ_SNzatICs5qWfnAEiF082TTlhcWFPSEoyYWlkNFBfZXlFMkFvEAUaWwpZChgKDQoCCAERAAAAAACAZkAR8KfGS7dHnUASFggAEAMQBhATEBIQARAAGAJCBBoCCAUaBgoECAIQAiIbChdPNk05YW9PX0c1MmFpZDRQX2V5RTJBb3ABKAEiFQCJilHRAFhb4Ok2kDsWfZtpYtwZERoYCgoNQuw5FRW1-4NTEgoNmO05FRUr-YNT",
+        "routeSummary": "DEFAULT_ROUTE",
+        "roadType": "general",
+        "avoidTolls": true,
+        "avoidHighways": true,
+        "tollInfo": null,
+        "tollPreference": null,
+        "tollExcludedFromFare": false,
+        "intermediateWaypoint": null
+      }
+    ],
+    "preFixedFareConfirmable": false,
+    "routeCandidateCount": 1,
+    "distinctRouteCount": 1,
+    "fallbackReason": "only_one_distinct_route",
+    "selectedAt": "2026-06-25T21:53:00.824Z"
+  },
+  "returnRoutePlan": {
+    "origin": {
+      "address": "千葉大学医学部附属病院"
+    },
+    "destination": {
+      "address": "千葉市中央区富士見2-1-1"
+    },
+    "waypoint": {
+      "waypointLabel": "イオン千葉みなと",
+      "waypointAddress": "イオン千葉みなと",
+      "stopType": null,
+      "waypointLatLng": {
+        "latitude": 35.59963630000001,
+        "longitude": 140.11390889999998
+      }
+    },
+    "distanceMeters": 4361,
+    "durationSeconds": 1124,
+    "selectedRouteId": "route_0",
+    "selectedRoute": {
+      "routeId": "route_0",
+      "routeLabel": "おすすめルート",
+      "routeDescription": "標準的な走行予定ルートです。",
+      "routeSource": "google_routes",
+      "routeStrategy": "recommended",
+      "distanceMeters": 4361,
+      "durationSeconds": 1124,
+      "distanceKm": 4.4,
+      "durationMinutes": 19,
+      "encodedPolyline": "_yhxEw~hvYLnBHz@ZARHv@JbAZN@eEzKuArDM`@[`@eBpFUnAwAtEWd@_@`@m@d@_AZMbCFj@Nl@@~@fEr@pA^t@^PLj@r@Xh@L^fB~GrBlFdFvLXl@f@j@JRCZBpDPdFaB|ApCvCRLTFtDrEuDsEUGc@a@sJyJQMkAQaCUkAJi@N{[lMkFlBa@@RqELwBJyCc@mA]cAi@kAa@~@gDvIKG",
+      "routeLabels": [
+        "DEFAULT_ROUTE"
+      ],
+      "routeToken": "CvMCCvoBMvcBGocBCiUCFgxL6nopRiEADcNFgD2TgTa4mTGG4AnliQvGU7k1v2X4owEAEiw7NHiAdi1nJyn4SQA8H72ddnDHSxMIT9_hMVCpao-Lp8u-Z3g3XyNXCXBp2xoLAAMLEhMkAAACIQMqC1ZbInBkAwAAAGQBMgEAPcx31z5FSPy5PUj244iYv5__h-wBGlIKFwIWBSF30QhGIQC5iAnvyh6s9UqH3Q4AEhQIcGnbEpQhp6hMU6jQW9tA2QKzWRoFAAJSIQgqBQ4AI0sePXfAaD9F5H8CPkjS1Z-Ky4bi0-0BIhdPNk05YW9uY0lOMnBpZDRQMDZiOXVBRRAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEUJg5dBiXLxAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXTzZNOWFyYXZIOTJwaWQ0UDA2Yjl1QUVwASgBIhUAiYpR0V2YLsreTJqHKh1b8j_5tGgaGAoKDYCqOBUVTM6GUxIKDemsOBUVsc2GUw",
+      "routeSummary": "DEFAULT_ROUTE",
+      "tollInfo": null,
+      "tollPreference": null,
+      "tollExcludedFromFare": false,
+      "intermediateWaypoint": {
+        "waypointLabel": "イオン千葉みなと",
+        "waypointAddress": "イオン千葉みなと",
+        "waypointLatLng": {
+          "latitude": 35.59963630000001,
+          "longitude": 140.11390889999998
+        }
+      },
+      "routeLegs": [
+        {
+          "legIndex": 0,
+          "distanceMeters": 2444,
+          "durationSeconds": 620,
+          "encodedPolyline": "_yhxEw~hvYLnBHz@ZARHv@JbAZN@eEzKuArDM`@[`@eBpFUnAwAtEWd@_@`@m@d@_AZMbCFj@Nl@@~@fEr@pA^t@^PLj@r@Xh@L^fB~GrBlFdFvLXl@f@j@JRCZBpDPdFaB|ApCvCRLTFtDrE",
+          "startLatLng": {
+            "lat": 35.603519999999996,
+            "lng": 140.1343564
+          },
+          "endLatLng": {
+            "lat": 35.59963630000001,
+            "lng": 140.11390889999998
+          }
+        },
+        {
+          "legIndex": 1,
+          "distanceMeters": 1917,
+          "durationSeconds": 503,
+          "encodedPolyline": "w`hxE}~dvYuDsEUGc@a@sJyJQMkAQaCUkAJi@N{[lMkFlBa@@RqELwBJyCc@mA]cAi@kAa@~@gDvIKG",
+          "startLatLng": {
+            "lat": 35.59963630000001,
+            "lng": 140.11390889999998
+          },
+          "endLatLng": {
+            "lat": 35.611757,
+            "lng": 140.1158581
+          }
+        }
+      ],
+      "roadType": "general",
+      "avoidTolls": true,
+      "avoidHighways": true,
+      "rawRouteIndex": 0
+    },
+    "selectedRouteLabel": "おすすめルート",
+    "selectedRouteIndex": 0,
+    "selectedRouteStrategy": "recommended",
+    "selectedRouteSource": "google_routes",
+    "encodedPolyline": "_yhxEw~hvYLnBHz@ZARHv@JbAZN@eEzKuArDM`@[`@eBpFUnAwAtEWd@_@`@m@d@_AZMbCFj@Nl@@~@fEr@pA^t@^PLj@r@Xh@L^fB~GrBlFdFvLXl@f@j@JRCZBpDPdFaB|ApCvCRLTFtDrEuDsEUGc@a@sJyJQMkAQaCUkAJi@N{[lMkFlBa@@RqELwBJyCc@mA]cAi@kAa@~@gDvIKG",
+    "routeToken": "CvMCCvoBMvcBGocBCiUCFgxL6nopRiEADcNFgD2TgTa4mTGG4AnliQvGU7k1v2X4owEAEiw7NHiAdi1nJyn4SQA8H72ddnDHSxMIT9_hMVCpao-Lp8u-Z3g3XyNXCXBp2xoLAAMLEhMkAAACIQMqC1ZbInBkAwAAAGQBMgEAPcx31z5FSPy5PUj244iYv5__h-wBGlIKFwIWBSF30QhGIQC5iAnvyh6s9UqH3Q4AEhQIcGnbEpQhp6hMU6jQW9tA2QKzWRoFAAJSIQgqBQ4AI0sePXfAaD9F5H8CPkjS1Z-Ky4bi0-0BIhdPNk05YW9uY0lOMnBpZDRQMDZiOXVBRRAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEUJg5dBiXLxAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXTzZNOWFyYXZIOTJwaWQ0UDA2Yjl1QUVwASgBIhUAiYpR0V2YLsreTJqHKh1b8j_5tGgaGAoKDYCqOBUVTM6GUxIKDemsOBUVsc2GUw",
+    "routeSummary": "DEFAULT_ROUTE",
+    "tollInfo": null,
+    "tollPreference": null,
+    "tollExcludedFromFare": false,
+    "intermediateWaypoint": {
+      "waypointLabel": "イオン千葉みなと",
+      "waypointAddress": "イオン千葉みなと",
+      "waypointLatLng": {
+        "latitude": 35.59963630000001,
+        "longitude": 140.11390889999998
+      }
+    },
+    "roadType": "general",
+    "routeCandidates": [
+      {
+        "routeId": "route_0",
+        "routeIndex": 0,
+        "label": "おすすめルート",
+        "routeLabel": "おすすめルート",
+        "routeDescription": "標準的な走行予定ルートです。",
+        "routeStrategy": "recommended",
+        "routeSource": "google_routes",
+        "distanceMeters": 4361,
+        "durationSeconds": 1124,
+        "distanceKm": 4.4,
+        "encodedPolyline": "_yhxEw~hvYLnBHz@ZARHv@JbAZN@eEzKuArDM`@[`@eBpFUnAwAtEWd@_@`@m@d@_AZMbCFj@Nl@@~@fEr@pA^t@^PLj@r@Xh@L^fB~GrBlFdFvLXl@f@j@JRCZBpDPdFaB|ApCvCRLTFtDrEuDsEUGc@a@sJyJQMkAQaCUkAJi@N{[lMkFlBa@@RqELwBJyCc@mA]cAi@kAa@~@gDvIKG",
+        "routeToken": "CvMCCvoBMvcBGocBCiUCFgxL6nopRiEADcNFgD2TgTa4mTGG4AnliQvGU7k1v2X4owEAEiw7NHiAdi1nJyn4SQA8H72ddnDHSxMIT9_hMVCpao-Lp8u-Z3g3XyNXCXBp2xoLAAMLEhMkAAACIQMqC1ZbInBkAwAAAGQBMgEAPcx31z5FSPy5PUj244iYv5__h-wBGlIKFwIWBSF30QhGIQC5iAnvyh6s9UqH3Q4AEhQIcGnbEpQhp6hMU6jQW9tA2QKzWRoFAAJSIQgqBQ4AI0sePXfAaD9F5H8CPkjS1Z-Ky4bi0-0BIhdPNk05YW9uY0lOMnBpZDRQMDZiOXVBRRAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEUJg5dBiXLxAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXTzZNOWFyYXZIOTJwaWQ0UDA2Yjl1QUVwASgBIhUAiYpR0V2YLsreTJqHKh1b8j_5tGgaGAoKDYCqOBUVTM6GUxIKDemsOBUVsc2GUw",
+        "routeSummary": "DEFAULT_ROUTE",
+        "roadType": "general",
+        "avoidTolls": true,
+        "avoidHighways": true,
+        "tollInfo": null,
+        "tollPreference": null,
+        "tollExcludedFromFare": false,
+        "intermediateWaypoint": {
+          "waypointLabel": "イオン千葉みなと",
+          "waypointAddress": "イオン千葉みなと",
+          "waypointLatLng": {
+            "latitude": 35.59963630000001,
+            "longitude": 140.11390889999998
+          }
+        }
+      }
+    ],
+    "preFixedFareConfirmable": false,
+    "routeCandidateCount": 1,
+    "distinctRouteCount": 1,
+    "fallbackReason": "only_one_distinct_route",
+    "selectedAt": "2026-06-25T21:53:00.824Z"
+  },
+  "totalDistanceMeters": 7082,
+  "totalDurationSeconds": 1683,
+  "preFixedFareScope": "outbound_and_return",
+  "returnFareStatus": "fixed_candidate",
+  "returnSelectedRouteId": "route_0",
+  "selectedRouteId": "route_0",
+  "selectedRouteLabel": "おすすめルート",
+  "selectedRouteIndex": 0,
+  "selectedRouteStrategy": "recommended",
+  "selectedRouteSource": "google_routes",
+  "encodedPolyline": "oljxEckevYaBeAi@vAC^Xn@Td@CPc@`@QCSQCS@kARaA~EoM`DuIP_@\\_@ZMnAIRFpLsBs@gUIkDCa@l@IfA@hCVZwBF[FgA`B]n@Ur@i@d@m@Zw@fAsDToAdBqFZa@d@wAvDwJjAaDYCaA[s@IOI[@MuAIuA",
+  "routeToken": "CokCCpABMo0BGnIKIQIWCTlpvFxDIQDQxhqz6g-sM6T0CPePCozTM5ehNspbABIg2QKzWR20IIR3bCA0muv7TwsbUU_uTV-Qn1jMXDo0eIAaCQChAwAUIBIyHSoICw0BYR1hVAwyAQc95H8CPkUaRBQ_SNzatICs5qWfnAEiF082TTlhcWFPSEoyYWlkNFBfZXlFMkFvEAUaWwpZChgKDQoCCAERAAAAAACAZkAR8KfGS7dHnUASFggAEAMQBhATEBIQARAAGAJCBBoCCAUaBgoECAIQAiIbChdPNk05YW9PX0c1MmFpZDRQX2V5RTJBb3ABKAEiFQCJilHRAFhb4Ok2kDsWfZtpYtwZERoYCgoNQuw5FRW1-4NTEgoNmO05FRUr-YNT",
+  "routeSummary": "DEFAULT_ROUTE",
+  "tollInfo": null,
+  "tollPreference": null,
+  "tollExcludedFromFare": false,
+  "intermediateWaypoint": null,
+  "routeCandidates": [
+    {
+      "routeId": "route_0",
+      "routeIndex": 0,
+      "label": "おすすめルート",
+      "routeLabel": "おすすめルート",
+      "routeDescription": "標準的な走行予定ルートです。",
+      "routeStrategy": "recommended",
+      "routeSource": "google_routes",
+      "distanceMeters": 2721,
+      "durationSeconds": 559,
+      "distanceKm": 2.7,
+      "encodedPolyline": "oljxEckevYaBeAi@vAC^Xn@Td@CPc@`@QCSQCS@kARaA~EoM`DuIP_@\\_@ZMnAIRFpLsBs@gUIkDCa@l@IfA@hCVZwBF[FgA`B]n@Ur@i@d@m@Zw@fAsDToAdBqFZa@d@wAvDwJjAaDYCaA[s@IOI[@MuAIuA",
+      "routeToken": "CokCCpABMo0BGnIKIQIWCTlpvFxDIQDQxhqz6g-sM6T0CPePCozTM5ehNspbABIg2QKzWR20IIR3bCA0muv7TwsbUU_uTV-Qn1jMXDo0eIAaCQChAwAUIBIyHSoICw0BYR1hVAwyAQc95H8CPkUaRBQ_SNzatICs5qWfnAEiF082TTlhcWFPSEoyYWlkNFBfZXlFMkFvEAUaWwpZChgKDQoCCAERAAAAAACAZkAR8KfGS7dHnUASFggAEAMQBhATEBIQARAAGAJCBBoCCAUaBgoECAIQAiIbChdPNk05YW9PX0c1MmFpZDRQX2V5RTJBb3ABKAEiFQCJilHRAFhb4Ok2kDsWfZtpYtwZERoYCgoNQuw5FRW1-4NTEgoNmO05FRUr-YNT",
+      "routeSummary": "DEFAULT_ROUTE",
+      "roadType": "general",
+      "avoidTolls": true,
+      "avoidHighways": true,
+      "tollInfo": null,
+      "tollPreference": null,
+      "tollExcludedFromFare": false,
+      "intermediateWaypoint": null
+    }
+  ],
+  "alternativeRoutes": [
+    {
+      "routeId": "route_0",
+      "routeIndex": 0,
+      "label": "おすすめルート",
+      "routeLabel": "おすすめルート",
+      "routeDescription": "標準的な走行予定ルートです。",
+      "routeStrategy": "recommended",
+      "routeSource": "google_routes",
+      "distanceMeters": 2721,
+      "durationSeconds": 559,
+      "distanceKm": 2.7,
+      "encodedPolyline": "oljxEckevYaBeAi@vAC^Xn@Td@CPc@`@QCSQCS@kARaA~EoM`DuIP_@\\_@ZMnAIRFpLsBs@gUIkDCa@l@IfA@hCVZwBF[FgA`B]n@Ur@i@d@m@Zw@fAsDToAdBqFZa@d@wAvDwJjAaDYCaA[s@IOI[@MuAIuA",
+      "routeToken": "CokCCpABMo0BGnIKIQIWCTlpvFxDIQDQxhqz6g-sM6T0CPePCozTM5ehNspbABIg2QKzWR20IIR3bCA0muv7TwsbUU_uTV-Qn1jMXDo0eIAaCQChAwAUIBIyHSoICw0BYR1hVAwyAQc95H8CPkUaRBQ_SNzatICs5qWfnAEiF082TTlhcWFPSEoyYWlkNFBfZXlFMkFvEAUaWwpZChgKDQoCCAERAAAAAACAZkAR8KfGS7dHnUASFggAEAMQBhATEBIQARAAGAJCBBoCCAUaBgoECAIQAiIbChdPNk05YW9PX0c1MmFpZDRQX2V5RTJBb3ABKAEiFQCJilHRAFhb4Ok2kDsWfZtpYtwZERoYCgoNQuw5FRW1-4NTEgoNmO05FRUr-YNT",
+      "routeSummary": "DEFAULT_ROUTE",
+      "roadType": "general",
+      "avoidTolls": true,
+      "avoidHighways": true,
+      "tollInfo": null,
+      "tollPreference": null,
+      "tollExcludedFromFare": false,
+      "intermediateWaypoint": null
+    }
+  ],
+  "routeCandidateCount": 1,
+  "distinctRouteCount": 1,
+  "alternativeRouteCount": 1,
+  "multipleRoutesAvailable": false,
+  "preFixedFareConfirmable": false,
+  "routeDedupedCount": 1,
+  "routeGenerationStrategies": [],
+  "fallbackReason": "only_one_distinct_route",
+  "selectedAt": "2026-06-25T21:53:00.824Z",
+  "selectedTrafficZoneId": "keiyo",
+  "selectedTrafficZoneLabel": "京葉交通圏",
+  "trafficZoneCoefficient": 1.2,
+  "detectedMunicipality": "千葉市中央区",
+  "trafficZoneDetectionMethod": "auto_address",
+  "trafficZoneDetectionSource": "origin_address",
+  "baseDistanceFareAmount": 3300,
+  "adjustedDistanceFareAmount": 3960,
+  "preFixedFareMode": true,
+  "routeProvider": "google_routes",
+  "distanceMeters": 7082,
+  "durationSeconds": 1683,
+  "estimateCalculationVersion": "v1"
+}

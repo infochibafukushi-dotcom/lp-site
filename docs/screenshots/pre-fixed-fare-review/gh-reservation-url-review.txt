@@ -1,0 +1,4 @@
+verifiedAt: 2026-06-25T21:53:12.622Z
+baseUrl: https://infochibafukushi-dotcom.github.io/lp-site
+reservationUrl: https://infochibafukushi-dotcom.github.io/reservation-v4/?source=estimate&estimateNo=EST-20260626-2916&fareConfirm=review
+fareConfirm=review: yes
