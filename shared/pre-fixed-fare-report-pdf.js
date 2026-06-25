@@ -93,13 +93,7 @@
     });
 
     return (
-      "<!doctype html><html><head><meta charset='utf-8'><style>" +
-      "body{font-family:'Yu Gothic','Meiryo',sans-serif;color:#222;font-size:11px;line-height:1.5;padding:0 2mm;}" +
-      "h1{font-size:20px;margin:0 0 10px;}h2{font-size:14px;margin:20px 0 8px;padding-bottom:3px;border-bottom:1px solid #ccc;}" +
-      "h3{font-size:12px;margin:10px 0 6px;}p{margin:0 0 8px;}ul,ol{margin:0 0 8px 20px;padding:0;}li{margin:0 0 4px;}" +
-      "table{width:100%;border-collapse:collapse;margin:6px 0 10px;table-layout:fixed;}th,td{border:1px solid #d9d9d9;padding:6px 7px;vertical-align:top;word-break:break-word;}" +
-      "th{background:#f6f6f6;font-weight:700;}section{page-break-inside:avoid;} .muted{color:#666;} .warn{color:#a94442;font-weight:700;}" +
-      "</style></head><body>" +
+      "<div class='pre-fixed-fare-report'>" +
       "<h1>" + escapeHtml(data.title || "") + "</h1>" +
       section("1. 表紙", buildMetaTable({
         title: data.title,
@@ -162,8 +156,68 @@
           return "<li>" + escapeHtml(item) + "</li>";
         }).join("") + "</ol>"
       ) +
-      "</body></html>"
+      "</div>"
     );
+  }
+
+  function ensureRenderableContent(reportElement){
+    if(!reportElement){
+      throw new Error("認可説明資料PDFの生成対象要素が作成できませんでした。");
+    }
+    const htmlLength = String(reportElement.innerHTML || "").trim().length;
+    const textLength = String(reportElement.innerText || "").trim().length;
+    if(htmlLength <= 0 || textLength <= 0){
+      throw new Error("認可説明資料PDFの生成対象HTMLが空です。");
+    }
+  }
+
+  function createRenderContainer(reportHtml){
+    const container = document.createElement("div");
+    container.className = "pre-fixed-fare-report-render-shell";
+    container.style.position = "absolute";
+    container.style.top = "0";
+    container.style.left = "0";
+    container.style.zIndex = "2147483000";
+    container.style.pointerEvents = "none";
+    container.style.display = "block";
+    container.style.visibility = "visible";
+    container.style.opacity = "1";
+    container.style.width = "794px";
+    container.style.background = "#ffffff";
+    container.style.color = "#111111";
+    container.style.padding = "0";
+    container.style.margin = "0";
+
+    container.innerHTML =
+      "<style>" +
+      ".pre-fixed-fare-report,.pre-fixed-fare-report *{box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Yu Gothic','Meiryo',sans-serif;background:transparent;color:#111111;}" +
+      ".pre-fixed-fare-report{display:block;visibility:visible;opacity:1;width:794px;min-height:20px;background:#ffffff;color:#111111;line-height:1.5;font-size:11px;padding:8mm;}" +
+      ".pre-fixed-fare-report h1{font-size:20px;margin:0 0 10px;color:#111111;}" +
+      ".pre-fixed-fare-report h2{font-size:14px;margin:20px 0 8px;padding-bottom:3px;border-bottom:1px solid #ccc;color:#111111;}" +
+      ".pre-fixed-fare-report h3{font-size:12px;margin:10px 0 6px;color:#111111;}" +
+      ".pre-fixed-fare-report p{margin:0 0 8px;color:#111111;}" +
+      ".pre-fixed-fare-report ul,.pre-fixed-fare-report ol{margin:0 0 8px 20px;padding:0;}" +
+      ".pre-fixed-fare-report li{margin:0 0 4px;color:#111111;}" +
+      ".pre-fixed-fare-report table{width:100%;border-collapse:collapse;margin:6px 0 10px;table-layout:fixed;background:#ffffff;}" +
+      ".pre-fixed-fare-report th,.pre-fixed-fare-report td{border:1px solid #d9d9d9;padding:6px 7px;vertical-align:top;word-break:break-word;color:#111111;background:#ffffff;}" +
+      ".pre-fixed-fare-report th{background:#f6f6f6;font-weight:700;}" +
+      ".pre-fixed-fare-report section{page-break-inside:avoid;}" +
+      ".pre-fixed-fare-report .warn{color:#8a1f1f;font-weight:700;}" +
+      "</style>" +
+      reportHtml;
+    return container;
+  }
+
+  async function waitForRenderReady(){
+    try{
+      if(document.fonts && typeof document.fonts.ready?.then === "function"){
+        await document.fonts.ready;
+      }
+    }catch(error){
+      console.warn("[PreFixedFareReportPdf] font readiness check failed", error);
+    }
+    await new Promise(function(resolve){ requestAnimationFrame(resolve); });
+    await new Promise(function(resolve){ requestAnimationFrame(resolve); });
   }
 
   function numberLabel(value){
@@ -173,13 +227,20 @@
 
   async function savePdf(reportData){
     await ensureHtml2Pdf();
-    const wrapper = document.createElement("div");
-    wrapper.style.position = "fixed";
-    wrapper.style.left = "-99999px";
-    wrapper.style.top = "0";
-    wrapper.style.width = "190mm";
-    wrapper.innerHTML = buildReportHtml(reportData);
+    const reportHtml = buildReportHtml(reportData);
+    const wrapper = createRenderContainer(reportHtml);
     document.body.appendChild(wrapper);
+    const reportElement = wrapper.querySelector(".pre-fixed-fare-report");
+
+    ensureRenderableContent(reportElement);
+    await waitForRenderReady();
+
+    console.log("[PreFixedFareReportPdf] report element exists:", Boolean(reportElement));
+    console.log("[PreFixedFareReportPdf] innerText length:", String(reportElement?.innerText || "").trim().length);
+    console.log("[PreFixedFareReportPdf] offsetWidth:", Number(reportElement?.offsetWidth) || 0);
+    console.log("[PreFixedFareReportPdf] offsetHeight:", Number(reportElement?.offsetHeight) || 0);
+    console.log("[PreFixedFareReportPdf] html2pdf loaded:", typeof html2pdf !== "undefined");
+
     try{
       await html2pdf().set({
         margin: [8, 8, 8, 8],
@@ -188,7 +249,7 @@
         html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
         pagebreak: { mode: ["css", "legacy"] }
-      }).from(wrapper).save();
+      }).from(reportElement).save();
     }finally{
       wrapper.remove();
     }

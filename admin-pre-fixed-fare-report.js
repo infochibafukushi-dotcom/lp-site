@@ -45,6 +45,12 @@
       config: config,
       estimateConfig: estimateConfig
     });
+    if(!reportData || typeof reportData !== "object"){
+      throw new Error("pre-fixed-fare-report-data の組み立てに失敗しました");
+    }
+    if(!String(reportData.title || "").trim()){
+      throw new Error("pre-fixed-fare-report-data の組み立てに失敗しました");
+    }
 
     setStatus("PDFを生成中...", "warn");
     await global.PreFixedFareReportPdf.savePdf(reportData);
@@ -60,7 +66,15 @@
         await exportReportPdf();
       }catch(error){
         console.error(error);
-        setStatus("出力失敗: " + (error?.message || String(error)), "error");
+        const reason = String(error?.message || "");
+        if(
+          reason.includes("生成対象HTMLが空")
+          || reason.includes("組み立てに失敗")
+        ){
+          setStatus(reason, "error");
+        }else{
+          setStatus("PDF生成に失敗しました。Consoleを確認してください。", "error");
+        }
       }finally{
         button.disabled = false;
       }
