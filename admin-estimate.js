@@ -371,7 +371,7 @@
       <h3>ページ設定</h3>
       <div class="row"><label>タイトル</label><input type="text" id="estimatePageTitle" value="${escapeAttr(estimateDraft.page?.title || "")}"></div>
       <div class="row"><label>説明文</label><textarea id="estimatePageDescription" rows="3">${escapeHtml(estimateDraft.page?.description || "")}</textarea></div>
-      <div class="row"><label>距離入力ラベル</label><input type="text" id="estimateDistanceLabel" value="${escapeAttr(estimateDraft.page?.distanceLabel || "片道距離（km）")}"></div>
+      <div class="row"><label>距離入力ラベル</label><input type="text" id="estimateDistanceLabel" value="${escapeAttr(estimateDraft.page?.distanceLabel || "走行ルート設定")}"></div>
       <div class="row"><label>距離入力補足文</label><textarea id="estimateDistanceNote" rows="2">${escapeHtml(estimateDraft.page?.distanceNote || "")}</textarea></div>
 
       <h3>Google Maps（住所から距離計算）</h3>
@@ -506,7 +506,7 @@
       disclaimer: document.getElementById("estimatePageDisclaimer")?.value || "",
       resultNotes: estimateDraft.page?.resultNotes || "",
       preFixedFareNotice: estimateDraft.page?.preFixedFareNotice || "",
-      distanceLabel: document.getElementById("estimateDistanceLabel")?.value.trim() || "片道距離（km）",
+      distanceLabel: document.getElementById("estimateDistanceLabel")?.value.trim() || "走行ルート設定",
       distanceNote: document.getElementById("estimateDistanceNote")?.value || "",
       tollRoadNote: estimateDraft.page?.tollRoadNote || ""
     };

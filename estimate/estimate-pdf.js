@@ -440,15 +440,7 @@
     const display = global.EstimateRouteMapDisplay;
     const segments = display && routePlan ? display.buildRouteMapSegments(routePlan) : [];
     const legendHtml = display && display.shouldShowLegend(segments)
-      ? (
-        "<div style=\"position:absolute;right:8px;bottom:8px;display:flex;flex-direction:column;gap:4px;" +
-        "padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.92);border:1px solid rgba(0,0,0,0.08);" +
-        "font-size:9px;line-height:1.3;color:#333;\">" +
-          "<div style=\"display:flex;align-items:center;gap:6px;\"><span style=\"width:14px;height:4px;border-radius:2px;background:#1565C0;\"></span>往路</div>" +
-          "<div style=\"display:flex;align-items:center;gap:6px;\"><span style=\"width:14px;height:4px;border-radius:2px;background:#2E7D32;\"></span>立ち寄り</div>" +
-          "<div style=\"display:flex;align-items:center;gap:6px;\"><span style=\"width:14px;height:4px;border-radius:2px;background:#C62828;\"></span>復路</div>" +
-        "</div>"
-      )
+      ? display.buildLegendPdfHtml(segments)
       : "";
     return (
       "<div class=\"estimate-pdf-route-map\" style=\"margin:0 0 " + layout.routeMapBottomGap + "px;\">" +

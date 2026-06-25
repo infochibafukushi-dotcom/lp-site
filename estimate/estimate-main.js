@@ -404,7 +404,7 @@
 
     steps.push({
       id: "distance",
-      title: state.config.page?.distanceLabel || "片道距離（km）",
+      title: state.config.page?.distanceLabel || "走行ルート設定",
       type: "distance"
     });
 
@@ -1448,7 +1448,7 @@
         map.fitBounds(bounds, 48);
 
         if(display.shouldShowLegend(segments) && wrap){
-          wrap.insertAdjacentHTML("beforeend", display.buildLegendHtml());
+          wrap.insertAdjacentHTML("beforeend", display.buildLegendHtml(segments));
         }
       });
     }catch(error){
@@ -1597,7 +1597,7 @@
     const btn = document.getElementById("calculateDistanceBtn");
     if(btn){
       btn.disabled = state.routeCalcLoading;
-      btn.textContent = state.routeCalcLoading ? "計算中..." : "距離を計算する";
+      btn.textContent = state.routeCalcLoading ? "計算中..." : "ルートを計算する";
     }
     if(feedback){
       feedback.textContent = state.routeCalcError || "";
@@ -1683,9 +1683,8 @@
   function renderDistanceStep(stepNum, step){
     const label = step.title;
     const note = isRoundTripActive()
-      ? "往復送迎では往路と復路を別々にルート計算します。片道距離の2倍では算定しません。"
-      : (state.config.page?.distanceNote || "距離は住所・施設名から自動計算するか、直接入力できます。");
-    const addressMode = isAddressDistanceMode();
+      ? "往路・復路はそれぞれ最適なルートで計算します。道路状況や一方通行等により、帰りの距離・時間が異なる場合があります。"
+      : (state.config.page?.distanceNote || "住所・施設名から走行ルートを計算します。");
     const calcResult = state.routeCalcResult;
     const addressFacilityNote = "住所のほか、病院・施設名でも検索できます。";
     const addressDisclaimer = "住所・施設名検索による距離は\n丁目・番地単位で算出されるため、\n実際の運行距離と異なる場合があります。\n\n概算料金の目安としてご利用ください。";
@@ -1693,19 +1692,6 @@
       state.config.page?.tollRoadNote ||
       "通行料金は実費負担となります。";
 
-    const modeRadios = `
-      <fieldset class="estimate-distance-mode">
-        <legend class="estimate-distance-mode-legend">距離入力方法</legend>
-        <label class="estimate-distance-mode-option">
-          <input type="radio" name="distanceInputMode" value="address" ${addressMode ? "checked" : ""}>
-          <span>住所・施設名から自動計算（推奨）</span>
-        </label>
-        <label class="estimate-distance-mode-option">
-          <input type="radio" name="distanceInputMode" value="manual" ${!addressMode ? "checked" : ""}>
-          <span>距離を直接入力</span>
-        </label>
-      </fieldset>
-    `;
     const roadTypeRadios = `
       <fieldset class="estimate-road-type">
         <legend class="estimate-road-type-legend">道路利用設定</legend>
@@ -1727,7 +1713,7 @@
         <label for="destinationAddressInput" class="estimate-distance-label estimate-distance-label--spaced">目的地（住所・施設名）</label>
         <input type="text" class="estimate-input" id="destinationAddressInput" autocomplete="street-address" placeholder="例: 千葉メディカルセンター" value="${escapeAttr(state.destinationAddress)}">
         <p class="estimate-step-note">${escapeHtml(addressFacilityNote)}</p>
-        <button type="button" class="estimate-calc-distance-btn" id="calculateDistanceBtn" ${state.routeCalcLoading ? "disabled" : ""}>${state.routeCalcLoading ? "計算中..." : "距離を計算する"}</button>
+        <button type="button" class="estimate-calc-distance-btn" id="calculateDistanceBtn" ${state.routeCalcLoading ? "disabled" : ""}>${state.routeCalcLoading ? "計算中..." : "ルートを計算する"}</button>
         <div class="estimate-route-feedback${state.routeCalcError ? " estimate-route-feedback--error" : ""}" id="routeCalcFeedback" aria-live="polite">${escapeHtml(state.routeCalcError || "")}</div>
         ${calcResult ? `
           <div class="estimate-route-result" aria-live="polite">
@@ -1771,13 +1757,6 @@
       </div>
     `;
 
-    const manualPanel = `
-      <div class="estimate-manual-distance" id="estimateManualDistancePanel">
-        <label for="distanceKmInput" class="estimate-distance-label">${escapeHtml(label)}</label>
-        <input type="text" class="estimate-input estimate-input--distance" id="distanceKmInput" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="例: 5.5" value="${escapeAttr(getDistanceInputDisplayValue())}">
-      </div>
-    `;
-
     return `
       <section class="estimate-step estimate-step--active" data-step-id="${escapeAttr(step.id)}">
         <div class="estimate-step-head">
@@ -1787,10 +1766,9 @@
           </div>
         </div>
         ${renderReturnPlanSection()}
-        ${modeRadios}
         ${roadTypeRadios}
         ${state.roadType === "toll" ? `<p class="estimate-road-type-note">${escapeHtml(tollRoadNote)}</p>` : ""}
-        ${addressMode ? addressPanel : manualPanel}
+        ${addressPanel}
         <p class="estimate-step-note">${escapeHtml(note)}</p>
       </section>
     `;
@@ -2767,6 +2745,8 @@
 
       if(state.config?.googleMaps?.enabled === false){
         state.distanceInputMode = "manual";
+      }else{
+        state.distanceInputMode = "address";
       }
 
       syncAssistanceForMobility();

@@ -578,7 +578,7 @@
   z-index:2;
   display:flex;
   flex-direction:column;
-  gap:4px;
+  gap:5px;
   padding:8px 10px;
   border-radius:8px;
   background:rgba(255,255,255,0.92);
@@ -587,6 +587,22 @@
   font-size:11px;
   line-height:1.3;
   color:#333;
+  max-width:calc(100% - 16px);
+}
+.estimate-route-map-legend-section{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.estimate-route-map-legend-heading{
+  font-size:10px;
+  font-weight:700;
+  color:#666;
+}
+.estimate-route-map-legend-divider{
+  height:1px;
+  background:rgba(0,0,0,0.1);
+  margin:1px 0;
 }
 .estimate-route-map-legend-item{
   display:flex;
@@ -599,6 +615,28 @@
   width:14px;
   height:4px;
   border-radius:2px;
+}
+.estimate-route-map-legend-marker{
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:16px;
+  height:16px;
+  border-radius:50%;
+  font-size:9px;
+  font-weight:700;
+  line-height:1;
+  color:#fff;
+}
+.estimate-route-map-legend-marker--origin{
+  background:#2E7D32;
+}
+.estimate-route-map-legend-marker--destination{
+  background:#C62828;
+}
+.estimate-route-map-legend-marker--waypoint{
+  background:#F9A825;
 }
 .estimate-route-map-legend-swatch--outbound{
   background:#1565C0;

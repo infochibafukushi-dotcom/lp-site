@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>凡例デモ | 走行ルート設定</title>
+<link rel="stylesheet" href="../estimate/estimate.css">
+<style>
+body{font-family:sans-serif;background:#f7f7f7;padding:24px;}
+.demo-wrap{max-width:360px;margin:0 auto;}
+.demo-map{position:relative;height:260px;border-radius:10px;background:linear-gradient(180deg,#e8f4fc 0%,#f0ede8 100%);}
+</style>
+</head>
+<body>
+<div class="demo-wrap">
+  <h1 style="font-size:18px;">STEP6 走行ルート設定（凡例）</h1>
+  <div class="estimate-route-map-wrap">
+    <div class="demo-map" aria-hidden="true"></div>
+    <div class="estimate-route-map-legend" aria-label="ルート凡例">
+      <div class="estimate-route-map-legend-section">
+        <div class="estimate-route-map-legend-heading">線</div>
+        <div class="estimate-route-map-legend-item"><span class="estimate-route-map-legend-swatch estimate-route-map-legend-swatch--outbound"></span><span>往路</span></div>
+        <div class="estimate-route-map-legend-item"><span class="estimate-route-map-legend-swatch estimate-route-map-legend-swatch--stop"></span><span>立ち寄り</span></div>
+        <div class="estimate-route-map-legend-item"><span class="estimate-route-map-legend-swatch estimate-route-map-legend-swatch--return"></span><span>復路</span></div>
+      </div>
+      <div class="estimate-route-map-legend-divider"></div>
+      <div class="estimate-route-map-legend-section">
+        <div class="estimate-route-map-legend-heading">マーカー</div>
+        <div class="estimate-route-map-legend-item"><span class="estimate-route-map-legend-marker estimate-route-map-legend-marker--origin">発</span><span>出発地</span></div>
+        <div class="estimate-route-map-legend-item"><span class="estimate-route-map-legend-marker estimate-route-map-legend-marker--destination">着</span><span>目的地</span></div>
+        <div class="estimate-route-map-legend-item"><span class="estimate-route-map-legend-marker estimate-route-map-legend-marker--waypoint">寄</span><span>立ち寄り地点</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
