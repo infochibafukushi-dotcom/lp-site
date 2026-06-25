@@ -77,18 +77,23 @@
       && (legNeedsReviewNotice(outbound) || (returnPlanType !== RETURN_PLAN_PENDING && legNeedsReviewNotice(returnLeg)));
   }
 
+  function getReturnStopoverRouteStructureExplanation(){
+    return "復路は、目的地 → 立ち寄り先 → 出発地の指定ルートで距離を算定しています。";
+  }
+
   function getReturnStopoverExplanation(routePlan, options){
     if(resolveReturnPlanType(routePlan, options) !== RETURN_WITH_STOP){
       return "";
     }
     const returnLeg = getReturnLeg(routePlan, options);
+    const routeStructure = getReturnStopoverRouteStructureExplanation();
     if(returnLeg && hasSingleNonConfirmableCandidate(returnLeg)){
-      return "復路は立ち寄り地点を含む指定ルートで算定しています。候補が1件のみのため確認対応となります。";
+      return routeStructure + "ルート候補が1件のみのため、事前確定運賃としては確定せず、予約後に確認対応となります。";
     }
     if(returnLeg && !isLegConfirmable(returnLeg)){
-      return "復路は立ち寄り地点を含む指定ルートで算定しています。候補が1件のみのため確認対応となります。";
+      return routeStructure + getSingleCandidateNotice();
     }
-    return "復路は、目的地 → 立ち寄り先 → 出発地の指定ルートで距離を算定しています。";
+    return routeStructure;
   }
 
   function isStructuredRoundTrip(routePlan){

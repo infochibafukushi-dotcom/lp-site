@@ -19,6 +19,61 @@ function resolveChromeExecutable(){
   }) || null;
 }
 
+function decodeHtmlEntities(text){
+  return String(text || "")
+    .replaceAll("&quot;", "\"")
+    .replaceAll("&amp;", "&")
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">");
+}
+
+function parseQuoteSnapshotMetaText(rawText){
+  const raw = String(rawText || "").trim();
+  if(!raw){
+    return { snapshot: null, parseError: "" };
+  }
+  try{
+    return { snapshot: JSON.parse(raw), parseError: "" };
+  }catch(firstError){
+    try{
+      return { snapshot: JSON.parse(decodeHtmlEntities(raw)), parseError: "" };
+    }catch(secondError){
+      return {
+        snapshot: null,
+        parseError: String(secondError?.message || secondError || firstError?.message || firstError)
+      };
+    }
+  }
+}
+
+function buildPdfTextChecks(pdfVisibleText){
+  const text = String(pdfVisibleText || "");
+  return {
+    singleCandidateReason: /ルート候補が1件のみのため/.test(text),
+    reviewAfterReservation: /予約後に確認対応/.test(text),
+    outboundReviewStatus: /往路：確認対応/.test(text),
+    returnReviewStatus: /復路：確認対応/.test(text),
+    stopoverRouteStructure: /目的地.*立ち寄り先.*出発地/.test(text),
+    destinationLabel: /目的地/.test(text),
+    stopoverLabel: /立ち寄り先/.test(text),
+    originLabel: /出発地/.test(text)
+  };
+}
+
+function isPdfTextCheckPass(checks){
+  return Boolean(
+    checks
+    && checks.singleCandidateReason
+    && checks.reviewAfterReservation
+    && checks.outboundReviewStatus
+    && checks.returnReviewStatus
+    && checks.stopoverRouteStructure
+    && checks.destinationLabel
+    && checks.stopoverLabel
+    && checks.originLabel
+  );
+}
+
 function pickSnapshotFields(snapshot){
   if(!snapshot){
     return null;
@@ -139,6 +194,7 @@ async function main(){
     const handoff = handoffRaw ? JSON.parse(handoffRaw) : null;
     const quoteSnapshot = handoff?.quoteSnapshot || null;
     let pdfSnapshot = null;
+    let pdfMetaParseError = "";
     let pdfVisibleText = "";
     let pdfBuildError = "";
     if(window.EstimatePdf && typeof window.EstimatePdf.buildPreviewElement === "function" && handoff){
@@ -159,14 +215,30 @@ async function main(){
           returnPlanType: handoff.selections?.returnPlanType || handoff.quoteSnapshot?.returnPlanType || handoff.routePlan?.returnPlanType || null,
           googleMaps: { enabled: false }
         });
+        pdfVisibleText = String(element?.textContent || "").replace(/\s+/g, " ").trim();
         const meta = element?.querySelector(".estimate-quote-snapshot-meta");
         if(meta){
-          pdfSnapshot = JSON.parse(meta.textContent || "{}");
+          const raw = String(meta.textContent || "").trim();
+          if(raw){
+            try{
+              pdfSnapshot = JSON.parse(raw);
+            }catch(firstError){
+              try{
+                pdfSnapshot = JSON.parse(
+                  raw
+                    .replaceAll("&quot;", "\"")
+                    .replaceAll("&amp;", "&")
+                    .replaceAll("&lt;", "<")
+                    .replaceAll("&gt;", ">")
+                );
+              }catch(secondError){
+                pdfMetaParseError = String(secondError?.message || secondError || firstError?.message || firstError);
+              }
+            }
+          }
         }
-        pdfVisibleText = String(element?.textContent || "").replace(/\s+/g, " ").trim();
       }catch(error){
         pdfBuildError = String(error?.message || error);
-        pdfVisibleText = "PDF_BUILD_ERROR:" + pdfBuildError;
       }
     }else{
       pdfBuildError = !handoff
@@ -187,6 +259,7 @@ async function main(){
       handoffExists: Boolean(handoff),
       quoteSnapshot: quoteSnapshot,
       pdfQuoteSnapshot: pdfSnapshot,
+      pdfMetaParseError: pdfMetaParseError,
       pdfBuildError: pdfBuildError,
       statusFromHandoff: statusFromHandoff,
       pdfVisibleText: pdfVisibleText.slice(0, 4000),
@@ -211,6 +284,8 @@ async function main(){
 
   await browser.close();
 
+  const pdfTextChecks = buildPdfTextChecks(resultData.pdfVisibleText);
+
   const report = {
     baseUrl: baseUrl,
     step6: step6Snapshot,
@@ -224,14 +299,17 @@ async function main(){
       },
       quoteSnapshot: pickSnapshotFields(resultData.quoteSnapshot),
       pdfQuoteSnapshot: pickSnapshotFields(resultData.pdfQuoteSnapshot),
+      pdfMetaParseError: resultData.pdfMetaParseError || "",
       pdfBuildError: resultData.pdfBuildError || "",
       statusFromHandoff: resultData.statusFromHandoff || [],
+      pdfTextChecks: pdfTextChecks,
+      pdfTextPass: isPdfTextCheckPass(pdfTextChecks),
       pdfTextIncludes: {
         returnDistance: /復路/.test(resultData.pdfVisibleText),
         reviewRequired: /確認対応/.test(resultData.pdfVisibleText),
         stopover: /立ち寄り/.test(resultData.pdfVisibleText),
-        singleCandidateNotice: /ルート候補が1件のみ/.test(resultData.pdfVisibleText),
-        stopoverRouteExplanation: /目的地.*立ち寄り先.*出発地/.test(resultData.pdfVisibleText)
+        singleCandidateNotice: pdfTextChecks.singleCandidateReason,
+        stopoverRouteExplanation: pdfTextChecks.stopoverRouteStructure
       },
       fareConfirmReview: /fareConfirm=review/.test(resultData.reservationUrl || resultData.fareConfirmReview || "")
     }
