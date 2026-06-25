@@ -656,6 +656,10 @@
   }
 
   function formatRouteLabel(route, index){
+    const explicit = String(route?.routeLabel || "").trim();
+    if(explicit){
+      return explicit;
+    }
     const labels = Array.isArray(route?.routeLabels) ? route.routeLabels.filter(Boolean) : [];
     if(labels.length){
       return labels.join(" / ");
@@ -679,30 +683,45 @@
     const label = selected
       ? formatRouteLabel(selected, selectedIndex >= 0 ? selectedIndex : 0)
       : "";
+    const confirmable = routePlan.preFixedFareConfirmable === true;
 
     return {
       selectedRouteId: selectedId || String(selected?.routeId || ""),
       selectedRouteLabel: label || null,
       selectedRouteIndex: selectedIndex >= 0 ? selectedIndex : 0,
+      selectedRouteStrategy: selected?.routeStrategy || null,
+      selectedRouteSource: selected?.routeSource || routePlan.provider || null,
       encodedPolyline: String(selected?.encodedPolyline || routePlan.encodedPolyline || ""),
       routeToken: String(selected?.routeToken || routePlan.routeToken || ""),
-      routeSummary: label || null,
+      routeSummary: String(selected?.routeSummary || label || "").trim() || null,
       tollInfo: selected?.tollInfo ?? routePlan.tollInfo ?? null,
-      roadType: String(routePlan.roadType || state.roadType || "general") === "toll" ? "toll" : "general",
+      roadType: String(selected?.roadType || routePlan.roadType || state.roadType || "general") === "toll" ? "toll" : "general",
       alternativeRoutes: routes.map(function(route, index){
         return {
           routeId: String(route.routeId || ""),
           routeIndex: index,
           label: formatRouteLabel(route, index),
+          routeStrategy: route.routeStrategy || null,
+          routeSource: route.routeSource || null,
           distanceMeters: Number(route.distanceMeters) || 0,
           durationSeconds: Number(route.durationSeconds) || 0,
           distanceKm: Number(route.distanceKm) || 0,
           encodedPolyline: String(route.encodedPolyline || ""),
-          routeToken: String(route.routeToken || "")
+          routeToken: String(route.routeToken || ""),
+          routeSummary: String(route.routeSummary || "").trim() || null,
+          roadType: String(route.roadType || "") === "toll" ? "toll" : "general",
+          avoidTolls: route.avoidTolls === true,
+          avoidHighways: route.avoidHighways === true
         };
       }),
       alternativeRouteCount: routes.length,
-      multipleRoutesAvailable: routes.length >= 2,
+      multipleRoutesAvailable: confirmable,
+      preFixedFareConfirmable: confirmable,
+      routeDedupedCount: Number(routePlan.routeDedupedCount) || routes.length,
+      routeGenerationStrategies: Array.isArray(routePlan.routeGenerationStrategies)
+        ? routePlan.routeGenerationStrategies.slice()
+        : [],
+      fallbackReason: routePlan.fallbackReason || null,
       selectedAt: routePlan.selectedAt || null
     };
   }
@@ -827,6 +846,8 @@
       selectedRouteId: routeSnapshot.selectedRouteId || "",
       selectedRouteLabel: routeSnapshot.selectedRouteLabel || null,
       selectedRouteIndex: routeSnapshot.selectedRouteIndex ?? null,
+      selectedRouteStrategy: routeSnapshot.selectedRouteStrategy || null,
+      selectedRouteSource: routeSnapshot.selectedRouteSource || null,
       encodedPolyline: routeSnapshot.encodedPolyline || "",
       routeToken: routeSnapshot.routeToken || "",
       routeSummary: routeSnapshot.routeSummary || null,
@@ -834,6 +855,10 @@
       alternativeRoutes: routeSnapshot.alternativeRoutes || [],
       alternativeRouteCount: routeSnapshot.alternativeRouteCount ?? 0,
       multipleRoutesAvailable: routeSnapshot.multipleRoutesAvailable === true,
+      preFixedFareConfirmable: routeSnapshot.preFixedFareConfirmable === true,
+      routeDedupedCount: routeSnapshot.routeDedupedCount ?? 0,
+      routeGenerationStrategies: routeSnapshot.routeGenerationStrategies || [],
+      fallbackReason: routeSnapshot.fallbackReason || null,
       selectedAt: routeSnapshot.selectedAt || null,
       selectedTrafficZoneId: preFixedMeta?.selectedTrafficZoneId || trafficZoneDetection?.selectedTrafficZoneId || null,
       selectedTrafficZoneLabel: preFixedMeta?.selectedTrafficZoneLabel || trafficZoneDetection?.selectedTrafficZoneLabel || null,

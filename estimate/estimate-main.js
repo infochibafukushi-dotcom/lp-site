@@ -724,11 +724,19 @@
   }
 
   function getRouteDisplayLabel(route, index){
+    const explicit = String(route?.routeLabel || "").trim();
+    if(explicit){
+      return explicit;
+    }
     const labels = Array.isArray(route?.routeLabels) ? route.routeLabels.filter(Boolean) : [];
     if(labels.length){
       return labels.join(" / ");
     }
     return "ルート候補 " + (Number(index) + 1);
+  }
+
+  function isPreFixedFareConfirmable(){
+    return state.routePlan?.preFixedFareConfirmable === true;
   }
 
   function computeResultForRoute(route){
@@ -747,13 +755,22 @@
         durationSeconds: Number(route.durationSeconds) || 0,
         encodedPolyline: String(route.encodedPolyline || ""),
         routeToken: String(route.routeToken || ""),
-        routeLabels: Array.isArray(route.routeLabels) ? route.routeLabels.slice() : []
+        routeLabels: Array.isArray(route.routeLabels) ? route.routeLabels.slice() : [],
+        routeLabel: String(route.routeLabel || ""),
+        routeSummary: String(route.routeSummary || route.routeLabel || ""),
+        routeStrategy: route.routeStrategy || null,
+        routeSource: route.routeSource || null,
+        roadType: String(route.roadType || state.routePlan.roadType || state.roadType || "general"),
+        tollInfo: route.tollInfo || null
       })
     });
     return window.EstimateCalc.computeEstimate(state.config, tempState);
   }
 
   function selectRoute(routeId){
+    if(!isPreFixedFareConfirmable()){
+      return;
+    }
     const routes = Array.isArray(state.routePlan?.routes) ? state.routePlan.routes : [];
     const route = routes.find(function(item){
       return String(item?.routeId || "") === String(routeId || "");
@@ -768,6 +785,11 @@
       encodedPolyline: String(route.encodedPolyline || ""),
       routeToken: String(route.routeToken || ""),
       routeLabels: Array.isArray(route.routeLabels) ? route.routeLabels.slice() : [],
+      routeLabel: String(route.routeLabel || ""),
+      routeSummary: String(route.routeSummary || route.routeLabel || ""),
+      routeStrategy: route.routeStrategy || null,
+      routeSource: route.routeSource || null,
+      roadType: String(route.roadType || state.routePlan.roadType || state.roadType || "general"),
       tollInfo: route.tollInfo || null,
       selectedAt: new Date().toISOString()
     });
@@ -791,11 +813,11 @@
       return "";
     }
 
+    const confirmable = isPreFixedFareConfirmable();
     const selectedId = String(state.routePlan.selectedRouteId || routes[0]?.routeId || "");
-    const roadTypeLabel = getRoadTypeLabel(state.routePlan.roadType || state.roadType);
-    const notice = routes.length >= 2
+    const notice = confirmable
       ? '<p class="estimate-route-selection-note">2件以上の走行予定ルートから1つを選択してください。選択したルートの距離で事前確定運賃を算定します。</p>'
-      : '<p class="estimate-route-selection-note">候補ルートが1件のみのため、このルートを使用します。APIの応答により複数候補が取得できない場合があります。</p>';
+      : '<p class="estimate-route-selection-warning">走行予定ルート候補が1件のみのため、事前確定運賃としての自動確定はできません。通常見積として表示し、ご予約時に確認いたします。</p>';
 
     const cards = routes.map(function(route, index){
       const routeId = String(route.routeId || "");
@@ -808,6 +830,7 @@
       const distanceLabel = formatRouteDistanceMeters(route.distanceMeters);
       const durationLabel = formatRouteDurationSeconds(route.durationSeconds);
       const summary = getRouteDisplayLabel(route, index);
+      const roadTypeLabel = getRoadTypeLabel(route.roadType || state.routePlan.roadType || state.roadType);
 
       return (
         '<article class="estimate-route-card' + (isSelected ? " is-selected" : "") + '">' +
@@ -816,10 +839,10 @@
             "<div><dt>距離</dt><dd>" + escapeHtml(distanceLabel || "-") + "</dd></div>" +
             "<div><dt>予定時間</dt><dd>" + escapeHtml(durationLabel || "-") + "</dd></div>" +
             "<div><dt>有料道路利用</dt><dd>" + escapeHtml(roadTypeLabel) + "</dd></div>" +
-            "<div><dt>概要</dt><dd>" + escapeHtml(summary) + "</dd></div>" +
+            "<div><dt>概要</dt><dd>" + escapeHtml(String(route.routeSummary || summary)) + "</dd></div>" +
             '<div><dt>事前確定運賃</dt><dd class="estimate-route-card-fare">' + escapeHtml(fareLabel) + "</dd></div>" +
           "</dl>" +
-          (routes.length >= 2
+          (confirmable
             ? '<button type="button" class="estimate-route-select-btn" data-select-route-id="' + escapeAttr(routeId) + '"' + (isSelected ? " disabled" : "") + ">" + (isSelected ? "選択中" : "このルートを選択") + "</button>"
             : "") +
         "</article>"
@@ -827,7 +850,7 @@
     }).join("");
 
     return (
-      '<section class="estimate-route-selection" aria-label="ルート候補の選択">' +
+      '<section class="estimate-route-selection' + (confirmable ? "" : " estimate-route-selection--fallback") + '" aria-label="ルート候補の選択">' +
         '<h4 class="estimate-route-selection-title">走行予定ルートの選択</h4>' +
         notice +
         '<div class="estimate-route-card-list">' + cards + "</div>" +
@@ -940,7 +963,7 @@
         origin: origin,
         destination: destination,
         roadType: state.roadType,
-        requestAlternativeRoutes: isPreFixedFareMode(),
+        requestPreFixedFareCandidates: isPreFixedFareMode(),
         languageCode: mapsConfig.language || "ja",
         region: mapsConfig.region || "JP"
       });
@@ -968,12 +991,23 @@
         selectedRouteId: String(result.selectedRouteId || "route_0"),
         encodedPolyline: String(primaryRoute?.encodedPolyline || ""),
         routeLabels: Array.isArray(primaryRoute?.routeLabels) ? primaryRoute.routeLabels.slice() : [],
+        routeLabel: String(primaryRoute?.routeLabel || ""),
+        routeSummary: String(primaryRoute?.routeSummary || primaryRoute?.routeLabel || ""),
+        routeStrategy: primaryRoute?.routeStrategy || null,
+        routeSource: primaryRoute?.routeSource || "google_routes",
         routeToken: String(primaryRoute?.routeToken || ""),
         distanceMeters: Number(primaryRoute?.distanceMeters) || 0,
         durationSeconds: Number(primaryRoute?.durationSeconds) || 0,
         tollInfo: primaryRoute?.tollInfo || null,
         routes: Array.isArray(result.routes) ? result.routes : [],
         selectedAt: new Date().toISOString(),
+        preFixedFareConfirmable: result.preFixedFareConfirmable === true,
+        multipleRoutesAvailable: result.multipleRoutesAvailable === true,
+        alternativeRouteCount: Number(result.alternativeRouteCount) || (Array.isArray(result.routes) ? result.routes.length : 0),
+        routeDedupedCount: Number(result.routeDedupedCount) || (Array.isArray(result.routes) ? result.routes.length : 0),
+        routeGenerationStrategies: Array.isArray(result.routeGenerationStrategies) ? result.routeGenerationStrategies.slice() : [],
+        rawRouteCount: Number(result.rawRouteCount) || 0,
+        fallbackReason: result.fallbackReason || null,
         pickup: {
           address: origin,
           latLng: geocoding?.location || null,
@@ -1429,13 +1463,25 @@
 
   function getReservationUrl(){
     const base = state.ctaUrls.reservation || "#";
+    let url = base;
     if(window.EstimateHandoff && state.estimateNumber){
       if(typeof window.EstimateHandoff.buildReservationHandoffUrl === "function"){
-        return window.EstimateHandoff.buildReservationHandoffUrl(base, state.estimateNumber);
+        url = window.EstimateHandoff.buildReservationHandoffUrl(base, state.estimateNumber);
+      }else{
+        url = window.EstimateHandoff.appendEstimateNoToUrl(base, state.estimateNumber);
       }
-      return window.EstimateHandoff.appendEstimateNoToUrl(base, state.estimateNumber);
     }
-    return base;
+    if(isPreFixedFareMode() && !isPreFixedFareConfirmable()){
+      try{
+        const parsed = new URL(url, window.location.origin);
+        parsed.searchParams.set("fareConfirm", "review");
+        return parsed.toString();
+      }catch(error){
+        const sep = url.includes("?") ? "&" : "?";
+        return url + sep + "fareConfirm=review";
+      }
+    }
+    return url;
   }
 
   function buildHandoffRecord(result){
