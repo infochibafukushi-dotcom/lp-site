@@ -41,6 +41,21 @@
     return String(routePlan?.returnPlanType || "").trim();
   }
 
+  function getOutboundLeg(routePlan, options){
+    return options?.outboundRoutePlan || routePlan?.outboundRoutePlan || routePlan;
+  }
+
+  function getReturnLeg(routePlan, options){
+    return options?.returnRoutePlan || routePlan?.returnRoutePlan || null;
+  }
+
+  function legNeedsReviewNotice(legPlan){
+    if(!legPlan || isLegConfirmable(legPlan)){
+      return false;
+    }
+    return hasSingleNonConfirmableCandidate(legPlan) || legPlan.preFixedFareConfirmable === false;
+  }
+
   function getSingleCandidateNotice(){
     return "ルート候補が1件のみのため、事前確定運賃としては確定せず、予約後に確認対応となります。";
   }
@@ -49,26 +64,28 @@
     if(!routePlan){
       return false;
     }
-    const outbound = routePlan.outboundRoutePlan || routePlan;
-    if(hasSingleNonConfirmableCandidate(outbound)){
+    const outbound = getOutboundLeg(routePlan, options);
+    const returnPlanType = resolveReturnPlanType(routePlan, options);
+    const returnLeg = getReturnLeg(routePlan, options);
+    if(legNeedsReviewNotice(outbound)){
       return true;
     }
-    const returnPlanType = resolveReturnPlanType(routePlan, options);
-    if(returnPlanType !== RETURN_PLAN_PENDING){
-      const returnLeg = routePlan.returnRoutePlan || null;
-      if(hasSingleNonConfirmableCandidate(returnLeg)){
-        return true;
-      }
+    if(returnPlanType !== RETURN_PLAN_PENDING && legNeedsReviewNotice(returnLeg)){
+      return true;
     }
-    return false;
+    return routePlan.preFixedFareConfirmable === false
+      && (legNeedsReviewNotice(outbound) || (returnPlanType !== RETURN_PLAN_PENDING && legNeedsReviewNotice(returnLeg)));
   }
 
   function getReturnStopoverExplanation(routePlan, options){
     if(resolveReturnPlanType(routePlan, options) !== RETURN_WITH_STOP){
       return "";
     }
-    const returnLeg = routePlan?.returnRoutePlan || null;
+    const returnLeg = getReturnLeg(routePlan, options);
     if(returnLeg && hasSingleNonConfirmableCandidate(returnLeg)){
+      return "復路は立ち寄り地点を含む指定ルートで算定しています。候補が1件のみのため確認対応となります。";
+    }
+    if(returnLeg && !isLegConfirmable(returnLeg)){
       return "復路は立ち寄り地点を含む指定ルートで算定しています。候補が1件のみのため確認対応となります。";
     }
     return "復路は、目的地 → 立ち寄り先 → 出発地の指定ルートで距離を算定しています。";
@@ -88,8 +105,8 @@
       messages.push({ type: "single_candidate_notice", text: getSingleCandidateNotice() });
     }
 
-    const outbound = routePlan.outboundRoutePlan || routePlan;
-    const returnLeg = routePlan.returnRoutePlan || null;
+    const outbound = getOutboundLeg(routePlan, options);
+    const returnLeg = getReturnLeg(routePlan, options);
     const returnPlanType = resolveReturnPlanType(routePlan, options);
 
     if(isStructuredRoundTrip(routePlan)){
@@ -173,6 +190,8 @@
     getSingleCandidateNotice: getSingleCandidateNotice,
     shouldShowSingleCandidateNotice: shouldShowSingleCandidateNotice,
     getReturnStopoverExplanation: getReturnStopoverExplanation,
+    getOutboundLeg: getOutboundLeg,
+    getReturnLeg: getReturnLeg,
     resolveReturnPlanType: resolveReturnPlanType,
     buildStatusMessages: buildStatusMessages,
     buildStatusHtml: buildStatusHtml,

@@ -401,10 +401,16 @@
     );
   }
 
+  function buildRouteStatusOptions(routePlan, options, quoteSnapshot){
+    return {
+      returnPlanType: options?.returnPlanType || quoteSnapshot?.returnPlanType || routePlan?.returnPlanType || null,
+      outboundRoutePlan: options?.outboundRoutePlan || quoteSnapshot?.outboundRoutePlan || routePlan?.outboundRoutePlan || null,
+      returnRoutePlan: options?.returnRoutePlan || quoteSnapshot?.returnRoutePlan || routePlan?.returnRoutePlan || null
+    };
+  }
+
   function buildRouteMapHtml(routeMapDataUrl, layout, routePlan, options){
-    const statusOptions = Object.assign({}, options || {}, {
-      returnPlanType: options?.returnPlanType || routePlan?.returnPlanType || null
-    });
+    const statusOptions = buildRouteStatusOptions(routePlan, options, options?.quoteSnapshot);
     const preFixedStatusHtml = global.PreFixedFareStatus && routePlan
       ? global.PreFixedFareStatus.buildStatusPdfHtml(routePlan, layout, statusOptions)
       : "";
@@ -846,7 +852,10 @@
 
     const footerHtml = buildPdfFooterHtml(data.pdfFooter, layout, qrDataUrls);
     const routeMapHtml = buildRouteMapHtml(data.routeMapDataUrl, layout, data.routePlan, {
-      returnPlanType: data.returnPlanType || data.routePlan?.returnPlanType || null
+      quoteSnapshot: data.quoteSnapshot || null,
+      returnPlanType: data.returnPlanType || data.quoteSnapshot?.returnPlanType || data.routePlan?.returnPlanType || null,
+      outboundRoutePlan: data.quoteSnapshot?.outboundRoutePlan || data.routePlan?.outboundRoutePlan || null,
+      returnRoutePlan: data.quoteSnapshot?.returnRoutePlan || data.routePlan?.returnRoutePlan || null
     });
 
     const fareCalculationHtml = buildFareCalculationMethodHtml(data, layout);

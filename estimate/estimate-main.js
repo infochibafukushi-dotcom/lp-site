@@ -2359,7 +2359,9 @@
     const roundTripStatusHtml = isPreFixedFareMode() && routePlan && window.PreFixedFareStatus
       ? window.PreFixedFareStatus.buildStatusHtml(routePlan, {
         escapeHtml: escapeHtml,
-        returnPlanType: getActiveReturnPlanType()
+        returnPlanType: getActiveReturnPlanType() || result?.quoteSnapshot?.returnPlanType || null,
+        outboundRoutePlan: result?.quoteSnapshot?.outboundRoutePlan || routePlan?.outboundRoutePlan || null,
+        returnRoutePlan: result?.quoteSnapshot?.returnRoutePlan || routePlan?.returnRoutePlan || null
       })
       : "";
     const routeCardHtml = routePlan ? `

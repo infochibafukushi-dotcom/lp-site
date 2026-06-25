@@ -140,6 +140,7 @@ async function main(){
     const quoteSnapshot = handoff?.quoteSnapshot || null;
     let pdfSnapshot = null;
     let pdfVisibleText = "";
+    let pdfBuildError = "";
     if(window.EstimatePdf && typeof window.EstimatePdf.buildPreviewElement === "function" && handoff){
       try{
         const element = await window.EstimatePdf.buildPreviewElement({
@@ -151,11 +152,11 @@ async function main(){
           breakdownRows: [],
           total: handoff.total || 0,
           resultNotes: "",
-          pdfFooter: {},
+          pdfFooter: { enabled: false },
           pageTitle: "かんたん料金確認",
           breakdown: handoff.breakdown || {},
           routePlan: handoff.routePlan || null,
-          returnPlanType: handoff.selections?.returnPlanType || handoff.routePlan?.returnPlanType || null,
+          returnPlanType: handoff.selections?.returnPlanType || handoff.quoteSnapshot?.returnPlanType || handoff.routePlan?.returnPlanType || null,
           googleMaps: { enabled: false }
         });
         const meta = element?.querySelector(".estimate-quote-snapshot-meta");
@@ -164,13 +165,30 @@ async function main(){
         }
         pdfVisibleText = String(element?.textContent || "").replace(/\s+/g, " ").trim();
       }catch(error){
-        pdfVisibleText = "PDF_BUILD_ERROR:" + String(error?.message || error);
+        pdfBuildError = String(error?.message || error);
+        pdfVisibleText = "PDF_BUILD_ERROR:" + pdfBuildError;
       }
+    }else{
+      pdfBuildError = !handoff
+        ? "handoff_missing"
+        : (!window.EstimatePdf ? "EstimatePdf_missing" : "buildPreviewElement_missing");
     }
+    const statusFromHandoff = (function(){
+      if(!window.PreFixedFareStatus || !handoff?.routePlan){
+        return [];
+      }
+      return window.PreFixedFareStatus.buildStatusMessages(handoff.routePlan, {
+        returnPlanType: handoff.selections?.returnPlanType || handoff.quoteSnapshot?.returnPlanType || null,
+        outboundRoutePlan: handoff.quoteSnapshot?.outboundRoutePlan || handoff.routePlan?.outboundRoutePlan || null,
+        returnRoutePlan: handoff.quoteSnapshot?.returnRoutePlan || handoff.routePlan?.returnRoutePlan || null
+      }).map(function(message){ return message.text; });
+    })();
     return {
       handoffExists: Boolean(handoff),
       quoteSnapshot: quoteSnapshot,
       pdfQuoteSnapshot: pdfSnapshot,
+      pdfBuildError: pdfBuildError,
+      statusFromHandoff: statusFromHandoff,
       pdfVisibleText: pdfVisibleText.slice(0, 4000),
       roundTripStatusText: Array.from(document.querySelectorAll(".estimate-round-trip-status p")).map(function(el){
         return String(el.textContent || "").trim();
@@ -206,6 +224,8 @@ async function main(){
       },
       quoteSnapshot: pickSnapshotFields(resultData.quoteSnapshot),
       pdfQuoteSnapshot: pickSnapshotFields(resultData.pdfQuoteSnapshot),
+      pdfBuildError: resultData.pdfBuildError || "",
+      statusFromHandoff: resultData.statusFromHandoff || [],
       pdfTextIncludes: {
         returnDistance: /復路/.test(resultData.pdfVisibleText),
         reviewRequired: /確認対応/.test(resultData.pdfVisibleText),
