@@ -190,8 +190,8 @@
 
   function buildRoutesRequestBody(options, params){
     const body = {
-      origin: { address: String(options.origin || "") },
-      destination: { address: String(options.destination || "") },
+      origin: { address: String(params.origin || options.origin || "") },
+      destination: { address: String(params.destination || options.destination || "") },
       travelMode: "DRIVE",
       routingPreference: "TRAFFIC_AWARE",
       computeAlternativeRoutes: params.computeAlternativeRoutes === true,
@@ -204,6 +204,7 @@
       languageCode: options?.languageCode || "ja",
       units: "METRIC"
     };
+    const intermediateAddress = String(params.intermediateAddress || options?.intermediateAddress || "").trim();
     if(params.intermediateWaypoint){
       body.intermediates = [{
         location: {
@@ -213,15 +214,21 @@
           }
         }
       }];
+    }else if(intermediateAddress){
+      body.intermediates = [{
+        address: intermediateAddress
+      }];
     }
     return body;
   }
 
   async function fetchRecommendedPool(options, userAvoidTolls){
+    const intermediateAddress = String(options?.intermediateAddress || "").trim();
     const rawRoutes = await fetchRoutesRequest(options, buildRoutesRequestBody(options, {
-      computeAlternativeRoutes: true,
+      computeAlternativeRoutes: !intermediateAddress,
       avoidTolls: userAvoidTolls,
-      avoidHighways: userAvoidTolls
+      avoidHighways: userAvoidTolls,
+      intermediateAddress: intermediateAddress
     }));
     return rawRoutes.map(function(route, index){
       return normalizeRawRoute(route, {
@@ -352,6 +359,7 @@
     const apiKey = String(options?.apiKey || "").trim();
     const origin = String(options?.origin || "").trim();
     const destination = String(options?.destination || "").trim();
+    const intermediateAddress = String(options?.intermediateAddress || "").trim();
     const userAvoidTolls = options?.roadType === "general";
 
     if(!apiKey){
@@ -359,6 +367,52 @@
     }
     if(!origin || !destination){
       throw new Error("出発地と目的地を入力してください。");
+    }
+
+    if(intermediateAddress){
+      const rawRoutes = await fetchRoutesRequest(options, buildRoutesRequestBody(options, {
+        origin: origin,
+        destination: destination,
+        computeAlternativeRoutes: false,
+        avoidTolls: userAvoidTolls,
+        avoidHighways: userAvoidTolls,
+        intermediateAddress: intermediateAddress
+      }));
+      if(!rawRoutes.length){
+        throw new Error("ルートが見つかりませんでした。住所を確認してください。");
+      }
+      const route = applyRoutePresentation(normalizeRawRoute(rawRoutes[0], {
+        routeStrategy: "recommended",
+        avoidTolls: userAvoidTolls,
+        avoidHighways: userAvoidTolls,
+        roadType: userAvoidTolls ? "general" : "toll",
+        intermediateWaypoint: {
+          waypointLabel: intermediateAddress,
+          waypointAddress: intermediateAddress
+        },
+        rawRouteIndex: 0
+      }), "recommended");
+      const deduped = assignRouteIds([route]);
+      const preFixedFareConfirmable = deduped.length >= 2;
+      const primary = deduped[0];
+      return {
+        distanceKm: primary.distanceKm,
+        durationMinutes: primary.durationMinutes,
+        distanceMeters: primary.distanceMeters,
+        durationSeconds: primary.durationSeconds,
+        selectedRouteId: primary.routeId,
+        routes: deduped,
+        routeCandidates: deduped,
+        routeCandidateCount: deduped.length,
+        distinctRouteCount: deduped.length,
+        alternativeRouteCount: deduped.length,
+        multipleRoutesAvailable: preFixedFareConfirmable,
+        preFixedFareConfirmable: preFixedFareConfirmable,
+        routeDedupedCount: deduped.length,
+        routeGenerationStrategies: ["recommended"],
+        rawRouteCount: rawRoutes.length,
+        fallbackReason: preFixedFareConfirmable ? null : "only_one_distinct_route"
+      };
     }
 
     const routeGenerationStrategies = [
@@ -435,6 +489,7 @@
     const apiKey = String(options?.apiKey || "").trim();
     const origin = String(options?.origin || "").trim();
     const destination = String(options?.destination || "").trim();
+    const intermediateAddress = String(options?.intermediateAddress || "").trim();
     const requestAlternativeRoutes = options?.requestAlternativeRoutes === true;
 
     if(!apiKey){
@@ -444,21 +499,14 @@
       throw new Error("出発地と目的地を入力してください。");
     }
 
-    const rawRoutes = await fetchRoutesRequest(options, {
-      origin: { address: origin },
-      destination: { address: destination },
-      travelMode: "DRIVE",
-      routingPreference: "TRAFFIC_AWARE",
-      computeAlternativeRoutes: requestAlternativeRoutes,
-      extraComputations: ["TOLLS"],
-      routeModifiers: {
-        avoidTolls: options?.roadType === "general",
-        avoidHighways: options?.roadType === "general",
-        avoidFerries: false
-      },
-      languageCode: options?.languageCode || "ja",
-      units: "METRIC"
-    });
+    const rawRoutes = await fetchRoutesRequest(options, buildRoutesRequestBody(options, {
+      origin: origin,
+      destination: destination,
+      computeAlternativeRoutes: requestAlternativeRoutes && !intermediateAddress,
+      avoidTolls: options?.roadType === "general",
+      avoidHighways: options?.roadType === "general",
+      intermediateAddress: intermediateAddress
+    }));
 
     if(!rawRoutes.length){
       throw new Error("ルートが見つかりませんでした。住所を確認してください。");

@@ -76,6 +76,21 @@
   }
 
   function getRoutePlanPrimaryRoute(routePlan){
+    if(routePlan?.outboundRoutePlan){
+      const outbound = routePlan.outboundRoutePlan;
+      if(Array.isArray(outbound.routes) && outbound.routes.length){
+        const selectedId = String(outbound.selectedRouteId || "");
+        const selected = outbound.routes.find(function(route){
+          return String(route?.routeId || "") === selectedId;
+        });
+        return selected || outbound.routes[0];
+      }
+      return {
+        encodedPolyline: String(outbound.encodedPolyline || ""),
+        distanceMeters: Number(outbound.distanceMeters) || 0,
+        durationSeconds: Number(outbound.durationSeconds) || 0
+      };
+    }
     if(!routePlan) return null;
     if(Array.isArray(routePlan.routes) && routePlan.routes.length){
       const selectedId = String(routePlan.selectedRouteId || "");
@@ -389,8 +404,20 @@
     const primaryRoute = getRoutePlanPrimaryRoute(routePlan);
     const infoParts = [];
     const roadLabel = getRoadTypeLabel(routePlan?.roadType);
-    const distanceLabel = formatRouteDistanceMeters(primaryRoute?.distanceMeters || routePlan?.distanceMeters);
-    const durationLabel = formatRouteDurationSeconds(primaryRoute?.durationSeconds || routePlan?.durationSeconds);
+    const outboundMeters = routePlan?.outboundRoutePlan
+      ? Number(getRoutePlanPrimaryRoute({ routes: routePlan.outboundRoutePlan.routes, selectedRouteId: routePlan.outboundRoutePlan.selectedRouteId, distanceMeters: routePlan.outboundRoutePlan.distanceMeters })?.distanceMeters || routePlan.outboundRoutePlan.distanceMeters) || 0
+      : 0;
+    const returnMeters = routePlan?.returnRoutePlan
+      ? Number(getRoutePlanPrimaryRoute({ routes: routePlan.returnRoutePlan.routes, selectedRouteId: routePlan.returnRoutePlan.selectedRouteId, distanceMeters: routePlan.returnRoutePlan.distanceMeters })?.distanceMeters || routePlan.returnRoutePlan.distanceMeters) || 0
+      : 0;
+    const distanceLabel = routePlan?.tripType === "round_trip"
+      ? (
+        (outboundMeters > 0 ? "往路：" + formatRouteDistanceMeters(outboundMeters) : "")
+        + (returnMeters > 0 ? "　復路：" + formatRouteDistanceMeters(returnMeters) : "")
+        + (Number(routePlan.totalDistanceMeters) > 0 ? "　合計：" + formatRouteDistanceMeters(routePlan.totalDistanceMeters) : "")
+      )
+      : formatRouteDistanceMeters(primaryRoute?.distanceMeters || routePlan?.distanceMeters);
+    const durationLabel = formatRouteDurationSeconds(routePlan?.totalDurationSeconds || primaryRoute?.durationSeconds || routePlan?.durationSeconds);
     if(roadLabel){
       infoParts.push("道路設定：" + roadLabel);
     }

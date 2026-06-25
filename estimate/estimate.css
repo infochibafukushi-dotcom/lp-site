@@ -1100,3 +1100,67 @@
   font-size:14px;
   line-height:1.6;
 }
+.estimate-return-plan{
+  margin:0 0 16px;
+  padding:14px 16px;
+  border:1px solid #dce5dc;
+  border-radius:12px;
+  background:#f8fbf8;
+}
+.estimate-return-plan-legend{
+  font-size:15px;
+  font-weight:700;
+  color:#2d2a26;
+  padding:0 4px;
+}
+.estimate-return-plan-options{
+  display:grid;
+  gap:8px;
+  margin-top:8px;
+}
+.estimate-return-plan-option,
+.estimate-return-stop-type-option{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  font-size:14px;
+  line-height:1.5;
+  color:#2d2a26;
+}
+.estimate-return-stop-panel,
+.estimate-return-destination-panel{
+  margin-top:12px;
+}
+.estimate-return-stop-type{
+  margin:0 0 12px;
+  padding:0;
+  border:none;
+}
+.estimate-return-stop-type-legend{
+  font-size:14px;
+  font-weight:700;
+  color:#444;
+  margin-bottom:8px;
+}
+.estimate-return-plan-note,
+.estimate-return-plan-pending{
+  margin:12px 0 0;
+  font-size:13px;
+  line-height:1.6;
+  color:#5a4a2f;
+}
+.estimate-return-plan-pending{
+  padding:10px 12px;
+  border-radius:8px;
+  background:#fff8e6;
+  border:1px solid #f0d78c;
+}
+.estimate-round-trip-status{
+  margin:0 0 10px;
+  font-size:13px;
+  line-height:1.6;
+  color:#5a4a2f;
+}
+.estimate-round-trip-status p{
+  margin:0 0 4px;
+}

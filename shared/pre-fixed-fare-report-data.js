@@ -77,6 +77,8 @@
         { item: "ルート候補生成", status: "LP側実装済み", basis: "おすすめ・距離優先・幹線道路・有料道路利用の4系統（shared/pre-fixed-fare-route-waypoints.js）" },
         { item: "選択ルート保存", status: "LP側実装済み / API側未確認", basis: "estimate/estimate-calc.js quoteSnapshot（routeCandidates / selectedRoute*）" },
         { item: "候補1件時の扱い", status: "通常見積または確認対応", basis: "estimate/estimate-main.js（警告表示・予約URLにfareConfirm=review）" },
+        { item: "往復時の往路・復路別算定", status: "LP側実装済み", basis: "estimate/estimate-main.js, estimate/estimate-distance-api.js（片道×2を廃止）" },
+        { item: "往復・帰り未定時の復路扱い", status: "復路は確認対応", basis: "estimate/estimate-calc.js（preFixedFareScope=outbound_only）" },
         { item: "予約API/DB保存", status: "未確認", basis: "shared/estimate-quote-register.js 経由、API/DB側要確認" },
         { item: "運転者への同一ルート表示", status: "未確認", basis: "reservation-v4 / driver画面（ワークスペース外）" }
       ],
@@ -110,7 +112,8 @@
       requirements: [
         { requirement: "電子地図で推計走行距離を算定", policy: "Google Routes API等で距離・ルート取得", current: "実装済み", evidence: "routePlan" },
         { requirement: "距離制運賃×係数で算定", policy: "fareMode=pre_fixed_fareで係数適用", current: "実装済み", evidence: "estimate/estimate-calc.js" },
-        { requirement: "2以上のルートから旅客が選択", policy: "4系統候補を生成し2件以上取得時のみ選択可", current: "本システムでは、電子地図APIにより、おすすめルート、取得候補内の距離短めルート、主要道路経由ルート、有料道路利用可ルートを生成し、実質的に異なる2件以上のルートが取得できた場合に、旅客が1つを選択して事前確定運賃を算定する。候補1件時は通常見積または確認対応とする。", evidence: "estimate/estimate-distance-api.js, shared/pre-fixed-fare-route-waypoints.js, estimate/estimate-main.js" },
+        { requirement: "2以上のルートから旅客が選択", policy: "4系統候補を生成し2件以上取得時のみ選択可", current: "本システムでは、電子地図APIにより、おすすめルート、取得候補内の距離短めルート、主要道路経由ルート、有料道路利用可ルートを生成し、実質的に異なる2件以上のルートが取得できた場合に、旅客が1つを選択して事前確定運賃を算定する。候補1件時は通常見積または確認対応とする。往復時は往路・復路を別算定し、それぞれで選択ルートを保存する。", evidence: "estimate/estimate-distance-api.js, shared/pre-fixed-fare-route-waypoints.js, estimate/estimate-main.js" },
+        { requirement: "往復時の往路・復路別算定", policy: "片道距離×2を用いず往路・復路を個別にAPI算定", current: "実装済み", evidence: "routePlan.outboundRoutePlan / returnRoutePlan" },
         { requirement: "有料道路利用有無を選択", policy: "roadTypeを保存しルート算定へ反映", current: "実装済み", evidence: "roadType" },
         { requirement: "運賃額と割引前後を提示", policy: "表示UIとsnapshotに保存", current: "未確認", evidence: "fareBeforeDiscount" },
         { requirement: "注意事項を提示し同意取得", policy: "consentAt等を保存", current: "未確認", evidence: "consentAt" },
@@ -179,7 +182,10 @@
         "Google Routes API等の電子地図を使用して距離・時間・ルートを取得する設計",
         "出発地、目的地、距離、時間、polyline、候補ルートを保存する設計",
         "routePlanとして見積時点の情報を保持する設計",
-        "地図情報が定期更新される電子地図を利用すること"
+        "地図情報が定期更新される電子地図を利用すること",
+        "往復送迎の場合、片道距離を単純に2倍せず、往路と復路を別々に電子地図APIで算定する",
+        "立ち寄りがある場合は、復路に中間地点を設定して算定する",
+        "帰りが未定の場合は、復路を事前確定運賃の対象外とし、確認対応とする"
       ],
       mapAndRouteRows: impl.mapRoute,
       multiRouteRows: impl.multiRoute,

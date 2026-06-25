@@ -102,7 +102,77 @@
     return visibleItems(config?.categories?.roundTripAddon?.items || []);
   }
 
+  const RETURN_PLAN_TYPES = {
+    SAME_RETURN: "same_return",
+    RETURN_WITH_STOP: "return_with_stop",
+    DIFFERENT_RETURN: "different_return_destination",
+    RETURN_PENDING: "return_pending"
+  };
+
+  function isStructuredRoutePlan(routePlan){
+    return Boolean(routePlan && routePlan.outboundRoutePlan);
+  }
+
+  function getOutboundLegPlan(routePlan){
+    if(!routePlan){
+      return null;
+    }
+    if(routePlan.outboundRoutePlan){
+      return routePlan.outboundRoutePlan;
+    }
+    return routePlan;
+  }
+
+  function getReturnLegPlan(routePlan){
+    if(!routePlan || !routePlan.returnRoutePlan){
+      return null;
+    }
+    return routePlan.returnRoutePlan;
+  }
+
+  function getLegPrimaryRoute(legPlan){
+    if(!legPlan){
+      return null;
+    }
+    if(Array.isArray(legPlan.routes) && legPlan.routes.length){
+      const selectedId = String(legPlan.selectedRouteId || "");
+      const selected = legPlan.routes.find(function(route){
+        return String(route?.routeId || "") === selectedId;
+      });
+      return selected || legPlan.routes[0];
+    }
+    if(Array.isArray(legPlan.routeCandidates) && legPlan.routeCandidates.length){
+      const selectedId = String(legPlan.selectedRouteId || "");
+      const selected = legPlan.routeCandidates.find(function(route){
+        return String(route?.routeId || "") === selectedId;
+      });
+      return selected || legPlan.routeCandidates[0];
+    }
+    return {
+      distanceMeters: Number(legPlan.distanceMeters) || 0,
+      durationSeconds: Number(legPlan.durationSeconds) || 0,
+      encodedPolyline: String(legPlan.encodedPolyline || ""),
+      routeId: String(legPlan.selectedRouteId || "route_0")
+    };
+  }
+
+  function resolveReturnPlanType(state){
+    const planType = String(state?.returnPlanType || "").trim();
+    if(Object.values(RETURN_PLAN_TYPES).includes(planType)){
+      return planType;
+    }
+    return RETURN_PLAN_TYPES.SAME_RETURN;
+  }
+
+  function usesSeparateReturnRoute(config, state){
+    return isRoundTripSelected(config, state)
+      && resolveReturnPlanType(state) !== RETURN_PLAN_TYPES.RETURN_PENDING;
+  }
+
   function getDistanceMultiplier(config, state){
+    if(usesSeparateReturnRoute(config, state) || isStructuredRoutePlan(state?.routePlan)){
+      return 1;
+    }
     const trip = findItem(config?.categories?.tripType?.items, state.tripTypeId);
     let distanceMultiplier = 1;
     if(trip){
@@ -112,6 +182,54 @@
       }
     }
     return distanceMultiplier;
+  }
+
+  function getEffectiveBilledDistanceKm(config, state){
+    const routePlan = state?.routePlan;
+    if(isStructuredRoutePlan(routePlan)){
+      const totalMeters = Number(routePlan.totalDistanceMeters) || 0;
+      if(totalMeters > 0){
+        return Math.round((totalMeters / 1000) * 10) / 10;
+      }
+      const outbound = getOutboundLegPlan(routePlan);
+      const outboundMeters = Number(getLegPrimaryRoute(outbound)?.distanceMeters || outbound?.distanceMeters) || 0;
+      if(outboundMeters > 0){
+        return Math.round((outboundMeters / 1000) * 10) / 10;
+      }
+    }
+    const distance = Number(state?.distanceKm) || 0;
+    return distance * getDistanceMultiplier(config, state);
+  }
+
+  function getEffectiveRideMinutes(state){
+    const routePlan = state?.routePlan;
+    if(isStructuredRoutePlan(routePlan)){
+      const totalSeconds = Number(routePlan.totalDurationSeconds) || 0;
+      if(totalSeconds > 0){
+        return Math.max(1, Math.round(totalSeconds / 60));
+      }
+    }
+    return Number(state?.routeCalcResult?.durationMinutes) || 0;
+  }
+
+  function getReturnPlanTypeLabel(planType){
+    const labels = {
+      same_return: "同じ場所へ戻る",
+      return_with_stop: "帰りに立ち寄る",
+      different_return_destination: "帰り先が違う",
+      return_pending: "帰りは未定・診察後に相談"
+    };
+    return labels[String(planType || "")] || "";
+  }
+
+  function getReturnStopTypeLabel(stopType){
+    const labels = {
+      pharmacy: "薬局",
+      supermarket: "スーパー・商業施設",
+      facility: "施設",
+      other: "その他"
+    };
+    return labels[String(stopType || "")] || "";
   }
 
   function getCurrentFareMode(config){
@@ -335,30 +453,63 @@
   }
 
   function buildDistanceUsageLines(config, state, distanceMultiplier){
-    const distance = Number(state.distanceKm) || 0;
-    if(!(distance > 0)){
-      return { lines: [], usage: "" };
-    }
-
+    const routePlan = state?.routePlan;
     const trip = findItem(config?.categories?.tripType?.items, state.tripTypeId);
     const tripLabel = trip?.label || (distanceMultiplier > 1 ? "往復" : "片道");
     const lines = [
       { label: "送迎方法", value: tripLabel }
     ];
 
-    if(distanceMultiplier > 1){
-      const billedDistance = distance * distanceMultiplier;
-      const multiplierLabel = Number.isInteger(distanceMultiplier)
-        ? String(distanceMultiplier)
-        : String(distanceMultiplier);
-      lines.push({ label: "片道距離", value: formatDisplayKm(distance) });
-      lines.push({
-        label: "計算対象距離",
-        value: formatDisplayKm(billedDistance),
-        note: formatDisplayKm(distance) + " × " + multiplierLabel
-      });
+    if(isStructuredRoutePlan(routePlan)){
+      const outbound = getOutboundLegPlan(routePlan);
+      const returnLeg = getReturnLegPlan(routePlan);
+      const outboundMeters = Number(getLegPrimaryRoute(outbound)?.distanceMeters || outbound?.distanceMeters) || 0;
+      const returnMeters = returnLeg
+        ? Number(getLegPrimaryRoute(returnLeg)?.distanceMeters || returnLeg?.distanceMeters) || 0
+        : 0;
+      const totalMeters = Number(routePlan.totalDistanceMeters) || (outboundMeters + returnMeters);
+
+      if(outboundMeters > 0){
+        lines.push({ label: "往路距離", value: formatDisplayKm(outboundMeters / 1000) });
+      }
+      if(returnMeters > 0){
+        lines.push({ label: "復路距離", value: formatDisplayKm(returnMeters / 1000) });
+      }
+      if(routePlan.returnPlanType === RETURN_PLAN_TYPES.RETURN_PENDING){
+        lines.push({ label: "復路", value: "確認対応（帰り未定）" });
+      }
+      if(totalMeters > 0){
+        lines.push({ label: "計算対象距離", value: formatDisplayKm(totalMeters / 1000) });
+      }
     }else{
-      lines.push({ label: "計算対象距離", value: formatDisplayKm(distance) });
+      const distance = Number(state.distanceKm) || 0;
+      if(!(distance > 0)){
+        return { lines: [], usage: "" };
+      }
+
+      if(distanceMultiplier > 1){
+        const billedDistance = distance * distanceMultiplier;
+        const multiplierLabel = Number.isInteger(distanceMultiplier)
+          ? String(distanceMultiplier)
+          : String(distanceMultiplier);
+        lines.push({ label: "片道距離", value: formatDisplayKm(distance) });
+        lines.push({
+          label: "計算対象距離",
+          value: formatDisplayKm(billedDistance),
+          note: formatDisplayKm(distance) + " × " + multiplierLabel
+        });
+      }else{
+        lines.push({ label: "計算対象距離", value: formatDisplayKm(distance) });
+      }
+    }
+
+    if(!lines.some(function(line){ return line.label === "計算対象距離"; })){
+      const billedDistance = getEffectiveBilledDistanceKm(config, state);
+      if(billedDistance > 0){
+        lines.push({ label: "計算対象距離", value: formatDisplayKm(billedDistance) });
+      }else{
+        return { lines: [], usage: "" };
+      }
     }
 
     const usage = lines.map(function(line){
@@ -373,7 +524,7 @@
 
   function buildDurationUsageLine(state, options){
     const opts = options || {};
-    const minutes = Number(state?.routeCalcResult?.durationMinutes) || 0;
+    const minutes = getEffectiveRideMinutes(state);
     const routeEstimate = opts.routeEstimate === true;
     if(minutes > 0){
       if(routeEstimate){
@@ -413,7 +564,7 @@
     const components = getFareComponents(config, fareMode);
     const sections = [];
     const notices = buildFareBasisNotices(fareMode, fixedFareData.preFixedFareMeta);
-    const rideMinutes = Number(state?.routeCalcResult?.durationMinutes) || 0;
+    const rideMinutes = getEffectiveRideMinutes(state);
     let hasTimeBlock = false;
 
     components.forEach(function(component){
@@ -489,7 +640,7 @@
       fareMode: fareMode,
       fareModeLabel: getFareModeLabel(config, fareMode),
       durationMinutes: rideMinutes,
-      distanceKm: Number(state.distanceKm) || 0,
+      distanceKm: getEffectiveBilledDistanceKm(config, state),
       distanceMultiplier: distanceMultiplier,
       sections: sections,
       notices: notices
@@ -500,7 +651,7 @@
     const fareMode = getCurrentFareMode(config);
     const components = getFareComponents(config, fareMode);
     const distanceMultiplier = getDistanceMultiplier(config, state);
-    const rideMinutes = Number(state?.routeCalcResult?.durationMinutes) || 0;
+    const rideMinutes = getEffectiveRideMinutes(state);
     const rows = [];
 
     let baseDistanceFareAmount = 0;
@@ -518,7 +669,7 @@
       }else if(calculator === "distance_pricing_ref"){
         const pricingRef = String(component?.pricingRef || "").trim() || "distancePricing";
         const pricing = config?.[pricingRef] || config?.distancePricing;
-        amount = calcDistanceFare(state.distanceKm, pricing) * distanceMultiplier;
+        amount = calcDistanceFare(getEffectiveBilledDistanceKm(config, state), pricing);
         if(isPreFixedFareMode(config)){
           baseDistanceFareAmount = Math.max(0, Math.round(Number(amount) || 0));
           const trafficZone = resolveTrafficZone(config, state);
@@ -580,6 +731,26 @@
           value: addon.label
         });
       }
+      const returnPlanLabel = getReturnPlanTypeLabel(resolveReturnPlanType(state));
+      if(returnPlanLabel){
+        lines.push({ label: "帰りの予定", value: returnPlanLabel });
+      }
+      if(resolveReturnPlanType(state) === RETURN_PLAN_TYPES.RETURN_WITH_STOP){
+        const stopLabel = getReturnStopTypeLabel(state.returnStopType);
+        const stopAddress = String(state.returnStopAddress || "").trim();
+        if(stopLabel){
+          lines.push({ label: "立ち寄り先種別", value: stopLabel });
+        }
+        if(stopAddress){
+          lines.push({ label: "立ち寄り先", value: stopAddress });
+        }
+      }
+      if(resolveReturnPlanType(state) === RETURN_PLAN_TYPES.DIFFERENT_RETURN){
+        const returnAddress = String(state.differentReturnAddress || "").trim();
+        if(returnAddress){
+          lines.push({ label: "帰り先", value: returnAddress });
+        }
+      }
     }
 
     const fareMode = getCurrentFareMode(config);
@@ -595,26 +766,88 @@
     });
 
     const distanceLabel = config.page?.distanceLabel || "片道距離";
-    const distance = Number(state.distanceKm);
-    if(distance > 0){
-      lines.push({ label: distanceLabel, value: distance.toFixed(1) + "km" });
+    const billedDistance = getEffectiveBilledDistanceKm(config, state);
+    if(billedDistance > 0){
+      if(isStructuredRoutePlan(state.routePlan)){
+        lines.push({ label: "計算対象距離", value: billedDistance.toFixed(1) + "km" });
+      }else{
+        lines.push({ label: distanceLabel, value: billedDistance.toFixed(1) + "km" });
+      }
     }
 
     return lines;
   }
 
   function getRoutePlanPrimaryRoute(routePlan){
-    if(!routePlan) return null;
-    if(Array.isArray(routePlan.routes) && routePlan.routes.length){
-      const selectedId = String(routePlan.selectedRouteId || "");
-      const selected = routePlan.routes.find(function(route){
-        return String(route?.routeId || "") === selectedId;
-      });
-      return selected || routePlan.routes[0];
+    const outbound = getOutboundLegPlan(routePlan);
+    return getLegPrimaryRoute(outbound);
+  }
+
+  function buildLegRouteSnapshot(legPlan){
+    if(!legPlan){
+      return {};
     }
+    const routes = Array.isArray(legPlan.routes) ? legPlan.routes
+      : (Array.isArray(legPlan.routeCandidates) ? legPlan.routeCandidates : []);
+    const selectedId = String(legPlan.selectedRouteId || "");
+    const selectedIndex = routes.findIndex(function(route){
+      return String(route?.routeId || "") === selectedId;
+    });
+    const selected = selectedIndex >= 0
+      ? routes[selectedIndex]
+      : getLegPrimaryRoute(legPlan);
+    const label = selected
+      ? formatRouteLabel(selected, selectedIndex >= 0 ? selectedIndex : 0)
+      : "";
+    const confirmable = legPlan.preFixedFareConfirmable === true;
+    const routeCandidates = routes.map(buildRouteCandidateSnapshot);
+
     return {
-      distanceMeters: Number(routePlan.distanceMeters) || 0,
-      durationSeconds: Number(routePlan.durationSeconds) || 0
+      origin: legPlan.origin || null,
+      destination: legPlan.destination || null,
+      waypoint: legPlan.waypoint || null,
+      distanceMeters: Number(selected?.distanceMeters || legPlan.distanceMeters) || 0,
+      durationSeconds: Number(selected?.durationSeconds || legPlan.durationSeconds) || 0,
+      selectedRouteId: selectedId || String(selected?.routeId || ""),
+      selectedRoute: selected || null,
+      selectedRouteLabel: label || null,
+      selectedRouteIndex: selectedIndex >= 0 ? selectedIndex : 0,
+      selectedRouteStrategy: selected?.routeStrategy || null,
+      selectedRouteSource: selected?.routeSource || legPlan.provider || null,
+      encodedPolyline: String(selected?.encodedPolyline || legPlan.encodedPolyline || ""),
+      routeToken: String(selected?.routeToken || legPlan.routeToken || ""),
+      routeSummary: String(selected?.routeSummary || label || "").trim() || null,
+      tollInfo: selected?.tollInfo ?? legPlan.tollInfo ?? null,
+      tollPreference: selected?.tollPreference || null,
+      tollExcludedFromFare: selected?.tollExcludedFromFare === true,
+      intermediateWaypoint: selected?.intermediateWaypoint || legPlan.waypoint || null,
+      roadType: String(selected?.roadType || legPlan.roadType || "general") === "toll" ? "toll" : "general",
+      routeCandidates: routeCandidates,
+      preFixedFareConfirmable: confirmable,
+      routeCandidateCount: routes.length,
+      distinctRouteCount: Number(legPlan.distinctRouteCount) || routes.length,
+      fallbackReason: legPlan.fallbackReason || null,
+      selectedAt: legPlan.selectedAt || null
+    };
+  }
+
+  function buildStructuredRoutePlanSnapshot(state){
+    const routePlan = state?.routePlan;
+    if(!isStructuredRoutePlan(routePlan)){
+      return null;
+    }
+    const outbound = buildLegRouteSnapshot(getOutboundLegPlan(routePlan));
+    const returnLeg = getReturnLegPlan(routePlan);
+    const returnSnapshot = returnLeg ? buildLegRouteSnapshot(returnLeg) : null;
+    return {
+      tripType: routePlan.tripType || "one_way",
+      returnPlanType: routePlan.returnPlanType || null,
+      outboundRoutePlan: outbound,
+      returnRoutePlan: returnSnapshot,
+      totalDistanceMeters: Number(routePlan.totalDistanceMeters) || 0,
+      totalDurationSeconds: Number(routePlan.totalDurationSeconds) || 0,
+      preFixedFareScope: routePlan.preFixedFareScope || "outbound_only",
+      returnFareStatus: routePlan.returnFareStatus || null
     };
   }
 
@@ -631,6 +864,12 @@
 
   function resolveDistanceMeters(state){
     const routePlan = state?.routePlan;
+    if(isStructuredRoutePlan(routePlan)){
+      const total = Number(routePlan.totalDistanceMeters) || 0;
+      if(total > 0){
+        return total;
+      }
+    }
     if(routePlan){
       const primaryRoute = getRoutePlanPrimaryRoute(routePlan);
       const meters = Number(primaryRoute?.distanceMeters || routePlan.distanceMeters) || 0;
@@ -644,6 +883,12 @@
 
   function resolveDurationSeconds(state){
     const routePlan = state?.routePlan;
+    if(isStructuredRoutePlan(routePlan)){
+      const total = Number(routePlan.totalDurationSeconds) || 0;
+      if(total > 0){
+        return total;
+      }
+    }
     if(routePlan){
       const primaryRoute = getRoutePlanPrimaryRoute(routePlan);
       const seconds = Number(primaryRoute?.durationSeconds || routePlan.durationSeconds) || 0;
@@ -651,7 +896,7 @@
         return seconds;
       }
     }
-    const minutes = Number(state?.routeCalcResult?.durationMinutes) || 0;
+    const minutes = getEffectiveRideMinutes(state);
     return minutes > 0 ? Math.round(minutes * 60) : 0;
   }
 
@@ -693,6 +938,34 @@
   }
 
   function buildSelectedRouteSnapshot(state){
+    const structured = buildStructuredRoutePlanSnapshot(state);
+    if(structured){
+      const outbound = structured.outboundRoutePlan || {};
+      const returnLeg = structured.returnRoutePlan;
+      const confirmable = structured.preFixedFareScope === "outbound_and_return"
+        ? outbound.preFixedFareConfirmable === true && returnLeg?.preFixedFareConfirmable === true
+        : outbound.preFixedFareConfirmable === true;
+      return Object.assign({}, outbound, {
+        routePlan: structured,
+        outboundRoutePlan: structured.outboundRoutePlan,
+        returnRoutePlan: structured.returnRoutePlan,
+        tripType: structured.tripType,
+        returnPlanType: structured.returnPlanType,
+        totalDistanceMeters: structured.totalDistanceMeters,
+        totalDurationSeconds: structured.totalDurationSeconds,
+        preFixedFareScope: structured.preFixedFareScope,
+        returnFareStatus: structured.returnFareStatus,
+        routeCandidates: outbound.routeCandidates || [],
+        alternativeRoutes: outbound.routeCandidates || [],
+        alternativeRouteCount: outbound.routeCandidateCount ?? 0,
+        multipleRoutesAvailable: confirmable,
+        preFixedFareConfirmable: confirmable,
+        routeDedupedCount: outbound.distinctRouteCount ?? 0,
+        routeGenerationStrategies: [],
+        fallbackReason: outbound.fallbackReason || null
+      });
+    }
+
     const routePlan = state?.routePlan;
     if(!routePlan){
       return {};
@@ -751,7 +1024,7 @@
     const pickupFee = getFeeAmount(basic.pickupFee);
     const specialVehicleFee = getFeeAmount(basic.specialVehicleFee);
     const specialVehicleFeeEnabled = basic.specialVehicleFee?.visible !== false;
-    let distanceFare = calcDistanceFare(state.distanceKm, config.distancePricing);
+    let distanceFare = calcDistanceFare(getEffectiveBilledDistanceKm(config, state), config.distancePricing);
 
     const mobility = findItem(config.categories?.mobility?.items, state.mobilityId);
     const wheelchairFee = mobility ? getFeeAmount(mobility) : 0;
@@ -784,7 +1057,7 @@
       }
     }
 
-    distanceFare = distanceFare * distanceMultiplier;
+    distanceFare = calcDistanceFare(getEffectiveBilledDistanceKm(config, state), config.distancePricing);
 
     let trafficZoneDetection = null;
     let computeState = state;
@@ -857,7 +1130,17 @@
       serviceFees: serviceFees,
       expenses: expenses,
       roadType: routeSnapshot.roadType || (String(state.roadType || "general") === "toll" ? "toll" : "general"),
-      distanceKm: Number(state.distanceKm) || 0,
+      distanceKm: getEffectiveBilledDistanceKm(config, state),
+      billedDistanceKm: getEffectiveBilledDistanceKm(config, state),
+      routePlan: routeSnapshot.routePlan || buildStructuredRoutePlanSnapshot(state) || null,
+      tripType: routeSnapshot.tripType || (isRoundTripSelected(config, state) ? "round_trip" : "one_way"),
+      returnPlanType: routeSnapshot.returnPlanType || (isRoundTripSelected(config, state) ? resolveReturnPlanType(state) : null),
+      outboundRoutePlan: routeSnapshot.outboundRoutePlan || null,
+      returnRoutePlan: routeSnapshot.returnRoutePlan || null,
+      totalDistanceMeters: routeSnapshot.totalDistanceMeters ?? resolveDistanceMeters(state),
+      totalDurationSeconds: routeSnapshot.totalDurationSeconds ?? resolveDurationSeconds(state),
+      preFixedFareScope: routeSnapshot.preFixedFareScope || null,
+      returnFareStatus: routeSnapshot.returnFareStatus || null,
       selectedRouteId: routeSnapshot.selectedRouteId || "",
       selectedRouteLabel: routeSnapshot.selectedRouteLabel || null,
       selectedRouteIndex: routeSnapshot.selectedRouteIndex ?? null,
@@ -917,6 +1200,19 @@
     resolveAssistanceId: resolveAssistanceId,
     isRoundTripSelected: isRoundTripSelected,
     getTripTypeItems: getTripTypeItems,
-    getRoundTripAddonItems: getRoundTripAddonItems
+    getRoundTripAddonItems: getRoundTripAddonItems,
+    RETURN_PLAN_TYPES: RETURN_PLAN_TYPES,
+    isStructuredRoutePlan: isStructuredRoutePlan,
+    getOutboundLegPlan: getOutboundLegPlan,
+    getReturnLegPlan: getReturnLegPlan,
+    getLegPrimaryRoute: getLegPrimaryRoute,
+    resolveReturnPlanType: resolveReturnPlanType,
+    usesSeparateReturnRoute: usesSeparateReturnRoute,
+    getDistanceMultiplier: getDistanceMultiplier,
+    getEffectiveBilledDistanceKm: getEffectiveBilledDistanceKm,
+    getEffectiveRideMinutes: getEffectiveRideMinutes,
+    getReturnPlanTypeLabel: getReturnPlanTypeLabel,
+    getReturnStopTypeLabel: getReturnStopTypeLabel,
+    buildStructuredRoutePlanSnapshot: buildStructuredRoutePlanSnapshot
   };
 })(typeof window !== "undefined" ? window : globalThis);
