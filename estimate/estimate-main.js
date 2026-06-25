@@ -1281,9 +1281,11 @@
     }
     const confirmable = isLegPreFixedFareConfirmable(legPlan);
     const selectedId = String(legPlan.selectedRouteId || routes[0]?.routeId || "");
+    const singleCandidateNotice = window.PreFixedFareStatus?.getSingleCandidateNotice?.()
+      || "ルート候補が1件のみのため、事前確定運賃としては確定せず、予約後に確認対応となります。";
     const notice = confirmable
       ? '<p class="estimate-route-selection-note">2件以上の走行予定ルートから1つを選択してください。選択したルートの距離で事前確定運賃を算定します。</p>'
-      : '<p class="estimate-route-selection-warning">走行予定ルート候補が1件のみのため、事前確定運賃としての自動確定はできません。通常見積として表示し、ご予約時に確認いたします。</p>';
+      : '<p class="estimate-route-selection-warning">' + escapeHtml(singleCandidateNotice) + "</p>";
 
     const compact = options?.compact === true;
     const stepReviewPending = compact && isPreFixedFareMode() && !state.distanceRouteReviewed;
@@ -2352,25 +2354,8 @@
     const plannedDistance = formatRouteDistanceMeters(routePlan?.totalDistanceMeters || primaryRoute?.distanceMeters || routePlan?.distanceMeters || 0);
     const plannedDuration = formatRouteDurationSeconds(routePlan?.totalDurationSeconds || primaryRoute?.durationSeconds || routePlan?.durationSeconds || 0);
     const roadTypeLabel = getRoadTypeLabel(routePlan?.roadType || state.roadType);
-    const roundTripStatusHtml = isRoundTripActive() && routePlan
-      ? (
-        '<div class="estimate-round-trip-status">' +
-          '<p>' + escapeHtml(
-            isLegPreFixedFareConfirmable(outboundLeg)
-              ? "往路：事前確定運賃候補"
-              : "往路：確認対応"
-          ) + "</p>" +
-          (getActiveReturnPlanType() === "return_pending"
-            ? '<p>復路：帰り未定のため確認対応</p>'
-            : (returnLeg
-              ? '<p>' + escapeHtml(
-                isLegPreFixedFareConfirmable(returnLeg)
-                  ? "復路：事前確定運賃候補"
-                  : "復路：確認対応"
-              ) + "</p>"
-              : "")) +
-        "</div>"
-      )
+    const roundTripStatusHtml = isPreFixedFareMode() && routePlan && window.PreFixedFareStatus
+      ? window.PreFixedFareStatus.buildStatusHtml(routePlan, { escapeHtml: escapeHtml })
       : "";
     const routeCardHtml = routePlan ? `
       <section class="estimate-route-preview" aria-label="走行予定ルート">

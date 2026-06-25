@@ -113,6 +113,8 @@ async function main(){
       roundTripStatusText: Array.from(document.querySelectorAll(".estimate-round-trip-status p")).map(function(el){
         return String(el.textContent || "").trim();
       }),
+      singleCandidateNotice: String(document.querySelector(".estimate-prefixed-fare-single-candidate-notice")?.textContent || "").trim(),
+      stopoverNote: String(document.querySelector(".estimate-prefixed-fare-stopover-note")?.textContent || "").trim(),
       returnPlanNote: String(document.querySelector(".estimate-return-plan-note")?.textContent || "").trim(),
       step6Warnings: Array.from(document.querySelectorAll(".estimate-route-selection-warning")).map(function(el){
         return String(el.textContent || "").trim();
@@ -172,8 +174,14 @@ async function main(){
       roundTripStatusText: Array.from(document.querySelectorAll(".estimate-round-trip-status p")).map(function(el){
         return String(el.textContent || "").trim();
       }),
+      singleCandidateNotice: String(document.querySelector(".estimate-prefixed-fare-single-candidate-notice")?.textContent || "").trim(),
+      stopoverNote: String(document.querySelector(".estimate-prefixed-fare-stopover-note")?.textContent || "").trim(),
       resultNotes: String(document.querySelector(".estimate-result-notes")?.textContent || "").trim(),
-      fareConfirmReview: window.location.href
+      reservationUrl: String(document.querySelector(".estimate-cta-primary")?.getAttribute("href") || ""),
+      fareConfirmReview: (function(){
+        const href = String(document.querySelector(".estimate-cta-primary")?.getAttribute("href") || "");
+        return /fareConfirm=review/.test(href) ? href : window.location.href;
+      })()
     };
   });
 
@@ -190,15 +198,21 @@ async function main(){
     result: {
       ui: {
         roundTripStatusText: resultData.roundTripStatusText,
-        resultNotes: resultData.resultNotes
+        singleCandidateNotice: resultData.singleCandidateNotice,
+        stopoverNote: resultData.stopoverNote,
+        resultNotes: resultData.resultNotes,
+        reservationUrl: resultData.reservationUrl
       },
       quoteSnapshot: pickSnapshotFields(resultData.quoteSnapshot),
       pdfQuoteSnapshot: pickSnapshotFields(resultData.pdfQuoteSnapshot),
       pdfTextIncludes: {
         returnDistance: /復路/.test(resultData.pdfVisibleText),
         reviewRequired: /確認対応/.test(resultData.pdfVisibleText),
-        stopover: /立ち寄り/.test(resultData.pdfVisibleText)
-      }
+        stopover: /立ち寄り/.test(resultData.pdfVisibleText),
+        singleCandidateNotice: /ルート候補が1件のみ/.test(resultData.pdfVisibleText),
+        stopoverRouteExplanation: /目的地.*立ち寄り先.*出発地/.test(resultData.pdfVisibleText)
+      },
+      fareConfirmReview: /fareConfirm=review/.test(resultData.reservationUrl || resultData.fareConfirmReview || "")
     }
   };
 

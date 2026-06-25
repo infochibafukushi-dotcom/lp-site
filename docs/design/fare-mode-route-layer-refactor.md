@@ -425,6 +425,7 @@ Leg
 ## 関連ドキュメント
 
 - [route-candidate-selection-ui.md](./route-candidate-selection-ui.md) — STEP6 候補UIの初期設計
+- [quote-snapshot-fields.md](./quote-snapshot-fields.md) — quoteSnapshot フィールドの現行意味
 - [shared/pre-fixed-fare-report-data.js](../../shared/pre-fixed-fare-report-data.js) — 認可要件エビデンス
 
 ---
