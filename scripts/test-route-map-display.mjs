@@ -146,4 +146,27 @@ if(legStopSegments[2].key !== "return" || legStopSegments[2].color !== "#C62828"
   throw new Error("routeLegs return segment mismatch");
 }
 
+const legJunctionPlan = Object.assign({}, roundTripPlan, {
+  returnPlanType: "return_with_stop",
+  returnRoutePlan: Object.assign({}, roundTripPlan.returnRoutePlan, {
+    routes: [{
+      routeId: "route_0",
+      encodedPolyline: encodePolyline(returnPath),
+      distanceMeters: 2000,
+      routeLegs: [
+        { encodedPolyline: "", endLatLng: { lat: 35.615, lng: 140.105 } },
+        { encodedPolyline: "", startLatLng: { lat: 35.615, lng: 140.105 } }
+      ]
+    }],
+    selectedRouteId: "route_0"
+  })
+});
+const legJunctionSegments = display.buildRouteMapSegments(legJunctionPlan);
+if(legJunctionSegments.length !== 3){
+  throw new Error("leg junction split should have 3 segments, got " + legJunctionSegments.length);
+}
+if(legJunctionSegments[1].key !== "stop"){
+  throw new Error("leg junction stop segment mismatch");
+}
+
 console.log("OK: route map display tests passed");

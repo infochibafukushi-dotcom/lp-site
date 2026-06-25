@@ -1315,7 +1315,7 @@
             '<div class="estimate-route-card-compact-meta">' +
               escapeHtml(compactRoadTypeLabel) + "　" + escapeHtml(distanceLabel || "-") + "　" + escapeHtml(durationLabel || "-") +
             "</div>" +
-            (confirmable || stepReviewPending
+            (confirmable
               ? '<button type="button" class="estimate-route-select-btn" data-select-route-id="' + escapeAttr(routeId) + '" data-select-route-leg="' + escapeAttr(legKey) + '"' + (!stepReviewPending && isSelected ? " disabled" : "") + ">" + (stepReviewPending ? "このルートを選択" : (isSelected ? "選択中" : "このルートを選択")) + "</button>"
               : "") +
           "</article>"

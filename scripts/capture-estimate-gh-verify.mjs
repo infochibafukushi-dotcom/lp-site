@@ -122,7 +122,7 @@ async function main(){
     await mapWrap.screenshot({ path: path.join(outputDir, "gh-estimate-step6-route-map.png") });
   }
 
-  const selectBtn = await page.$('.estimate-route-select-btn:not([disabled])');
+  const selectBtn = await page.$('.estimate-route-select-btn[data-select-route-leg="outbound"]:not([disabled])');
   if(selectBtn){
     await selectBtn.click();
     await page.waitForSelector(".estimate-result", { timeout: 30000 });

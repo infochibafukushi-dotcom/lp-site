@@ -127,22 +127,35 @@
     return findBestSplitIndex(path, lat, lng);
   }
 
-  function buildStopReturnPathsFromRouteLegs(primaryRoute){
+  function buildStopReturnPathsFromRouteLegs(primaryRoute, fullPath){
     const routeLegs = Array.isArray(primaryRoute?.routeLegs) ? primaryRoute.routeLegs : [];
     if(routeLegs.length < 2){
       return null;
     }
-    const stopPath = decodePolyline(routeLegs[0].encodedPolyline || "");
-    const returnPath = decodePolyline(routeLegs[1].encodedPolyline || "");
-    if(stopPath.length < 2 || returnPath.length < 2){
-      return null;
+    const stopPathFromLeg = decodePolyline(routeLegs[0].encodedPolyline || "");
+    const returnPathFromLeg = decodePolyline(routeLegs[1].encodedPolyline || "");
+    if(stopPathFromLeg.length >= 2 && returnPathFromLeg.length >= 2){
+      return {
+        stopPath: stopPathFromLeg,
+        returnPath: returnPathFromLeg,
+        waypointLatLng: routeLegs[0].endLatLng || routeLegs[1].startLatLng || null
+      };
     }
+    const path = Array.isArray(fullPath) && fullPath.length >= 2
+      ? fullPath
+      : decodePolyline(primaryRoute?.encodedPolyline || "");
     const waypointLatLng = routeLegs[0].endLatLng || routeLegs[1].startLatLng || null;
-    return {
-      stopPath: stopPath,
-      returnPath: returnPath,
-      waypointLatLng: waypointLatLng
-    };
+    if(path.length >= 2 && waypointLatLng){
+      const split = splitPathAtClosest(path, waypointLatLng);
+      if(split.after && split.before.length >= 2 && split.after.length >= 2){
+        return {
+          stopPath: split.before,
+          returnPath: split.after,
+          waypointLatLng: waypointLatLng
+        };
+      }
+    }
+    return null;
   }
 
   function normalizeLatLng(point){
@@ -210,7 +223,7 @@
         if(returnPath.length >= 2){
           if(returnPlanType === "return_with_stop"){
             const primaryRoute = getLegPrimaryRoute(returnLeg);
-            const legPaths = buildStopReturnPathsFromRouteLegs(primaryRoute);
+            const legPaths = buildStopReturnPathsFromRouteLegs(primaryRoute, returnPath);
             if(legPaths){
               segments.push({
                 key: "stop",
