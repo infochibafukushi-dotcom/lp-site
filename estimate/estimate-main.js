@@ -1216,6 +1216,57 @@
     });
   }
 
+  function anyLegRequiresRouteSelection(routePlan){
+    if(!routePlan){
+      return false;
+    }
+    const outbound = routePlan.outboundRoutePlan || routePlan;
+    if(outbound && isLegPreFixedFareConfirmable(outbound)){
+      return true;
+    }
+    const returnLeg = routePlan.returnRoutePlan;
+    if(returnLeg && isLegPreFixedFareConfirmable(returnLeg)){
+      return true;
+    }
+    return false;
+  }
+
+  function shouldAutoAcknowledgeRouteReview(routePlan){
+    if(!routePlan || !isPreFixedFareMode()){
+      return false;
+    }
+    return !anyLegRequiresRouteSelection(routePlan);
+  }
+
+  function getReservationReviewNotice(){
+    if(!isPreFixedFareMode() || isPreFixedFareConfirmable() || !state.routePlan){
+      return "";
+    }
+    const statusOptions = {
+      returnPlanType: getActiveReturnPlanType(),
+      outboundRoutePlan: state.routePlan.outboundRoutePlan || null,
+      returnRoutePlan: state.routePlan.returnRoutePlan || null
+    };
+    if(window.PreFixedFareStatus?.shouldShowSingleCandidateNotice?.(state.routePlan, statusOptions)){
+      return window.PreFixedFareStatus.getSingleCandidateNotice();
+    }
+    return "この見積は確認対応が必要です。予約後に内容を確認いたします。";
+  }
+
+  function getReservationCtaLabel(){
+    if(isPreFixedFareMode() && !isPreFixedFareConfirmable()){
+      return "確認対応として予約へ進む";
+    }
+    return "この内容で予約する";
+  }
+
+  function getDistanceRouteProceedLabel(){
+    if(isPreFixedFareMode() && state.routePlan && !anyLegRequiresRouteSelection(state.routePlan)){
+      return "この内容で予約へ進む";
+    }
+    return "見積結果を表示する";
+  }
+
   function needsDistanceRouteReview(){
     return isPreFixedFareMode() && Boolean(state.routePlan) && state.distanceRouteReviewed !== true;
   }
@@ -1428,13 +1479,18 @@
     if(!needsDistanceRouteReview()){
       return "";
     }
-    const outboundLeg = state.routePlan?.outboundRoutePlan || state.routePlan;
-    if(outboundLeg && isLegPreFixedFareConfirmable(outboundLeg)){
+    if(anyLegRequiresRouteSelection(state.routePlan)){
       return '<p class="estimate-route-selection-note">ルート候補を選択すると見積結果へ進みます。</p>';
     }
+    const reviewNotice = getReservationReviewNotice();
     return (
       '<div class="estimate-distance-route-review-actions">' +
-        '<button type="button" class="estimate-calc-distance-btn estimate-distance-route-ack-btn" data-distance-route-acknowledge="1">見積結果を表示する</button>' +
+        (reviewNotice
+          ? '<p class="estimate-reservation-review-notice">' + escapeHtml(reviewNotice) + "</p>"
+          : "") +
+        '<button type="button" class="estimate-calc-distance-btn estimate-distance-route-ack-btn" data-distance-route-acknowledge="1">' +
+          escapeHtml(getDistanceRouteProceedLabel()) +
+        "</button>" +
       "</div>"
     );
   }
@@ -1716,7 +1772,7 @@
 
       syncStateFromRoutePlan(routePlan);
       state.routeCalcError = "";
-      state.distanceRouteReviewed = false;
+      state.distanceRouteReviewed = shouldAutoAcknowledgeRouteReview(state.routePlan);
       invalidateEstimateNumberIfChanged();
       state.lastActiveStepId = "";
       shouldRenderPage = true;
@@ -2442,8 +2498,11 @@
         <div class="estimate-copy-url-feedback" id="estimateCopyUrlFeedback" aria-live="polite"></div>
         <button type="button" class="estimate-reset-btn estimate-reset-btn--bottom" id="estimateResetBtnBottom">最初からやり直す</button>
       </section>
+      ${getReservationReviewNotice()
+        ? '<p class="estimate-reservation-review-notice estimate-reservation-review-notice--result">' + escapeHtml(getReservationReviewNotice()) + "</p>"
+        : ""}
       <div class="estimate-cta-group">
-        <a class="estimate-cta-primary" href="${escapeAttr(reservationUrl)}" rel="noopener noreferrer">この内容で予約する</a>
+        <a class="estimate-cta-primary" href="${escapeAttr(reservationUrl)}" rel="noopener noreferrer">${escapeHtml(getReservationCtaLabel())}</a>
         <div class="estimate-cta-secondary-row">
           <a class="estimate-cta-secondary" href="${escapeAttr(lineUrl)}" target="_blank" rel="noopener noreferrer">LINEで相談する</a>
           <a class="estimate-cta-secondary" href="${escapeAttr(phoneUrl)}">電話で問い合わせる</a>
