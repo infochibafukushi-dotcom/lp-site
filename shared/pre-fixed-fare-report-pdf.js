@@ -17,17 +17,25 @@
     }).join("") + "</ul>";
   }
 
-  function buildTable(headers, rows){
+  function buildTable(headers, rows, options){
+    options = options || {};
+    const className = String(options.className || "").trim();
+    const colWidths = Array.isArray(options.colWidths) ? options.colWidths : [];
     const th = headers.map(function(item){
       return "<th>" + escapeHtml(item) + "</th>";
     }).join("");
+    const colgroup = colWidths.length
+      ? "<colgroup>" + colWidths.map(function(width){
+        return "<col style='width:" + escapeHtml(width) + ";'>";
+      }).join("") + "</colgroup>"
+      : "";
     const body = (rows || []).map(function(row){
       const cells = row.map(function(cell){
         return "<td>" + escapeHtml(cell) + "</td>";
       }).join("");
       return "<tr>" + cells + "</tr>";
     }).join("");
-    return "<table><thead><tr>" + th + "</tr></thead><tbody>" + body + "</tbody></table>";
+    return "<table" + (className ? " class='" + escapeHtml(className) + "'" : "") + ">" + colgroup + "<thead><tr>" + th + "</tr></thead><tbody>" + body + "</tbody></table>";
   }
 
   function buildMetaTable(meta){
@@ -43,7 +51,8 @@
         ["システムバージョン", meta.systemVersion || ""],
         ["料金設定バージョン", meta.estimateConfigVersion || "未設定"],
         ["作成元", meta.createdBy || "LP管理画面"]
-      ]
+      ],
+      { className: "table-meta", colWidths: ["34%", "66%"] }
     );
   }
 
@@ -113,23 +122,43 @@
         "<p><strong>" + escapeHtml(data.notices?.formulaText || "") + "</strong></p>"
       ) +
       section("5. 千葉県の平準化係数",
-        buildTable(["営業区域", "係数", "根拠", "適用日"], coefficientRows) +
+        buildTable(
+          ["営業区域", "係数", "根拠", "適用日"],
+          coefficientRows,
+          { className: "table-coefficients", colWidths: ["20%", "12%", "38%", "30%"] }
+        ) +
         "<p>" + escapeHtml(data.coefficientPolicy || "") + "</p>"
       ) +
       section("6. 運賃と各種料金の区分",
-        buildTable(["区分", "事前確定運賃に含めるか", "扱い"], fareFeeRows)
+        buildTable(
+          ["区分", "事前確定運賃に含めるか", "扱い"],
+          fareFeeRows,
+          { className: "table-fare-fees", colWidths: ["34%", "20%", "46%"] }
+        )
       ) +
       section("7. 電子地図・ルート算定",
         buildList(data.mapAndRouteDesign) +
-        buildTable(["項目", "状況", "根拠"], mapRows)
+        buildTable(
+          ["項目", "状況", "根拠"],
+          mapRows,
+          { className: "table-map-route", colWidths: ["25%", "15%", "60%"] }
+        )
       ) +
       section("8. 複数ルート選択",
         "<p>旅客が2以上の走行予定ルートから1つを選択できる必要がある。選択ルートの距離で事前確定運賃を算定し、利用者・運転者・管理者に同一内容を表示する必要がある。</p>" +
-        buildTable(["項目", "状況", "根拠"], multiRouteRows)
+        buildTable(
+          ["項目", "状況", "根拠"],
+          multiRouteRows,
+          { className: "table-multi-route", colWidths: ["25%", "15%", "60%"] }
+        )
       ) +
       section("9. 有料道路利用有無の選択",
         "<p>旅客が予約時または配車依頼時に有料道路利用有無を選択し、選択結果に基づいて算定する。通行料は運賃とは区分して扱う。</p>" +
-        buildTable(["項目", "状況", "根拠"], tollRows)
+        buildTable(
+          ["項目", "状況", "根拠"],
+          tollRows,
+          { className: "table-toll", colWidths: ["25%", "15%", "60%"] }
+        )
       ) +
       section("10. 利用者への提示と同意",
         "<h3>提示・同意要件</h3>" + buildList(data.userNoticeItems) +
@@ -146,7 +175,11 @@
       ) +
       section("13. 予約後の固定表示", buildList(data.fixedAfterReservation)) +
       section("14. 公示要件対応表",
-        buildTable(["公示要件", "システム対応方針", "現状", "根拠ファイル / 保存項目"], requirementRows)
+        buildTable(
+          ["公示要件", "システム対応方針", "現状", "根拠ファイル / 保存項目"],
+          requirementRows,
+          { className: "table-requirements", colWidths: ["25%", "30%", "15%", "30%"] }
+        )
       ) +
       section("15. 未実装・未確認事項",
         "<p class='warn'>以下は未実装または未確認として明示する。</p>" + buildList(data.unimplementedOrUnconfirmed)
@@ -182,7 +215,7 @@
     container.style.display = "block";
     container.style.visibility = "visible";
     container.style.opacity = "1";
-    container.style.width = "794px";
+    container.style.width = "720px";
     container.style.background = "#ffffff";
     container.style.color = "#111111";
     container.style.padding = "0";
@@ -191,17 +224,19 @@
     container.innerHTML =
       "<style>" +
       ".pre-fixed-fare-report,.pre-fixed-fare-report *{box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Yu Gothic','Meiryo',sans-serif;background:transparent;color:#111111;}" +
-      ".pre-fixed-fare-report{display:block;visibility:visible;opacity:1;width:794px;min-height:20px;background:#ffffff;color:#111111;line-height:1.5;font-size:11px;padding:8mm;}" +
-      ".pre-fixed-fare-report h1{font-size:20px;margin:0 0 10px;color:#111111;}" +
-      ".pre-fixed-fare-report h2{font-size:14px;margin:20px 0 8px;padding-bottom:3px;border-bottom:1px solid #ccc;color:#111111;}" +
-      ".pre-fixed-fare-report h3{font-size:12px;margin:10px 0 6px;color:#111111;}" +
-      ".pre-fixed-fare-report p{margin:0 0 8px;color:#111111;}" +
-      ".pre-fixed-fare-report ul,.pre-fixed-fare-report ol{margin:0 0 8px 20px;padding:0;}" +
-      ".pre-fixed-fare-report li{margin:0 0 4px;color:#111111;}" +
-      ".pre-fixed-fare-report table{width:100%;border-collapse:collapse;margin:6px 0 10px;table-layout:fixed;background:#ffffff;}" +
-      ".pre-fixed-fare-report th,.pre-fixed-fare-report td{border:1px solid #d9d9d9;padding:6px 7px;vertical-align:top;word-break:break-word;color:#111111;background:#ffffff;}" +
+      ".pre-fixed-fare-report{display:block;visibility:visible;opacity:1;position:relative;top:0;left:0;width:720px;background:#ffffff;color:#111111;line-height:1.45;font-size:10.5px;padding:0;margin:0;}" +
+      ".pre-fixed-fare-report h1{font-size:19px;margin:0 0 8px;color:#111111;line-height:1.3;}" +
+      ".pre-fixed-fare-report h2{font-size:13.5px;margin:14px 0 6px;padding-bottom:2px;border-bottom:1px solid #ccc;color:#111111;break-after:avoid;page-break-after:avoid;}" +
+      ".pre-fixed-fare-report h3{font-size:11.5px;margin:8px 0 5px;color:#111111;break-after:avoid;page-break-after:avoid;}" +
+      ".pre-fixed-fare-report p{margin:0 0 6px;color:#111111;}" +
+      ".pre-fixed-fare-report ul,.pre-fixed-fare-report ol{margin:0 0 6px 16px;padding:0;}" +
+      ".pre-fixed-fare-report li{margin:0 0 3px;color:#111111;}" +
+      ".pre-fixed-fare-report table{width:100%;border-collapse:collapse;table-layout:fixed;margin:5px 0 8px;background:#ffffff;}" +
+      ".pre-fixed-fare-report th,.pre-fixed-fare-report td{border:1px solid #d9d9d9;padding:5px 6px;vertical-align:top;white-space:normal;word-break:break-word;overflow-wrap:anywhere;color:#111111;background:#ffffff;box-sizing:border-box;font-size:9.5px;line-height:1.4;}" +
       ".pre-fixed-fare-report th{background:#f6f6f6;font-weight:700;}" +
-      ".pre-fixed-fare-report section{page-break-inside:avoid;}" +
+      ".pre-fixed-fare-report section{break-inside:auto;page-break-inside:auto;margin:0 0 10px;}" +
+      ".pre-fixed-fare-report tr{break-inside:avoid;page-break-inside:avoid;}" +
+      ".pre-fixed-fare-report .table-requirements td,.pre-fixed-fare-report .table-requirements th{font-size:9px;}" +
       ".pre-fixed-fare-report .warn{color:#8a1f1f;font-weight:700;}" +
       "</style>" +
       reportHtml;
@@ -243,10 +278,10 @@
 
     try{
       await html2pdf().set({
-        margin: [8, 8, 8, 8],
+        margin: [10, 10, 10, 10],
         filename: "pre-fixed-fare-regulatory-report.pdf",
         image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollX: 0, scrollY: 0 },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
         pagebreak: { mode: ["css", "legacy"] }
       }).from(reportElement).save();
