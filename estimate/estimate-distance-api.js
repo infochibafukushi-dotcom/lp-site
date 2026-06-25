@@ -44,6 +44,53 @@
     return String(route?.routeLabel || "").trim();
   }
 
+  function normalizeApiLatLng(latLng){
+    if(!latLng){
+      return null;
+    }
+    const lat = Number(latLng.latitude != null ? latLng.latitude : latLng.lat);
+    const lng = Number(latLng.longitude != null ? latLng.longitude : latLng.lng);
+    if(!Number.isFinite(lat) || !Number.isFinite(lng)){
+      return null;
+    }
+    return { lat: lat, lng: lng };
+  }
+
+  function normalizeRouteLegs(route){
+    const legs = Array.isArray(route?.legs) ? route.legs : [];
+    return legs.map(function(leg, index){
+      return {
+        legIndex: index,
+        distanceMeters: Number(leg?.distanceMeters) || 0,
+        durationSeconds: parseDurationSeconds(leg?.duration || leg?.staticDuration),
+        encodedPolyline: String(leg?.polyline?.encodedPolyline || ""),
+        startLatLng: normalizeApiLatLng(leg?.startLocation?.latLng),
+        endLatLng: normalizeApiLatLng(leg?.endLocation?.latLng)
+      };
+    }).filter(function(leg){
+      return leg.encodedPolyline.length > 0;
+    });
+  }
+
+  function buildIntermediateWaypointFromLegs(routeLegs, intermediateAddress){
+    const address = String(intermediateAddress || "").trim();
+    if(!address || !Array.isArray(routeLegs) || routeLegs.length < 2){
+      return null;
+    }
+    const endLatLng = routeLegs[0]?.endLatLng || routeLegs[1]?.startLatLng || null;
+    const waypoint = {
+      waypointLabel: address,
+      waypointAddress: address
+    };
+    if(endLatLng){
+      waypoint.waypointLatLng = {
+        latitude: endLatLng.lat,
+        longitude: endLatLng.lng
+      };
+    }
+    return waypoint;
+  }
+
   function normalizeRawRoute(route, context){
     const distanceMeters = Number(route?.distanceMeters) || 0;
     const durationSeconds = parseDurationSeconds(route?.duration);
@@ -51,6 +98,9 @@
     const durationMinutes = durationSeconds > 0 ? Math.max(1, Math.round(durationSeconds / 60)) : 0;
     const avoidTolls = context.avoidTolls === true;
     const avoidHighways = context.avoidHighways === true;
+    const routeLegs = normalizeRouteLegs(route);
+    const intermediateWaypoint = context.intermediateWaypoint
+      || buildIntermediateWaypointFromLegs(routeLegs, context.intermediateAddress);
 
     return {
       routeId: "",
@@ -69,7 +119,8 @@
       tollInfo: route?.travelAdvisory?.tollInfo || null,
       tollPreference: context.tollPreference || null,
       tollExcludedFromFare: context.tollExcludedFromFare === true,
-      intermediateWaypoint: context.intermediateWaypoint || null,
+      intermediateWaypoint: intermediateWaypoint,
+      routeLegs: routeLegs,
       roadType: context.roadType || roadTypeFromModifiers(avoidTolls),
       avoidTolls: avoidTolls,
       avoidHighways: avoidHighways,
@@ -386,10 +437,7 @@
         avoidTolls: userAvoidTolls,
         avoidHighways: userAvoidTolls,
         roadType: userAvoidTolls ? "general" : "toll",
-        intermediateWaypoint: {
-          waypointLabel: intermediateAddress,
-          waypointAddress: intermediateAddress
-        },
+        intermediateAddress: intermediateAddress,
         rawRouteIndex: 0
       }), "recommended");
       const deduped = assignRouteIds([route]);
@@ -463,11 +511,14 @@
     };
   }
 
-  function normalizeRoute(route, index){
+  function normalizeRoute(route, index, context){
     const distanceMeters = Number(route?.distanceMeters) || 0;
     const durationSeconds = parseDurationSeconds(route?.duration);
     const distanceKm = Math.round((distanceMeters / 1000) * 10) / 10;
     const durationMinutes = durationSeconds > 0 ? Math.max(1, Math.round(durationSeconds / 60)) : 0;
+    const routeLegs = normalizeRouteLegs(route);
+    const intermediateWaypoint = context?.intermediateWaypoint
+      || buildIntermediateWaypointFromLegs(routeLegs, context?.intermediateAddress);
     return {
       routeId: "route_" + index,
       distanceMeters: distanceMeters,
@@ -477,7 +528,9 @@
       encodedPolyline: String(route?.polyline?.encodedPolyline || ""),
       routeLabels: Array.isArray(route?.routeLabels) ? route.routeLabels.slice() : [],
       routeToken: String(route?.routeToken || ""),
-      tollInfo: route?.travelAdvisory?.tollInfo || null
+      tollInfo: route?.travelAdvisory?.tollInfo || null,
+      routeLegs: routeLegs,
+      intermediateWaypoint: intermediateWaypoint
     };
   }
 
@@ -512,7 +565,9 @@
       throw new Error("ルートが見つかりませんでした。住所を確認してください。");
     }
     const routes = rawRoutes.map(function(route, index){
-      return normalizeRoute(route, index);
+      return normalizeRoute(route, index, {
+        intermediateAddress: intermediateAddress
+      });
     });
     const primary = routes[0];
 

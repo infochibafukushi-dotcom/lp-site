@@ -181,6 +181,7 @@
       tollPreference: primaryRoute?.tollPreference || null,
       tollExcludedFromFare: primaryRoute?.tollExcludedFromFare === true,
       intermediateWaypoint: primaryRoute?.intermediateWaypoint || waypointInfo,
+      routeLegs: Array.isArray(primaryRoute?.routeLegs) ? primaryRoute.routeLegs : [],
       routes: routes,
       routeCandidates: Array.isArray(apiResult?.routeCandidates) ? apiResult.routeCandidates : routes,
       selectedAt: new Date().toISOString(),
@@ -1080,7 +1081,7 @@
     if(!legPlan || !route){
       return legPlan;
     }
-    return Object.assign({}, legPlan, {
+    const next = Object.assign({}, legPlan, {
       selectedRouteId: String(route.routeId || ""),
       distanceMeters: Number(route.distanceMeters) || 0,
       durationSeconds: Number(route.durationSeconds) || 0,
@@ -1096,8 +1097,18 @@
       tollPreference: route.tollPreference || null,
       tollExcludedFromFare: route.tollExcludedFromFare === true,
       intermediateWaypoint: route.intermediateWaypoint || legPlan.waypoint || null,
+      routeLegs: Array.isArray(route.routeLegs) ? route.routeLegs : (legPlan.routeLegs || []),
       selectedAt: new Date().toISOString()
     });
+    if(Array.isArray(next.routes)){
+      next.routes = next.routes.map(function(item){
+        if(String(item?.routeId || "") === String(route.routeId || "")){
+          return Object.assign({}, item, route);
+        }
+        return item;
+      });
+    }
+    return next;
   }
 
   function rebuildRoutePlanFromLegs(outboundLeg, returnLeg){
@@ -1621,8 +1632,26 @@
               longitude: stopGeocoding.location.lng
             };
           }
+          const primaryReturnRoute = window.EstimateCalc.getLegPrimaryRoute(returnLeg);
+          const routeLegs = Array.isArray(primaryReturnRoute?.routeLegs) ? primaryReturnRoute.routeLegs : [];
+          if(!waypointInfo.waypointLatLng && routeLegs.length >= 2){
+            const endLatLng = routeLegs[0]?.endLatLng || routeLegs[1]?.startLatLng || null;
+            if(endLatLng){
+              waypointInfo.waypointLatLng = {
+                latitude: endLatLng.lat,
+                longitude: endLatLng.lng
+              };
+            }
+          }
           returnLeg.waypoint = Object.assign({}, returnLeg.waypoint || {}, waypointInfo);
-          returnLeg.intermediateWaypoint = Object.assign({}, returnLeg.intermediateWaypoint || {}, waypointInfo);
+          returnLeg.intermediateWaypoint = Object.assign(
+            {},
+            primaryReturnRoute?.intermediateWaypoint || returnLeg.intermediateWaypoint || {},
+            waypointInfo
+          );
+          if(routeLegs.length){
+            returnLeg.routeLegs = routeLegs;
+          }
         }
       }
 
@@ -1740,7 +1769,7 @@
     const tollRoadNote =
       state.config.page?.tollRoadNote ||
       "通行料金は実費負担となります。";
-    const hideRoadTypeRadios = isPreFixedFareMode() && Boolean(state.routePlan);
+    const hideRoadTypeRadios = isPreFixedFareMode();
 
     const roadTypeRadios = hideRoadTypeRadios ? "" : `
       <fieldset class="estimate-road-type">

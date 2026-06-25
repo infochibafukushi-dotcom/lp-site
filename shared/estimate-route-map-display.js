@@ -84,20 +84,65 @@
     return 2 * earthRadius * Math.asin(Math.sqrt(h));
   }
 
-  function findInteriorSplitIndex(path, lat, lng){
+  function projectPointOnSegment(start, end, point){
+    const dx = end.lng - start.lng;
+    const dy = end.lat - start.lat;
+    const lengthSquared = dx * dx + dy * dy;
+    if(lengthSquared === 0){
+      return start;
+    }
+    let t = ((point.lng - start.lng) * dx + (point.lat - start.lat) * dy) / lengthSquared;
+    t = Math.max(0, Math.min(1, t));
+    return {
+      lat: start.lat + t * dy,
+      lng: start.lng + t * dx
+    };
+  }
+
+  function findBestSplitIndex(path, lat, lng){
     if(!Array.isArray(path) || path.length < 3){
       return -1;
     }
-    let bestIndex = -1;
+    const target = { lat: lat, lng: lng };
+    let bestIndex = 1;
     let bestDistance = Infinity;
-    for(let i = 1; i < path.length - 1; i++){
-      const distance = haversineMeters(path[i], { lat: lat, lng: lng });
+    for(let i = 0; i < path.length - 1; i++){
+      const projected = projectPointOnSegment(path[i], path[i + 1], target);
+      const distance = haversineMeters(projected, target);
       if(distance < bestDistance){
         bestDistance = distance;
-        bestIndex = i;
+        bestIndex = i + 1;
       }
     }
+    if(bestIndex <= 0){
+      bestIndex = 1;
+    }
+    if(bestIndex >= path.length - 1){
+      bestIndex = path.length - 2;
+    }
     return bestIndex;
+  }
+
+  function findInteriorSplitIndex(path, lat, lng){
+    return findBestSplitIndex(path, lat, lng);
+  }
+
+  function buildStopReturnPathsFromRouteLegs(primaryRoute){
+    const routeLegs = Array.isArray(primaryRoute?.routeLegs) ? primaryRoute.routeLegs : [];
+    if(routeLegs.length < 2){
+      return null;
+    }
+    const stopPath = decodePolyline(routeLegs[0].encodedPolyline || "");
+    const returnPath = decodePolyline(routeLegs[1].encodedPolyline || "");
+    if(stopPath.length < 2 || returnPath.length < 2){
+      return null;
+    }
+    const waypointLatLng = routeLegs[0].endLatLng || routeLegs[1].startLatLng || null;
+    return {
+      stopPath: stopPath,
+      returnPath: returnPath,
+      waypointLatLng: waypointLatLng
+    };
   }
 
   function normalizeLatLng(point){
@@ -164,22 +209,48 @@
         const returnPath = getLegPath(returnLeg);
         if(returnPath.length >= 2){
           if(returnPlanType === "return_with_stop"){
-            const waypoint = waypointLatLng || normalizeLatLng(returnLeg.waypoint || returnLeg.intermediateWaypoint);
-            if(waypoint){
-              const split = splitPathAtClosest(returnPath, waypoint);
-              if(split.after && split.before.length >= 2 && split.after.length >= 2){
-                segments.push({
-                  key: "stop",
-                  color: ROUTE_COLORS.stop,
-                  path: split.before,
-                  label: "立ち寄り"
-                });
-                segments.push({
-                  key: "return",
-                  color: ROUTE_COLORS.return,
-                  path: split.after,
-                  label: "復路"
-                });
+            const primaryRoute = getLegPrimaryRoute(returnLeg);
+            const legPaths = buildStopReturnPathsFromRouteLegs(primaryRoute);
+            if(legPaths){
+              segments.push({
+                key: "stop",
+                color: ROUTE_COLORS.stop,
+                path: legPaths.stopPath,
+                label: "立ち寄り"
+              });
+              segments.push({
+                key: "return",
+                color: ROUTE_COLORS.return,
+                path: legPaths.returnPath,
+                label: "復路"
+              });
+            }else{
+              const waypoint = waypointLatLng
+                || normalizeLatLng(returnLeg.waypoint || returnLeg.intermediateWaypoint)
+                || normalizeLatLng(primaryRoute?.intermediateWaypoint);
+              if(waypoint){
+                const split = splitPathAtClosest(returnPath, waypoint);
+                if(split.after && split.before.length >= 2 && split.after.length >= 2){
+                  segments.push({
+                    key: "stop",
+                    color: ROUTE_COLORS.stop,
+                    path: split.before,
+                    label: "立ち寄り"
+                  });
+                  segments.push({
+                    key: "return",
+                    color: ROUTE_COLORS.return,
+                    path: split.after,
+                    label: "復路"
+                  });
+                }else{
+                  segments.push({
+                    key: "return",
+                    color: ROUTE_COLORS.return,
+                    path: returnPath,
+                    label: "復路"
+                  });
+                }
               }else{
                 segments.push({
                   key: "return",
@@ -188,13 +259,6 @@
                   label: "復路"
                 });
               }
-            }else{
-              segments.push({
-                key: "return",
-                color: ROUTE_COLORS.return,
-                path: returnPath,
-                label: "復路"
-              });
             }
           }else{
             segments.push({
@@ -445,6 +509,15 @@
     const existing = normalizeLatLng(returnLeg.waypoint || returnLeg.intermediateWaypoint);
     if(existing){
       return existing;
+    }
+    const primaryRoute = getLegPrimaryRoute(returnLeg);
+    const legPaths = buildStopReturnPathsFromRouteLegs(primaryRoute);
+    if(legPaths?.waypointLatLng){
+      return legPaths.waypointLatLng;
+    }
+    const fromRoute = normalizeLatLng(primaryRoute?.intermediateWaypoint);
+    if(fromRoute){
+      return fromRoute;
     }
     const address = getWaypointAddress(routePlan, fallbackAddress);
     if(!address || typeof geocodeFn !== "function"){

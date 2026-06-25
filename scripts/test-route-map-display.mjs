@@ -111,4 +111,39 @@ if(!stopSegments[1] || !stopSegments[1].path.some(function(point){
   throw new Error("waypoint marker should sit on green segment");
 }
 
+const legStopPath = [
+  { lat: 35.62, lng: 140.12 },
+  { lat: 35.615, lng: 140.105 }
+];
+const legReturnPath = [
+  { lat: 35.615, lng: 140.105 },
+  { lat: 35.61, lng: 140.10 },
+  { lat: 35.60, lng: 140.10 }
+];
+const legStopPlan = Object.assign({}, roundTripPlan, {
+  returnPlanType: "return_with_stop",
+  returnRoutePlan: Object.assign({}, roundTripPlan.returnRoutePlan, {
+    routes: [{
+      routeId: "route_0",
+      encodedPolyline: encodePolyline(returnPath),
+      distanceMeters: 2000,
+      routeLegs: [
+        { encodedPolyline: encodePolyline(legStopPath), endLatLng: { lat: 35.615, lng: 140.105 } },
+        { encodedPolyline: encodePolyline(legReturnPath), startLatLng: { lat: 35.615, lng: 140.105 } }
+      ]
+    }],
+    selectedRouteId: "route_0"
+  })
+});
+const legStopSegments = display.buildRouteMapSegments(legStopPlan);
+if(legStopSegments.length !== 3){
+  throw new Error("routeLegs stop return should have 3 segments, got " + legStopSegments.length);
+}
+if(legStopSegments[1].key !== "stop" || legStopSegments[1].color !== "#2E7D32"){
+  throw new Error("routeLegs stop segment mismatch");
+}
+if(legStopSegments[2].key !== "return" || legStopSegments[2].color !== "#C62828"){
+  throw new Error("routeLegs return segment mismatch");
+}
+
 console.log("OK: route map display tests passed");
