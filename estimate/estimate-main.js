@@ -96,7 +96,7 @@
   }
 
   function isRoundTripActive(){
-    return window.EstimateCalc.isRoundTripSelected(state.config, state);
+    return window.EstimateCalc?.isRoundTripSelected?.(state.config, state) === true;
   }
 
   function getActiveReturnPlanType(){
@@ -1025,43 +1025,6 @@
     return false;
   }
 
-  function getRouteCandidatesFromPlan(routePlan){
-    if(!routePlan){
-      return [];
-    }
-    const candidates = Array.isArray(routePlan.routeCandidates) && routePlan.routeCandidates.length
-      ? routePlan.routeCandidates.slice()
-      : (Array.isArray(routePlan.routes) && routePlan.routes.length ? routePlan.routes.slice() : []);
-    if(candidates.length){
-      return candidates;
-    }
-    if((Number(routePlan.distanceMeters) || 0) > 0 || String(routePlan.encodedPolyline || "").trim()){
-      const distanceMeters = Number(routePlan.distanceMeters) || 0;
-      const durationSeconds = Number(routePlan.durationSeconds) || 0;
-      return [{
-        routeId: String(routePlan.selectedRouteId || "route_0"),
-        routeLabel: String(routePlan.routeLabel || "おすすめルート"),
-        routeDescription: String(routePlan.routeDescription || ""),
-        routeStrategy: routePlan.routeStrategy || "recommended",
-        routeSource: routePlan.routeSource || routePlan.provider || "google_routes",
-        distanceMeters: distanceMeters,
-        durationSeconds: durationSeconds,
-        distanceKm: Math.round((distanceMeters / 1000) * 10) / 10,
-        durationMinutes: durationSeconds > 0 ? Math.max(1, Math.round(durationSeconds / 60)) : 0,
-        encodedPolyline: String(routePlan.encodedPolyline || ""),
-        routeToken: String(routePlan.routeToken || ""),
-        routeSummary: String(routePlan.routeSummary || routePlan.routeLabel || ""),
-        tollInfo: routePlan.tollInfo || null,
-        tollPreference: routePlan.tollPreference || null,
-        tollExcludedFromFare: routePlan.tollExcludedFromFare === true,
-        intermediateWaypoint: routePlan.intermediateWaypoint || null,
-        roadType: routePlan.roadType || "general",
-        routeLabels: Array.isArray(routePlan.routeLabels) ? routePlan.routeLabels.slice() : []
-      }];
-    }
-    return [];
-  }
-
   function logRouteUiState(result){
     const fareMode = String(state.config?.fareMode || result?.quoteSnapshot?.fareMode || "");
     const routeCandidates = getRouteCandidatesFromPlan(state.routePlan);
@@ -1163,10 +1126,10 @@
       distanceKm: billedKm,
       durationMinutes: rideMinutes,
       outboundDistanceKm: routePlan.outboundRoutePlan
-        ? Math.round((Number(window.EstimateCalc.getLegPrimaryRoute(routePlan.outboundRoutePlan)?.distanceMeters || 0) / 100) / 10
+        ? Math.round((Number(window.EstimateCalc.getLegPrimaryRoute(routePlan.outboundRoutePlan)?.distanceMeters || 0) / 1000) * 10) / 10
         : billedKm,
       returnDistanceKm: routePlan.returnRoutePlan
-        ? Math.round((Number(window.EstimateCalc.getLegPrimaryRoute(routePlan.returnRoutePlan)?.distanceMeters || 0) / 100) / 10
+        ? Math.round((Number(window.EstimateCalc.getLegPrimaryRoute(routePlan.returnRoutePlan)?.distanceMeters || 0) / 1000) * 10) / 10
         : 0
     };
   }
