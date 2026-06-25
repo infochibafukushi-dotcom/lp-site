@@ -21,6 +21,7 @@
     routePlan: null,
     routeCalcError: "",
     routeCalcLoading: false,
+    distanceRouteReviewed: false,
     estimateNumber: "",
     estimateCreatedAt: "",
     selectionFingerprint: "",
@@ -425,7 +426,13 @@
       case "addon":
         return Boolean(state.roundTripAddonId);
       case "distance":
-        return Number(state.distanceKm) > 0;
+        if(Number(state.distanceKm) <= 0){
+          return false;
+        }
+        if(isPreFixedFareMode() && state.routePlan){
+          return state.distanceRouteReviewed === true;
+        }
+        return true;
       default:
         return false;
     }
@@ -548,6 +555,7 @@
         state.routeCalcResult = null;
         state.routePlan = null;
         state.routeCalcError = "";
+        state.distanceRouteReviewed = false;
         break;
       default:
         break;
@@ -594,6 +602,7 @@
     state.routePlan = null;
     state.routeCalcError = "";
     state.routeCalcLoading = false;
+    state.distanceRouteReviewed = false;
     state.estimateNumber = "";
     state.estimateCreatedAt = "";
     state.selectionFingerprint = "";
@@ -1205,6 +1214,20 @@
     });
   }
 
+  function needsDistanceRouteReview(){
+    return isPreFixedFareMode() && Boolean(state.routePlan) && state.distanceRouteReviewed !== true;
+  }
+
+  function acknowledgeDistanceRouteReview(){
+    if(!state.routePlan){
+      return;
+    }
+    state.distanceRouteReviewed = true;
+    invalidateEstimateNumberIfChanged();
+    state.lastActiveStepId = "result";
+    renderPage();
+  }
+
   function selectRoute(routeId, legKey){
     const key = legKey === "return" ? "return" : "outbound";
     const legPlan = key === "return"
@@ -1246,6 +1269,7 @@
       };
     }
     invalidateEstimateNumberIfChanged();
+    state.distanceRouteReviewed = true;
     state.lastActiveStepId = isFlowComplete() ? "result" : "distance";
     renderPage();
   }
@@ -1262,6 +1286,7 @@
       : '<p class="estimate-route-selection-warning">走行予定ルート候補が1件のみのため、事前確定運賃としての自動確定はできません。通常見積として表示し、ご予約時に確認いたします。</p>';
 
     const compact = options?.compact === true;
+    const stepReviewPending = compact && isPreFixedFareMode() && !state.distanceRouteReviewed;
     const cards = routes.map(function(route, index){
       const routeId = String(route.routeId || "");
       const isSelected = routeId === selectedId || (!selectedId && index === 0);
@@ -1290,8 +1315,8 @@
             '<div class="estimate-route-card-compact-meta">' +
               escapeHtml(compactRoadTypeLabel) + "　" + escapeHtml(distanceLabel || "-") + "　" + escapeHtml(durationLabel || "-") +
             "</div>" +
-            (confirmable
-              ? '<button type="button" class="estimate-route-select-btn" data-select-route-id="' + escapeAttr(routeId) + '" data-select-route-leg="' + escapeAttr(legKey) + '"' + (isSelected ? " disabled" : "") + ">" + (isSelected ? "選択中" : "このルートを選択") + "</button>"
+            (confirmable || stepReviewPending
+              ? '<button type="button" class="estimate-route-select-btn" data-select-route-id="' + escapeAttr(routeId) + '" data-select-route-leg="' + escapeAttr(legKey) + '"' + (!stepReviewPending && isSelected ? " disabled" : "") + ">" + (stepReviewPending ? "このルートを選択" : (isSelected ? "選択中" : "このルートを選択")) + "</button>"
               : "") +
           "</article>"
         );
@@ -1391,7 +1416,23 @@
     if(!state.routePlan || !isPreFixedFareMode()){
       return "";
     }
-    return renderRouteSelectionSection(window.EstimateCalc.computeEstimate(state.config, state), { compact: true });
+    return renderRouteSelectionSection(window.EstimateCalc.computeEstimate(state.config, state), { compact: true })
+      + renderDistanceRouteReviewActions();
+  }
+
+  function renderDistanceRouteReviewActions(){
+    if(!needsDistanceRouteReview()){
+      return "";
+    }
+    const outboundLeg = state.routePlan?.outboundRoutePlan || state.routePlan;
+    if(outboundLeg && isLegPreFixedFareConfirmable(outboundLeg)){
+      return '<p class="estimate-route-selection-note">ルート候補を選択すると見積結果へ進みます。</p>';
+    }
+    return (
+      '<div class="estimate-distance-route-review-actions">' +
+        '<button type="button" class="estimate-calc-distance-btn estimate-distance-route-ack-btn" data-distance-route-acknowledge="1">見積結果を表示する</button>' +
+      "</div>"
+    );
   }
 
   async function resolveRouteMapWaypointLatLng(routePlan){
@@ -1671,6 +1712,7 @@
 
       syncStateFromRoutePlan(routePlan);
       state.routeCalcError = "";
+      state.distanceRouteReviewed = false;
       invalidateEstimateNumberIfChanged();
       state.lastActiveStepId = "";
       shouldRenderPage = true;
@@ -2519,6 +2561,12 @@
         if(routeId) selectRoute(routeId, legKey);
         return;
       }
+      const routeAckBtn = event.target.closest("[data-distance-route-acknowledge]");
+      if(routeAckBtn){
+        event.preventDefault();
+        acknowledgeDistanceRouteReview();
+        return;
+      }
       const basisToggle = event.target.closest("#estimateCalcBasisToggle");
       if(basisToggle){
         event.preventDefault();
@@ -2712,6 +2760,7 @@
       state.routeCalcError = "";
       state.distanceKm = 0;
       state.distanceInputText = "";
+      state.distanceRouteReviewed = false;
       state.lastActiveStepId = "";
       renderPage();
     });
@@ -2727,6 +2776,7 @@
       state.roadType = value === "toll" ? "toll" : "general";
       state.routeCalcError = "";
       state.routePlan = null;
+      state.distanceRouteReviewed = false;
       state.lastActiveStepId = "";
       renderPage();
     });
