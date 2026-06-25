@@ -30,6 +30,7 @@
     const apiKey = String(options?.apiKey || "").trim();
     const origin = String(options?.origin || "").trim();
     const destination = String(options?.destination || "").trim();
+    const requestAlternativeRoutes = options?.requestAlternativeRoutes === true;
 
     if(!apiKey){
       throw new Error("Google Maps APIキーが設定されていません。");
@@ -50,7 +51,7 @@
         destination: { address: destination },
         travelMode: "DRIVE",
         routingPreference: "TRAFFIC_AWARE",
-        computeAlternativeRoutes: false,
+        computeAlternativeRoutes: requestAlternativeRoutes,
         extraComputations: ["TOLLS"],
         routeModifiers: {
           avoidTolls: options?.roadType === "general",

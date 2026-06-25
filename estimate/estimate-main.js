@@ -719,6 +719,122 @@
     return String(roadType || "") === "toll" ? "有料道路利用" : "一般道利用";
   }
 
+  function isPreFixedFareMode(){
+    return String(state.config?.fareMode || "") === "pre_fixed_fare";
+  }
+
+  function getRouteDisplayLabel(route, index){
+    const labels = Array.isArray(route?.routeLabels) ? route.routeLabels.filter(Boolean) : [];
+    if(labels.length){
+      return labels.join(" / ");
+    }
+    return "ルート候補 " + (Number(index) + 1);
+  }
+
+  function computeResultForRoute(route){
+    if(!route || !state.config || !state.routePlan){
+      return null;
+    }
+    const tempState = Object.assign({}, state, {
+      distanceKm: Number(route.distanceKm) || 0,
+      routeCalcResult: {
+        distanceKm: Number(route.distanceKm) || 0,
+        durationMinutes: Number(route.durationMinutes) || 0
+      },
+      routePlan: Object.assign({}, state.routePlan, {
+        selectedRouteId: String(route.routeId || ""),
+        distanceMeters: Number(route.distanceMeters) || 0,
+        durationSeconds: Number(route.durationSeconds) || 0,
+        encodedPolyline: String(route.encodedPolyline || ""),
+        routeToken: String(route.routeToken || ""),
+        routeLabels: Array.isArray(route.routeLabels) ? route.routeLabels.slice() : []
+      })
+    });
+    return window.EstimateCalc.computeEstimate(state.config, tempState);
+  }
+
+  function selectRoute(routeId){
+    const routes = Array.isArray(state.routePlan?.routes) ? state.routePlan.routes : [];
+    const route = routes.find(function(item){
+      return String(item?.routeId || "") === String(routeId || "");
+    });
+    if(!route || !state.routePlan){
+      return;
+    }
+    state.routePlan = Object.assign({}, state.routePlan, {
+      selectedRouteId: String(route.routeId || ""),
+      distanceMeters: Number(route.distanceMeters) || 0,
+      durationSeconds: Number(route.durationSeconds) || 0,
+      encodedPolyline: String(route.encodedPolyline || ""),
+      routeToken: String(route.routeToken || ""),
+      routeLabels: Array.isArray(route.routeLabels) ? route.routeLabels.slice() : [],
+      tollInfo: route.tollInfo || null,
+      selectedAt: new Date().toISOString()
+    });
+    state.distanceKm = Number(route.distanceKm) || 0;
+    state.distanceInputText = String(state.distanceKm);
+    state.routeCalcResult = {
+      distanceKm: Number(route.distanceKm) || 0,
+      durationMinutes: Number(route.durationMinutes) || 0
+    };
+    invalidateEstimateNumberIfChanged();
+    state.lastActiveStepId = "result";
+    renderPage();
+  }
+
+  function renderRouteSelectionSection(result){
+    if(!isPreFixedFareMode() || !state.routePlan){
+      return "";
+    }
+    const routes = Array.isArray(state.routePlan.routes) ? state.routePlan.routes : [];
+    if(!routes.length){
+      return "";
+    }
+
+    const selectedId = String(state.routePlan.selectedRouteId || routes[0]?.routeId || "");
+    const roadTypeLabel = getRoadTypeLabel(state.routePlan.roadType || state.roadType);
+    const notice = routes.length >= 2
+      ? '<p class="estimate-route-selection-note">2件以上の走行予定ルートから1つを選択してください。選択したルートの距離で事前確定運賃を算定します。</p>'
+      : '<p class="estimate-route-selection-note">候補ルートが1件のみのため、このルートを使用します。APIの応答により複数候補が取得できない場合があります。</p>';
+
+    const cards = routes.map(function(route, index){
+      const routeId = String(route.routeId || "");
+      const isSelected = routeId === selectedId || (!selectedId && index === 0);
+      const routeResult = computeResultForRoute(route);
+      const preFixedAmount = Number(routeResult?.quoteSnapshot?.adjustedDistanceFareAmount) || 0;
+      const fareLabel = preFixedAmount > 0
+        ? formatYen(preFixedAmount)
+        : (routeResult ? formatYen(routeResult.total) : "-");
+      const distanceLabel = formatRouteDistanceMeters(route.distanceMeters);
+      const durationLabel = formatRouteDurationSeconds(route.durationSeconds);
+      const summary = getRouteDisplayLabel(route, index);
+
+      return (
+        '<article class="estimate-route-card' + (isSelected ? " is-selected" : "") + '">' +
+          '<h5 class="estimate-route-card-title">' + escapeHtml(summary) + "</h5>" +
+          '<dl class="estimate-route-card-meta">' +
+            "<div><dt>距離</dt><dd>" + escapeHtml(distanceLabel || "-") + "</dd></div>" +
+            "<div><dt>予定時間</dt><dd>" + escapeHtml(durationLabel || "-") + "</dd></div>" +
+            "<div><dt>有料道路利用</dt><dd>" + escapeHtml(roadTypeLabel) + "</dd></div>" +
+            "<div><dt>概要</dt><dd>" + escapeHtml(summary) + "</dd></div>" +
+            '<div><dt>事前確定運賃</dt><dd class="estimate-route-card-fare">' + escapeHtml(fareLabel) + "</dd></div>" +
+          "</dl>" +
+          (routes.length >= 2
+            ? '<button type="button" class="estimate-route-select-btn" data-select-route-id="' + escapeAttr(routeId) + '"' + (isSelected ? " disabled" : "") + ">" + (isSelected ? "選択中" : "このルートを選択") + "</button>"
+            : "") +
+        "</article>"
+      );
+    }).join("");
+
+    return (
+      '<section class="estimate-route-selection" aria-label="ルート候補の選択">' +
+        '<h4 class="estimate-route-selection-title">走行予定ルートの選択</h4>' +
+        notice +
+        '<div class="estimate-route-card-list">' + cards + "</div>" +
+      "</section>"
+    );
+  }
+
   async function renderRouteMapIfNeeded(){
     const mapContainer = document.getElementById("estimateRouteMap");
     if(!mapContainer) return;
@@ -824,6 +940,7 @@
         origin: origin,
         destination: destination,
         roadType: state.roadType,
+        requestAlternativeRoutes: isPreFixedFareMode(),
         languageCode: mapsConfig.language || "ja",
         region: mapsConfig.region || "JP"
       });
@@ -854,7 +971,9 @@
         routeToken: String(primaryRoute?.routeToken || ""),
         distanceMeters: Number(primaryRoute?.distanceMeters) || 0,
         durationSeconds: Number(primaryRoute?.durationSeconds) || 0,
+        tollInfo: primaryRoute?.tollInfo || null,
         routes: Array.isArray(result.routes) ? result.routes : [],
+        selectedAt: new Date().toISOString(),
         pickup: {
           address: origin,
           latLng: geocoding?.location || null,
@@ -1409,7 +1528,7 @@
     const roadTypeLabel = getRoadTypeLabel(routePlan?.roadType || state.roadType);
     const routeCardHtml = routePlan ? `
       <section class="estimate-route-preview" aria-label="走行予定ルート">
-        <h4 class="estimate-route-preview-title">走行予定ルート</h4>
+        <h4 class="estimate-route-preview-title">走行予定ルート（選択中）</h4>
         <div class="estimate-route-map" id="estimateRouteMap" role="img" aria-label="走行予定ルート地図"></div>
         <dl class="estimate-route-info-list">
           <div class="estimate-route-info-row">
@@ -1441,6 +1560,7 @@
         <h3>見積結果</h3>
         ${renderEstimateNumberBox()}
         ${renderRegisterWarningBox()}
+        ${renderRouteSelectionSection(result)}
         ${routeCardHtml}
         ${renderUsageSummary(result)}
         ${renderFareBasis(result)}
@@ -1560,6 +1680,14 @@
         if(pdfBtn.disabled) return;
         console.log("PDF_DEBUG_2 ボタンクリック");
         saveEstimatePdf();
+        return;
+      }
+      const routeSelectBtn = event.target.closest("[data-select-route-id]");
+      if(routeSelectBtn){
+        event.preventDefault();
+        if(routeSelectBtn.disabled) return;
+        const routeId = routeSelectBtn.getAttribute("data-select-route-id");
+        if(routeId) selectRoute(routeId);
         return;
       }
       const basisToggle = event.target.closest("#estimateCalcBasisToggle");

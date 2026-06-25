@@ -596,6 +596,90 @@
   font-weight:600;
   text-align:right;
 }
+.estimate-route-selection{
+  margin:0 0 16px;
+  padding:14px;
+  border:1px solid #d9e8d9;
+  border-radius:12px;
+  background:#f7fbf7;
+}
+.estimate-route-selection-title{
+  margin:0 0 8px;
+  font-size:15px;
+  font-weight:700;
+  color:#2e6b3a;
+}
+.estimate-route-selection-note{
+  margin:0 0 12px;
+  font-size:12px;
+  line-height:1.65;
+  color:#555;
+}
+.estimate-route-card-list{
+  display:grid;
+  gap:12px;
+}
+.estimate-route-card{
+  padding:12px;
+  border:1px solid #d9e8d9;
+  border-radius:10px;
+  background:#fff;
+}
+.estimate-route-card.is-selected{
+  border-color:#2e6b3a;
+  box-shadow:0 0 0 1px #2e6b3a inset;
+  background:#f3faf4;
+}
+.estimate-route-card-title{
+  margin:0 0 8px;
+  font-size:14px;
+  font-weight:700;
+  color:#2d2a26;
+}
+.estimate-route-card-meta{
+  margin:0 0 10px;
+}
+.estimate-route-card-meta div{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:4px 0;
+  font-size:13px;
+  line-height:1.5;
+  border-bottom:1px solid #eef3ee;
+}
+.estimate-route-card-meta div:last-child{
+  border-bottom:none;
+}
+.estimate-route-card-meta dt{
+  margin:0;
+  color:#666;
+}
+.estimate-route-card-meta dd{
+  margin:0;
+  color:#2d2a26;
+  font-weight:600;
+  text-align:right;
+}
+.estimate-route-card-fare{
+  color:#c62828;
+}
+.estimate-route-select-btn{
+  width:100%;
+  padding:10px 12px;
+  border:1px solid #2e6b3a;
+  border-radius:8px;
+  background:#fff;
+  color:#2e6b3a;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+}
+.estimate-route-select-btn:disabled{
+  background:#2e6b3a;
+  color:#fff;
+  cursor:default;
+}
 .estimate-usage-title{
   font-size:14px;
   font-weight:700;

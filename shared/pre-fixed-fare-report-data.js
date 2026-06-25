@@ -72,9 +72,9 @@
   function implStatusRows(){
     return {
       multiRoute: [
-        { item: "複数ルート取得", status: "未実装", basis: "estimate/estimate-distance-api.js（computeAlternativeRoutes:false）" },
-        { item: "旅客によるルート選択", status: "未実装", basis: "estimate/estimate-main.js" },
-        { item: "選択ルート保存", status: "未確認", basis: "shared/estimate-quote-register.js（API/DB側確認要）" },
+        { item: "複数ルート取得", status: "実装済み", basis: "estimate/estimate-distance-api.js（事前確定運賃時 computeAlternativeRoutes:true）" },
+        { item: "旅客によるルート選択", status: "実装済み", basis: "estimate/estimate-main.js（ルート選択UI）" },
+        { item: "選択ルート保存", status: "LP側実装済み / API側未確認", basis: "estimate/estimate-calc.js quoteSnapshot、shared/estimate-quote-register.js" },
         { item: "運転者への同一ルート表示", status: "未確認", basis: "reservation-v4 / driver画面（ワークスペース外）" }
       ],
       toll: [
@@ -107,7 +107,7 @@
       requirements: [
         { requirement: "電子地図で推計走行距離を算定", policy: "Google Routes API等で距離・ルート取得", current: "実装済み", evidence: "routePlan" },
         { requirement: "距離制運賃×係数で算定", policy: "fareMode=pre_fixed_fareで係数適用", current: "実装済み", evidence: "estimate/estimate-calc.js" },
-        { requirement: "2以上のルートから旅客が選択", policy: "複数ルートUIを用意", current: "未実装", evidence: "routes[]" },
+        { requirement: "2以上のルートから旅客が選択", policy: "複数ルートUIを用意", current: "実装済み", evidence: "estimate/estimate-main.js routes[]" },
         { requirement: "有料道路利用有無を選択", policy: "roadTypeを保存しルート算定へ反映", current: "実装済み", evidence: "roadType" },
         { requirement: "運賃額と割引前後を提示", policy: "表示UIとsnapshotに保存", current: "未確認", evidence: "fareBeforeDiscount" },
         { requirement: "注意事項を提示し同意取得", policy: "consentAt等を保存", current: "未確認", evidence: "consentAt" },
@@ -214,7 +214,6 @@
       ],
       requirementRows: impl.requirements,
       unimplementedOrUnconfirmed: [
-        "複数ルート選択UI",
         "予約API/DBへの選択ルート保存",
         "利用者同意日時の保存",
         "同意文面バージョン保存",
@@ -225,7 +224,6 @@
         "運転者画面への同一ルート表示"
       ],
       priorities: [
-        "複数ルート選択UI",
         "有料道路利用有無選択の保存強化",
         "利用者同意日時・同意文面保存",
         "snapshotHash / HMAC署名検証",
