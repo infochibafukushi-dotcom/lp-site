@@ -2,8 +2,15 @@
   const CONFIG_PATH = "./data/config.json";
   const ESTIMATE_CONFIG_PATH = "./data/estimate-config.json";
 
-  function setStatus(message, type){
+  function setRegulatoryStatus(message, type){
     const box = document.getElementById("preFixedFareReportResult");
+    if(!box) return;
+    box.className = "preview" + (type ? " " + type : "");
+    box.textContent = message || "";
+  }
+
+  function setApprovalSummaryStatus(message, type){
+    const box = document.getElementById("preFixedFareApprovalSummaryStatus");
     if(!box) return;
     box.className = "preview" + (type ? " " + type : "");
     box.textContent = message || "";
@@ -28,12 +35,12 @@
     return null;
   }
 
-  async function exportReportPdf(){
+  async function exportRegulatoryReportPdf(){
     if(!global.PreFixedFareReportData || !global.PreFixedFareReportPdf){
       throw new Error("認可説明資料PDFモジュールの読み込みに失敗しました。");
     }
 
-    setStatus("設定を読み込み中...", "warn");
+    setRegulatoryStatus("設定を読み込み中...", "warn");
 
     const [config, estimateConfigFromFile] = await Promise.all([
       fetchJson(CONFIG_PATH).catch(function(){ return {}; }),
@@ -52,18 +59,31 @@
       throw new Error("pre-fixed-fare-report-data の組み立てに失敗しました");
     }
 
-    setStatus("PDFを生成中...", "warn");
+    setRegulatoryStatus("PDFを生成中...", "warn");
     await global.PreFixedFareReportPdf.savePdf(reportData);
-    setStatus("PDFを出力しました。", "success");
+    setRegulatoryStatus("PDFを出力しました。", "success");
   }
 
-  function bind(){
+  async function generatePreFixedFareApprovalSummaryPdf(){
+    if(!global.PreFixedFareApprovalSummaryPdf){
+      throw new Error("事前確定運賃システム説明資料PDFモジュールの読み込みに失敗しました。");
+    }
+    await global.PreFixedFareApprovalSummaryPdf.generatePreFixedFareApprovalSummaryPdf();
+  }
+
+  async function exportApprovalSummaryPdf(){
+    setApprovalSummaryStatus("PDFを作成しています...", "warn");
+    await generatePreFixedFareApprovalSummaryPdf();
+    setApprovalSummaryStatus("PDFを保存しました。", "success");
+  }
+
+  function bindRegulatoryButton(){
     const button = document.getElementById("preFixedFareReportExportBtn");
     if(!button) return;
     button.addEventListener("click", async function(){
       button.disabled = true;
       try{
-        await exportReportPdf();
+        await exportRegulatoryReportPdf();
       }catch(error){
         console.error(error);
         const reason = String(error?.message || "");
@@ -71,14 +91,44 @@
           reason.includes("生成対象HTMLが空")
           || reason.includes("組み立てに失敗")
         ){
-          setStatus(reason, "error");
+          setRegulatoryStatus(reason, "error");
         }else{
-          setStatus("PDF生成に失敗しました。Consoleを確認してください。", "error");
+          setRegulatoryStatus("PDF生成に失敗しました。Consoleを確認してください。", "error");
         }
       }finally{
         button.disabled = false;
       }
     });
+  }
+
+  function bindApprovalSummaryButton(){
+    const button = document.getElementById("preFixedFareApprovalSummaryExportBtn");
+    if(!button) return;
+    button.addEventListener("click", async function(){
+      button.disabled = true;
+      try{
+        await exportApprovalSummaryPdf();
+      }catch(error){
+        console.error(error);
+        const reason = String(error?.message || "");
+        if(
+          reason.includes("生成対象HTMLが空")
+          || reason.includes("組み立てに失敗")
+          || reason.includes("読み込みに失敗")
+        ){
+          setApprovalSummaryStatus(reason, "error");
+        }else{
+          setApprovalSummaryStatus("PDF作成に失敗しました。", "error");
+        }
+      }finally{
+        button.disabled = false;
+      }
+    });
+  }
+
+  function bind(){
+    bindRegulatoryButton();
+    bindApprovalSummaryButton();
   }
 
   if(document.readyState === "loading"){

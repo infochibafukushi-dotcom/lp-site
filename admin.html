@@ -1394,11 +1394,21 @@ body{
       <span class="toggle-state">閉じています</span>
     </button>
     <div class="card-body js-card-body">
-      <p class="note">関東運輸局の事前確定運賃公示要件に対するシステム対応、算定式、係数、ルート算定、同意証跡、保存設計をまとめた説明資料をPDFで出力します。</p>
-      <div class="actions" style="margin-top:16px;">
-        <button type="button" id="preFixedFareReportExportBtn">事前確定運賃 認可説明資料PDFを出力</button>
+      <p class="note">本カードから2種類のPDFを出力できます。①は公示要件対応表・算定式・係数など制度説明寄り、②は Phase 2 / Phase 3-B の実装内容・ルート候補選択・証跡保存の説明寄りです。</p>
+      <div style="margin-top:16px;">
+        <p class="note" style="margin-bottom:8px;"><strong>① 事前確定運賃システム概要書 兼 関東運輸局公示要件対応表</strong><br>関東運輸局の事前確定運賃公示要件に対するシステム対応、算定式、係数、ルート算定、同意証跡、保存設計をまとめた説明資料です。</p>
+        <div class="actions">
+          <button type="button" id="preFixedFareReportExportBtn">事前確定運賃 認可説明資料PDFを出力</button>
+        </div>
+        <div class="preview" id="preFixedFareReportResult">まだ出力していません。</div>
       </div>
-      <div class="preview" id="preFixedFareReportResult">まだ出力していません。</div>
+      <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e5e5e5;">
+        <p class="note" style="margin-bottom:8px;"><strong>② 事前確定運賃システム説明資料</strong><br>Phase 2 / Phase 3-B の実装内容、走行予定ルート候補、選択証跡、PDF・quoteSnapshot・handoff の保存内容をまとめた説明資料を出力します。</p>
+        <div class="actions">
+          <button type="button" id="preFixedFareApprovalSummaryExportBtn">事前確定運賃システム説明資料PDFを出力</button>
+        </div>
+        <div class="preview" id="preFixedFareApprovalSummaryStatus">まだ出力していません。</div>
+      </div>
     </div>
   </div>
 
@@ -1426,6 +1436,8 @@ body{
 <script src="./admin-estimate.js"></script>
 <script src="./shared/pre-fixed-fare-report-data.js"></script>
 <script src="./shared/pre-fixed-fare-report-pdf.js"></script>
+<script src="./shared/pre-fixed-fare-approval-summary-data.js"></script>
+<script src="./shared/pre-fixed-fare-approval-summary-pdf.js"></script>
 <script src="./admin-pre-fixed-fare-report.js"></script>
 <script>
 const CONFIG_PATH = 'data/config.json';
