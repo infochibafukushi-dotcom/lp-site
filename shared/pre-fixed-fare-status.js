@@ -115,6 +115,51 @@
     return routeStructure;
   }
 
+  function getOverallRoutePathLabel(routePlan){
+    const overall = routePlan?.overallRouteSelection;
+    if(!overall){
+      return "";
+    }
+    const segments = Array.isArray(overall.commonSegments) ? overall.commonSegments : [];
+    const outbound = segments.find(function(segment){
+      return segment?.key === "outbound";
+    });
+    const returnCommon = segments.find(function(segment){
+      return segment?.key === "return_common";
+    });
+    const home = String(outbound?.originAddress || "出発地").trim();
+    const goal = String(outbound?.destinationAddress || "目的地").trim();
+    const stop = String(
+      returnCommon?.destinationAddress
+      || overall.selectableSegment?.originAddress
+      || "立ち寄り先"
+    ).trim();
+    return home + " → " + goal + " → " + stop + " → " + home;
+  }
+
+  function getOverallRouteSelectionStatusLabel(){
+    return "全体走行予定ルート：事前確定運賃候補（選択済み）";
+  }
+
+  function getOverallRouteSelectionNote(){
+    return "往路・立ち寄り区間を含む全体走行予定ルートで距離を算定しています。";
+  }
+
+  function buildOverallRouteSelectionStatusMessages(routePlan){
+    const pathLabel = getOverallRoutePathLabel(routePlan);
+    const messages = [
+      { type: "overall_route_status", text: getOverallRouteSelectionStatusLabel() }
+    ];
+    if(pathLabel){
+      messages.push({
+        type: "overall_route_path",
+        text: pathLabel + " の全体ルートを選択済みです。"
+      });
+    }
+    messages.push({ type: "overall_route_note", text: getOverallRouteSelectionNote() });
+    return messages;
+  }
+
   function isStructuredRoundTrip(routePlan){
     return routePlan?.tripType === "round_trip" || Boolean(routePlan?.outboundRoutePlan);
   }
@@ -127,6 +172,11 @@
 
     if(shouldShowSingleCandidateNotice(routePlan, options)){
       messages.push({ type: "single_candidate_notice", text: getSingleCandidateNotice() });
+    }
+
+    if(isOverallRouteSelectionConfirmable(routePlan)){
+      messages.push.apply(messages, buildOverallRouteSelectionStatusMessages(routePlan));
+      return messages;
     }
 
     const outbound = getOutboundLeg(routePlan, options);
@@ -166,7 +216,11 @@
     const parts = messages.map(function(message){
       const className = message.type === "single_candidate_notice"
         ? "estimate-prefixed-fare-single-candidate-notice"
-        : (message.type === "stopover" ? "estimate-prefixed-fare-stopover-note" : "");
+        : (message.type === "overall_route_status"
+          ? "estimate-prefixed-fare-overall-route-status"
+          : (message.type === "stopover" || message.type === "overall_route_note"
+            ? "estimate-prefixed-fare-stopover-note"
+            : ""));
       return "<p" + (className ? ' class="' + className + '"' : "") + ">" + escapeHtml(message.text) + "</p>";
     });
     return "<div class=\"" + escapeHtml(wrapperClass) + "\">" + parts.join("") + "</div>";
@@ -180,8 +234,11 @@
     const gap = Math.max(4, Number(layout?.routeMapTitleGap) || 6);
     const fontSize = Math.max(9, Number(layout?.metaFont) - 1 || 10);
     const parts = messages.map(function(message){
-      const color = message.type === "single_candidate_notice" ? "#8a6010" : "#5a4a2f";
-      const weight = message.type === "single_candidate_notice" ? "700" : "400";
+      const isReviewNotice = message.type === "single_candidate_notice";
+      const isOverallStatus = message.type === "overall_route_status";
+      const isOverallPath = message.type === "overall_route_path";
+      const color = isReviewNotice ? "#8a6010" : (isOverallStatus || isOverallPath ? "#333" : "#5a4a2f");
+      const weight = isReviewNotice || isOverallStatus ? "700" : (isOverallPath ? "600" : "400");
       return (
         "<p style=\"margin:0 0 " + gap + "px;font-size:" + fontSize + "px;line-height:1.55;" +
         "color:" + color + ";font-weight:" + weight + ";\">" +
@@ -213,6 +270,8 @@
     hasSingleNonConfirmableCandidate: hasSingleNonConfirmableCandidate,
     getSingleCandidateNotice: getSingleCandidateNotice,
     isOverallRouteSelectionConfirmable: isOverallRouteSelectionConfirmable,
+    getOverallRoutePathLabel: getOverallRoutePathLabel,
+    getOverallRouteSelectionStatusLabel: getOverallRouteSelectionStatusLabel,
     shouldShowSingleCandidateNotice: shouldShowSingleCandidateNotice,
     getReturnStopoverExplanation: getReturnStopoverExplanation,
     getOutboundLeg: getOutboundLeg,

@@ -1309,6 +1309,10 @@
   font-weight:600;
   color:#8a6010;
 }
+.estimate-prefixed-fare-overall-route-status{
+  font-weight:700;
+  color:#2d2a26;
+}
 .estimate-prefixed-fare-stopover-note{
   color:#5a4a2f;
 }
