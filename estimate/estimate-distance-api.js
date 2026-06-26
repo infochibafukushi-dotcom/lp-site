@@ -635,6 +635,56 @@
     };
   }
 
+  function assembleOverallRouteSelection(options){
+    const homeAddress = String(options?.homeAddress || "").trim();
+    const goalAddress = String(options?.goalAddress || "").trim();
+    const stopAddress = String(options?.stopAddress || "").trim();
+    const outboundRoute = options?.outboundRoute || null;
+    const outboundRouteCandidates = Array.isArray(options?.outboundRouteCandidates)
+      ? options.outboundRouteCandidates
+      : (outboundRoute ? [outboundRoute] : []);
+    const returnCommonRoute = options?.returnCommonRoute || null;
+    const selectableCandidates = Array.isArray(options?.selectableCandidates)
+      ? options.selectableCandidates
+      : [];
+
+    if(!homeAddress || !goalAddress || !stopAddress || !outboundRoute || !returnCommonRoute || !selectableCandidates.length){
+      return null;
+    }
+
+    const outboundLabel = String(homeAddress) + " → " + String(goalAddress);
+    const returnCommonLabel = String(goalAddress) + " → " + String(stopAddress);
+    const selectableLabel = String(stopAddress) + " → " + String(homeAddress);
+    const assembledOverall = selectableCandidates.map(function(selectableRoute, index){
+      return buildOverallRouteCandidate(outboundRoute, returnCommonRoute, selectableRoute, index);
+    });
+    const overallRouteCandidates = dedupeOverallRouteCandidates(assembledOverall).slice(0, MAX_ROUTE_CANDIDATES);
+    const overallConfirmable = overallRouteCandidates.length >= 2;
+    const outboundNeedsSelection = outboundRouteCandidates.length >= 2;
+    const selectionPhase = String(options?.selectionPhase || "").trim()
+      || (outboundNeedsSelection ? "outbound" : "overall");
+
+    return {
+      routePlanType: "return_with_stop",
+      selectionPhase: selectionPhase,
+      fixedOutboundRouteId: String(outboundRoute?.routeId || "") || null,
+      commonSegments: [
+        buildSegmentSnapshot("outbound", outboundLabel, homeAddress, goalAddress, outboundRoute),
+        buildSegmentSnapshot("return_common", returnCommonLabel, goalAddress, stopAddress, returnCommonRoute)
+      ],
+      selectableSegment: {
+        key: "return_selectable",
+        label: selectableLabel,
+        originAddress: stopAddress,
+        destinationAddress: homeAddress
+      },
+      overallRouteCandidates: overallRouteCandidates,
+      selectedOverallRouteId: options?.selectedOverallRouteId || null,
+      preFixedFareConfirmable: overallConfirmable,
+      fallbackReason: overallConfirmable ? null : "only_one_distinct_route"
+    };
+  }
+
   async function computeReturnWithStopOverallRouteSelection(options){
     const apiKey = String(options?.apiKey || "").trim();
     const homeAddress = String(options?.homeAddress || "").trim();
@@ -685,40 +735,21 @@
       throw new Error("選択区間（立ち寄り先 → 出発地）のルートが見つかりませんでした。");
     }
 
-    const outboundLabel = String(homeAddress) + " → " + String(goalAddress);
-    const returnCommonLabel = String(goalAddress) + " → " + String(stopAddress);
-    const selectableLabel = String(stopAddress) + " → " + String(homeAddress);
-
-    const assembledOverall = selectableCandidates.map(function(selectableRoute, index){
-      return buildOverallRouteCandidate(outboundRoute, returnCommonRoute, selectableRoute, index);
+    const outboundNeedsSelection = outboundRouteCandidates.length >= 2;
+    const overallRouteSelection = assembleOverallRouteSelection({
+      homeAddress: homeAddress,
+      goalAddress: goalAddress,
+      stopAddress: stopAddress,
+      outboundRoute: outboundRoute,
+      outboundRouteCandidates: outboundRouteCandidates,
+      returnCommonRoute: returnCommonRoute,
+      selectableCandidates: selectableCandidates,
+      selectionPhase: outboundNeedsSelection ? "outbound" : "overall"
     });
-    const overallRouteCandidates = dedupeOverallRouteCandidates(assembledOverall).slice(0, MAX_ROUTE_CANDIDATES);
-    const overallConfirmable = overallRouteCandidates.length >= 2;
     const primarySelectable = selectableCandidates.find(function(route){
       const primaryId = String(selectableResult?.selectedRouteId || "");
       return primaryId && String(route?.routeId || "") === primaryId;
     }) || selectableCandidates[0] || null;
-
-    const outboundNeedsSelection = outboundRouteCandidates.length >= 2;
-    const overallRouteSelection = {
-      routePlanType: "return_with_stop",
-      selectionPhase: outboundNeedsSelection ? "outbound" : "overall",
-      fixedOutboundRouteId: String(outboundRoute?.routeId || "") || null,
-      commonSegments: [
-        buildSegmentSnapshot("outbound", outboundLabel, homeAddress, goalAddress, outboundRoute),
-        buildSegmentSnapshot("return_common", returnCommonLabel, goalAddress, stopAddress, returnCommonRoute)
-      ],
-      selectableSegment: {
-        key: "return_selectable",
-        label: selectableLabel,
-        originAddress: stopAddress,
-        destinationAddress: homeAddress
-      },
-      overallRouteCandidates: overallRouteCandidates,
-      selectedOverallRouteId: null,
-      preFixedFareConfirmable: overallConfirmable,
-      fallbackReason: overallConfirmable ? null : "only_one_distinct_route"
-    };
 
     return {
       overallRouteSelection: overallRouteSelection,
@@ -896,6 +927,7 @@
     computeRouteDistance: computeRouteDistance,
     computePreFixedFareRouteCandidates: computePreFixedFareRouteCandidates,
     computeReturnWithStopOverallRouteSelection: computeReturnWithStopOverallRouteSelection,
+    assembleOverallRouteSelection: assembleOverallRouteSelection,
     geocodeAddress: geocodeAddress
   };
 })(typeof window !== "undefined" ? window : globalThis);

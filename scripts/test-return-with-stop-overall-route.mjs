@@ -172,3 +172,66 @@ const results = await Promise.all([
 ]);
 
 console.log(JSON.stringify({ ok: true, results }, null, 2));
+
+const outboundRouteA = {
+  routeId: "route_0",
+  routeStrategy: "recommended",
+  routeLabel: "おすすめルート",
+  distanceMeters: 20980,
+  durationSeconds: 3045
+};
+const outboundRouteB = {
+  routeId: "route_1",
+  routeStrategy: "toll_allowed",
+  routeLabel: "高速道路ルート",
+  distanceMeters: 25800,
+  durationSeconds: 3120
+};
+const returnCommonRoute = {
+  distanceMeters: 17829,
+  durationSeconds: 2973,
+  routeStrategy: "recommended",
+  encodedPolyline: "common"
+};
+const selectableCandidates = [
+  { routeId: "route_0", routeStrategy: "recommended", routeLabel: "おすすめルート", distanceMeters: 32069, durationSeconds: 2841, usesToll: true },
+  { routeId: "route_1", routeStrategy: "toll_allowed", routeLabel: "高速道路ルート", routeDescription: "遠方移動に適したルートです。有料道路料金は別途必要です。", distanceMeters: 39075, durationSeconds: 3268, usesToll: true }
+];
+const baseOpts = {
+  homeAddress: "千葉市中央区出洲港8-3-2",
+  goalAddress: "船橋市立医療センター",
+  stopAddress: "東京ディズニーランド",
+  returnCommonRoute: returnCommonRoute,
+  selectableCandidates: selectableCandidates,
+  outboundRouteCandidates: [outboundRouteA, outboundRouteB]
+};
+const overallA = api.assembleOverallRouteSelection(Object.assign({}, baseOpts, {
+  outboundRoute: outboundRouteA,
+  selectionPhase: "outbound"
+}));
+const overallB = api.assembleOverallRouteSelection(Object.assign({}, baseOpts, {
+  outboundRoute: outboundRouteB,
+  selectionPhase: "overall",
+  selectedOverallRouteId: null
+}));
+if(!overallA || !overallB){
+  throw new Error("assembleOverallRouteSelection returned null");
+}
+if(overallA.overallRouteCandidates.length !== 2 || overallB.overallRouteCandidates.length !== 2){
+  throw new Error("expected 2 overall candidates after rebuild");
+}
+if(overallA.overallRouteCandidates[0].totalDistanceMeters === overallB.overallRouteCandidates[0].totalDistanceMeters){
+  throw new Error("outbound selection should change totalDistanceMeters");
+}
+if(overallB.commonSegments[0].distanceMeters !== 25800){
+  throw new Error("commonSegments.outbound should reflect selected outbound");
+}
+console.log(JSON.stringify({
+  ok: true,
+  rebuild: {
+    overallA_total: overallA.overallRouteCandidates[0].totalDistanceMeters,
+    overallB_total: overallB.overallRouteCandidates[0].totalDistanceMeters,
+    outboundB_meters: overallB.commonSegments[0].distanceMeters,
+    fixedOutboundRouteId: overallB.fixedOutboundRouteId
+  }
+}, null, 2));

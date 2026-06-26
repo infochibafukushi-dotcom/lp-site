@@ -281,6 +281,7 @@
       outboundRoutePlan: outboundLeg,
       returnRoutePlan: returnLeg,
       overallRouteSelection: opts.overallRouteSelection || null,
+      returnWithStopSplitContext: opts.returnWithStopSplitContext || null,
       totalDistanceMeters: totalDistanceMeters,
       totalDurationSeconds: totalDurationSeconds,
       preFixedFareScope: preFixedFareScope,
@@ -1146,19 +1147,74 @@
     return next;
   }
 
+  function buildReturnWithStopSplitContext(returnRequest, returnWithStopSplit){
+    if(!returnRequest || !returnWithStopSplit){
+      return null;
+    }
+    const selectableCandidates = Array.isArray(returnWithStopSplit.selectableResult?.routeCandidates)
+      ? returnWithStopSplit.selectableResult.routeCandidates
+      : [];
+    if(!returnWithStopSplit.returnCommonRoute || !selectableCandidates.length){
+      return null;
+    }
+    return {
+      homeAddress: String(returnRequest.destination || "").trim(),
+      goalAddress: String(returnRequest.origin || "").trim(),
+      stopAddress: String(returnRequest.intermediateAddress || "").trim(),
+      returnCommonRoute: returnWithStopSplit.returnCommonRoute,
+      selectableCandidates: selectableCandidates
+    };
+  }
+
+  function resolveReturnWithStopOverallRouteSelection(outboundLeg, existingPlan){
+    const splitContext = existingPlan?.returnWithStopSplitContext;
+    if(!splitContext || typeof window.EstimateDistanceApi?.assembleOverallRouteSelection !== "function"){
+      return existingPlan?.overallRouteSelection || null;
+    }
+    const outboundRoute = window.EstimateCalc.getLegPrimaryRoute(outboundLeg);
+    if(!outboundRoute){
+      return existingPlan?.overallRouteSelection || null;
+    }
+    const outboundRouteCandidates = Array.isArray(outboundLeg?.routeCandidates) && outboundLeg.routeCandidates.length
+      ? outboundLeg.routeCandidates
+      : [outboundRoute];
+    const selectedOutboundId = String(outboundLeg?.selectedRouteId || outboundRoute?.routeId || "");
+    const selectionPhase = outboundRouteCandidates.length >= 2 && selectedOutboundId
+      ? "overall"
+      : (outboundRouteCandidates.length >= 2 ? "outbound" : "overall");
+    return window.EstimateDistanceApi.assembleOverallRouteSelection({
+      homeAddress: splitContext.homeAddress,
+      goalAddress: splitContext.goalAddress,
+      stopAddress: splitContext.stopAddress,
+      outboundRoute: outboundRoute,
+      outboundRouteCandidates: outboundRouteCandidates,
+      returnCommonRoute: splitContext.returnCommonRoute,
+      selectableCandidates: splitContext.selectableCandidates,
+      selectedOverallRouteId: existingPlan?.overallRouteSelection?.selectedOverallRouteId || null,
+      selectionPhase: selectionPhase
+    });
+  }
+
   function rebuildRoutePlanFromLegs(outboundLeg, returnLeg){
+    const existingPlan = state.routePlan || {};
+    const splitContext = existingPlan.returnWithStopSplitContext || null;
+    const overallRouteSelection = splitContext
+      ? resolveReturnWithStopOverallRouteSelection(outboundLeg, existingPlan)
+      : (existingPlan.overallRouteSelection || null);
     return buildStructuredRoutePlan(outboundLeg, returnLeg, {
       returnPlanType: getActiveReturnPlanType(),
       tripType: isRoundTripActive() ? "round_trip" : "one_way",
-      pickup: state.routePlan?.pickup || {
+      pickup: existingPlan.pickup || {
         address: state.originAddress,
         latLng: null,
         geocoding: null
       },
-      destination: state.routePlan?.destination || {
+      destination: existingPlan.destination || {
         address: state.destinationAddress,
         latLng: null
-      }
+      },
+      overallRouteSelection: overallRouteSelection,
+      returnWithStopSplitContext: splitContext
     });
   }
 
@@ -1817,6 +1873,7 @@
         returnPlanType: returnPlanType,
         tripType: isRoundTripActive() ? "round_trip" : "one_way",
         overallRouteSelection: returnWithStopSplit?.overallRouteSelection || null,
+        returnWithStopSplitContext: buildReturnWithStopSplitContext(returnRequest, returnWithStopSplit),
         pickup: {
           address: origin,
           latLng: geocoding?.location || null,
