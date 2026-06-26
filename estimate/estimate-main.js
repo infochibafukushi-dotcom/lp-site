@@ -2638,6 +2638,7 @@
       breakdown: result.breakdown,
       quoteSnapshot: result.quoteSnapshot || null,
       routePlan: result.routePlan || state.routePlan || null,
+      snapshotHash: state.handoffSnapshotHash || null,
       selections: {
         mobilityId: state.mobilityId,
         assistanceId: state.assistanceId,
@@ -2672,6 +2673,14 @@
       if(registerResult.ok){
         state.quoteRegisterStatus = "ok";
         state.quoteRegisterMessage = "";
+        if(registerResult.data?.snapshotHash){
+          handoff.snapshotHash = registerResult.data.snapshotHash;
+          state.handoffSnapshotHash = registerResult.data.snapshotHash;
+          if(registerResult.data?.expiresAt){
+            handoff.quoteExpiresAt = registerResult.data.expiresAt;
+          }
+          window.EstimateHandoff.saveHandoffRecord(handoff);
+        }
         return;
       }
       state.quoteRegisterStatus = "warn";
