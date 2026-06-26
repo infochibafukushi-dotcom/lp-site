@@ -60,8 +60,24 @@
     return "ルート候補が1件のみのため、事前確定運賃としては確定せず、予約後に確認対応となります。";
   }
 
+  function isOverallRouteSelectionConfirmable(routePlan){
+    if(resolveReturnPlanType(routePlan) !== RETURN_WITH_STOP){
+      return false;
+    }
+    const overall = routePlan?.overallRouteSelection;
+    if(!overall){
+      return false;
+    }
+    const candidates = Array.isArray(overall.overallRouteCandidates) ? overall.overallRouteCandidates : [];
+    const selectedId = String(overall.selectedOverallRouteId || "").trim();
+    return candidates.length >= 2 && Boolean(selectedId);
+  }
+
   function shouldShowSingleCandidateNotice(routePlan, options){
     if(!routePlan){
+      return false;
+    }
+    if(isOverallRouteSelectionConfirmable(routePlan)){
       return false;
     }
     const outbound = getOutboundLeg(routePlan, options);
@@ -87,6 +103,9 @@
     }
     const returnLeg = getReturnLeg(routePlan, options);
     const routeStructure = getReturnStopoverRouteStructureExplanation();
+    if(isOverallRouteSelectionConfirmable(routePlan)){
+      return routeStructure;
+    }
     if(returnLeg && hasSingleNonConfirmableCandidate(returnLeg)){
       return routeStructure + "ルート候補が1件のみのため、事前確定運賃としては確定せず、予約後に確認対応となります。";
     }
@@ -193,6 +212,7 @@
     getLegStatusLabel: getLegStatusLabel,
     hasSingleNonConfirmableCandidate: hasSingleNonConfirmableCandidate,
     getSingleCandidateNotice: getSingleCandidateNotice,
+    isOverallRouteSelectionConfirmable: isOverallRouteSelectionConfirmable,
     shouldShowSingleCandidateNotice: shouldShowSingleCandidateNotice,
     getReturnStopoverExplanation: getReturnStopoverExplanation,
     getOutboundLeg: getOutboundLeg,

@@ -84,7 +84,8 @@ S → G → 立ち寄り → S
 
 | 条件 | `preFixedFareConfirmable` |
 |------|---------------------------|
-| `overallRouteCandidates.length >= 2` | `true`（往路・復路の個別判定に加え、全体候補数を正とする） |
+| `overallRouteCandidates.length >= 2` かつ `selectedOverallRouteId` あり | `true`（トップレベル・`quoteSnapshot` の正） |
+| `overallRouteCandidates.length >= 2` かつ未選択 | `false`（STEP6 で全体選択完了まで結果画面へ進めない） |
 | `overallRouteCandidates.length === 1` | `false`（確認対応。`fallbackReason: "only_one_distinct_route"` 等） |
 | 往路が未選択（往路2候補時） | 全体候補表示前。往路選択完了まで全体 `preFixedFareConfirmable` は `false` |
 

@@ -224,6 +224,16 @@ fareConfirm=review
 - `selectedOverallRouteId` がある場合は該当 `overallRouteCandidate` のラベル・説明・合計距離・合計所要時間を表示
 - 候補1件または未選択時は確認対応文言を表示し、レッグ別「選択ルート（往路/復路）」表示は行わない
 
+**トップレベル `preFixedFareConfirmable`（Phase 2-D）**
+
+`return_with_stop` かつ `overallRouteSelection` がある場合、トップレベルおよび `quoteSnapshot.preFixedFareConfirmable` はレッグ AND ではなく以下を正とする。
+
+| 条件 | `preFixedFareConfirmable` | 予約URL |
+|------|---------------------------|---------|
+| `overallRouteCandidates.length >= 2` かつ `selectedOverallRouteId` あり | `true` | `fareConfirm=review` なし |
+| `overallRouteCandidates.length === 1` | `false` | `fareConfirm=review` あり |
+| `overallRouteSelection` なし | 従来ロジック（レッグ単位） | 従来どおり |
+
 ---
 
 ## 変更履歴
@@ -233,3 +243,4 @@ fareConfirm=review
 | 2026-06-25 | 初版作成（`preFixedFareConfirmable` / `fallbackReason` / `returnFareStatus` の現行意味を明文化） |
 | 2026-06-26 | 帰り立ち寄り時の結果画面・PDF説明で経路構造（目的地 → 立ち寄り先 → 出発地）を候補1件時も維持する旨を追記 |
 | 2026-06-26 | `overallRouteSelection` の PDF 正式表示（Phase 2-C）を `quote-snapshot-fields.md` に追記 |
+| 2026-06-26 | 全体候補2件以上・選択済み時の `preFixedFareConfirmable` 判定（Phase 2-D）を追記 |

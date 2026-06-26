@@ -840,6 +840,45 @@
     };
   }
 
+  function resolveOverallRouteSelectionConfirmable(overallRouteSelection){
+    if(!overallRouteSelection){
+      return null;
+    }
+    const candidates = Array.isArray(overallRouteSelection.overallRouteCandidates)
+      ? overallRouteSelection.overallRouteCandidates
+      : [];
+    if(candidates.length >= 2){
+      const selectedId = String(overallRouteSelection.selectedOverallRouteId || "").trim();
+      return selectedId ? true : false;
+    }
+    if(candidates.length === 1){
+      return false;
+    }
+    return null;
+  }
+
+  function resolveStructuredPreFixedFareConfirmable(routePlan){
+    if(!routePlan){
+      return false;
+    }
+    const returnPlanType = routePlan.returnPlanType;
+    if(returnPlanType === "return_with_stop"){
+      const overallConfirmable = resolveOverallRouteSelectionConfirmable(routePlan.overallRouteSelection);
+      if(overallConfirmable !== null){
+        return overallConfirmable;
+      }
+    }
+    const outbound = routePlan.outboundRoutePlan || routePlan;
+    const returnLeg = routePlan.returnRoutePlan;
+    if(returnPlanType === "return_pending"){
+      return outbound?.preFixedFareConfirmable === true;
+    }
+    if(returnLeg){
+      return outbound?.preFixedFareConfirmable === true && returnLeg?.preFixedFareConfirmable === true;
+    }
+    return outbound?.preFixedFareConfirmable === true;
+  }
+
   function buildOverallRouteSelectionSnapshot(overallRouteSelection){
     if(!overallRouteSelection){
       return null;
@@ -1014,9 +1053,14 @@
     if(structured){
       const outbound = structured.outboundRoutePlan || {};
       const returnLeg = structured.returnRoutePlan;
-      const confirmable = structured.preFixedFareScope === "outbound_and_return"
-        ? outbound.preFixedFareConfirmable === true && returnLeg?.preFixedFareConfirmable === true
-        : outbound.preFixedFareConfirmable === true;
+      const confirmable = resolveStructuredPreFixedFareConfirmable({
+        returnPlanType: structured.returnPlanType,
+        outboundRoutePlan: outbound,
+        returnRoutePlan: returnLeg,
+        overallRouteSelection: structured.overallRouteSelection
+          || state?.routePlan?.overallRouteSelection
+          || null
+      });
       const base = Object.assign({}, outbound, {
         routePlan: structured,
         outboundRoutePlan: structured.outboundRoutePlan,
@@ -1320,6 +1364,8 @@
     getEffectiveRideMinutes: getEffectiveRideMinutes,
     getReturnPlanTypeLabel: getReturnPlanTypeLabel,
     getReturnStopTypeLabel: getReturnStopTypeLabel,
-    buildStructuredRoutePlanSnapshot: buildStructuredRoutePlanSnapshot
+    buildStructuredRoutePlanSnapshot: buildStructuredRoutePlanSnapshot,
+    resolveOverallRouteSelectionConfirmable: resolveOverallRouteSelectionConfirmable,
+    resolveStructuredPreFixedFareConfirmable: resolveStructuredPreFixedFareConfirmable
   };
 })(typeof window !== "undefined" ? window : globalThis);

@@ -269,11 +269,12 @@
     const preFixedFareScope = returnPlanType === "return_pending" || !hasReturnLeg
       ? "outbound_only"
       : "outbound_and_return";
-    const outboundConfirmable = outboundLeg?.preFixedFareConfirmable === true;
-    const returnConfirmable = returnLeg?.preFixedFareConfirmable === true;
-    const preFixedFareConfirmable = returnPlanType === "return_pending"
-      ? outboundConfirmable
-      : (hasReturnLeg ? outboundConfirmable && returnConfirmable : outboundConfirmable);
+    const preFixedFareConfirmable = window.EstimateCalc.resolveStructuredPreFixedFareConfirmable({
+      returnPlanType: returnPlanType,
+      outboundRoutePlan: outboundLeg,
+      returnRoutePlan: returnLeg,
+      overallRouteSelection: opts.overallRouteSelection || null
+    });
 
     const routePlan = mirrorRoutePlanLegacyFields({
       tripType: opts.tripType || (isRoundTripActive() ? "round_trip" : "one_way"),
@@ -1169,6 +1170,7 @@
     if(!candidate || !routePlan){
       return routePlan;
     }
+    const confirmable = window.EstimateCalc.resolveStructuredPreFixedFareConfirmable(routePlan);
     return Object.assign({}, routePlan, {
       totalDistanceMeters: Number(candidate.totalDistanceMeters) || Number(routePlan.totalDistanceMeters) || 0,
       totalDurationSeconds: Number(candidate.totalDurationSeconds) || Number(routePlan.totalDurationSeconds) || 0,
@@ -1177,7 +1179,9 @@
       selectedRouteLabel: String(candidate.routeLabel || ""),
       selectedRouteDescription: String(candidate.routeDescription || ""),
       selectedRouteType: candidate.routeType || candidate.strategy || null,
-      selectedUsesToll: candidate.usesToll === true
+      selectedUsesToll: candidate.usesToll === true,
+      preFixedFareConfirmable: confirmable,
+      multipleRoutesAvailable: confirmable
     });
   }
 
