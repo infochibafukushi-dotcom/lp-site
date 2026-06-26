@@ -1,5 +1,15 @@
 (function(global){
   const ROUTE_PRESENTATION = {
+    time_priority: {
+      routeType: "time_priority",
+      routeLabel: "時間優先ルート",
+      routeDescription: "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。"
+    },
+    general_road_priority: {
+      routeType: "general_road_priority",
+      routeLabel: "一般道優先ルート",
+      routeDescription: "有料道路を使わず、一般道を優先して算定した走行予定ルートです。"
+    },
     recommended: {
       routeType: "recommended",
       routeLabel: "おすすめルート",
@@ -46,6 +56,11 @@
     return ROUTE_PRESENTATION[strategy] || null;
   }
 
+  function resolveTimePriorityLabel(route){
+    const usesToll = routeUsesToll(route) || route?.usesToll === true;
+    return usesToll ? "時間優先（有料道）" : "時間優先ルート";
+  }
+
   function getApiRouteSummary(route){
     if(route?.routeSummary && !isInternalRouteSummary(route.routeSummary)){
       return String(route.routeSummary).trim();
@@ -73,8 +88,14 @@
     const presentation = getPresentation(resolvedStrategy);
     const usesToll = routeUsesToll(route) || resolvedStrategy === "toll_allowed" || route?.roadType === "toll";
     const apiSummary = getApiRouteSummary(route);
-    const routeLabel = presentation?.routeLabel || String(route.routeLabel || "").trim() || "ルート候補";
-    const routeDescription = presentation?.routeDescription || String(route.routeDescription || "").trim();
+    let routeLabel = presentation?.routeLabel || String(route.routeLabel || "").trim() || "ルート候補";
+    let routeDescription = presentation?.routeDescription || String(route.routeDescription || "").trim();
+    if(resolvedStrategy === "time_priority"){
+      routeLabel = resolveTimePriorityLabel(route);
+    }
+    if(resolvedStrategy === "time_priority" && usesToll && !routeDescription.includes("別途必要")){
+      routeDescription = "所要時間を優先して算定した走行予定ルートです。有料道路料金は見積料金に含まれず、別途必要です。";
+    }
     return Object.assign({}, route, {
       routeStrategy: resolvedStrategy || route.routeStrategy || null,
       routeType: presentation?.routeType || resolvedStrategy || route.routeType || null,
@@ -86,11 +107,15 @@
   }
 
   function getRouteDisplayLabel(route, index){
+    const strategy = resolveStrategy(route);
+    if(strategy === "time_priority"){
+      return resolveTimePriorityLabel(route);
+    }
     const label = String(route?.routeLabel || "").trim();
     if(label){
       return label;
     }
-    const presentation = getPresentation(resolveStrategy(route));
+    const presentation = getPresentation(strategy);
     if(presentation){
       return presentation.routeLabel;
     }
@@ -118,6 +143,7 @@
     getRouteDisplayDescription: getRouteDisplayDescription,
     getPresentation: getPresentation,
     isInternalRouteSummary: isInternalRouteSummary,
-    getApiRouteSummary: getApiRouteSummary
+    getApiRouteSummary: getApiRouteSummary,
+    resolveTimePriorityLabel: resolveTimePriorityLabel
   };
 })(typeof window !== "undefined" ? window : globalThis);

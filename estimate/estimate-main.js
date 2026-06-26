@@ -1619,7 +1619,7 @@
       const description = getRouteDisplayDescription(route);
       const roadTypeLabel = getRoadTypeLabel(route.roadType || legPlan.roadType || state.roadType);
       const compactRoadTypeLabel = getCompactRoadTypeLabel(route.roadType || legPlan.roadType || state.roadType);
-      const tollNote = route.usesToll === true || route.routeStrategy === "toll_allowed"
+      const tollNote = route.usesToll === true || route.routeStrategy === "toll_allowed" || route.routeStrategy === "time_priority"
         ? "有料道路料金は見積料金に含まれず、別途必要です。"
         : "";
       const waypointLabel = route.intermediateWaypoint?.waypointLabel

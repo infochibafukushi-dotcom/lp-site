@@ -688,3 +688,4 @@ Phase 2-C の全体ルート PDF ブロックを拡張:
 | 日付 | 内容 |
 |------|------|
 | 2026-06-26 | 初版作成（Phase 3-A 設計のみ） |
+| 2026-06-26 | Phase 3-B 実装：`time_priority` / `general_road_priority` 取得・dedupe 最小見直し・証跡フィールド追加 |

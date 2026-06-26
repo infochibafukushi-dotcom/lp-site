@@ -125,12 +125,27 @@
       roadType: context.roadType || roadTypeFromModifiers(avoidTolls),
       avoidTolls: avoidTolls,
       avoidHighways: avoidHighways,
+      routingPreference: String(context.routingPreference || "TRAFFIC_AWARE"),
+      generationReason: String(context.generationReason || ""),
+      dedupeDecision: "kept",
       rawRouteIndex: Number(context.rawRouteIndex) || 0
     };
   }
 
+  function getRouteRoutingFingerprint(route){
+    return [
+      route?.avoidHighways === true ? "1" : "0",
+      route?.avoidTolls === true ? "1" : "0",
+      String(route?.routingPreference || "TRAFFIC_AWARE"),
+      String(route?.intermediateWaypoint?.waypointId || "")
+    ].join("|");
+  }
+
   function isDuplicateRoute(left, right){
     if(!left || !right){
+      return false;
+    }
+    if(getRouteRoutingFingerprint(left) !== getRouteRoutingFingerprint(right)){
       return false;
     }
     const polyLeft = String(left.encodedPolyline || "");
@@ -142,6 +157,9 @@
     const distRight = Number(right.distanceMeters) || 0;
     const durLeft = Number(left.durationSeconds) || 0;
     const durRight = Number(right.durationSeconds) || 0;
+    if(distLeft > 0 && distRight > 0 && distLeft === distRight && durLeft === durRight){
+      return true;
+    }
     if(distLeft > 0 && distRight > 0 && Math.abs(distLeft - distRight) < 100){
       if(Math.abs(durLeft - durRight) < 60){
         return true;
@@ -151,16 +169,6 @@
     const summaryRight = getRouteSummaryText(right);
     if(summaryLeft && summaryRight && summaryLeft === summaryRight){
       return true;
-    }
-    const waypointLeft = String(left?.intermediateWaypoint?.waypointId || "");
-    const waypointRight = String(right?.intermediateWaypoint?.waypointId || "");
-    if(waypointLeft && waypointRight && waypointLeft === waypointRight){
-      if(isDuplicateRoute(
-        Object.assign({}, left, { intermediateWaypoint: null }),
-        Object.assign({}, right, { intermediateWaypoint: null })
-      )){
-        return true;
-      }
     }
     return false;
   }
@@ -172,7 +180,9 @@
         return isDuplicateRoute(existing, route);
       });
       if(!duplicate){
-        deduped.push(route);
+        deduped.push(Object.assign({}, route, {
+          dedupeDecision: "kept"
+        }));
       }
     });
     return deduped;
@@ -268,6 +278,8 @@
         avoidTolls: userAvoidTolls,
         avoidHighways: userAvoidTolls,
         roadType: userAvoidTolls ? "general" : "toll",
+        routingPreference: "TRAFFIC_AWARE",
+        generationReason: index === 0 ? "recommended_route" : "pool_candidate_route",
         rawRouteIndex: index
       });
     });
@@ -347,11 +359,58 @@
       avoidTolls: userAvoidTolls,
       avoidHighways: false,
       roadType: userAvoidTolls ? "general" : "toll",
+      routingPreference: "TRAFFIC_AWARE",
+      generationReason: "arterial_road_route",
       intermediateWaypoint: waypoint,
       rawRouteIndex: 0
     }), "arterial_road");
     route.intermediateWaypoint = waypoint;
     return route;
+  }
+
+  async function fetchTimePriorityRoute(options, userAvoidTolls){
+    const rawRoutes = await fetchRoutesRequest(options, buildRoutesRequestBody(options, {
+      computeAlternativeRoutes: false,
+      avoidTolls: userAvoidTolls,
+      avoidHighways: false
+    })).catch(function(){
+      return [];
+    });
+    if(!rawRoutes.length){
+      return null;
+    }
+    return applyRoutePresentation(normalizeRawRoute(rawRoutes[0], {
+      routeStrategy: "time_priority",
+      avoidTolls: userAvoidTolls,
+      avoidHighways: false,
+      roadType: userAvoidTolls ? "general" : "toll",
+      routingPreference: "TRAFFIC_AWARE",
+      generationReason: "time_priority_route",
+      tollExcludedFromFare: true,
+      rawRouteIndex: 0
+    }), "time_priority");
+  }
+
+  async function fetchGeneralRoadPriorityRoute(options){
+    const rawRoutes = await fetchRoutesRequest(options, buildRoutesRequestBody(options, {
+      computeAlternativeRoutes: false,
+      avoidTolls: true,
+      avoidHighways: true
+    })).catch(function(){
+      return [];
+    });
+    if(!rawRoutes.length){
+      return null;
+    }
+    return applyRoutePresentation(normalizeRawRoute(rawRoutes[0], {
+      routeStrategy: "general_road_priority",
+      avoidTolls: true,
+      avoidHighways: true,
+      roadType: "general",
+      routingPreference: "TRAFFIC_AWARE",
+      generationReason: "general_road_priority_route",
+      rawRouteIndex: 0
+    }), "general_road_priority");
   }
 
   async function fetchTollAllowedRoute(options, recommendedRoute){
@@ -371,6 +430,8 @@
         roadType: "toll",
         tollPreference: "allow",
         tollExcludedFromFare: true,
+        routingPreference: "TRAFFIC_AWARE",
+        generationReason: "toll_allowed_route",
         rawRouteIndex: index
       });
       if(!routeUsesToll(normalized)){
@@ -588,23 +649,35 @@
     }
 
     const routeGenerationStrategies = [
+      "time_priority",
+      "general_road_priority",
       "recommended",
       "shorter_distance",
       "arterial_road",
       "toll_allowed"
     ];
 
+    const timePriorityRoute = await fetchTimePriorityRoute(options, userAvoidTolls);
+    const generalRoadPriorityRoute = await fetchGeneralRoadPriorityRoute(options);
     const recommendedPool = await fetchRecommendedPool(options, userAvoidTolls);
-    if(!recommendedPool.length){
+    if(!recommendedPool.length && !timePriorityRoute && !generalRoadPriorityRoute){
       throw new Error("ルートが見つかりませんでした。住所を確認してください。");
     }
 
-    const recommendedRoute = applyRoutePresentation(recommendedPool[0], "recommended");
-    const shorterDistanceRoute = pickShorterDistanceRoute(recommendedPool, recommendedRoute);
+    const recommendedRoute = recommendedPool.length
+      ? applyRoutePresentation(recommendedPool[0], "recommended")
+      : null;
+    const shorterDistanceRoute = recommendedRoute
+      ? pickShorterDistanceRoute(recommendedPool, recommendedRoute)
+      : null;
     const arterialRoute = await fetchArterialRoute(options, userAvoidTolls);
-    const tollAllowedRoute = await fetchTollAllowedRoute(options, recommendedRoute);
+    const tollAllowedRoute = recommendedRoute
+      ? await fetchTollAllowedRoute(options, recommendedRoute)
+      : await fetchTollAllowedRoute(options, timePriorityRoute);
 
     const assembled = [
+      timePriorityRoute,
+      generalRoadPriorityRoute,
       recommendedRoute,
       shorterDistanceRoute,
       arterialRoute,
@@ -613,7 +686,7 @@
 
     const deduped = assignRouteIds(dedupeRoutes(assembled)).slice(0, MAX_ROUTE_CANDIDATES);
     const preFixedFareConfirmable = deduped.length >= 2;
-    const primary = deduped[0] || recommendedRoute;
+    const primary = deduped[0] || timePriorityRoute || generalRoadPriorityRoute || recommendedRoute;
 
     return {
       distanceKm: primary.distanceKm,
