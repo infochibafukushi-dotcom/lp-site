@@ -1017,7 +1017,7 @@
       const confirmable = structured.preFixedFareScope === "outbound_and_return"
         ? outbound.preFixedFareConfirmable === true && returnLeg?.preFixedFareConfirmable === true
         : outbound.preFixedFareConfirmable === true;
-      return Object.assign({}, outbound, {
+      const base = Object.assign({}, outbound, {
         routePlan: structured,
         outboundRoutePlan: structured.outboundRoutePlan,
         returnRoutePlan: structured.returnRoutePlan,
@@ -1036,6 +1036,25 @@
         routeGenerationStrategies: [],
         fallbackReason: outbound.fallbackReason || null
       });
+      const overall = structured.overallRouteSelection || state?.routePlan?.overallRouteSelection || null;
+      const selectedOverallId = String(overall?.selectedOverallRouteId || "").trim();
+      if(selectedOverallId){
+        const overallCandidate = (overall?.overallRouteCandidates || []).find(function(candidate){
+          return String(candidate?.routeId || "") === selectedOverallId;
+        });
+        if(overallCandidate){
+          return Object.assign({}, base, {
+            selectedRouteLabel: String(overallCandidate.routeLabel || base.selectedRouteLabel || "") || null,
+            selectedRouteDescription: String(overallCandidate.routeDescription || base.selectedRouteDescription || "") || null,
+            selectedRouteType: overallCandidate.routeType || overallCandidate.strategy || base.selectedRouteType || null,
+            selectedUsesToll: overallCandidate.usesToll === true,
+            selectedRouteStrategy: overallCandidate.strategy || overallCandidate.routeType || base.selectedRouteStrategy || null,
+            totalDistanceMeters: Number(overallCandidate.totalDistanceMeters) || structured.totalDistanceMeters,
+            totalDurationSeconds: Number(overallCandidate.totalDurationSeconds) || structured.totalDurationSeconds
+          });
+        }
+      }
+      return base;
     }
 
     const routePlan = state?.routePlan;

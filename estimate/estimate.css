@@ -798,6 +798,20 @@
 .estimate-route-card-fare{
   color:#c62828;
 }
+.estimate-overall-route-selection{
+  border-color:#b8d4be;
+  background:#f3faf4;
+}
+.estimate-overall-route-path{
+  margin:0 0 8px;
+  font-size:12px;
+  line-height:1.6;
+  color:#355c3a;
+  font-weight:600;
+}
+.estimate-overall-route-card .estimate-route-card-compact-head{
+  color:#2e6b3a;
+}
 .estimate-route-select-btn{
   width:100%;
   padding:10px 12px;

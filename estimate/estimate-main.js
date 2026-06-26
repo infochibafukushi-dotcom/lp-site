@@ -308,7 +308,8 @@
       String(state.distanceKm),
       state.roadType,
       String(state.routePlan?.outboundRoutePlan?.selectedRouteId || state.routePlan?.selectedRouteId || ""),
-      String(state.routePlan?.returnRoutePlan?.selectedRouteId || "")
+      String(state.routePlan?.returnRoutePlan?.selectedRouteId || ""),
+      String(state.routePlan?.overallRouteSelection?.selectedOverallRouteId || "")
     ].join("|");
   }
 
@@ -1111,6 +1112,96 @@
     return state.routePlan?.preFixedFareConfirmable === true;
   }
 
+  function getOverallRouteSelection(routePlan){
+    return routePlan?.overallRouteSelection || null;
+  }
+
+  function getOverallRouteCandidates(routePlan){
+    const overall = getOverallRouteSelection(routePlan);
+    return Array.isArray(overall?.overallRouteCandidates) ? overall.overallRouteCandidates : [];
+  }
+
+  function requiresOverallRouteSelection(routePlan){
+    if(getActiveReturnPlanType() !== "return_with_stop" || !isPreFixedFareMode()){
+      return false;
+    }
+    return getOverallRouteCandidates(routePlan).length >= 2;
+  }
+
+  function hasOverallRouteSelected(routePlan){
+    const overall = getOverallRouteSelection(routePlan);
+    return Boolean(String(overall?.selectedOverallRouteId || "").trim());
+  }
+
+  function isOverallRouteSelectionMode(routePlan){
+    return requiresOverallRouteSelection(routePlan);
+  }
+
+  function getOverallRoutePathLabel(routePlan){
+    const overall = getOverallRouteSelection(routePlan);
+    const segments = Array.isArray(overall?.commonSegments) ? overall.commonSegments : [];
+    const selectable = overall?.selectableSegment || null;
+    const outbound = segments.find(function(segment){
+      return segment?.key === "outbound";
+    });
+    const returnCommon = segments.find(function(segment){
+      return segment?.key === "return_common";
+    });
+    const home = String(outbound?.originAddress || state.originAddress || "出発地").trim();
+    const goal = String(outbound?.destinationAddress || state.destinationAddress || "目的地").trim();
+    const stop = String(returnCommon?.destinationAddress || selectable?.originAddress || state.returnStopAddress || "立ち寄り").trim();
+    return home + " → " + goal + " → " + stop + " → " + home;
+  }
+
+  function getSelectedOverallRouteCandidate(routePlan){
+    const overall = getOverallRouteSelection(routePlan);
+    const selectedId = String(overall?.selectedOverallRouteId || "").trim();
+    if(!selectedId){
+      return null;
+    }
+    return getOverallRouteCandidates(routePlan).find(function(candidate){
+      return String(candidate?.routeId || "") === selectedId;
+    }) || null;
+  }
+
+  function applySelectedOverallToRoutePlan(routePlan){
+    const candidate = getSelectedOverallRouteCandidate(routePlan);
+    if(!candidate || !routePlan){
+      return routePlan;
+    }
+    return Object.assign({}, routePlan, {
+      totalDistanceMeters: Number(candidate.totalDistanceMeters) || Number(routePlan.totalDistanceMeters) || 0,
+      totalDurationSeconds: Number(candidate.totalDurationSeconds) || Number(routePlan.totalDurationSeconds) || 0,
+      routeLabel: String(candidate.routeLabel || routePlan.routeLabel || ""),
+      routeDescription: String(candidate.routeDescription || routePlan.routeDescription || ""),
+      selectedRouteLabel: String(candidate.routeLabel || ""),
+      selectedRouteDescription: String(candidate.routeDescription || ""),
+      selectedRouteType: candidate.routeType || candidate.strategy || null,
+      selectedUsesToll: candidate.usesToll === true
+    });
+  }
+
+  function isRouteReviewComplete(routePlan){
+    if(!routePlan){
+      return false;
+    }
+    const outbound = routePlan.outboundRoutePlan || routePlan;
+    if(outbound && isLegPreFixedFareConfirmable(outbound)){
+      return false;
+    }
+    if(isOverallRouteSelectionMode(routePlan)){
+      if(!hasOverallRouteSelected(routePlan)){
+        return false;
+      }
+      return true;
+    }
+    const returnLeg = routePlan.returnRoutePlan;
+    if(returnLeg && isLegPreFixedFareConfirmable(returnLeg)){
+      return false;
+    }
+    return true;
+  }
+
   function applyRouteToLegPlan(legPlan, route){
     if(!legPlan || !route){
       return legPlan;
@@ -1195,13 +1286,17 @@
     });
   }
 
-  function rebuildRoutePlanFromLegs(outboundLeg, returnLeg){
+  function rebuildRoutePlanFromLegs(outboundLeg, returnLeg, opts){
     const existingPlan = state.routePlan || {};
+    const extras = opts || {};
     const splitContext = existingPlan.returnWithStopSplitContext || null;
+    const priorOverall = extras.overallRouteSelection || existingPlan.overallRouteSelection || null;
     const overallRouteSelection = splitContext
-      ? resolveReturnWithStopOverallRouteSelection(outboundLeg, existingPlan)
-      : (existingPlan.overallRouteSelection || null);
-    return buildStructuredRoutePlan(outboundLeg, returnLeg, {
+      ? resolveReturnWithStopOverallRouteSelection(outboundLeg, Object.assign({}, existingPlan, {
+        overallRouteSelection: priorOverall
+      }))
+      : (priorOverall || null);
+    let routePlan = buildStructuredRoutePlan(outboundLeg, returnLeg, {
       returnPlanType: getActiveReturnPlanType(),
       tripType: isRoundTripActive() ? "round_trip" : "one_way",
       pickup: existingPlan.pickup || {
@@ -1216,6 +1311,7 @@
       overallRouteSelection: overallRouteSelection,
       returnWithStopSplitContext: splitContext
     });
+    return applySelectedOverallToRoutePlan(routePlan);
   }
 
   function syncStateFromRoutePlan(routePlan){
@@ -1304,6 +1400,9 @@
     if(outbound && isLegPreFixedFareConfirmable(outbound)){
       return true;
     }
+    if(isOverallRouteSelectionMode(routePlan)){
+      return false;
+    }
     const returnLeg = routePlan.returnRoutePlan;
     if(returnLeg && isLegPreFixedFareConfirmable(returnLeg)){
       return true;
@@ -1313,6 +1412,9 @@
 
   function shouldAutoAcknowledgeRouteReview(routePlan){
     if(!routePlan || !isPreFixedFareMode()){
+      return false;
+    }
+    if(requiresOverallRouteSelection(routePlan)){
       return false;
     }
     return !anyLegRequiresRouteSelection(routePlan);
@@ -1402,9 +1504,86 @@
       };
     }
     invalidateEstimateNumberIfChanged();
-    state.distanceRouteReviewed = true;
+    state.distanceRouteReviewed = isRouteReviewComplete(state.routePlan);
     state.lastActiveStepId = isFlowComplete() ? "result" : "distance";
     renderPage();
+  }
+
+  function selectOverallRoute(routeId){
+    if(!state.routePlan || !requiresOverallRouteSelection(state.routePlan)){
+      return;
+    }
+    const overall = getOverallRouteSelection(state.routePlan);
+    const candidate = getOverallRouteCandidates(state.routePlan).find(function(item){
+      return String(item?.routeId || "") === String(routeId || "");
+    });
+    if(!overall || !candidate){
+      return;
+    }
+    const updatedOverall = Object.assign({}, overall, {
+      selectedOverallRouteId: String(routeId),
+      selectionPhase: "completed"
+    });
+    const outboundLeg = state.routePlan.outboundRoutePlan;
+    const returnLeg = state.routePlan.returnRoutePlan;
+    syncStateFromRoutePlan(rebuildRoutePlanFromLegs(outboundLeg, returnLeg, {
+      overallRouteSelection: updatedOverall
+    }));
+    invalidateEstimateNumberIfChanged();
+    state.distanceRouteReviewed = isRouteReviewComplete(state.routePlan);
+    state.lastActiveStepId = isFlowComplete() ? "result" : "distance";
+    renderPage();
+  }
+
+  function renderOverallRouteSelectionSection(){
+    const routePlan = state.routePlan;
+    if(!routePlan || !requiresOverallRouteSelection(routePlan)){
+      return "";
+    }
+    const candidates = getOverallRouteCandidates(routePlan);
+    const overall = getOverallRouteSelection(routePlan);
+    const selectedId = String(overall?.selectedOverallRouteId || "");
+    const pathLabel = getOverallRoutePathLabel(routePlan);
+    const description = (
+      "復路は、目的地 → 立ち寄り先 → 出発地の指定ルートで距離を算定します。" +
+      "目的地 → 立ち寄り先 までは共通です。" +
+      "立ち寄り先 → 出発地 の区間で異なる走行予定ルートを含め、以下の全体走行予定ルートから選択できます。"
+    );
+    const cards = candidates.map(function(candidate, index){
+      const routeId = String(candidate.routeId || "");
+      const isSelected = routeId && routeId === selectedId;
+      const routeLabel = String(candidate.routeLabel || ("全体候補 " + (index + 1)));
+      const routeDescription = String(candidate.routeDescription || "");
+      const distanceLabel = formatRouteDistanceMeters(candidate.totalDistanceMeters);
+      const durationLabel = formatRouteDurationSeconds(candidate.totalDurationSeconds);
+      const tollLabel = candidate.usesToll === true ? "有料道路利用" : "一般道利用";
+      const tollNote = candidate.usesToll === true || candidate.strategy === "toll_allowed" || candidate.routeType === "toll_allowed"
+        ? '<p class="estimate-route-card-toll-note">有料道路料金は見積料金に含まれず、別途必要です。</p>'
+        : "";
+      return (
+        '<article class="estimate-route-card estimate-route-card--compact estimate-overall-route-card' + (isSelected ? " is-selected" : "") + '">' +
+          '<div class="estimate-route-card-compact-head">全体候補：' + escapeHtml(routeLabel) + "</div>" +
+          '<p class="estimate-overall-route-path">' + escapeHtml(pathLabel) + "</p>" +
+          (routeDescription
+            ? '<p class="estimate-route-card-description estimate-route-card-description--compact">' + escapeHtml(routeDescription) + "</p>"
+            : "") +
+          '<div class="estimate-route-card-compact-meta">' +
+            escapeHtml(tollLabel) + "　合計 " + escapeHtml(distanceLabel || "-") + "　" + escapeHtml(durationLabel || "-") +
+          "</div>" +
+          tollNote +
+          '<button type="button" class="estimate-route-select-btn" data-select-overall-route-id="' + escapeAttr(routeId) + '"' + (isSelected ? " disabled" : "") + ">" + (isSelected ? "選択中" : "このルートを選択") + "</button>" +
+        "</article>"
+      );
+    }).join("");
+
+    return (
+      '<section class="estimate-route-selection estimate-overall-route-selection" aria-label="全体走行予定ルートの選択">' +
+        '<h4 class="estimate-route-selection-title">全体走行予定ルートの選択</h4>' +
+        '<p class="estimate-route-selection-note">' + escapeHtml(description) + "</p>" +
+        '<p class="estimate-route-selection-note">2件以上の全体走行予定ルートから1つを選択してください。</p>' +
+        '<div class="estimate-route-card-list">' + cards + "</div>" +
+      "</section>"
+    );
   }
 
   function renderRouteSelectionCards(legPlan, legKey, sectionTitle, options){
@@ -1512,13 +1691,19 @@
     }
 
     if(state.routePlan.outboundRoutePlan){
-      const outboundSection = renderRouteSelectionCards(
-        state.routePlan.outboundRoutePlan,
-        "outbound",
-        "往路の走行予定ルートの選択",
-        selectionOptions
-      );
-      const returnSection = state.routePlan.returnRoutePlan
+      const outboundNeedsSelection = isLegPreFixedFareConfirmable(state.routePlan.outboundRoutePlan);
+      const outboundSection = outboundNeedsSelection
+        ? renderRouteSelectionCards(
+          state.routePlan.outboundRoutePlan,
+          "outbound",
+          "往路の走行予定ルートの選択",
+          selectionOptions
+        )
+        : "";
+      const overallSection = isOverallRouteSelectionMode(state.routePlan)
+        ? renderOverallRouteSelectionSection()
+        : "";
+      const returnSection = (!isOverallRouteSelectionMode(state.routePlan) && state.routePlan.returnRoutePlan)
         ? renderRouteSelectionCards(
           state.routePlan.returnRoutePlan,
           "return",
@@ -1529,7 +1714,7 @@
       const pendingNotice = getActiveReturnPlanType() === "return_pending"
         ? '<p class="estimate-route-selection-warning">復路は帰り未定のため確認対応です。往路のみ事前確定運賃候補として算定します。</p>'
         : "";
-      if(!outboundSection && !returnSection){
+      if(!outboundSection && !returnSection && !overallSection){
         return (
           '<section class="estimate-route-selection estimate-route-selection--fallback" aria-label="ルート候補の選択">' +
             '<h4 class="estimate-route-selection-title">走行予定ルートの選択</h4>' +
@@ -1537,7 +1722,7 @@
           "</section>"
         );
       }
-      return pendingNotice + outboundSection + returnSection;
+      return pendingNotice + outboundSection + overallSection + returnSection;
     }
 
     const routes = getRouteCandidatesFromPlan(state.routePlan);
@@ -1567,6 +1752,9 @@
     }
     if(anyLegRequiresRouteSelection(state.routePlan)){
       return '<p class="estimate-route-selection-note">ルート候補を選択すると見積結果へ進みます。</p>';
+    }
+    if(requiresOverallRouteSelection(state.routePlan) && !hasOverallRouteSelected(state.routePlan)){
+      return '<p class="estimate-route-selection-note">全体走行予定ルートを選択すると見積結果へ進みます。</p>';
     }
     const reviewNotice = getReservationReviewNotice();
     return (
@@ -2725,6 +2913,14 @@
         const routeId = routeSelectBtn.getAttribute("data-select-route-id");
         const legKey = routeSelectBtn.getAttribute("data-select-route-leg") || "outbound";
         if(routeId) selectRoute(routeId, legKey);
+        return;
+      }
+      const overallSelectBtn = event.target.closest("[data-select-overall-route-id]");
+      if(overallSelectBtn){
+        event.preventDefault();
+        if(overallSelectBtn.disabled) return;
+        const overallRouteId = overallSelectBtn.getAttribute("data-select-overall-route-id");
+        if(overallRouteId) selectOverallRoute(overallRouteId);
         return;
       }
       const routeAckBtn = event.target.closest("[data-distance-route-acknowledge]");
