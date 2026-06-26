@@ -1,0 +1,680 @@
+{
+  "fareMode": "pre_fixed_fare",
+  "distancePricing": {
+    "mode": "patternA",
+    "patternA": {
+      "initialDistanceKm": 1.06,
+      "initialFare": 500,
+      "incrementDistanceKm": 0.221,
+      "incrementFare": 100
+    },
+    "patternB": {
+      "perKmRate": 450
+    }
+  },
+  "fareComponents": {
+    "time": [
+      {
+        "key": "timeBaseFare",
+        "label": "時間制運賃",
+        "calculator": "time_block",
+        "params": {
+          "baseMinutes": 30,
+          "baseAmount": 5000,
+          "perBlockMinutes": 15,
+          "perBlockAmount": 1200
+        }
+      },
+      {
+        "key": "pickupFee",
+        "label": "迎車料金",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "pickupFee"
+      },
+      {
+        "key": "specialVehicleFee",
+        "label": "特殊車両使用料",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "specialVehicleFee"
+      }
+    ],
+    "distance": [
+      {
+        "key": "pickupFee",
+        "label": "迎車料金",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "pickupFee"
+      },
+      {
+        "key": "specialVehicleFee",
+        "label": "特殊車両使用料",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "specialVehicleFee"
+      },
+      {
+        "key": "distanceFare",
+        "label": "距離運賃",
+        "calculator": "distance_pricing_ref",
+        "pricingRef": "distancePricing"
+      }
+    ],
+    "distance_time": [
+      {
+        "key": "pickupFee",
+        "label": "迎車料金",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "pickupFee"
+      },
+      {
+        "key": "specialVehicleFee",
+        "label": "特殊車両使用料",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "specialVehicleFee"
+      },
+      {
+        "key": "distanceFare",
+        "label": "距離運賃",
+        "calculator": "distance_pricing_ref",
+        "pricingRef": "distancePricing"
+      },
+      {
+        "key": "timeAdjustment",
+        "label": "予定時間加算（概算）",
+        "calculator": "time_block",
+        "params": {
+          "baseMinutes": 20,
+          "baseAmount": 0,
+          "perBlockMinutes": 10,
+          "perBlockAmount": 300
+        }
+      }
+    ],
+    "pre_fixed_fare": [
+      {
+        "key": "pickupFee",
+        "label": "迎車料金",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "pickupFee"
+      },
+      {
+        "key": "specialVehicleFee",
+        "label": "特殊車両使用料",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "specialVehicleFee"
+      },
+      {
+        "key": "distanceFare",
+        "label": "距離運賃",
+        "calculator": "distance_pricing_ref",
+        "pricingRef": "distancePricing"
+      },
+      {
+        "key": "timeAdjustment",
+        "label": "予定時間加算（概算）",
+        "calculator": "time_block",
+        "params": {
+          "baseMinutes": 20,
+          "baseAmount": 0,
+          "perBlockMinutes": 10,
+          "perBlockAmount": 300
+        }
+      }
+    ]
+  },
+  "fareBasis": {
+    "fareMode": "pre_fixed_fare",
+    "fareModeLabel": "事前確定運賃",
+    "durationMinutes": 3,
+    "distanceKm": 0.6,
+    "distanceMultiplier": 1,
+    "sections": [
+      {
+        "key": "pickupFee",
+        "title": "迎車料金",
+        "rules": [
+          "迎車料金 800円"
+        ],
+        "usage": "",
+        "amountLabel": "迎車料金",
+        "amount": 800
+      },
+      {
+        "key": "specialVehicleFee",
+        "title": "特殊車両使用料",
+        "rules": [
+          "特殊車両使用料 1000円"
+        ],
+        "usage": "",
+        "amountLabel": "特殊車両使用料",
+        "amount": 1000
+      },
+      {
+        "key": "distanceFare",
+        "title": "距離部分",
+        "rules": [
+          "初乗 1.06km まで 500円",
+          "以後 221m ごとに 100円加算",
+          "認可距離制運賃 500円 × 平準化係数 1.2 = 600円"
+        ],
+        "usage": "送迎方法：片道\n往路距離：0.6km\n計算対象距離：0.6km",
+        "usageLines": [
+          {
+            "label": "送迎方法",
+            "value": "片道"
+          },
+          {
+            "label": "往路距離",
+            "value": "0.6km"
+          },
+          {
+            "label": "計算対象距離",
+            "value": "0.6km"
+          }
+        ],
+        "amountLabel": "距離運賃",
+        "amount": 600
+      },
+      {
+        "key": "timeAdjustment",
+        "title": "予定時間加算（概算）",
+        "rules": [
+          "初回 20分 0円",
+          "以後 10分ごとに 300円加算"
+        ],
+        "usage": "ルート予定時間: 3分（Google Routes API の概算。認可メーターの低速走行加算とは異なります）",
+        "amountLabel": "予定時間加算（概算）",
+        "amount": 0
+      }
+    ],
+    "notices": [
+      "表示は見積時点の運賃設定に基づく計算根拠です。",
+      "時間加算はルート予定時間に基づく概算です。実走行では認可メーター（低速走行時の時間距離併用）が適用されます。",
+      "待機時間は運賃計算に含まれません。",
+      "距離運賃には交通圏平準化係数（1.2）を適用しています。介助料・待機料・実費には適用しません。"
+    ]
+  },
+  "fixedFareTotal": 2400,
+  "fixedFareBreakdown": [
+    {
+      "key": "pickupFee",
+      "label": "迎車料金",
+      "amount": 800,
+      "calculator": "fixed_fee_ref"
+    },
+    {
+      "key": "specialVehicleFee",
+      "label": "特殊車両使用料",
+      "amount": 1000,
+      "calculator": "fixed_fee_ref"
+    },
+    {
+      "key": "distanceFare",
+      "label": "距離運賃",
+      "amount": 600,
+      "calculator": "distance_pricing_ref"
+    }
+  ],
+  "pickupFee": 800,
+  "specialVehicleFeeEnabled": true,
+  "specialVehicleFeeAmount": 1000,
+  "serviceFees": [
+    {
+      "key": "specialVehicleFee",
+      "label": "特殊車両使用料",
+      "amount": 1000
+    },
+    {
+      "key": "assistanceFee",
+      "label": "介助料金",
+      "amount": 1100
+    }
+  ],
+  "expenses": [],
+  "roadType": "general",
+  "distanceKm": 0.6,
+  "billedDistanceKm": 0.6,
+  "routePlan": {
+    "tripType": "one_way",
+    "returnPlanType": null,
+    "outboundRoutePlan": {
+      "origin": {
+        "address": "パールホテル新宿曙橋"
+      },
+      "destination": {
+        "address": "東京女子医科大学病院"
+      },
+      "waypoint": null,
+      "distanceMeters": 612,
+      "durationSeconds": 155,
+      "selectedRouteId": "route_0",
+      "selectedRoute": {
+        "routeId": "route_0",
+        "routeLabel": "時間優先ルート",
+        "routeDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+        "routeSource": "google_routes",
+        "routeStrategy": "time_priority",
+        "distanceMeters": 612,
+        "durationSeconds": 155,
+        "distanceKm": 0.6,
+        "durationMinutes": 3,
+        "encodedPolyline": "wozxE{exsYkBj@mAn@s@d@c@h@gA~@SJ}D~DyCq@_@Q]_@GKRM`@{@MKVk@AIACOX",
+        "routeLabels": [
+          "DEFAULT_ROUTE"
+        ],
+        "routeToken": "Ct8BCmoyaBpOChQCFgUhorBmtAsAt6wH1L4HP68DABIU3QeTcVwaAXPKzu4K1k3bZxPZ1FkaBQBZBgMXKgVzMF4FYT2grI88RZY0Aj9I0YeKnO2w1rZuIhZrUTgtYW9IY09mVG1yN3dQdWEtVUdREAUaWApWChgKDQoCCAERAAAAAACAZkARILByaBEclUASFAgAEAMQBhATEBIQARgCQgQaAggFGgYKBAgCEAIiGgoWa1E4LWFyM0JPZlRtcjd3UHVhLVVHUXABKAEiFQCJilHRDQxStUpdqLmXYtZ1Kp0fpxoYCgoNkIBGFRXnskdTEgoNPoFGFRXQtUdT",
+        "routeSummary": "DEFAULT_ROUTE",
+        "tollInfo": null,
+        "tollPreference": null,
+        "tollExcludedFromFare": true,
+        "intermediateWaypoint": null,
+        "routeLegs": [
+          {
+            "legIndex": 0,
+            "distanceMeters": 612,
+            "durationSeconds": 155,
+            "encodedPolyline": "wozxE{exsYkBj@mAn@s@d@c@h@gA~@SJ}D~DyCq@_@Q]_@GKRM`@{@MKVk@AIACOX",
+            "startLatLng": {
+              "lat": 35.6941968,
+              "lng": 139.7207783
+            },
+            "endLatLng": {
+              "lat": 35.6978785,
+              "lng": 139.7197332
+            }
+          }
+        ],
+        "roadType": "general",
+        "avoidTolls": true,
+        "avoidHighways": false,
+        "routingPreference": "TRAFFIC_AWARE",
+        "generationReason": "time_priority_route",
+        "dedupeDecision": "kept",
+        "rawRouteIndex": 0,
+        "routeType": "time_priority",
+        "usesToll": false
+      },
+      "selectedRouteLabel": "時間優先ルート",
+      "selectedRouteDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+      "selectedRouteType": "time_priority",
+      "selectedUsesToll": false,
+      "selectedRouteIndex": 0,
+      "selectedRouteStrategy": "time_priority",
+      "selectedRouteSource": "google_routes",
+      "encodedPolyline": "wozxE{exsYkBj@mAn@s@d@c@h@gA~@SJ}D~DyCq@_@Q]_@GKRM`@{@MKVk@AIACOX",
+      "routeToken": "Ct8BCmoyaBpOChQCFgUhorBmtAsAt6wH1L4HP68DABIU3QeTcVwaAXPKzu4K1k3bZxPZ1FkaBQBZBgMXKgVzMF4FYT2grI88RZY0Aj9I0YeKnO2w1rZuIhZrUTgtYW9IY09mVG1yN3dQdWEtVUdREAUaWApWChgKDQoCCAERAAAAAACAZkARILByaBEclUASFAgAEAMQBhATEBIQARgCQgQaAggFGgYKBAgCEAIiGgoWa1E4LWFyM0JPZlRtcjd3UHVhLVVHUXABKAEiFQCJilHRDQxStUpdqLmXYtZ1Kp0fpxoYCgoNkIBGFRXnskdTEgoNPoFGFRXQtUdT",
+      "routeSummary": "DEFAULT_ROUTE",
+      "tollInfo": null,
+      "tollPreference": null,
+      "tollExcludedFromFare": true,
+      "intermediateWaypoint": null,
+      "roadType": "general",
+      "routeCandidates": [
+        {
+          "routeId": "route_0",
+          "routeIndex": 0,
+          "label": "時間優先ルート",
+          "routeLabel": "時間優先ルート",
+          "routeDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+          "routeType": "time_priority",
+          "routeStrategy": "time_priority",
+          "strategy": "time_priority",
+          "routeSource": "google_routes",
+          "distanceMeters": 612,
+          "durationSeconds": 155,
+          "distanceKm": 0.6,
+          "encodedPolyline": "wozxE{exsYkBj@mAn@s@d@c@h@gA~@SJ}D~DyCq@_@Q]_@GKRM`@{@MKVk@AIACOX",
+          "routeToken": "Ct8BCmoyaBpOChQCFgUhorBmtAsAt6wH1L4HP68DABIU3QeTcVwaAXPKzu4K1k3bZxPZ1FkaBQBZBgMXKgVzMF4FYT2grI88RZY0Aj9I0YeKnO2w1rZuIhZrUTgtYW9IY09mVG1yN3dQdWEtVUdREAUaWApWChgKDQoCCAERAAAAAACAZkARILByaBEclUASFAgAEAMQBhATEBIQARgCQgQaAggFGgYKBAgCEAIiGgoWa1E4LWFyM0JPZlRtcjd3UHVhLVVHUXABKAEiFQCJilHRDQxStUpdqLmXYtZ1Kp0fpxoYCgoNkIBGFRXnskdTEgoNPoFGFRXQtUdT",
+          "routeSummary": "DEFAULT_ROUTE",
+          "roadType": "general",
+          "avoidTolls": true,
+          "avoidHighways": false,
+          "routingPreference": "TRAFFIC_AWARE",
+          "generationReason": "time_priority_route",
+          "dedupeDecision": "kept",
+          "usesToll": false,
+          "tollInfo": null,
+          "tollPreference": null,
+          "tollExcludedFromFare": true,
+          "intermediateWaypoint": null
+        },
+        {
+          "routeId": "route_1",
+          "routeIndex": 1,
+          "label": "一般道優先ルート",
+          "routeLabel": "一般道優先ルート",
+          "routeDescription": "有料道路を使わず、一般道を優先して算定した走行予定ルートです。",
+          "routeType": "general_road_priority",
+          "routeStrategy": "general_road_priority",
+          "strategy": "general_road_priority",
+          "routeSource": "google_routes",
+          "distanceMeters": 612,
+          "durationSeconds": 155,
+          "distanceKm": 0.6,
+          "encodedPolyline": "wozxE{exsYkBj@mAn@s@d@c@h@gA~@SJ}D~DyCq@_@Q]_@GKRM`@{@MKVk@AIACOX",
+          "routeToken": "CuMBCmsyaRpOChQCFgUhorBmtAsAt6wH1L4HP68DABIU3QeTcVwaAXPKzu4K1k3bZxPZ1FkaBQBZBgMXKgVzMF4FYT2grI88RZY0Aj9I0YeKnO2w1rZuIhdrZzgtYXZLSUJaaUJyN3dQenZ1RWtBZxAFGlsKWQoYCg0KAggBEQAAAAAAgGZAESCwcmgRHJVAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXa2c4LWF0MzFCSmlCcjd3UHp2dUVrQWdwASgBIhUAiYpR0cs76kHub5BYLYZjNWVdpHMaGAoKDZCARhUV57JHUxIKDT6BRhUV0LVHUw",
+          "routeSummary": "DEFAULT_ROUTE",
+          "roadType": "general",
+          "avoidTolls": true,
+          "avoidHighways": true,
+          "routingPreference": "TRAFFIC_AWARE",
+          "generationReason": "general_road_priority_route",
+          "dedupeDecision": "kept",
+          "usesToll": false,
+          "tollInfo": null,
+          "tollPreference": null,
+          "tollExcludedFromFare": false,
+          "intermediateWaypoint": null
+        }
+      ],
+      "preFixedFareConfirmable": true,
+      "routeCandidateCount": 2,
+      "distinctRouteCount": 2,
+      "fallbackReason": null,
+      "selectedAt": "2026-06-26T05:35:19.287Z"
+    },
+    "returnRoutePlan": null,
+    "overallRouteSelection": null,
+    "totalDistanceMeters": 612,
+    "totalDurationSeconds": 155,
+    "preFixedFareScope": "outbound_only",
+    "returnFareStatus": null
+  },
+  "tripType": "one_way",
+  "returnPlanType": null,
+  "outboundRoutePlan": {
+    "origin": {
+      "address": "パールホテル新宿曙橋"
+    },
+    "destination": {
+      "address": "東京女子医科大学病院"
+    },
+    "waypoint": null,
+    "distanceMeters": 612,
+    "durationSeconds": 155,
+    "selectedRouteId": "route_0",
+    "selectedRoute": {
+      "routeId": "route_0",
+      "routeLabel": "時間優先ルート",
+      "routeDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+      "routeSource": "google_routes",
+      "routeStrategy": "time_priority",
+      "distanceMeters": 612,
+      "durationSeconds": 155,
+      "distanceKm": 0.6,
+      "durationMinutes": 3,
+      "encodedPolyline": "wozxE{exsYkBj@mAn@s@d@c@h@gA~@SJ}D~DyCq@_@Q]_@GKRM`@{@MKVk@AIACOX",
+      "routeLabels": [
+        "DEFAULT_ROUTE"
+      ],
+      "routeToken": "Ct8BCmoyaBpOChQCFgUhorBmtAsAt6wH1L4HP68DABIU3QeTcVwaAXPKzu4K1k3bZxPZ1FkaBQBZBgMXKgVzMF4FYT2grI88RZY0Aj9I0YeKnO2w1rZuIhZrUTgtYW9IY09mVG1yN3dQdWEtVUdREAUaWApWChgKDQoCCAERAAAAAACAZkARILByaBEclUASFAgAEAMQBhATEBIQARgCQgQaAggFGgYKBAgCEAIiGgoWa1E4LWFyM0JPZlRtcjd3UHVhLVVHUXABKAEiFQCJilHRDQxStUpdqLmXYtZ1Kp0fpxoYCgoNkIBGFRXnskdTEgoNPoFGFRXQtUdT",
+      "routeSummary": "DEFAULT_ROUTE",
+      "tollInfo": null,
+      "tollPreference": null,
+      "tollExcludedFromFare": true,
+      "intermediateWaypoint": null,
+      "routeLegs": [
+        {
+          "legIndex": 0,
+          "distanceMeters": 612,
+          "durationSeconds": 155,
+          "encodedPolyline": "wozxE{exsYkBj@mAn@s@d@c@h@gA~@SJ}D~DyCq@_@Q]_@GKRM`@{@MKVk@AIACOX",
+          "startLatLng": {
+            "lat": 35.6941968,
+            "lng": 139.7207783
+          },
+          "endLatLng": {
+            "lat": 35.6978785,
+            "lng": 139.7197332
+          }
+        }
+      ],
+      "roadType": "general",
+      "avoidTolls": true,
+      "avoidHighways": false,
+      "routingPreference": "TRAFFIC_AWARE",
+      "generationReason": "time_priority_route",
+      "dedupeDecision": "kept",
+      "rawRouteIndex": 0,
+      "routeType": "time_priority",
+      "usesToll": false
+    },
+    "selectedRouteLabel": "時間優先ルート",
+    "selectedRouteDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+    "selectedRouteType": "time_priority",
+    "selectedUsesToll": false,
+    "selectedRouteIndex": 0,
+    "selectedRouteStrategy": "time_priority",
+    "selectedRouteSource": "google_routes",
+    "encodedPolyline": "wozxE{exsYkBj@mAn@s@d@c@h@gA~@SJ}D~DyCq@_@Q]_@GKRM`@{@MKVk@AIACOX",
+    "routeToken": "Ct8BCmoyaBpOChQCFgUhorBmtAsAt6wH1L4HP68DABIU3QeTcVwaAXPKzu4K1k3bZxPZ1FkaBQBZBgMXKgVzMF4FYT2grI88RZY0Aj9I0YeKnO2w1rZuIhZrUTgtYW9IY09mVG1yN3dQdWEtVUdREAUaWApWChgKDQoCCAERAAAAAACAZkARILByaBEclUASFAgAEAMQBhATEBIQARgCQgQaAggFGgYKBAgCEAIiGgoWa1E4LWFyM0JPZlRtcjd3UHVhLVVHUXABKAEiFQCJilHRDQxStUpdqLmXYtZ1Kp0fpxoYCgoNkIBGFRXnskdTEgoNPoFGFRXQtUdT",
+    "routeSummary": "DEFAULT_ROUTE",
+    "tollInfo": null,
+    "tollPreference": null,
+    "tollExcludedFromFare": true,
+    "intermediateWaypoint": null,
+    "roadType": "general",
+    "routeCandidates": [
+      {
+        "routeId": "route_0",
+        "routeIndex": 0,
+        "label": "時間優先ルート",
+        "routeLabel": "時間優先ルート",
+        "routeDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+        "routeType": "time_priority",
+        "routeStrategy": "time_priority",
+        "strategy": "time_priority",
+        "routeSource": "google_routes",
+        "distanceMeters": 612,
+        "durationSeconds": 155,
+        "distanceKm": 0.6,
+        "encodedPolyline": "wozxE{exsYkBj@mAn@s@d@c@h@gA~@SJ}D~DyCq@_@Q]_@GKRM`@{@MKVk@AIACOX",
+        "routeToken": "Ct8BCmoyaBpOChQCFgUhorBmtAsAt6wH1L4HP68DABIU3QeTcVwaAXPKzu4K1k3bZxPZ1FkaBQBZBgMXKgVzMF4FYT2grI88RZY0Aj9I0YeKnO2w1rZuIhZrUTgtYW9IY09mVG1yN3dQdWEtVUdREAUaWApWChgKDQoCCAERAAAAAACAZkARILByaBEclUASFAgAEAMQBhATEBIQARgCQgQaAggFGgYKBAgCEAIiGgoWa1E4LWFyM0JPZlRtcjd3UHVhLVVHUXABKAEiFQCJilHRDQxStUpdqLmXYtZ1Kp0fpxoYCgoNkIBGFRXnskdTEgoNPoFGFRXQtUdT",
+        "routeSummary": "DEFAULT_ROUTE",
+        "roadType": "general",
+        "avoidTolls": true,
+        "avoidHighways": false,
+        "routingPreference": "TRAFFIC_AWARE",
+        "generationReason": "time_priority_route",
+        "dedupeDecision": "kept",
+        "usesToll": false,
+        "tollInfo": null,
+        "tollPreference": null,
+        "tollExcludedFromFare": true,
+        "intermediateWaypoint": null
+      },
+      {
+        "routeId": "route_1",
+        "routeIndex": 1,
+        "label": "一般道優先ルート",
+        "routeLabel": "一般道優先ルート",
+        "routeDescription": "有料道路を使わず、一般道を優先して算定した走行予定ルートです。",
+        "routeType": "general_road_priority",
+        "routeStrategy": "general_road_priority",
+        "strategy": "general_road_priority",
+        "routeSource": "google_routes",
+        "distanceMeters": 612,
+        "durationSeconds": 155,
+        "distanceKm": 0.6,
+        "encodedPolyline": "wozxE{exsYkBj@mAn@s@d@c@h@gA~@SJ}D~DyCq@_@Q]_@GKRM`@{@MKVk@AIACOX",
+        "routeToken": "CuMBCmsyaRpOChQCFgUhorBmtAsAt6wH1L4HP68DABIU3QeTcVwaAXPKzu4K1k3bZxPZ1FkaBQBZBgMXKgVzMF4FYT2grI88RZY0Aj9I0YeKnO2w1rZuIhdrZzgtYXZLSUJaaUJyN3dQenZ1RWtBZxAFGlsKWQoYCg0KAggBEQAAAAAAgGZAESCwcmgRHJVAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXa2c4LWF0MzFCSmlCcjd3UHp2dUVrQWdwASgBIhUAiYpR0cs76kHub5BYLYZjNWVdpHMaGAoKDZCARhUV57JHUxIKDT6BRhUV0LVHUw",
+        "routeSummary": "DEFAULT_ROUTE",
+        "roadType": "general",
+        "avoidTolls": true,
+        "avoidHighways": true,
+        "routingPreference": "TRAFFIC_AWARE",
+        "generationReason": "general_road_priority_route",
+        "dedupeDecision": "kept",
+        "usesToll": false,
+        "tollInfo": null,
+        "tollPreference": null,
+        "tollExcludedFromFare": false,
+        "intermediateWaypoint": null
+      }
+    ],
+    "preFixedFareConfirmable": true,
+    "routeCandidateCount": 2,
+    "distinctRouteCount": 2,
+    "fallbackReason": null,
+    "selectedAt": "2026-06-26T05:35:19.287Z"
+  },
+  "returnRoutePlan": null,
+  "overallRouteSelection": null,
+  "totalDistanceMeters": 612,
+  "totalDurationSeconds": 155,
+  "preFixedFareScope": "outbound_only",
+  "returnFareStatus": null,
+  "returnSelectedRouteId": null,
+  "selectedRouteId": "route_0",
+  "selectedRouteLabel": "時間優先ルート",
+  "selectedRouteDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+  "selectedRouteType": "time_priority",
+  "selectedUsesToll": false,
+  "selectedRouteIndex": 0,
+  "selectedRouteStrategy": "time_priority",
+  "selectedRouteSource": "google_routes",
+  "encodedPolyline": "wozxE{exsYkBj@mAn@s@d@c@h@gA~@SJ}D~DyCq@_@Q]_@GKRM`@{@MKVk@AIACOX",
+  "routeToken": "Ct8BCmoyaBpOChQCFgUhorBmtAsAt6wH1L4HP68DABIU3QeTcVwaAXPKzu4K1k3bZxPZ1FkaBQBZBgMXKgVzMF4FYT2grI88RZY0Aj9I0YeKnO2w1rZuIhZrUTgtYW9IY09mVG1yN3dQdWEtVUdREAUaWApWChgKDQoCCAERAAAAAACAZkARILByaBEclUASFAgAEAMQBhATEBIQARgCQgQaAggFGgYKBAgCEAIiGgoWa1E4LWFyM0JPZlRtcjd3UHVhLVVHUXABKAEiFQCJilHRDQxStUpdqLmXYtZ1Kp0fpxoYCgoNkIBGFRXnskdTEgoNPoFGFRXQtUdT",
+  "routeSummary": "DEFAULT_ROUTE",
+  "tollInfo": null,
+  "tollPreference": null,
+  "tollExcludedFromFare": true,
+  "intermediateWaypoint": null,
+  "routeCandidates": [
+    {
+      "routeId": "route_0",
+      "routeIndex": 0,
+      "label": "時間優先ルート",
+      "routeLabel": "時間優先ルート",
+      "routeDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+      "routeType": "time_priority",
+      "routeStrategy": "time_priority",
+      "strategy": "time_priority",
+      "routeSource": "google_routes",
+      "distanceMeters": 612,
+      "durationSeconds": 155,
+      "distanceKm": 0.6,
+      "encodedPolyline": "wozxE{exsYkBj@mAn@s@d@c@h@gA~@SJ}D~DyCq@_@Q]_@GKRM`@{@MKVk@AIACOX",
+      "routeToken": "Ct8BCmoyaBpOChQCFgUhorBmtAsAt6wH1L4HP68DABIU3QeTcVwaAXPKzu4K1k3bZxPZ1FkaBQBZBgMXKgVzMF4FYT2grI88RZY0Aj9I0YeKnO2w1rZuIhZrUTgtYW9IY09mVG1yN3dQdWEtVUdREAUaWApWChgKDQoCCAERAAAAAACAZkARILByaBEclUASFAgAEAMQBhATEBIQARgCQgQaAggFGgYKBAgCEAIiGgoWa1E4LWFyM0JPZlRtcjd3UHVhLVVHUXABKAEiFQCJilHRDQxStUpdqLmXYtZ1Kp0fpxoYCgoNkIBGFRXnskdTEgoNPoFGFRXQtUdT",
+      "routeSummary": "DEFAULT_ROUTE",
+      "roadType": "general",
+      "avoidTolls": true,
+      "avoidHighways": false,
+      "routingPreference": "TRAFFIC_AWARE",
+      "generationReason": "time_priority_route",
+      "dedupeDecision": "kept",
+      "usesToll": false,
+      "tollInfo": null,
+      "tollPreference": null,
+      "tollExcludedFromFare": true,
+      "intermediateWaypoint": null
+    },
+    {
+      "routeId": "route_1",
+      "routeIndex": 1,
+      "label": "一般道優先ルート",
+      "routeLabel": "一般道優先ルート",
+      "routeDescription": "有料道路を使わず、一般道を優先して算定した走行予定ルートです。",
+      "routeType": "general_road_priority",
+      "routeStrategy": "general_road_priority",
+      "strategy": "general_road_priority",
+      "routeSource": "google_routes",
+      "distanceMeters": 612,
+      "durationSeconds": 155,
+      "distanceKm": 0.6,
+      "encodedPolyline": "wozxE{exsYkBj@mAn@s@d@c@h@gA~@SJ}D~DyCq@_@Q]_@GKRM`@{@MKVk@AIACOX",
+      "routeToken": "CuMBCmsyaRpOChQCFgUhorBmtAsAt6wH1L4HP68DABIU3QeTcVwaAXPKzu4K1k3bZxPZ1FkaBQBZBgMXKgVzMF4FYT2grI88RZY0Aj9I0YeKnO2w1rZuIhdrZzgtYXZLSUJaaUJyN3dQenZ1RWtBZxAFGlsKWQoYCg0KAggBEQAAAAAAgGZAESCwcmgRHJVAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXa2c4LWF0MzFCSmlCcjd3UHp2dUVrQWdwASgBIhUAiYpR0cs76kHub5BYLYZjNWVdpHMaGAoKDZCARhUV57JHUxIKDT6BRhUV0LVHUw",
+      "routeSummary": "DEFAULT_ROUTE",
+      "roadType": "general",
+      "avoidTolls": true,
+      "avoidHighways": true,
+      "routingPreference": "TRAFFIC_AWARE",
+      "generationReason": "general_road_priority_route",
+      "dedupeDecision": "kept",
+      "usesToll": false,
+      "tollInfo": null,
+      "tollPreference": null,
+      "tollExcludedFromFare": false,
+      "intermediateWaypoint": null
+    }
+  ],
+  "alternativeRoutes": [
+    {
+      "routeId": "route_0",
+      "routeIndex": 0,
+      "label": "時間優先ルート",
+      "routeLabel": "時間優先ルート",
+      "routeDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+      "routeType": "time_priority",
+      "routeStrategy": "time_priority",
+      "strategy": "time_priority",
+      "routeSource": "google_routes",
+      "distanceMeters": 612,
+      "durationSeconds": 155,
+      "distanceKm": 0.6,
+      "encodedPolyline": "wozxE{exsYkBj@mAn@s@d@c@h@gA~@SJ}D~DyCq@_@Q]_@GKRM`@{@MKVk@AIACOX",
+      "routeToken": "Ct8BCmoyaBpOChQCFgUhorBmtAsAt6wH1L4HP68DABIU3QeTcVwaAXPKzu4K1k3bZxPZ1FkaBQBZBgMXKgVzMF4FYT2grI88RZY0Aj9I0YeKnO2w1rZuIhZrUTgtYW9IY09mVG1yN3dQdWEtVUdREAUaWApWChgKDQoCCAERAAAAAACAZkARILByaBEclUASFAgAEAMQBhATEBIQARgCQgQaAggFGgYKBAgCEAIiGgoWa1E4LWFyM0JPZlRtcjd3UHVhLVVHUXABKAEiFQCJilHRDQxStUpdqLmXYtZ1Kp0fpxoYCgoNkIBGFRXnskdTEgoNPoFGFRXQtUdT",
+      "routeSummary": "DEFAULT_ROUTE",
+      "roadType": "general",
+      "avoidTolls": true,
+      "avoidHighways": false,
+      "routingPreference": "TRAFFIC_AWARE",
+      "generationReason": "time_priority_route",
+      "dedupeDecision": "kept",
+      "usesToll": false,
+      "tollInfo": null,
+      "tollPreference": null,
+      "tollExcludedFromFare": true,
+      "intermediateWaypoint": null
+    },
+    {
+      "routeId": "route_1",
+      "routeIndex": 1,
+      "label": "一般道優先ルート",
+      "routeLabel": "一般道優先ルート",
+      "routeDescription": "有料道路を使わず、一般道を優先して算定した走行予定ルートです。",
+      "routeType": "general_road_priority",
+      "routeStrategy": "general_road_priority",
+      "strategy": "general_road_priority",
+      "routeSource": "google_routes",
+      "distanceMeters": 612,
+      "durationSeconds": 155,
+      "distanceKm": 0.6,
+      "encodedPolyline": "wozxE{exsYkBj@mAn@s@d@c@h@gA~@SJ}D~DyCq@_@Q]_@GKRM`@{@MKVk@AIACOX",
+      "routeToken": "CuMBCmsyaRpOChQCFgUhorBmtAsAt6wH1L4HP68DABIU3QeTcVwaAXPKzu4K1k3bZxPZ1FkaBQBZBgMXKgVzMF4FYT2grI88RZY0Aj9I0YeKnO2w1rZuIhdrZzgtYXZLSUJaaUJyN3dQenZ1RWtBZxAFGlsKWQoYCg0KAggBEQAAAAAAgGZAESCwcmgRHJVAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXa2c4LWF0MzFCSmlCcjd3UHp2dUVrQWdwASgBIhUAiYpR0cs76kHub5BYLYZjNWVdpHMaGAoKDZCARhUV57JHUxIKDT6BRhUV0LVHUw",
+      "routeSummary": "DEFAULT_ROUTE",
+      "roadType": "general",
+      "avoidTolls": true,
+      "avoidHighways": true,
+      "routingPreference": "TRAFFIC_AWARE",
+      "generationReason": "general_road_priority_route",
+      "dedupeDecision": "kept",
+      "usesToll": false,
+      "tollInfo": null,
+      "tollPreference": null,
+      "tollExcludedFromFare": false,
+      "intermediateWaypoint": null
+    }
+  ],
+  "routeCandidateCount": 2,
+  "distinctRouteCount": 2,
+  "alternativeRouteCount": 2,
+  "multipleRoutesAvailable": true,
+  "preFixedFareConfirmable": true,
+  "routeDedupedCount": 2,
+  "routeGenerationStrategies": [],
+  "fallbackReason": null,
+  "selectedAt": "2026-06-26T05:35:19.287Z",
+  "selectedTrafficZoneId": "keiyo",
+  "selectedTrafficZoneLabel": "京葉交通圏",
+  "trafficZoneCoefficient": 1.2,
+  "detectedMunicipality": null,
+  "trafficZoneDetectionMethod": "fallback_config",
+  "trafficZoneDetectionSource": "origin_address",
+  "baseDistanceFareAmount": 500,
+  "adjustedDistanceFareAmount": 600,
+  "preFixedFareMode": true,
+  "routeProvider": "google_routes",
+  "distanceMeters": 612,
+  "durationSeconds": 155,
+  "estimateCalculationVersion": "v1"
+}

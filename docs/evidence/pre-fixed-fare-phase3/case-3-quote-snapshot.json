@@ -1,0 +1,1353 @@
+{
+  "fareMode": "pre_fixed_fare",
+  "distancePricing": {
+    "mode": "patternA",
+    "patternA": {
+      "initialDistanceKm": 1.06,
+      "initialFare": 500,
+      "incrementDistanceKm": 0.221,
+      "incrementFare": 100
+    },
+    "patternB": {
+      "perKmRate": 450
+    }
+  },
+  "fareComponents": {
+    "time": [
+      {
+        "key": "timeBaseFare",
+        "label": "時間制運賃",
+        "calculator": "time_block",
+        "params": {
+          "baseMinutes": 30,
+          "baseAmount": 5000,
+          "perBlockMinutes": 15,
+          "perBlockAmount": 1200
+        }
+      },
+      {
+        "key": "pickupFee",
+        "label": "迎車料金",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "pickupFee"
+      },
+      {
+        "key": "specialVehicleFee",
+        "label": "特殊車両使用料",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "specialVehicleFee"
+      }
+    ],
+    "distance": [
+      {
+        "key": "pickupFee",
+        "label": "迎車料金",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "pickupFee"
+      },
+      {
+        "key": "specialVehicleFee",
+        "label": "特殊車両使用料",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "specialVehicleFee"
+      },
+      {
+        "key": "distanceFare",
+        "label": "距離運賃",
+        "calculator": "distance_pricing_ref",
+        "pricingRef": "distancePricing"
+      }
+    ],
+    "distance_time": [
+      {
+        "key": "pickupFee",
+        "label": "迎車料金",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "pickupFee"
+      },
+      {
+        "key": "specialVehicleFee",
+        "label": "特殊車両使用料",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "specialVehicleFee"
+      },
+      {
+        "key": "distanceFare",
+        "label": "距離運賃",
+        "calculator": "distance_pricing_ref",
+        "pricingRef": "distancePricing"
+      },
+      {
+        "key": "timeAdjustment",
+        "label": "予定時間加算（概算）",
+        "calculator": "time_block",
+        "params": {
+          "baseMinutes": 20,
+          "baseAmount": 0,
+          "perBlockMinutes": 10,
+          "perBlockAmount": 300
+        }
+      }
+    ],
+    "pre_fixed_fare": [
+      {
+        "key": "pickupFee",
+        "label": "迎車料金",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "pickupFee"
+      },
+      {
+        "key": "specialVehicleFee",
+        "label": "特殊車両使用料",
+        "calculator": "fixed_fee_ref",
+        "feeRef": "specialVehicleFee"
+      },
+      {
+        "key": "distanceFare",
+        "label": "距離運賃",
+        "calculator": "distance_pricing_ref",
+        "pricingRef": "distancePricing"
+      },
+      {
+        "key": "timeAdjustment",
+        "label": "予定時間加算（概算）",
+        "calculator": "time_block",
+        "params": {
+          "baseMinutes": 20,
+          "baseAmount": 0,
+          "perBlockMinutes": 10,
+          "perBlockAmount": 300
+        }
+      }
+    ]
+  },
+  "fareBasis": {
+    "fareMode": "pre_fixed_fare",
+    "fareModeLabel": "事前確定運賃",
+    "durationMinutes": 181,
+    "distanceKm": 71.2,
+    "distanceMultiplier": 1,
+    "sections": [
+      {
+        "key": "pickupFee",
+        "title": "迎車料金",
+        "rules": [
+          "迎車料金 800円"
+        ],
+        "usage": "",
+        "amountLabel": "迎車料金",
+        "amount": 800
+      },
+      {
+        "key": "specialVehicleFee",
+        "title": "特殊車両使用料",
+        "rules": [
+          "特殊車両使用料 1000円"
+        ],
+        "usage": "",
+        "amountLabel": "特殊車両使用料",
+        "amount": 1000
+      },
+      {
+        "key": "distanceFare",
+        "title": "距離部分",
+        "rules": [
+          "初乗 1.06km まで 500円",
+          "以後 221m ごとに 100円加算",
+          "認可距離制運賃 32300円 × 平準化係数 1.2 = 38760円"
+        ],
+        "usage": "送迎方法：往復\n往路距離：29.0km\n復路距離：42.2km\n計算対象距離：71.2km",
+        "usageLines": [
+          {
+            "label": "送迎方法",
+            "value": "往復"
+          },
+          {
+            "label": "往路距離",
+            "value": "29.0km"
+          },
+          {
+            "label": "復路距離",
+            "value": "42.2km"
+          },
+          {
+            "label": "計算対象距離",
+            "value": "71.2km"
+          }
+        ],
+        "amountLabel": "距離運賃",
+        "amount": 38760
+      },
+      {
+        "key": "timeAdjustment",
+        "title": "予定時間加算（概算）",
+        "rules": [
+          "初回 20分 0円",
+          "以後 10分ごとに 300円加算"
+        ],
+        "usage": "ルート予定時間: 181分（Google Routes API の概算。認可メーターの低速走行加算とは異なります）",
+        "amountLabel": "予定時間加算（概算）",
+        "amount": 5100
+      }
+    ],
+    "notices": [
+      "表示は見積時点の運賃設定に基づく計算根拠です。",
+      "時間加算はルート予定時間に基づく概算です。実走行では認可メーター（低速走行時の時間距離併用）が適用されます。",
+      "待機時間は運賃計算に含まれません。",
+      "距離運賃には交通圏平準化係数（1.2）を適用しています。介助料・待機料・実費には適用しません。"
+    ]
+  },
+  "fixedFareTotal": 45660,
+  "fixedFareBreakdown": [
+    {
+      "key": "pickupFee",
+      "label": "迎車料金",
+      "amount": 800,
+      "calculator": "fixed_fee_ref"
+    },
+    {
+      "key": "specialVehicleFee",
+      "label": "特殊車両使用料",
+      "amount": 1000,
+      "calculator": "fixed_fee_ref"
+    },
+    {
+      "key": "distanceFare",
+      "label": "距離運賃",
+      "amount": 38760,
+      "calculator": "distance_pricing_ref"
+    },
+    {
+      "key": "timeAdjustment",
+      "label": "予定時間加算（概算）",
+      "amount": 5100,
+      "calculator": "time_block"
+    }
+  ],
+  "pickupFee": 800,
+  "specialVehicleFeeEnabled": true,
+  "specialVehicleFeeAmount": 1000,
+  "serviceFees": [
+    {
+      "key": "specialVehicleFee",
+      "label": "特殊車両使用料",
+      "amount": 1000
+    },
+    {
+      "key": "assistanceFee",
+      "label": "介助料金",
+      "amount": 1100
+    },
+    {
+      "key": "waitingFee",
+      "label": "待機料金",
+      "amount": 800
+    }
+  ],
+  "expenses": [],
+  "roadType": "general",
+  "distanceKm": 71.2,
+  "billedDistanceKm": 71.2,
+  "routePlan": {
+    "tripType": "round_trip",
+    "returnPlanType": "return_with_stop",
+    "outboundRoutePlan": {
+      "origin": {
+        "address": "千葉市中央区出洲港8-3-2"
+      },
+      "destination": {
+        "address": "東京ディズニーランド"
+      },
+      "waypoint": null,
+      "distanceMeters": 28997,
+      "durationSeconds": 4063,
+      "selectedRouteId": "route_0",
+      "selectedRoute": {
+        "routeId": "route_0",
+        "routeLabel": "時間優先ルート",
+        "routeDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+        "routeSource": "google_routes",
+        "routeStrategy": "time_priority",
+        "distanceMeters": 28997,
+        "durationSeconds": 4063,
+        "distanceKm": 29,
+        "durationMinutes": 68,
+        "encodedPolyline": "orgxE}~dvYdArA_FfGs@dAeGjG{KqDi@]]e@iCwEoEfEc@ZsE`EiHzGiAjAqW~TaExCsCnBsCzBiC|BiCnCw@`ACT}FpGkZl[q^t]_EvDg@^}CrCcIdHyA~A_HfI}RnTkD~Di@v@{@|@uAdBgCpDmE~FcFtGgA|A}CdEm@~@cAnBq@bBcBzFcArCoAjCe@z@cBbCcDpD_GpGqBhCeCxDk@hAMDyB|DmAfCaAlCs@tCc@|Ba@dDu@dIWxDk@rMSbC_@bDy@jEeC`KEB}@dEqBdIqAdEqBdGyB|FsBxEq@nAuA~CyBrDkBhD{CjGcDhHuBpF_B|EiA~Dy@pDk@pD_@~CSjCUjFIdEQtBQhAoGrY_AlD_AhCaApB}KlRuEvIii@heAoBdDiA~AqAzAaCvBoA|@iBbA}B`A}E~A}E|AuB~@uBpAoB|A}A~A_BrBwAbCaAlBeBrEyOtb@{AjEw@rC}@fEa`@t|B{AdJsEtXq@jF[zDI~C?hENnDXfDd@bDp@~C|@zCv@tBhBbEZ\\rE|IlIjPxBnEfEbIVp@hChEbB~C^l@|Tnb@dCbE~A~B`K`MjP`SdAjAlAzAl\\~`@vDbEhHzGjGdFvHbHvF|EpFdFdGpG|CtDpO|RnBlCpA~AhBdCnMfPlDjEn@t@?JvCdD|\\zb@bRxU~JlMhBnCL@FDtKfNhAfBjBxDp@hB|@fD^lB^hC^`FLxB{B`D}ArB_BnBy@hAKTcErF{CfEdCrF|@pAdH`JlCnAjBv@",
+        "routeLabels": [
+          "DEFAULT_ROUTE"
+        ],
+        "routeToken": "CqMCCqwBMqkBGo0BCi4CFgxLc5EJRiEAshTf2AfA3gvu8QO_9wGM4waj-rYapsKrRdy1uV-RkBCk2TIAEih70uwgPpYbGBoIOn_s9epIEddwnWp9UCtc7MqL0nOn5niKAxaat2NkGgwADgoXASyyHimVAgAqCksZE2EAcmoYXwAyAgMBPbpGOT9FSJFjP0iFxJX2qs-SiK0BIhd1QTgtYXFXUE12VzFyN3dQby03VDZBMBAFGlkKVwoYCg0KAggBEQAAAAAAgGZAESlcj8JVqLRAEhQIABADEAYQExASEAEYAkIEGgIIBRoGCgQIAhACIhsKF3VBOC1hcUxtTVBXMXI3d1BvLTdUNkEwcAEoASIVAImKUdEqwY5ci-NZ6b0YE7STxXgSGhgKCg3-uTcVFXavg1MSCg2yuzcVFUetg1M",
+        "routeSummary": "DEFAULT_ROUTE",
+        "tollInfo": null,
+        "tollPreference": null,
+        "tollExcludedFromFare": true,
+        "intermediateWaypoint": null,
+        "routeLegs": [
+          {
+            "legIndex": 0,
+            "distanceMeters": 28997,
+            "durationSeconds": 4063,
+            "encodedPolyline": "orgxE}~dvYdArA_FfGs@dAeGjG{KqDi@]]e@iCwEoEfEc@ZsE`EiHzGiAjAqW~TaExCsCnBsCzBiC|BiCnCw@`ACT}FpGkZl[q^t]_EvDg@^}CrCcIdHyA~A_HfI}RnTkD~Di@v@{@|@uAdBgCpDmE~FcFtGgA|A}CdEm@~@cAnBq@bBcBzFcArCoAjCe@z@cBbCcDpD_GpGqBhCeCxDk@hAMDyB|DmAfCaAlCs@tCc@|Ba@dDu@dIWxDk@rMSbC_@bDy@jEeC`KEB}@dEqBdIqAdEqBdGyB|FsBxEq@nAuA~CyBrDkBhD{CjGcDhHuBpF_B|EiA~Dy@pDk@pD_@~CSjCUjFIdEQtBQhAoGrY_AlD_AhCaApB}KlRuEvIii@heAoBdDiA~AqAzAaCvBoA|@iBbA}B`A}E~A}E|AuB~@uBpAoB|A}A~A_BrBwAbCaAlBeBrEyOtb@{AjEw@rC}@fEa`@t|B{AdJsEtXq@jF[zDI~C?hENnDXfDd@bDp@~C|@zCv@tBhBbEZ\\rE|IlIjPxBnEfEbIVp@hChEbB~C^l@|Tnb@dCbE~A~B`K`MjP`SdAjAlAzAl\\~`@vDbEhHzGjGdFvHbHvF|EpFdFdGpG|CtDpO|RnBlCpA~AhBdCnMfPlDjEn@t@?JvCdD|\\zb@bRxU~JlMhBnCL@FDtKfNhAfBjBxDp@hB|@fD^lB^hC^`FLxB{B`D}ArB_BnBy@hAKTcErF{CfEdCrF|@pAdH`JlCnAjBv@",
+            "startLatLng": {
+              "lat": 35.597363,
+              "lng": 140.1139062
+            },
+            "endLatLng": {
+              "lat": 35.637120599999996,
+              "lng": 139.87584769999998
+            }
+          }
+        ],
+        "roadType": "general",
+        "avoidTolls": true,
+        "avoidHighways": false,
+        "routingPreference": "TRAFFIC_AWARE",
+        "generationReason": "time_priority_route",
+        "dedupeDecision": "kept",
+        "rawRouteIndex": 0,
+        "routeType": "time_priority",
+        "usesToll": false
+      },
+      "selectedRouteLabel": "時間優先ルート",
+      "selectedRouteDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+      "selectedRouteType": "time_priority",
+      "selectedUsesToll": false,
+      "selectedRouteIndex": 0,
+      "selectedRouteStrategy": "time_priority",
+      "selectedRouteSource": "google_routes",
+      "encodedPolyline": "orgxE}~dvYdArA_FfGs@dAeGjG{KqDi@]]e@iCwEoEfEc@ZsE`EiHzGiAjAqW~TaExCsCnBsCzBiC|BiCnCw@`ACT}FpGkZl[q^t]_EvDg@^}CrCcIdHyA~A_HfI}RnTkD~Di@v@{@|@uAdBgCpDmE~FcFtGgA|A}CdEm@~@cAnBq@bBcBzFcArCoAjCe@z@cBbCcDpD_GpGqBhCeCxDk@hAMDyB|DmAfCaAlCs@tCc@|Ba@dDu@dIWxDk@rMSbC_@bDy@jEeC`KEB}@dEqBdIqAdEqBdGyB|FsBxEq@nAuA~CyBrDkBhD{CjGcDhHuBpF_B|EiA~Dy@pDk@pD_@~CSjCUjFIdEQtBQhAoGrY_AlD_AhCaApB}KlRuEvIii@heAoBdDiA~AqAzAaCvBoA|@iBbA}B`A}E~A}E|AuB~@uBpAoB|A}A~A_BrBwAbCaAlBeBrEyOtb@{AjEw@rC}@fEa`@t|B{AdJsEtXq@jF[zDI~C?hENnDXfDd@bDp@~C|@zCv@tBhBbEZ\\rE|IlIjPxBnEfEbIVp@hChEbB~C^l@|Tnb@dCbE~A~B`K`MjP`SdAjAlAzAl\\~`@vDbEhHzGjGdFvHbHvF|EpFdFdGpG|CtDpO|RnBlCpA~AhBdCnMfPlDjEn@t@?JvCdD|\\zb@bRxU~JlMhBnCL@FDtKfNhAfBjBxDp@hB|@fD^lB^hC^`FLxB{B`D}ArB_BnBy@hAKTcErF{CfEdCrF|@pAdH`JlCnAjBv@",
+      "routeToken": "CqMCCqwBMqkBGo0BCi4CFgxLc5EJRiEAshTf2AfA3gvu8QO_9wGM4waj-rYapsKrRdy1uV-RkBCk2TIAEih70uwgPpYbGBoIOn_s9epIEddwnWp9UCtc7MqL0nOn5niKAxaat2NkGgwADgoXASyyHimVAgAqCksZE2EAcmoYXwAyAgMBPbpGOT9FSJFjP0iFxJX2qs-SiK0BIhd1QTgtYXFXUE12VzFyN3dQby03VDZBMBAFGlkKVwoYCg0KAggBEQAAAAAAgGZAESlcj8JVqLRAEhQIABADEAYQExASEAEYAkIEGgIIBRoGCgQIAhACIhsKF3VBOC1hcUxtTVBXMXI3d1BvLTdUNkEwcAEoASIVAImKUdEqwY5ci-NZ6b0YE7STxXgSGhgKCg3-uTcVFXavg1MSCg2yuzcVFUetg1M",
+      "routeSummary": "DEFAULT_ROUTE",
+      "tollInfo": null,
+      "tollPreference": null,
+      "tollExcludedFromFare": true,
+      "intermediateWaypoint": null,
+      "roadType": "general",
+      "routeCandidates": [
+        {
+          "routeId": "route_0",
+          "routeIndex": 0,
+          "label": "時間優先ルート",
+          "routeLabel": "時間優先ルート",
+          "routeDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+          "routeType": "time_priority",
+          "routeStrategy": "time_priority",
+          "strategy": "time_priority",
+          "routeSource": "google_routes",
+          "distanceMeters": 28997,
+          "durationSeconds": 4063,
+          "distanceKm": 29,
+          "encodedPolyline": "orgxE}~dvYdArA_FfGs@dAeGjG{KqDi@]]e@iCwEoEfEc@ZsE`EiHzGiAjAqW~TaExCsCnBsCzBiC|BiCnCw@`ACT}FpGkZl[q^t]_EvDg@^}CrCcIdHyA~A_HfI}RnTkD~Di@v@{@|@uAdBgCpDmE~FcFtGgA|A}CdEm@~@cAnBq@bBcBzFcArCoAjCe@z@cBbCcDpD_GpGqBhCeCxDk@hAMDyB|DmAfCaAlCs@tCc@|Ba@dDu@dIWxDk@rMSbC_@bDy@jEeC`KEB}@dEqBdIqAdEqBdGyB|FsBxEq@nAuA~CyBrDkBhD{CjGcDhHuBpF_B|EiA~Dy@pDk@pD_@~CSjCUjFIdEQtBQhAoGrY_AlD_AhCaApB}KlRuEvIii@heAoBdDiA~AqAzAaCvBoA|@iBbA}B`A}E~A}E|AuB~@uBpAoB|A}A~A_BrBwAbCaAlBeBrEyOtb@{AjEw@rC}@fEa`@t|B{AdJsEtXq@jF[zDI~C?hENnDXfDd@bDp@~C|@zCv@tBhBbEZ\\rE|IlIjPxBnEfEbIVp@hChEbB~C^l@|Tnb@dCbE~A~B`K`MjP`SdAjAlAzAl\\~`@vDbEhHzGjGdFvHbHvF|EpFdFdGpG|CtDpO|RnBlCpA~AhBdCnMfPlDjEn@t@?JvCdD|\\zb@bRxU~JlMhBnCL@FDtKfNhAfBjBxDp@hB|@fD^lB^hC^`FLxB{B`D}ArB_BnBy@hAKTcErF{CfEdCrF|@pAdH`JlCnAjBv@",
+          "routeToken": "CqMCCqwBMqkBGo0BCi4CFgxLc5EJRiEAshTf2AfA3gvu8QO_9wGM4waj-rYapsKrRdy1uV-RkBCk2TIAEih70uwgPpYbGBoIOn_s9epIEddwnWp9UCtc7MqL0nOn5niKAxaat2NkGgwADgoXASyyHimVAgAqCksZE2EAcmoYXwAyAgMBPbpGOT9FSJFjP0iFxJX2qs-SiK0BIhd1QTgtYXFXUE12VzFyN3dQby03VDZBMBAFGlkKVwoYCg0KAggBEQAAAAAAgGZAESlcj8JVqLRAEhQIABADEAYQExASEAEYAkIEGgIIBRoGCgQIAhACIhsKF3VBOC1hcUxtTVBXMXI3d1BvLTdUNkEwcAEoASIVAImKUdEqwY5ci-NZ6b0YE7STxXgSGhgKCg3-uTcVFXavg1MSCg2yuzcVFUetg1M",
+          "routeSummary": "DEFAULT_ROUTE",
+          "roadType": "general",
+          "avoidTolls": true,
+          "avoidHighways": false,
+          "routingPreference": "TRAFFIC_AWARE",
+          "generationReason": "time_priority_route",
+          "dedupeDecision": "kept",
+          "usesToll": false,
+          "tollInfo": null,
+          "tollPreference": null,
+          "tollExcludedFromFare": true,
+          "intermediateWaypoint": null
+        },
+        {
+          "routeId": "route_1",
+          "routeIndex": 1,
+          "label": "一般道優先ルート",
+          "routeLabel": "一般道優先ルート",
+          "routeDescription": "有料道路を使わず、一般道を優先して算定した走行予定ルートです。",
+          "routeType": "general_road_priority",
+          "routeStrategy": "general_road_priority",
+          "strategy": "general_road_priority",
+          "routeSource": "google_routes",
+          "distanceMeters": 28997,
+          "durationSeconds": 4060,
+          "distanceKm": 29,
+          "encodedPolyline": "orgxE}~dvYdArA_FfGs@dAeGjG{KqDi@]]e@iCwEoEfEc@ZsE`EiHzGiAjAqW~TaExCsCnBsCzBiC|BiCnCw@`ACT}FpGkZl[q^t]_EvDg@^}CrCcIdHyA~A_HfI}RnTkD~Di@v@{@|@uAdBgCpDmE~FcFtGgA|A}CdEm@~@cAnBq@bBcBzFcArCoAjCe@z@cBbCcDpD_GpGqBhCeCxDk@hAMDyB|DmAfCaAlCs@tCc@|Ba@dDu@dIWxDk@rMSbC_@bDy@jEeC`KEB}@dEqBdIqAdEqBdGyB|FsBxEq@nAuA~CyBrDkBhD{CjGcDhHuBpF_B|EiA~Dy@pDk@pD_@~CSjCUjFIdEQtBQhAoGrY_AlD_AhCaApB}KlRuEvIii@heAoBdDiA~AqAzAaCvBoA|@iBbA}B`A}E~A}E|AuB~@uBpAoB|A}A~A_BrBwAbCaAlBeBrEyOtb@{AjEw@rC}@fEa`@t|B{AdJsEtXq@jF[zDI~C?hENnDXfDd@bDp@~C|@zCv@tBhBbEZ\\rE|IlIjPxBnEfEbIVp@hChEbB~C^l@|Tnb@dCbE~A~B`K`MjP`SdAjAlAzAl\\~`@vDbEhHzGjGdFvHbHvF|EpFdFdGpG|CtDpO|RnBlCpA~AhBdCnMfPlDjEn@t@?JvCdD|\\zb@bRxU~JlMhBnCL@FDtKfNhAfBjBxDp@hB|@fD^lB^hC^`FLxB{B`D}ArB_BnBy@hAKTcErF{CfEdCrF|@pAdH`JlCnAjBv@",
+          "routeToken": "CqUCCqwBMqkBGo0BCi4CFgxLc5EJRiEAshTf2AfA3gvu8QO_9wGM4waj-rYapsKrRdy1uV-RkBCk2TIAEih70uwgPpYbGBoIOn_s9epIEddwnWp9UCtc7MqL0nOn5niKAxaat2NkGgwADgoXASyyHimVAgAqCksZE2EAcmoYXwAyAgMBPbpGOT9FSJFjP0iFxJX2qs-SiK0BIhd1QTgtYXFMZk9PNjByN3dQdEluemlBSRAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEdejcD3qpLRAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXdUE4LWF1V0dPTzYwcjd3UHRJbnppQUlwASgBIhUAiYpR0e5GbM1HKbXiE_a5sTDrtRgaGAoKDf65NxUVdq-DUxIKDbK7NxUVR62DUw",
+          "routeSummary": "DEFAULT_ROUTE",
+          "roadType": "general",
+          "avoidTolls": true,
+          "avoidHighways": true,
+          "routingPreference": "TRAFFIC_AWARE",
+          "generationReason": "general_road_priority_route",
+          "dedupeDecision": "kept",
+          "usesToll": false,
+          "tollInfo": null,
+          "tollPreference": null,
+          "tollExcludedFromFare": false,
+          "intermediateWaypoint": null
+        },
+        {
+          "routeId": "route_2",
+          "routeIndex": 2,
+          "label": "高速道路ルート",
+          "routeLabel": "高速道路ルート",
+          "routeDescription": "遠方移動に適したルートです。有料道路料金は別途必要です。",
+          "routeType": "toll_allowed",
+          "routeStrategy": "toll_allowed",
+          "strategy": "toll_allowed",
+          "routeSource": "google_routes",
+          "distanceMeters": 29022,
+          "durationSeconds": 2726,
+          "distanceKm": 29,
+          "encodedPolyline": "orgxE}~dvYdArA_FfGs@dAeGjG{KqDi@]]e@iCwEoEfEc@ZsE`EiHzGiAjAqW~TaExCsCnBsCzBiC|BiCnCw@`ACT}FpGkZl[q^t]_EvDg@^}CrCcIdHyA~A_HfI}RnTkD~Di@v@{@|@uAdBgCpDmE~FcFtGgA|A}CdEm@~@cAnBq@bBcBzFcArCoAjCe@z@cBbCcDpD_GpGqBhCeCxDk@hAMDyB|DmAfCaAlCs@tCc@|Ba@dDu@dIWxDk@rMSbC_@bDy@jEeC`KEB}@dEqBdIqAdEqBdGyB|FsBxEq@nAuA~CyBrDkBhD{CjGcDhHuBpF_B|EiA~Dy@pDk@pD_@~CSjCUjFIdEQtBQhAeGvXOJy@fC{@rBo@lAuBvCiD~F}BrEg@dA_@n@SHea@tw@wMjWuA|BqAdBmBrByBfB_B`AcCjA}CfAaGhBuBz@aB|@}B`BuAjAyAdBkA`BsA|B}ApDwS`k@sAjE_AxDcBtJyf@lvCy@zFa@dEO`DCnD@fBHn@DvBThCb@jDXzAt@zC`AtCtAdDfBxD~l@djAjDrGlBhDdBrCfEfGlFzGx@~@n@|@jFjGhGvHzDxEr@v@l^fc@xEzElf@`d@xCxCzCjDdS~V`GnH`I~JVNlGhHdBbBv@n@B@vCdD|\\zb@bRxU~JlMhBnCL@FDtKfNhAfBjBxDp@hB|@fD^lB^hC^`FLxB{B`D}ArB_BnBy@hAKTcErF{CfEdCrF|@pAdH`JlCnAjBv@",
+          "routeToken": "CrQCCr8BMrwBGqABCjUCFg5Xc5EJRiEAshTf2AfA3gvu8QO_9wGM4waj-rYa7NL5ApPGyxWQj-hJleMzkZAQpNkyABIwe9LsID6WGxgaCDp_7PXqSBHXcJ1qfVArmML9nJyTmfVc7MqL0nOn5niKAxaat2NkGg4ADgoXASw95RYDKZUCACoMSxkTYQByAmkBGF8AMgIDAT26Rjk_RUiRYz9I_8GgpuWz9KiIASIXdVE4LWF2eWpDZENCcjd3UHg5S1A2QVkQBRpXClUKGAoNCgIIAREAAAAAAIBmQBGEwMqhRUmvQBISCAAQAxAGEBMQEhgCQgQaAggFGgYKBAgCEAIiGwoXdVE4LWFvenZCOUNCcjd3UHg5S1A2QVlwASgBIhUAiYpR0bUPAk8634Zuv2jKxNO-KaEaGAoKDf65NxUVdq-DUxIKDbK7NxUVR62DUw",
+          "routeSummary": "DEFAULT_ROUTE",
+          "roadType": "toll",
+          "avoidTolls": false,
+          "avoidHighways": false,
+          "routingPreference": "TRAFFIC_AWARE",
+          "generationReason": "toll_allowed_route",
+          "dedupeDecision": "kept",
+          "usesToll": true,
+          "tollInfo": {
+            "estimatedPrice": [
+              {
+                "currencyCode": "JPY",
+                "units": "2370"
+              }
+            ]
+          },
+          "tollPreference": "allow",
+          "tollExcludedFromFare": true,
+          "intermediateWaypoint": null
+        }
+      ],
+      "preFixedFareConfirmable": true,
+      "routeCandidateCount": 3,
+      "distinctRouteCount": 3,
+      "fallbackReason": null,
+      "selectedAt": "2026-06-26T05:35:54.158Z"
+    },
+    "returnRoutePlan": {
+      "origin": {
+        "address": "東京ディズニーランド"
+      },
+      "destination": {
+        "address": "千葉市中央区出洲港8-3-2"
+      },
+      "waypoint": {
+        "waypointLabel": "船橋市立医療センター",
+        "waypointAddress": "船橋市立医療センター",
+        "stopType": null,
+        "waypointLatLng": {
+          "latitude": 35.723815099999996,
+          "longitude": 139.99778279999998
+        }
+      },
+      "distanceMeters": 42170,
+      "durationSeconds": 6819,
+      "selectedRouteId": "route_0",
+      "selectedRoute": {
+        "routeId": "route_0",
+        "routeLabel": "時間優先ルート",
+        "routeDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+        "routeSource": "google_routes",
+        "routeStrategy": "time_priority",
+        "distanceMeters": 42170,
+        "durationSeconds": 6819,
+        "distanceKm": 42.2,
+        "durationMinutes": 114,
+        "encodedPolyline": "{h`yEcinuYi@ECEcA?S|@`@Hb@C|@SnA@x`@jAn@OpEsCVYVg@j@aBX]~GgFjDaBXGzC?tCJbANnI`Cv@`@j@^bEfDd@n@vDbJl@z@j@f@`Aj@zGfBjC}QdGgc@LiB?oDQeXMwBKiAzKcBbBC|@D|@RrAb@RIxB`AjVxKhFrC`FrCjAp@xAz@zAx@lFbDdD|BnFdEnI`GtBrAn[~OrCvAzAgDhAuBvAqBbBkBhB_BrBuAlBaAfDmAdGmBzB}@fBaAvAcAfB{Az@aAxAmB~B_E|F_Lp@wAbYkj@|EuJbCwFvBmFbCeHxBeHvIs\\z@oD~@aFnBmIrA{GhA}EzAsFxBaH`BoEvBiFxDcIzDaIx@kBbBqEbBkDl@uAhDkJz@{B|B}HdBgHt@iEZsCNiCVcHHaA\\sCb@{BhBwHd@uC`AkJb@}Dh@oDn@gCb@sABUdAkBzF{KbDuEpLaOhEeFvGuKR_@Ts@xAkD\\u@rC{E~CgEdBoBdAkA~A{BJErCsD`AeA@Gz@gAdCcEjA}AxBeCpHiHrDoE~DgF`FsFnCmChHaGx@q@dBmBpEsEXU|DaEnEyD~AeBvDsDvEcEbFiFjFoFtDiDrE_FvAeBrEgFdBkBdAmATEzDkDvD}CbD_CtB{AvLiKzKeJ~C_DfKyJ|D{DlBiB|BcChBkBbCuB^c@RLTFbNnP~EgGeAsA",
+        "routeLabels": [
+          "DEFAULT_ROUTE"
+        ],
+        "routeToken": "CqQCCq0BMqoBGo4BCjACFgxLl_zPvwsAtyWwrhfSkgudykjMtJ4B4ungBOic3WWr8Oxj0NIe97rAAcGkCgASKIYFN4MEwqEfzT1cLPFyxY--bFAb02vM0xiXy4jyiDQ3wsLh63rS7CAaDAAwLs8BFUvSAgsiLSoKAkZlWxddBRJeYTICAwM9HFwwPkWMco0-SMvKlLuNldWVFCIXdVE4LWFxSFRGLXk2cjd3UG9PaW84UWMQBRpZClcKGAoNCgIIAREAAAAAAIBmQBGHFtnO1-C5QBIUCAAQAxAGEBMQEhABGAJCBBoCCAUaBgoECAIQAiIbChd1UTgtYXNiZEZleTZyN3dQb09pbzhRY3ABKAEiFQCJilHRE4dO4e66rNJxI-R0VbRwZhoYCgoNhwVLFRVk93FTEgoNcQVLFRWv-HFT",
+        "routeSummary": "DEFAULT_ROUTE",
+        "tollInfo": null,
+        "tollPreference": null,
+        "tollExcludedFromFare": true,
+        "intermediateWaypoint": {
+          "waypointLabel": "船橋市立医療センター",
+          "waypointAddress": "船橋市立医療センター",
+          "waypointLatLng": {
+            "latitude": 35.723815099999996,
+            "longitude": 139.99778279999998
+          }
+        },
+        "routeLegs": [
+          {
+            "legIndex": 0,
+            "distanceMeters": 20699,
+            "durationSeconds": 3788,
+            "encodedPolyline": "_koxEaovtYrAl@ETJj@`IvDnCvAR@LQ`A_C\\y@n@PdAb@DCd@iBJONBpAf@fAVtALvA?rAUjGGrAERGv@g@^q@FOf@gCViBTeAp@oBh@sDH_@Ra@P@PFsGdd@eTL_CPu@AcASqFmC}QsJaAw@qDiEgHiJc@w@}BiFlD{EbAkAjJqMEoDSeD_@cDYcBg@{Bs@yBoA{CmA}ByD_FeKoMs@oA_CqCY_@iAsAqMmPoBkCeAmAq_@_f@w@kAQK{CcEuDuEOWwKkNeJ}KuO{RqB}BqE{EkV_UmGwG}GmGmDsDgGkHqx@uaAeC_DqDuFmDgGiJoQmCgFoEaJgCuFsLeUeGuKiCgFsA_D{@oCm@}Be@wC_@oDa@sFGgC?iDFcCVwD^aDjIyf@`C_N|A}Id@cCx@qFdHcb@}LwDmE}BcYuOaHiDmA[{Ey@|@oFpFi\\ZgB?OsAQeA[}OeGcASiKmAsCo@aHiBsMiDaAk@q@o@o@aAoDuIe@o@wEwD{@e@y@YiHsBcAOuCKcD@c@NmDfBsG`F[d@a@nAWf@WXqErCo@Ny`@kA@c@g@GIF]A",
+            "startLatLng": {
+              "lat": 35.637120599999996,
+              "lng": 139.87584769999998
+            },
+            "endLatLng": {
+              "lat": 35.723815099999996,
+              "lng": 139.99778279999998
+            }
+          },
+          {
+            "legIndex": 1,
+            "distanceMeters": 21471,
+            "durationSeconds": 3031,
+            "encodedPolyline": "{h`yEcinuYi@ECEcA?S|@`@Hb@C|@SnA@x`@jAn@OpEsCVYVg@j@aBX]~GgFjDaBXGzC?tCJbANnI`Cv@`@j@^bEfDd@n@vDbJl@z@j@f@`Aj@zGfBjC}QdGgc@LiB?oDQeXMwBKiAzKcBbBC|@D|@RrAb@RIxB`AjVxKhFrC`FrCjAp@xAz@zAx@lFbDdD|BnFdEnI`GtBrAn[~OrCvAzAgDhAuBvAqBbBkBhB_BrBuAlBaAfDmAdGmBzB}@fBaAvAcAfB{Az@aAxAmB~B_E|F_Lp@wAbYkj@|EuJbCwFvBmFbCeHxBeHvIs\\z@oD~@aFnBmIrA{GhA}EzAsFxBaH`BoEvBiFxDcIzDaIx@kBbBqEbBkDl@uAhDkJz@{B|B}HdBgHt@iEZsCNiCVcHHaA\\sCb@{BhBwHd@uC`AkJb@}Dh@oDn@gCb@sABUdAkBzF{KbDuEpLaOhEeFvGuKR_@Ts@xAkD\\u@rC{E~CgEdBoBdAkA~A{BJErCsD`AeA@Gz@gAdCcEjA}AxBeCpHiHrDoE~DgF`FsFnCmChHaGx@q@dBmBpEsEXU|DaEnEyD~AeBvDsDvEcEbFiFjFoFtDiDrE_FvAeBrEgFdBkBdAmATEzDkDvD}CbD_CtB{AvLiKzKeJ~C_DfKyJ|D{DlBiB|BcChBkBbCuB^c@RLTFbNnP~EgGeAsA",
+            "startLatLng": {
+              "lat": 35.723815099999996,
+              "lng": 139.99778279999998
+            },
+            "endLatLng": {
+              "lat": 35.597363,
+              "lng": 140.1139062
+            }
+          }
+        ],
+        "roadType": "general",
+        "avoidTolls": true,
+        "avoidHighways": false,
+        "routingPreference": "TRAFFIC_AWARE",
+        "generationReason": "time_priority_route",
+        "dedupeDecision": "kept",
+        "rawRouteIndex": 0,
+        "routeType": "time_priority",
+        "usesToll": false
+      },
+      "selectedRouteLabel": "時間優先ルート",
+      "selectedRouteDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+      "selectedRouteType": "time_priority",
+      "selectedUsesToll": false,
+      "selectedRouteIndex": 0,
+      "selectedRouteStrategy": "time_priority",
+      "selectedRouteSource": "google_routes",
+      "encodedPolyline": "{h`yEcinuYi@ECEcA?S|@`@Hb@C|@SnA@x`@jAn@OpEsCVYVg@j@aBX]~GgFjDaBXGzC?tCJbANnI`Cv@`@j@^bEfDd@n@vDbJl@z@j@f@`Aj@zGfBjC}QdGgc@LiB?oDQeXMwBKiAzKcBbBC|@D|@RrAb@RIxB`AjVxKhFrC`FrCjAp@xAz@zAx@lFbDdD|BnFdEnI`GtBrAn[~OrCvAzAgDhAuBvAqBbBkBhB_BrBuAlBaAfDmAdGmBzB}@fBaAvAcAfB{Az@aAxAmB~B_E|F_Lp@wAbYkj@|EuJbCwFvBmFbCeHxBeHvIs\\z@oD~@aFnBmIrA{GhA}EzAsFxBaH`BoEvBiFxDcIzDaIx@kBbBqEbBkDl@uAhDkJz@{B|B}HdBgHt@iEZsCNiCVcHHaA\\sCb@{BhBwHd@uC`AkJb@}Dh@oDn@gCb@sABUdAkBzF{KbDuEpLaOhEeFvGuKR_@Ts@xAkD\\u@rC{E~CgEdBoBdAkA~A{BJErCsD`AeA@Gz@gAdCcEjA}AxBeCpHiHrDoE~DgF`FsFnCmChHaGx@q@dBmBpEsEXU|DaEnEyD~AeBvDsDvEcEbFiFjFoFtDiDrE_FvAeBrEgFdBkBdAmATEzDkDvD}CbD_CtB{AvLiKzKeJ~C_DfKyJ|D{DlBiB|BcChBkBbCuB^c@RLTFbNnP~EgGeAsA",
+      "routeToken": "CqQCCq0BMqoBGo4BCjACFgxLl_zPvwsAtyWwrhfSkgudykjMtJ4B4ungBOic3WWr8Oxj0NIe97rAAcGkCgASKIYFN4MEwqEfzT1cLPFyxY--bFAb02vM0xiXy4jyiDQ3wsLh63rS7CAaDAAwLs8BFUvSAgsiLSoKAkZlWxddBRJeYTICAwM9HFwwPkWMco0-SMvKlLuNldWVFCIXdVE4LWFxSFRGLXk2cjd3UG9PaW84UWMQBRpZClcKGAoNCgIIAREAAAAAAIBmQBGHFtnO1-C5QBIUCAAQAxAGEBMQEhABGAJCBBoCCAUaBgoECAIQAiIbChd1UTgtYXNiZEZleTZyN3dQb09pbzhRY3ABKAEiFQCJilHRE4dO4e66rNJxI-R0VbRwZhoYCgoNhwVLFRVk93FTEgoNcQVLFRWv-HFT",
+      "routeSummary": "DEFAULT_ROUTE",
+      "tollInfo": null,
+      "tollPreference": null,
+      "tollExcludedFromFare": true,
+      "intermediateWaypoint": {
+        "waypointLabel": "船橋市立医療センター",
+        "waypointAddress": "船橋市立医療センター",
+        "waypointLatLng": {
+          "latitude": 35.723815099999996,
+          "longitude": 139.99778279999998
+        }
+      },
+      "roadType": "general",
+      "routeCandidates": [
+        {
+          "routeId": "route_0",
+          "routeIndex": 0,
+          "label": "時間優先ルート",
+          "routeLabel": "時間優先ルート",
+          "routeDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+          "routeType": "time_priority",
+          "routeStrategy": "time_priority",
+          "strategy": "time_priority",
+          "routeSource": "google_routes",
+          "distanceMeters": 42170,
+          "durationSeconds": 6819,
+          "distanceKm": 42.2,
+          "encodedPolyline": "{h`yEcinuYi@ECEcA?S|@`@Hb@C|@SnA@x`@jAn@OpEsCVYVg@j@aBX]~GgFjDaBXGzC?tCJbANnI`Cv@`@j@^bEfDd@n@vDbJl@z@j@f@`Aj@zGfBjC}QdGgc@LiB?oDQeXMwBKiAzKcBbBC|@D|@RrAb@RIxB`AjVxKhFrC`FrCjAp@xAz@zAx@lFbDdD|BnFdEnI`GtBrAn[~OrCvAzAgDhAuBvAqBbBkBhB_BrBuAlBaAfDmAdGmBzB}@fBaAvAcAfB{Az@aAxAmB~B_E|F_Lp@wAbYkj@|EuJbCwFvBmFbCeHxBeHvIs\\z@oD~@aFnBmIrA{GhA}EzAsFxBaH`BoEvBiFxDcIzDaIx@kBbBqEbBkDl@uAhDkJz@{B|B}HdBgHt@iEZsCNiCVcHHaA\\sCb@{BhBwHd@uC`AkJb@}Dh@oDn@gCb@sABUdAkBzF{KbDuEpLaOhEeFvGuKR_@Ts@xAkD\\u@rC{E~CgEdBoBdAkA~A{BJErCsD`AeA@Gz@gAdCcEjA}AxBeCpHiHrDoE~DgF`FsFnCmChHaGx@q@dBmBpEsEXU|DaEnEyD~AeBvDsDvEcEbFiFjFoFtDiDrE_FvAeBrEgFdBkBdAmATEzDkDvD}CbD_CtB{AvLiKzKeJ~C_DfKyJ|D{DlBiB|BcChBkBbCuB^c@RLTFbNnP~EgGeAsA",
+          "routeToken": "CqQCCq0BMqoBGo4BCjACFgxLl_zPvwsAtyWwrhfSkgudykjMtJ4B4ungBOic3WWr8Oxj0NIe97rAAcGkCgASKIYFN4MEwqEfzT1cLPFyxY--bFAb02vM0xiXy4jyiDQ3wsLh63rS7CAaDAAwLs8BFUvSAgsiLSoKAkZlWxddBRJeYTICAwM9HFwwPkWMco0-SMvKlLuNldWVFCIXdVE4LWFxSFRGLXk2cjd3UG9PaW84UWMQBRpZClcKGAoNCgIIAREAAAAAAIBmQBGHFtnO1-C5QBIUCAAQAxAGEBMQEhABGAJCBBoCCAUaBgoECAIQAiIbChd1UTgtYXNiZEZleTZyN3dQb09pbzhRY3ABKAEiFQCJilHRE4dO4e66rNJxI-R0VbRwZhoYCgoNhwVLFRVk93FTEgoNcQVLFRWv-HFT",
+          "routeSummary": "DEFAULT_ROUTE",
+          "roadType": "general",
+          "avoidTolls": true,
+          "avoidHighways": false,
+          "routingPreference": "TRAFFIC_AWARE",
+          "generationReason": "time_priority_route",
+          "dedupeDecision": "kept",
+          "usesToll": false,
+          "tollInfo": null,
+          "tollPreference": null,
+          "tollExcludedFromFare": true,
+          "intermediateWaypoint": {
+            "waypointLabel": "船橋市立医療センター",
+            "waypointAddress": "船橋市立医療センター",
+            "waypointLatLng": {
+              "latitude": 35.723815099999996,
+              "longitude": 139.99778279999998
+            }
+          }
+        }
+      ],
+      "preFixedFareConfirmable": false,
+      "routeCandidateCount": 1,
+      "distinctRouteCount": 1,
+      "fallbackReason": "only_one_distinct_route",
+      "selectedAt": "2026-06-26T05:35:54.158Z"
+    },
+    "overallRouteSelection": {
+      "routePlanType": "return_with_stop",
+      "selectionPhase": "overall",
+      "fixedOutboundRouteId": "route_0",
+      "commonSegments": [
+        {
+          "key": "outbound",
+          "label": "千葉市中央区出洲港8-3-2 → 東京ディズニーランド",
+          "originAddress": "千葉市中央区出洲港8-3-2",
+          "destinationAddress": "東京ディズニーランド",
+          "distanceMeters": 28997,
+          "durationSeconds": 4063,
+          "routeId": "route_0",
+          "routeStrategy": "time_priority",
+          "encodedPolyline": "orgxE}~dvYdArA_FfGs@dAeGjG{KqDi@]]e@iCwEoEfEc@ZsE`EiHzGiAjAqW~TaExCsCnBsCzBiC|BiCnCw@`ACT}FpGkZl[q^t]_EvDg@^}CrCcIdHyA~A_HfI}RnTkD~Di@v@{@|@uAdBgCpDmE~FcFtGgA|A}CdEm@~@cAnBq@bBcBzFcArCoAjCe@z@cBbCcDpD_GpGqBhCeCxDk@hAMDyB|DmAfCaAlCs@tCc@|Ba@dDu@dIWxDk@rMSbC_@bDy@jEeC`KEB}@dEqBdIqAdEqBdGyB|FsBxEq@nAuA~CyBrDkBhD{CjGcDhHuBpF_B|EiA~Dy@pDk@pD_@~CSjCUjFIdEQtBQhAoGrY_AlD_AhCaApB}KlRuEvIii@heAoBdDiA~AqAzAaCvBoA|@iBbA}B`A}E~A}E|AuB~@uBpAoB|A}A~A_BrBwAbCaAlBeBrEyOtb@{AjEw@rC}@fEa`@t|B{AdJsEtXq@jF[zDI~C?hENnDXfDd@bDp@~C|@zCv@tBhBbEZ\\rE|IlIjPxBnEfEbIVp@hChEbB~C^l@|Tnb@dCbE~A~B`K`MjP`SdAjAlAzAl\\~`@vDbEhHzGjGdFvHbHvF|EpFdFdGpG|CtDpO|RnBlCpA~AhBdCnMfPlDjEn@t@?JvCdD|\\zb@bRxU~JlMhBnCL@FDtKfNhAfBjBxDp@hB|@fD^lB^hC^`FLxB{B`D}ArB_BnBy@hAKTcErF{CfEdCrF|@pAdH`JlCnAjBv@"
+        },
+        {
+          "key": "return_common",
+          "label": "東京ディズニーランド → 船橋市立医療センター",
+          "originAddress": "東京ディズニーランド",
+          "destinationAddress": "船橋市立医療センター",
+          "distanceMeters": 20699,
+          "durationSeconds": 3788,
+          "routeId": null,
+          "routeStrategy": "recommended",
+          "encodedPolyline": "_koxEaovtYrAl@ETJj@`IvDnCvAR@LQ`A_C\\y@n@PdAb@DCd@iBJONBpAf@fAVtALvA?rAUjGGrAERGv@g@^q@FOf@gCViBTeAp@oBh@sDH_@Ra@P@PFsGdd@eTL_CPu@AcASqFmC}QsJaAw@qDiEgHiJc@w@}BiFlD{EbAkAjJqMEoDSeD_@cDYcBg@{Bs@yBoA{CmA}ByD_FeKoMs@oA_CqCY_@iAsAqMmPoBkCeAmAq_@_f@w@kAQK{CcEuDuEOWwKkNeJ}KuO{RqB}BqE{EkV_UmGwG}GmGmDsDgGkHqx@uaAeC_DqDuFmDgGiJoQmCgFoEaJgCuFsLeUeGuKiCgFsA_D{@oCm@}Be@wC_@oDa@sFGgC?iDFcCVwD^aDjIyf@`C_N|A}Id@cCx@qFdHcb@}LwDmE}BcYuOaHiDmA[{Ey@|@oFpFi\\ZgB?OsAQeA[}OeGcASiKmAsCo@aHiBsMiDaAk@q@o@o@aAoDuIe@o@wEwD{@e@y@YiHsBcAOuCKcD@c@NmDfBsG`F[d@a@nAWf@WXqErCo@Ny`@kA@c@g@GIF]A"
+        }
+      ],
+      "selectableSegment": {
+        "key": "return_selectable",
+        "label": "船橋市立医療センター → 千葉市中央区出洲港8-3-2",
+        "originAddress": "船橋市立医療センター",
+        "destinationAddress": "千葉市中央区出洲港8-3-2"
+      },
+      "overallRouteCandidates": [
+        {
+          "routeId": "overall_0",
+          "routeLabel": "時間優先ルート",
+          "routeDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+          "routeType": "time_priority",
+          "strategy": "time_priority",
+          "usesToll": false,
+          "totalDistanceMeters": 71167,
+          "totalDurationSeconds": 10882,
+          "segmentBreakdown": {
+            "outbound": {
+              "routeId": "route_0",
+              "routeStrategy": "time_priority",
+              "distanceMeters": 28997,
+              "durationSeconds": 4063
+            },
+            "returnCommon": {
+              "distanceMeters": 20699,
+              "durationSeconds": 3788
+            },
+            "returnSelectable": {
+              "routeId": "route_0",
+              "routeStrategy": "time_priority",
+              "routeLabel": "時間優先ルート",
+              "routeDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+              "routeType": "time_priority",
+              "strategy": "time_priority",
+              "distanceMeters": 21471,
+              "durationSeconds": 3031,
+              "usesToll": false,
+              "encodedPolyline": "{h`yEcinuYi@ECEcA?S|@`@Hb@C|@SnA@x`@jAn@OpEsCVYVg@j@aBX]~GgFjDaBXGzC?tCJbANnI`Cv@`@j@^bEfDd@n@vDbJl@z@j@f@`Aj@zGfBjC}QdGgc@LiB?oDQeXMwBKiAzKcBbBC|@D|@RrAb@RIxB`AjVxKhFrC`FrCjAp@xAz@zAx@lFbDdD|BnFdEnI`GtBrAn[~OrCvAzAgDhAuBvAqBbBkBhB_BrBuAlBaAfDmAdGmBzB}@fBaAvAcAfB{Az@aAxAmB~B_E|F_Lp@wAbYkj@|EuJbCwFvBmFbCeHxBeHvIs\\z@oD~@aFnBmIrA{GhA}EzAsFxBaH`BoEvBiFxDcIzDaIx@kBbBqEbBkDl@uAhDkJz@{B|B}HdBgHt@iEZsCNiCVcHHaA\\sCb@{BhBwHd@uC`AkJb@}Dh@oDn@gCb@sABUdAkBzF{KbDuEpLaOhEeFvGuKR_@Ts@xAkD\\u@rC{E~CgEdBoBdAkA~A{BJErCsD`AeA@Gz@gAdCcEjA}AxBeCpHiHrDoE~DgF`FsFnCmChHaGx@q@dBmBpEsEXU|DaEnEyD~AeBvDsDvEcEbFiFjFoFtDiDrE_FvAeBrEgFdBkBdAmATEzDkDvD}CbD_CtB{AvLiKzKeJ~C_DfKyJ|D{DlBiB|BcChBkBbCuB^c@RLTFbNnP~EgGeAsA"
+            }
+          },
+          "encodedPolyline": "{h`yEcinuYi@ECEcA?S|@`@Hb@C|@SnA@x`@jAn@OpEsCVYVg@j@aBX]~GgFjDaBXGzC?tCJbANnI`Cv@`@j@^bEfDd@n@vDbJl@z@j@f@`Aj@zGfBjC}QdGgc@LiB?oDQeXMwBKiAzKcBbBC|@D|@RrAb@RIxB`AjVxKhFrC`FrCjAp@xAz@zAx@lFbDdD|BnFdEnI`GtBrAn[~OrCvAzAgDhAuBvAqBbBkBhB_BrBuAlBaAfDmAdGmBzB}@fBaAvAcAfB{Az@aAxAmB~B_E|F_Lp@wAbYkj@|EuJbCwFvBmFbCeHxBeHvIs\\z@oD~@aFnBmIrA{GhA}EzAsFxBaH`BoEvBiFxDcIzDaIx@kBbBqEbBkDl@uAhDkJz@{B|B}HdBgHt@iEZsCNiCVcHHaA\\sCb@{BhBwHd@uC`AkJb@}Dh@oDn@gCb@sABUdAkBzF{KbDuEpLaOhEeFvGuKR_@Ts@xAkD\\u@rC{E~CgEdBoBdAkA~A{BJErCsD`AeA@Gz@gAdCcEjA}AxBeCpHiHrDoE~DgF`FsFnCmChHaGx@q@dBmBpEsEXU|DaEnEyD~AeBvDsDvEcEbFiFjFoFtDiDrE_FvAeBrEgFdBkBdAmATEzDkDvD}CbD_CtB{AvLiKzKeJ~C_DfKyJ|D{DlBiB|BcChBkBbCuB^c@RLTFbNnP~EgGeAsA"
+        },
+        {
+          "routeId": "overall_1",
+          "routeLabel": "高速道路ルート",
+          "routeDescription": "遠方移動に適したルートです。有料道路料金は別途必要です。",
+          "routeType": "toll_allowed",
+          "strategy": "toll_allowed",
+          "usesToll": true,
+          "totalDistanceMeters": 75841,
+          "totalDurationSeconds": 10784,
+          "segmentBreakdown": {
+            "outbound": {
+              "routeId": "route_0",
+              "routeStrategy": "time_priority",
+              "distanceMeters": 28997,
+              "durationSeconds": 4063
+            },
+            "returnCommon": {
+              "distanceMeters": 20699,
+              "durationSeconds": 3788
+            },
+            "returnSelectable": {
+              "routeId": "route_2",
+              "routeStrategy": "toll_allowed",
+              "routeLabel": "高速道路ルート",
+              "routeDescription": "遠方移動に適したルートです。有料道路料金は別途必要です。",
+              "routeType": "toll_allowed",
+              "strategy": "toll_allowed",
+              "distanceMeters": 26145,
+              "durationSeconds": 2933,
+              "usesToll": true,
+              "encodedPolyline": "{h`yEcinuYi@ECEcA?S|@`@Hb@C|@SnA@x`@jAn@OpEsCVYVg@j@aBX]~GgFjDaBXGzC?tCJbANnI`Cv@`@j@^bEfDd@n@vDbJl@z@j@f@`Aj@zGfBjC}QdGgc@LiB?oDQeXMwBKiAzKcBbBC|@D|@RrAb@RIxB`AjVxKhFrC`FrCjAp@xAz@zAx@lFbDdD|BnFdEnI`Gx@h@[`AKn@ShBI^[p@d@\\`@LTGHI~@eB|@eAb@w@zC{GLE~BkHvFyQhAuCjAaCr@mAzAqBdBkB~AqAzByAbCiApHeCbCkAjBoAdByAjBsBjBmCfCcF`Wki@~@aCz@sCj@gCf@iDXwDHiDAsDyFo}CEgI?kHLgILaEDe@ZmGl@qIdAkKlAeJz@iF|AeInBsIxIe[`Mmc@pBqIz@eE^wB`AgGbAmIj@oGf@oHbAaRFwDb@eH`@eEXqDd@qDl@aDr@uCr@yBrAeDhA_C|AgCxAsBjBqBzAuAbAu@pCeBrCoAlFiBvIkCxAi@pWaIbBi@vFiCvDuB~DmCRYpAoAlAcBdBgBPMHQj@q@t@{Av@sBV_@\\GpDjD|AfBvHpH`CzBTXFVnFnFTTTD|@bAp@jAh@lAbA|ChDbNd@|Av@dBbAdBdElGfA`Bt@xAbAhCzEzOdBzEnCrGjArCdA|CZtAZdBhAjJv@hDxD|Nt@pBz@`B|@pAz@bAD?hErERVn`BsbBjIuIpDqD`KkK~HcItAwAxZm[r@eA~EgGeAsA"
+            }
+          },
+          "encodedPolyline": "{h`yEcinuYi@ECEcA?S|@`@Hb@C|@SnA@x`@jAn@OpEsCVYVg@j@aBX]~GgFjDaBXGzC?tCJbANnI`Cv@`@j@^bEfDd@n@vDbJl@z@j@f@`Aj@zGfBjC}QdGgc@LiB?oDQeXMwBKiAzKcBbBC|@D|@RrAb@RIxB`AjVxKhFrC`FrCjAp@xAz@zAx@lFbDdD|BnFdEnI`Gx@h@[`AKn@ShBI^[p@d@\\`@LTGHI~@eB|@eAb@w@zC{GLE~BkHvFyQhAuCjAaCr@mAzAqBdBkB~AqAzByAbCiApHeCbCkAjBoAdByAjBsBjBmCfCcF`Wki@~@aCz@sCj@gCf@iDXwDHiDAsDyFo}CEgI?kHLgILaEDe@ZmGl@qIdAkKlAeJz@iF|AeInBsIxIe[`Mmc@pBqIz@eE^wB`AgGbAmIj@oGf@oHbAaRFwDb@eH`@eEXqDd@qDl@aDr@uCr@yBrAeDhA_C|AgCxAsBjBqBzAuAbAu@pCeBrCoAlFiBvIkCxAi@pWaIbBi@vFiCvDuB~DmCRYpAoAlAcBdBgBPMHQj@q@t@{Av@sBV_@\\GpDjD|AfBvHpH`CzBTXFVnFnFTTTD|@bAp@jAh@lAbA|ChDbNd@|Av@dBbAdBdElGfA`Bt@xAbAhCzEzOdBzEnCrGjArCdA|CZtAZdBhAjJv@hDxD|Nt@pBz@`B|@pAz@bAD?hErERVn`BsbBjIuIpDqD`KkK~HcItAwAxZm[r@eA~EgGeAsA"
+        }
+      ],
+      "selectedOverallRouteId": "overall_0",
+      "preFixedFareConfirmable": true,
+      "fallbackReason": null
+    },
+    "totalDistanceMeters": 71167,
+    "totalDurationSeconds": 10882,
+    "preFixedFareScope": "outbound_and_return",
+    "returnFareStatus": "fixed_candidate"
+  },
+  "tripType": "round_trip",
+  "returnPlanType": "return_with_stop",
+  "outboundRoutePlan": {
+    "origin": {
+      "address": "千葉市中央区出洲港8-3-2"
+    },
+    "destination": {
+      "address": "東京ディズニーランド"
+    },
+    "waypoint": null,
+    "distanceMeters": 28997,
+    "durationSeconds": 4063,
+    "selectedRouteId": "route_0",
+    "selectedRoute": {
+      "routeId": "route_0",
+      "routeLabel": "時間優先ルート",
+      "routeDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+      "routeSource": "google_routes",
+      "routeStrategy": "time_priority",
+      "distanceMeters": 28997,
+      "durationSeconds": 4063,
+      "distanceKm": 29,
+      "durationMinutes": 68,
+      "encodedPolyline": "orgxE}~dvYdArA_FfGs@dAeGjG{KqDi@]]e@iCwEoEfEc@ZsE`EiHzGiAjAqW~TaExCsCnBsCzBiC|BiCnCw@`ACT}FpGkZl[q^t]_EvDg@^}CrCcIdHyA~A_HfI}RnTkD~Di@v@{@|@uAdBgCpDmE~FcFtGgA|A}CdEm@~@cAnBq@bBcBzFcArCoAjCe@z@cBbCcDpD_GpGqBhCeCxDk@hAMDyB|DmAfCaAlCs@tCc@|Ba@dDu@dIWxDk@rMSbC_@bDy@jEeC`KEB}@dEqBdIqAdEqBdGyB|FsBxEq@nAuA~CyBrDkBhD{CjGcDhHuBpF_B|EiA~Dy@pDk@pD_@~CSjCUjFIdEQtBQhAoGrY_AlD_AhCaApB}KlRuEvIii@heAoBdDiA~AqAzAaCvBoA|@iBbA}B`A}E~A}E|AuB~@uBpAoB|A}A~A_BrBwAbCaAlBeBrEyOtb@{AjEw@rC}@fEa`@t|B{AdJsEtXq@jF[zDI~C?hENnDXfDd@bDp@~C|@zCv@tBhBbEZ\\rE|IlIjPxBnEfEbIVp@hChEbB~C^l@|Tnb@dCbE~A~B`K`MjP`SdAjAlAzAl\\~`@vDbEhHzGjGdFvHbHvF|EpFdFdGpG|CtDpO|RnBlCpA~AhBdCnMfPlDjEn@t@?JvCdD|\\zb@bRxU~JlMhBnCL@FDtKfNhAfBjBxDp@hB|@fD^lB^hC^`FLxB{B`D}ArB_BnBy@hAKTcErF{CfEdCrF|@pAdH`JlCnAjBv@",
+      "routeLabels": [
+        "DEFAULT_ROUTE"
+      ],
+      "routeToken": "CqMCCqwBMqkBGo0BCi4CFgxLc5EJRiEAshTf2AfA3gvu8QO_9wGM4waj-rYapsKrRdy1uV-RkBCk2TIAEih70uwgPpYbGBoIOn_s9epIEddwnWp9UCtc7MqL0nOn5niKAxaat2NkGgwADgoXASyyHimVAgAqCksZE2EAcmoYXwAyAgMBPbpGOT9FSJFjP0iFxJX2qs-SiK0BIhd1QTgtYXFXUE12VzFyN3dQby03VDZBMBAFGlkKVwoYCg0KAggBEQAAAAAAgGZAESlcj8JVqLRAEhQIABADEAYQExASEAEYAkIEGgIIBRoGCgQIAhACIhsKF3VBOC1hcUxtTVBXMXI3d1BvLTdUNkEwcAEoASIVAImKUdEqwY5ci-NZ6b0YE7STxXgSGhgKCg3-uTcVFXavg1MSCg2yuzcVFUetg1M",
+      "routeSummary": "DEFAULT_ROUTE",
+      "tollInfo": null,
+      "tollPreference": null,
+      "tollExcludedFromFare": true,
+      "intermediateWaypoint": null,
+      "routeLegs": [
+        {
+          "legIndex": 0,
+          "distanceMeters": 28997,
+          "durationSeconds": 4063,
+          "encodedPolyline": "orgxE}~dvYdArA_FfGs@dAeGjG{KqDi@]]e@iCwEoEfEc@ZsE`EiHzGiAjAqW~TaExCsCnBsCzBiC|BiCnCw@`ACT}FpGkZl[q^t]_EvDg@^}CrCcIdHyA~A_HfI}RnTkD~Di@v@{@|@uAdBgCpDmE~FcFtGgA|A}CdEm@~@cAnBq@bBcBzFcArCoAjCe@z@cBbCcDpD_GpGqBhCeCxDk@hAMDyB|DmAfCaAlCs@tCc@|Ba@dDu@dIWxDk@rMSbC_@bDy@jEeC`KEB}@dEqBdIqAdEqBdGyB|FsBxEq@nAuA~CyBrDkBhD{CjGcDhHuBpF_B|EiA~Dy@pDk@pD_@~CSjCUjFIdEQtBQhAoGrY_AlD_AhCaApB}KlRuEvIii@heAoBdDiA~AqAzAaCvBoA|@iBbA}B`A}E~A}E|AuB~@uBpAoB|A}A~A_BrBwAbCaAlBeBrEyOtb@{AjEw@rC}@fEa`@t|B{AdJsEtXq@jF[zDI~C?hENnDXfDd@bDp@~C|@zCv@tBhBbEZ\\rE|IlIjPxBnEfEbIVp@hChEbB~C^l@|Tnb@dCbE~A~B`K`MjP`SdAjAlAzAl\\~`@vDbEhHzGjGdFvHbHvF|EpFdFdGpG|CtDpO|RnBlCpA~AhBdCnMfPlDjEn@t@?JvCdD|\\zb@bRxU~JlMhBnCL@FDtKfNhAfBjBxDp@hB|@fD^lB^hC^`FLxB{B`D}ArB_BnBy@hAKTcErF{CfEdCrF|@pAdH`JlCnAjBv@",
+          "startLatLng": {
+            "lat": 35.597363,
+            "lng": 140.1139062
+          },
+          "endLatLng": {
+            "lat": 35.637120599999996,
+            "lng": 139.87584769999998
+          }
+        }
+      ],
+      "roadType": "general",
+      "avoidTolls": true,
+      "avoidHighways": false,
+      "routingPreference": "TRAFFIC_AWARE",
+      "generationReason": "time_priority_route",
+      "dedupeDecision": "kept",
+      "rawRouteIndex": 0,
+      "routeType": "time_priority",
+      "usesToll": false
+    },
+    "selectedRouteLabel": "時間優先ルート",
+    "selectedRouteDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+    "selectedRouteType": "time_priority",
+    "selectedUsesToll": false,
+    "selectedRouteIndex": 0,
+    "selectedRouteStrategy": "time_priority",
+    "selectedRouteSource": "google_routes",
+    "encodedPolyline": "orgxE}~dvYdArA_FfGs@dAeGjG{KqDi@]]e@iCwEoEfEc@ZsE`EiHzGiAjAqW~TaExCsCnBsCzBiC|BiCnCw@`ACT}FpGkZl[q^t]_EvDg@^}CrCcIdHyA~A_HfI}RnTkD~Di@v@{@|@uAdBgCpDmE~FcFtGgA|A}CdEm@~@cAnBq@bBcBzFcArCoAjCe@z@cBbCcDpD_GpGqBhCeCxDk@hAMDyB|DmAfCaAlCs@tCc@|Ba@dDu@dIWxDk@rMSbC_@bDy@jEeC`KEB}@dEqBdIqAdEqBdGyB|FsBxEq@nAuA~CyBrDkBhD{CjGcDhHuBpF_B|EiA~Dy@pDk@pD_@~CSjCUjFIdEQtBQhAoGrY_AlD_AhCaApB}KlRuEvIii@heAoBdDiA~AqAzAaCvBoA|@iBbA}B`A}E~A}E|AuB~@uBpAoB|A}A~A_BrBwAbCaAlBeBrEyOtb@{AjEw@rC}@fEa`@t|B{AdJsEtXq@jF[zDI~C?hENnDXfDd@bDp@~C|@zCv@tBhBbEZ\\rE|IlIjPxBnEfEbIVp@hChEbB~C^l@|Tnb@dCbE~A~B`K`MjP`SdAjAlAzAl\\~`@vDbEhHzGjGdFvHbHvF|EpFdFdGpG|CtDpO|RnBlCpA~AhBdCnMfPlDjEn@t@?JvCdD|\\zb@bRxU~JlMhBnCL@FDtKfNhAfBjBxDp@hB|@fD^lB^hC^`FLxB{B`D}ArB_BnBy@hAKTcErF{CfEdCrF|@pAdH`JlCnAjBv@",
+    "routeToken": "CqMCCqwBMqkBGo0BCi4CFgxLc5EJRiEAshTf2AfA3gvu8QO_9wGM4waj-rYapsKrRdy1uV-RkBCk2TIAEih70uwgPpYbGBoIOn_s9epIEddwnWp9UCtc7MqL0nOn5niKAxaat2NkGgwADgoXASyyHimVAgAqCksZE2EAcmoYXwAyAgMBPbpGOT9FSJFjP0iFxJX2qs-SiK0BIhd1QTgtYXFXUE12VzFyN3dQby03VDZBMBAFGlkKVwoYCg0KAggBEQAAAAAAgGZAESlcj8JVqLRAEhQIABADEAYQExASEAEYAkIEGgIIBRoGCgQIAhACIhsKF3VBOC1hcUxtTVBXMXI3d1BvLTdUNkEwcAEoASIVAImKUdEqwY5ci-NZ6b0YE7STxXgSGhgKCg3-uTcVFXavg1MSCg2yuzcVFUetg1M",
+    "routeSummary": "DEFAULT_ROUTE",
+    "tollInfo": null,
+    "tollPreference": null,
+    "tollExcludedFromFare": true,
+    "intermediateWaypoint": null,
+    "roadType": "general",
+    "routeCandidates": [
+      {
+        "routeId": "route_0",
+        "routeIndex": 0,
+        "label": "時間優先ルート",
+        "routeLabel": "時間優先ルート",
+        "routeDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+        "routeType": "time_priority",
+        "routeStrategy": "time_priority",
+        "strategy": "time_priority",
+        "routeSource": "google_routes",
+        "distanceMeters": 28997,
+        "durationSeconds": 4063,
+        "distanceKm": 29,
+        "encodedPolyline": "orgxE}~dvYdArA_FfGs@dAeGjG{KqDi@]]e@iCwEoEfEc@ZsE`EiHzGiAjAqW~TaExCsCnBsCzBiC|BiCnCw@`ACT}FpGkZl[q^t]_EvDg@^}CrCcIdHyA~A_HfI}RnTkD~Di@v@{@|@uAdBgCpDmE~FcFtGgA|A}CdEm@~@cAnBq@bBcBzFcArCoAjCe@z@cBbCcDpD_GpGqBhCeCxDk@hAMDyB|DmAfCaAlCs@tCc@|Ba@dDu@dIWxDk@rMSbC_@bDy@jEeC`KEB}@dEqBdIqAdEqBdGyB|FsBxEq@nAuA~CyBrDkBhD{CjGcDhHuBpF_B|EiA~Dy@pDk@pD_@~CSjCUjFIdEQtBQhAoGrY_AlD_AhCaApB}KlRuEvIii@heAoBdDiA~AqAzAaCvBoA|@iBbA}B`A}E~A}E|AuB~@uBpAoB|A}A~A_BrBwAbCaAlBeBrEyOtb@{AjEw@rC}@fEa`@t|B{AdJsEtXq@jF[zDI~C?hENnDXfDd@bDp@~C|@zCv@tBhBbEZ\\rE|IlIjPxBnEfEbIVp@hChEbB~C^l@|Tnb@dCbE~A~B`K`MjP`SdAjAlAzAl\\~`@vDbEhHzGjGdFvHbHvF|EpFdFdGpG|CtDpO|RnBlCpA~AhBdCnMfPlDjEn@t@?JvCdD|\\zb@bRxU~JlMhBnCL@FDtKfNhAfBjBxDp@hB|@fD^lB^hC^`FLxB{B`D}ArB_BnBy@hAKTcErF{CfEdCrF|@pAdH`JlCnAjBv@",
+        "routeToken": "CqMCCqwBMqkBGo0BCi4CFgxLc5EJRiEAshTf2AfA3gvu8QO_9wGM4waj-rYapsKrRdy1uV-RkBCk2TIAEih70uwgPpYbGBoIOn_s9epIEddwnWp9UCtc7MqL0nOn5niKAxaat2NkGgwADgoXASyyHimVAgAqCksZE2EAcmoYXwAyAgMBPbpGOT9FSJFjP0iFxJX2qs-SiK0BIhd1QTgtYXFXUE12VzFyN3dQby03VDZBMBAFGlkKVwoYCg0KAggBEQAAAAAAgGZAESlcj8JVqLRAEhQIABADEAYQExASEAEYAkIEGgIIBRoGCgQIAhACIhsKF3VBOC1hcUxtTVBXMXI3d1BvLTdUNkEwcAEoASIVAImKUdEqwY5ci-NZ6b0YE7STxXgSGhgKCg3-uTcVFXavg1MSCg2yuzcVFUetg1M",
+        "routeSummary": "DEFAULT_ROUTE",
+        "roadType": "general",
+        "avoidTolls": true,
+        "avoidHighways": false,
+        "routingPreference": "TRAFFIC_AWARE",
+        "generationReason": "time_priority_route",
+        "dedupeDecision": "kept",
+        "usesToll": false,
+        "tollInfo": null,
+        "tollPreference": null,
+        "tollExcludedFromFare": true,
+        "intermediateWaypoint": null
+      },
+      {
+        "routeId": "route_1",
+        "routeIndex": 1,
+        "label": "一般道優先ルート",
+        "routeLabel": "一般道優先ルート",
+        "routeDescription": "有料道路を使わず、一般道を優先して算定した走行予定ルートです。",
+        "routeType": "general_road_priority",
+        "routeStrategy": "general_road_priority",
+        "strategy": "general_road_priority",
+        "routeSource": "google_routes",
+        "distanceMeters": 28997,
+        "durationSeconds": 4060,
+        "distanceKm": 29,
+        "encodedPolyline": "orgxE}~dvYdArA_FfGs@dAeGjG{KqDi@]]e@iCwEoEfEc@ZsE`EiHzGiAjAqW~TaExCsCnBsCzBiC|BiCnCw@`ACT}FpGkZl[q^t]_EvDg@^}CrCcIdHyA~A_HfI}RnTkD~Di@v@{@|@uAdBgCpDmE~FcFtGgA|A}CdEm@~@cAnBq@bBcBzFcArCoAjCe@z@cBbCcDpD_GpGqBhCeCxDk@hAMDyB|DmAfCaAlCs@tCc@|Ba@dDu@dIWxDk@rMSbC_@bDy@jEeC`KEB}@dEqBdIqAdEqBdGyB|FsBxEq@nAuA~CyBrDkBhD{CjGcDhHuBpF_B|EiA~Dy@pDk@pD_@~CSjCUjFIdEQtBQhAoGrY_AlD_AhCaApB}KlRuEvIii@heAoBdDiA~AqAzAaCvBoA|@iBbA}B`A}E~A}E|AuB~@uBpAoB|A}A~A_BrBwAbCaAlBeBrEyOtb@{AjEw@rC}@fEa`@t|B{AdJsEtXq@jF[zDI~C?hENnDXfDd@bDp@~C|@zCv@tBhBbEZ\\rE|IlIjPxBnEfEbIVp@hChEbB~C^l@|Tnb@dCbE~A~B`K`MjP`SdAjAlAzAl\\~`@vDbEhHzGjGdFvHbHvF|EpFdFdGpG|CtDpO|RnBlCpA~AhBdCnMfPlDjEn@t@?JvCdD|\\zb@bRxU~JlMhBnCL@FDtKfNhAfBjBxDp@hB|@fD^lB^hC^`FLxB{B`D}ArB_BnBy@hAKTcErF{CfEdCrF|@pAdH`JlCnAjBv@",
+        "routeToken": "CqUCCqwBMqkBGo0BCi4CFgxLc5EJRiEAshTf2AfA3gvu8QO_9wGM4waj-rYapsKrRdy1uV-RkBCk2TIAEih70uwgPpYbGBoIOn_s9epIEddwnWp9UCtc7MqL0nOn5niKAxaat2NkGgwADgoXASyyHimVAgAqCksZE2EAcmoYXwAyAgMBPbpGOT9FSJFjP0iFxJX2qs-SiK0BIhd1QTgtYXFMZk9PNjByN3dQdEluemlBSRAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEdejcD3qpLRAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXdUE4LWF1V0dPTzYwcjd3UHRJbnppQUlwASgBIhUAiYpR0e5GbM1HKbXiE_a5sTDrtRgaGAoKDf65NxUVdq-DUxIKDbK7NxUVR62DUw",
+        "routeSummary": "DEFAULT_ROUTE",
+        "roadType": "general",
+        "avoidTolls": true,
+        "avoidHighways": true,
+        "routingPreference": "TRAFFIC_AWARE",
+        "generationReason": "general_road_priority_route",
+        "dedupeDecision": "kept",
+        "usesToll": false,
+        "tollInfo": null,
+        "tollPreference": null,
+        "tollExcludedFromFare": false,
+        "intermediateWaypoint": null
+      },
+      {
+        "routeId": "route_2",
+        "routeIndex": 2,
+        "label": "高速道路ルート",
+        "routeLabel": "高速道路ルート",
+        "routeDescription": "遠方移動に適したルートです。有料道路料金は別途必要です。",
+        "routeType": "toll_allowed",
+        "routeStrategy": "toll_allowed",
+        "strategy": "toll_allowed",
+        "routeSource": "google_routes",
+        "distanceMeters": 29022,
+        "durationSeconds": 2726,
+        "distanceKm": 29,
+        "encodedPolyline": "orgxE}~dvYdArA_FfGs@dAeGjG{KqDi@]]e@iCwEoEfEc@ZsE`EiHzGiAjAqW~TaExCsCnBsCzBiC|BiCnCw@`ACT}FpGkZl[q^t]_EvDg@^}CrCcIdHyA~A_HfI}RnTkD~Di@v@{@|@uAdBgCpDmE~FcFtGgA|A}CdEm@~@cAnBq@bBcBzFcArCoAjCe@z@cBbCcDpD_GpGqBhCeCxDk@hAMDyB|DmAfCaAlCs@tCc@|Ba@dDu@dIWxDk@rMSbC_@bDy@jEeC`KEB}@dEqBdIqAdEqBdGyB|FsBxEq@nAuA~CyBrDkBhD{CjGcDhHuBpF_B|EiA~Dy@pDk@pD_@~CSjCUjFIdEQtBQhAeGvXOJy@fC{@rBo@lAuBvCiD~F}BrEg@dA_@n@SHea@tw@wMjWuA|BqAdBmBrByBfB_B`AcCjA}CfAaGhBuBz@aB|@}B`BuAjAyAdBkA`BsA|B}ApDwS`k@sAjE_AxDcBtJyf@lvCy@zFa@dEO`DCnD@fBHn@DvBThCb@jDXzAt@zC`AtCtAdDfBxD~l@djAjDrGlBhDdBrCfEfGlFzGx@~@n@|@jFjGhGvHzDxEr@v@l^fc@xEzElf@`d@xCxCzCjDdS~V`GnH`I~JVNlGhHdBbBv@n@B@vCdD|\\zb@bRxU~JlMhBnCL@FDtKfNhAfBjBxDp@hB|@fD^lB^hC^`FLxB{B`D}ArB_BnBy@hAKTcErF{CfEdCrF|@pAdH`JlCnAjBv@",
+        "routeToken": "CrQCCr8BMrwBGqABCjUCFg5Xc5EJRiEAshTf2AfA3gvu8QO_9wGM4waj-rYa7NL5ApPGyxWQj-hJleMzkZAQpNkyABIwe9LsID6WGxgaCDp_7PXqSBHXcJ1qfVArmML9nJyTmfVc7MqL0nOn5niKAxaat2NkGg4ADgoXASw95RYDKZUCACoMSxkTYQByAmkBGF8AMgIDAT26Rjk_RUiRYz9I_8GgpuWz9KiIASIXdVE4LWF2eWpDZENCcjd3UHg5S1A2QVkQBRpXClUKGAoNCgIIAREAAAAAAIBmQBGEwMqhRUmvQBISCAAQAxAGEBMQEhgCQgQaAggFGgYKBAgCEAIiGwoXdVE4LWFvenZCOUNCcjd3UHg5S1A2QVlwASgBIhUAiYpR0bUPAk8634Zuv2jKxNO-KaEaGAoKDf65NxUVdq-DUxIKDbK7NxUVR62DUw",
+        "routeSummary": "DEFAULT_ROUTE",
+        "roadType": "toll",
+        "avoidTolls": false,
+        "avoidHighways": false,
+        "routingPreference": "TRAFFIC_AWARE",
+        "generationReason": "toll_allowed_route",
+        "dedupeDecision": "kept",
+        "usesToll": true,
+        "tollInfo": {
+          "estimatedPrice": [
+            {
+              "currencyCode": "JPY",
+              "units": "2370"
+            }
+          ]
+        },
+        "tollPreference": "allow",
+        "tollExcludedFromFare": true,
+        "intermediateWaypoint": null
+      }
+    ],
+    "preFixedFareConfirmable": true,
+    "routeCandidateCount": 3,
+    "distinctRouteCount": 3,
+    "fallbackReason": null,
+    "selectedAt": "2026-06-26T05:35:54.158Z"
+  },
+  "returnRoutePlan": {
+    "origin": {
+      "address": "東京ディズニーランド"
+    },
+    "destination": {
+      "address": "千葉市中央区出洲港8-3-2"
+    },
+    "waypoint": {
+      "waypointLabel": "船橋市立医療センター",
+      "waypointAddress": "船橋市立医療センター",
+      "stopType": null,
+      "waypointLatLng": {
+        "latitude": 35.723815099999996,
+        "longitude": 139.99778279999998
+      }
+    },
+    "distanceMeters": 42170,
+    "durationSeconds": 6819,
+    "selectedRouteId": "route_0",
+    "selectedRoute": {
+      "routeId": "route_0",
+      "routeLabel": "時間優先ルート",
+      "routeDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+      "routeSource": "google_routes",
+      "routeStrategy": "time_priority",
+      "distanceMeters": 42170,
+      "durationSeconds": 6819,
+      "distanceKm": 42.2,
+      "durationMinutes": 114,
+      "encodedPolyline": "{h`yEcinuYi@ECEcA?S|@`@Hb@C|@SnA@x`@jAn@OpEsCVYVg@j@aBX]~GgFjDaBXGzC?tCJbANnI`Cv@`@j@^bEfDd@n@vDbJl@z@j@f@`Aj@zGfBjC}QdGgc@LiB?oDQeXMwBKiAzKcBbBC|@D|@RrAb@RIxB`AjVxKhFrC`FrCjAp@xAz@zAx@lFbDdD|BnFdEnI`GtBrAn[~OrCvAzAgDhAuBvAqBbBkBhB_BrBuAlBaAfDmAdGmBzB}@fBaAvAcAfB{Az@aAxAmB~B_E|F_Lp@wAbYkj@|EuJbCwFvBmFbCeHxBeHvIs\\z@oD~@aFnBmIrA{GhA}EzAsFxBaH`BoEvBiFxDcIzDaIx@kBbBqEbBkDl@uAhDkJz@{B|B}HdBgHt@iEZsCNiCVcHHaA\\sCb@{BhBwHd@uC`AkJb@}Dh@oDn@gCb@sABUdAkBzF{KbDuEpLaOhEeFvGuKR_@Ts@xAkD\\u@rC{E~CgEdBoBdAkA~A{BJErCsD`AeA@Gz@gAdCcEjA}AxBeCpHiHrDoE~DgF`FsFnCmChHaGx@q@dBmBpEsEXU|DaEnEyD~AeBvDsDvEcEbFiFjFoFtDiDrE_FvAeBrEgFdBkBdAmATEzDkDvD}CbD_CtB{AvLiKzKeJ~C_DfKyJ|D{DlBiB|BcChBkBbCuB^c@RLTFbNnP~EgGeAsA",
+      "routeLabels": [
+        "DEFAULT_ROUTE"
+      ],
+      "routeToken": "CqQCCq0BMqoBGo4BCjACFgxLl_zPvwsAtyWwrhfSkgudykjMtJ4B4ungBOic3WWr8Oxj0NIe97rAAcGkCgASKIYFN4MEwqEfzT1cLPFyxY--bFAb02vM0xiXy4jyiDQ3wsLh63rS7CAaDAAwLs8BFUvSAgsiLSoKAkZlWxddBRJeYTICAwM9HFwwPkWMco0-SMvKlLuNldWVFCIXdVE4LWFxSFRGLXk2cjd3UG9PaW84UWMQBRpZClcKGAoNCgIIAREAAAAAAIBmQBGHFtnO1-C5QBIUCAAQAxAGEBMQEhABGAJCBBoCCAUaBgoECAIQAiIbChd1UTgtYXNiZEZleTZyN3dQb09pbzhRY3ABKAEiFQCJilHRE4dO4e66rNJxI-R0VbRwZhoYCgoNhwVLFRVk93FTEgoNcQVLFRWv-HFT",
+      "routeSummary": "DEFAULT_ROUTE",
+      "tollInfo": null,
+      "tollPreference": null,
+      "tollExcludedFromFare": true,
+      "intermediateWaypoint": {
+        "waypointLabel": "船橋市立医療センター",
+        "waypointAddress": "船橋市立医療センター",
+        "waypointLatLng": {
+          "latitude": 35.723815099999996,
+          "longitude": 139.99778279999998
+        }
+      },
+      "routeLegs": [
+        {
+          "legIndex": 0,
+          "distanceMeters": 20699,
+          "durationSeconds": 3788,
+          "encodedPolyline": "_koxEaovtYrAl@ETJj@`IvDnCvAR@LQ`A_C\\y@n@PdAb@DCd@iBJONBpAf@fAVtALvA?rAUjGGrAERGv@g@^q@FOf@gCViBTeAp@oBh@sDH_@Ra@P@PFsGdd@eTL_CPu@AcASqFmC}QsJaAw@qDiEgHiJc@w@}BiFlD{EbAkAjJqMEoDSeD_@cDYcBg@{Bs@yBoA{CmA}ByD_FeKoMs@oA_CqCY_@iAsAqMmPoBkCeAmAq_@_f@w@kAQK{CcEuDuEOWwKkNeJ}KuO{RqB}BqE{EkV_UmGwG}GmGmDsDgGkHqx@uaAeC_DqDuFmDgGiJoQmCgFoEaJgCuFsLeUeGuKiCgFsA_D{@oCm@}Be@wC_@oDa@sFGgC?iDFcCVwD^aDjIyf@`C_N|A}Id@cCx@qFdHcb@}LwDmE}BcYuOaHiDmA[{Ey@|@oFpFi\\ZgB?OsAQeA[}OeGcASiKmAsCo@aHiBsMiDaAk@q@o@o@aAoDuIe@o@wEwD{@e@y@YiHsBcAOuCKcD@c@NmDfBsG`F[d@a@nAWf@WXqErCo@Ny`@kA@c@g@GIF]A",
+          "startLatLng": {
+            "lat": 35.637120599999996,
+            "lng": 139.87584769999998
+          },
+          "endLatLng": {
+            "lat": 35.723815099999996,
+            "lng": 139.99778279999998
+          }
+        },
+        {
+          "legIndex": 1,
+          "distanceMeters": 21471,
+          "durationSeconds": 3031,
+          "encodedPolyline": "{h`yEcinuYi@ECEcA?S|@`@Hb@C|@SnA@x`@jAn@OpEsCVYVg@j@aBX]~GgFjDaBXGzC?tCJbANnI`Cv@`@j@^bEfDd@n@vDbJl@z@j@f@`Aj@zGfBjC}QdGgc@LiB?oDQeXMwBKiAzKcBbBC|@D|@RrAb@RIxB`AjVxKhFrC`FrCjAp@xAz@zAx@lFbDdD|BnFdEnI`GtBrAn[~OrCvAzAgDhAuBvAqBbBkBhB_BrBuAlBaAfDmAdGmBzB}@fBaAvAcAfB{Az@aAxAmB~B_E|F_Lp@wAbYkj@|EuJbCwFvBmFbCeHxBeHvIs\\z@oD~@aFnBmIrA{GhA}EzAsFxBaH`BoEvBiFxDcIzDaIx@kBbBqEbBkDl@uAhDkJz@{B|B}HdBgHt@iEZsCNiCVcHHaA\\sCb@{BhBwHd@uC`AkJb@}Dh@oDn@gCb@sABUdAkBzF{KbDuEpLaOhEeFvGuKR_@Ts@xAkD\\u@rC{E~CgEdBoBdAkA~A{BJErCsD`AeA@Gz@gAdCcEjA}AxBeCpHiHrDoE~DgF`FsFnCmChHaGx@q@dBmBpEsEXU|DaEnEyD~AeBvDsDvEcEbFiFjFoFtDiDrE_FvAeBrEgFdBkBdAmATEzDkDvD}CbD_CtB{AvLiKzKeJ~C_DfKyJ|D{DlBiB|BcChBkBbCuB^c@RLTFbNnP~EgGeAsA",
+          "startLatLng": {
+            "lat": 35.723815099999996,
+            "lng": 139.99778279999998
+          },
+          "endLatLng": {
+            "lat": 35.597363,
+            "lng": 140.1139062
+          }
+        }
+      ],
+      "roadType": "general",
+      "avoidTolls": true,
+      "avoidHighways": false,
+      "routingPreference": "TRAFFIC_AWARE",
+      "generationReason": "time_priority_route",
+      "dedupeDecision": "kept",
+      "rawRouteIndex": 0,
+      "routeType": "time_priority",
+      "usesToll": false
+    },
+    "selectedRouteLabel": "時間優先ルート",
+    "selectedRouteDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+    "selectedRouteType": "time_priority",
+    "selectedUsesToll": false,
+    "selectedRouteIndex": 0,
+    "selectedRouteStrategy": "time_priority",
+    "selectedRouteSource": "google_routes",
+    "encodedPolyline": "{h`yEcinuYi@ECEcA?S|@`@Hb@C|@SnA@x`@jAn@OpEsCVYVg@j@aBX]~GgFjDaBXGzC?tCJbANnI`Cv@`@j@^bEfDd@n@vDbJl@z@j@f@`Aj@zGfBjC}QdGgc@LiB?oDQeXMwBKiAzKcBbBC|@D|@RrAb@RIxB`AjVxKhFrC`FrCjAp@xAz@zAx@lFbDdD|BnFdEnI`GtBrAn[~OrCvAzAgDhAuBvAqBbBkBhB_BrBuAlBaAfDmAdGmBzB}@fBaAvAcAfB{Az@aAxAmB~B_E|F_Lp@wAbYkj@|EuJbCwFvBmFbCeHxBeHvIs\\z@oD~@aFnBmIrA{GhA}EzAsFxBaH`BoEvBiFxDcIzDaIx@kBbBqEbBkDl@uAhDkJz@{B|B}HdBgHt@iEZsCNiCVcHHaA\\sCb@{BhBwHd@uC`AkJb@}Dh@oDn@gCb@sABUdAkBzF{KbDuEpLaOhEeFvGuKR_@Ts@xAkD\\u@rC{E~CgEdBoBdAkA~A{BJErCsD`AeA@Gz@gAdCcEjA}AxBeCpHiHrDoE~DgF`FsFnCmChHaGx@q@dBmBpEsEXU|DaEnEyD~AeBvDsDvEcEbFiFjFoFtDiDrE_FvAeBrEgFdBkBdAmATEzDkDvD}CbD_CtB{AvLiKzKeJ~C_DfKyJ|D{DlBiB|BcChBkBbCuB^c@RLTFbNnP~EgGeAsA",
+    "routeToken": "CqQCCq0BMqoBGo4BCjACFgxLl_zPvwsAtyWwrhfSkgudykjMtJ4B4ungBOic3WWr8Oxj0NIe97rAAcGkCgASKIYFN4MEwqEfzT1cLPFyxY--bFAb02vM0xiXy4jyiDQ3wsLh63rS7CAaDAAwLs8BFUvSAgsiLSoKAkZlWxddBRJeYTICAwM9HFwwPkWMco0-SMvKlLuNldWVFCIXdVE4LWFxSFRGLXk2cjd3UG9PaW84UWMQBRpZClcKGAoNCgIIAREAAAAAAIBmQBGHFtnO1-C5QBIUCAAQAxAGEBMQEhABGAJCBBoCCAUaBgoECAIQAiIbChd1UTgtYXNiZEZleTZyN3dQb09pbzhRY3ABKAEiFQCJilHRE4dO4e66rNJxI-R0VbRwZhoYCgoNhwVLFRVk93FTEgoNcQVLFRWv-HFT",
+    "routeSummary": "DEFAULT_ROUTE",
+    "tollInfo": null,
+    "tollPreference": null,
+    "tollExcludedFromFare": true,
+    "intermediateWaypoint": {
+      "waypointLabel": "船橋市立医療センター",
+      "waypointAddress": "船橋市立医療センター",
+      "waypointLatLng": {
+        "latitude": 35.723815099999996,
+        "longitude": 139.99778279999998
+      }
+    },
+    "roadType": "general",
+    "routeCandidates": [
+      {
+        "routeId": "route_0",
+        "routeIndex": 0,
+        "label": "時間優先ルート",
+        "routeLabel": "時間優先ルート",
+        "routeDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+        "routeType": "time_priority",
+        "routeStrategy": "time_priority",
+        "strategy": "time_priority",
+        "routeSource": "google_routes",
+        "distanceMeters": 42170,
+        "durationSeconds": 6819,
+        "distanceKm": 42.2,
+        "encodedPolyline": "{h`yEcinuYi@ECEcA?S|@`@Hb@C|@SnA@x`@jAn@OpEsCVYVg@j@aBX]~GgFjDaBXGzC?tCJbANnI`Cv@`@j@^bEfDd@n@vDbJl@z@j@f@`Aj@zGfBjC}QdGgc@LiB?oDQeXMwBKiAzKcBbBC|@D|@RrAb@RIxB`AjVxKhFrC`FrCjAp@xAz@zAx@lFbDdD|BnFdEnI`GtBrAn[~OrCvAzAgDhAuBvAqBbBkBhB_BrBuAlBaAfDmAdGmBzB}@fBaAvAcAfB{Az@aAxAmB~B_E|F_Lp@wAbYkj@|EuJbCwFvBmFbCeHxBeHvIs\\z@oD~@aFnBmIrA{GhA}EzAsFxBaH`BoEvBiFxDcIzDaIx@kBbBqEbBkDl@uAhDkJz@{B|B}HdBgHt@iEZsCNiCVcHHaA\\sCb@{BhBwHd@uC`AkJb@}Dh@oDn@gCb@sABUdAkBzF{KbDuEpLaOhEeFvGuKR_@Ts@xAkD\\u@rC{E~CgEdBoBdAkA~A{BJErCsD`AeA@Gz@gAdCcEjA}AxBeCpHiHrDoE~DgF`FsFnCmChHaGx@q@dBmBpEsEXU|DaEnEyD~AeBvDsDvEcEbFiFjFoFtDiDrE_FvAeBrEgFdBkBdAmATEzDkDvD}CbD_CtB{AvLiKzKeJ~C_DfKyJ|D{DlBiB|BcChBkBbCuB^c@RLTFbNnP~EgGeAsA",
+        "routeToken": "CqQCCq0BMqoBGo4BCjACFgxLl_zPvwsAtyWwrhfSkgudykjMtJ4B4ungBOic3WWr8Oxj0NIe97rAAcGkCgASKIYFN4MEwqEfzT1cLPFyxY--bFAb02vM0xiXy4jyiDQ3wsLh63rS7CAaDAAwLs8BFUvSAgsiLSoKAkZlWxddBRJeYTICAwM9HFwwPkWMco0-SMvKlLuNldWVFCIXdVE4LWFxSFRGLXk2cjd3UG9PaW84UWMQBRpZClcKGAoNCgIIAREAAAAAAIBmQBGHFtnO1-C5QBIUCAAQAxAGEBMQEhABGAJCBBoCCAUaBgoECAIQAiIbChd1UTgtYXNiZEZleTZyN3dQb09pbzhRY3ABKAEiFQCJilHRE4dO4e66rNJxI-R0VbRwZhoYCgoNhwVLFRVk93FTEgoNcQVLFRWv-HFT",
+        "routeSummary": "DEFAULT_ROUTE",
+        "roadType": "general",
+        "avoidTolls": true,
+        "avoidHighways": false,
+        "routingPreference": "TRAFFIC_AWARE",
+        "generationReason": "time_priority_route",
+        "dedupeDecision": "kept",
+        "usesToll": false,
+        "tollInfo": null,
+        "tollPreference": null,
+        "tollExcludedFromFare": true,
+        "intermediateWaypoint": {
+          "waypointLabel": "船橋市立医療センター",
+          "waypointAddress": "船橋市立医療センター",
+          "waypointLatLng": {
+            "latitude": 35.723815099999996,
+            "longitude": 139.99778279999998
+          }
+        }
+      }
+    ],
+    "preFixedFareConfirmable": false,
+    "routeCandidateCount": 1,
+    "distinctRouteCount": 1,
+    "fallbackReason": "only_one_distinct_route",
+    "selectedAt": "2026-06-26T05:35:54.158Z"
+  },
+  "overallRouteSelection": {
+    "routePlanType": "return_with_stop",
+    "selectionPhase": "overall",
+    "fixedOutboundRouteId": "route_0",
+    "commonSegments": [
+      {
+        "key": "outbound",
+        "label": "千葉市中央区出洲港8-3-2 → 東京ディズニーランド",
+        "originAddress": "千葉市中央区出洲港8-3-2",
+        "destinationAddress": "東京ディズニーランド",
+        "distanceMeters": 28997,
+        "durationSeconds": 4063,
+        "routeId": "route_0",
+        "routeStrategy": "time_priority",
+        "encodedPolyline": "orgxE}~dvYdArA_FfGs@dAeGjG{KqDi@]]e@iCwEoEfEc@ZsE`EiHzGiAjAqW~TaExCsCnBsCzBiC|BiCnCw@`ACT}FpGkZl[q^t]_EvDg@^}CrCcIdHyA~A_HfI}RnTkD~Di@v@{@|@uAdBgCpDmE~FcFtGgA|A}CdEm@~@cAnBq@bBcBzFcArCoAjCe@z@cBbCcDpD_GpGqBhCeCxDk@hAMDyB|DmAfCaAlCs@tCc@|Ba@dDu@dIWxDk@rMSbC_@bDy@jEeC`KEB}@dEqBdIqAdEqBdGyB|FsBxEq@nAuA~CyBrDkBhD{CjGcDhHuBpF_B|EiA~Dy@pDk@pD_@~CSjCUjFIdEQtBQhAoGrY_AlD_AhCaApB}KlRuEvIii@heAoBdDiA~AqAzAaCvBoA|@iBbA}B`A}E~A}E|AuB~@uBpAoB|A}A~A_BrBwAbCaAlBeBrEyOtb@{AjEw@rC}@fEa`@t|B{AdJsEtXq@jF[zDI~C?hENnDXfDd@bDp@~C|@zCv@tBhBbEZ\\rE|IlIjPxBnEfEbIVp@hChEbB~C^l@|Tnb@dCbE~A~B`K`MjP`SdAjAlAzAl\\~`@vDbEhHzGjGdFvHbHvF|EpFdFdGpG|CtDpO|RnBlCpA~AhBdCnMfPlDjEn@t@?JvCdD|\\zb@bRxU~JlMhBnCL@FDtKfNhAfBjBxDp@hB|@fD^lB^hC^`FLxB{B`D}ArB_BnBy@hAKTcErF{CfEdCrF|@pAdH`JlCnAjBv@"
+      },
+      {
+        "key": "return_common",
+        "label": "東京ディズニーランド → 船橋市立医療センター",
+        "originAddress": "東京ディズニーランド",
+        "destinationAddress": "船橋市立医療センター",
+        "distanceMeters": 20699,
+        "durationSeconds": 3788,
+        "routeId": null,
+        "routeStrategy": "recommended",
+        "encodedPolyline": "_koxEaovtYrAl@ETJj@`IvDnCvAR@LQ`A_C\\y@n@PdAb@DCd@iBJONBpAf@fAVtALvA?rAUjGGrAERGv@g@^q@FOf@gCViBTeAp@oBh@sDH_@Ra@P@PFsGdd@eTL_CPu@AcASqFmC}QsJaAw@qDiEgHiJc@w@}BiFlD{EbAkAjJqMEoDSeD_@cDYcBg@{Bs@yBoA{CmA}ByD_FeKoMs@oA_CqCY_@iAsAqMmPoBkCeAmAq_@_f@w@kAQK{CcEuDuEOWwKkNeJ}KuO{RqB}BqE{EkV_UmGwG}GmGmDsDgGkHqx@uaAeC_DqDuFmDgGiJoQmCgFoEaJgCuFsLeUeGuKiCgFsA_D{@oCm@}Be@wC_@oDa@sFGgC?iDFcCVwD^aDjIyf@`C_N|A}Id@cCx@qFdHcb@}LwDmE}BcYuOaHiDmA[{Ey@|@oFpFi\\ZgB?OsAQeA[}OeGcASiKmAsCo@aHiBsMiDaAk@q@o@o@aAoDuIe@o@wEwD{@e@y@YiHsBcAOuCKcD@c@NmDfBsG`F[d@a@nAWf@WXqErCo@Ny`@kA@c@g@GIF]A"
+      }
+    ],
+    "selectableSegment": {
+      "key": "return_selectable",
+      "label": "船橋市立医療センター → 千葉市中央区出洲港8-3-2",
+      "originAddress": "船橋市立医療センター",
+      "destinationAddress": "千葉市中央区出洲港8-3-2"
+    },
+    "overallRouteCandidates": [
+      {
+        "routeId": "overall_0",
+        "routeLabel": "時間優先ルート",
+        "routeDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+        "routeType": "time_priority",
+        "strategy": "time_priority",
+        "usesToll": false,
+        "totalDistanceMeters": 71167,
+        "totalDurationSeconds": 10882,
+        "segmentBreakdown": {
+          "outbound": {
+            "routeId": "route_0",
+            "routeStrategy": "time_priority",
+            "distanceMeters": 28997,
+            "durationSeconds": 4063
+          },
+          "returnCommon": {
+            "distanceMeters": 20699,
+            "durationSeconds": 3788
+          },
+          "returnSelectable": {
+            "routeId": "route_0",
+            "routeStrategy": "time_priority",
+            "routeLabel": "時間優先ルート",
+            "routeDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+            "routeType": "time_priority",
+            "strategy": "time_priority",
+            "distanceMeters": 21471,
+            "durationSeconds": 3031,
+            "usesToll": false,
+            "encodedPolyline": "{h`yEcinuYi@ECEcA?S|@`@Hb@C|@SnA@x`@jAn@OpEsCVYVg@j@aBX]~GgFjDaBXGzC?tCJbANnI`Cv@`@j@^bEfDd@n@vDbJl@z@j@f@`Aj@zGfBjC}QdGgc@LiB?oDQeXMwBKiAzKcBbBC|@D|@RrAb@RIxB`AjVxKhFrC`FrCjAp@xAz@zAx@lFbDdD|BnFdEnI`GtBrAn[~OrCvAzAgDhAuBvAqBbBkBhB_BrBuAlBaAfDmAdGmBzB}@fBaAvAcAfB{Az@aAxAmB~B_E|F_Lp@wAbYkj@|EuJbCwFvBmFbCeHxBeHvIs\\z@oD~@aFnBmIrA{GhA}EzAsFxBaH`BoEvBiFxDcIzDaIx@kBbBqEbBkDl@uAhDkJz@{B|B}HdBgHt@iEZsCNiCVcHHaA\\sCb@{BhBwHd@uC`AkJb@}Dh@oDn@gCb@sABUdAkBzF{KbDuEpLaOhEeFvGuKR_@Ts@xAkD\\u@rC{E~CgEdBoBdAkA~A{BJErCsD`AeA@Gz@gAdCcEjA}AxBeCpHiHrDoE~DgF`FsFnCmChHaGx@q@dBmBpEsEXU|DaEnEyD~AeBvDsDvEcEbFiFjFoFtDiDrE_FvAeBrEgFdBkBdAmATEzDkDvD}CbD_CtB{AvLiKzKeJ~C_DfKyJ|D{DlBiB|BcChBkBbCuB^c@RLTFbNnP~EgGeAsA"
+          }
+        },
+        "encodedPolyline": "{h`yEcinuYi@ECEcA?S|@`@Hb@C|@SnA@x`@jAn@OpEsCVYVg@j@aBX]~GgFjDaBXGzC?tCJbANnI`Cv@`@j@^bEfDd@n@vDbJl@z@j@f@`Aj@zGfBjC}QdGgc@LiB?oDQeXMwBKiAzKcBbBC|@D|@RrAb@RIxB`AjVxKhFrC`FrCjAp@xAz@zAx@lFbDdD|BnFdEnI`GtBrAn[~OrCvAzAgDhAuBvAqBbBkBhB_BrBuAlBaAfDmAdGmBzB}@fBaAvAcAfB{Az@aAxAmB~B_E|F_Lp@wAbYkj@|EuJbCwFvBmFbCeHxBeHvIs\\z@oD~@aFnBmIrA{GhA}EzAsFxBaH`BoEvBiFxDcIzDaIx@kBbBqEbBkDl@uAhDkJz@{B|B}HdBgHt@iEZsCNiCVcHHaA\\sCb@{BhBwHd@uC`AkJb@}Dh@oDn@gCb@sABUdAkBzF{KbDuEpLaOhEeFvGuKR_@Ts@xAkD\\u@rC{E~CgEdBoBdAkA~A{BJErCsD`AeA@Gz@gAdCcEjA}AxBeCpHiHrDoE~DgF`FsFnCmChHaGx@q@dBmBpEsEXU|DaEnEyD~AeBvDsDvEcEbFiFjFoFtDiDrE_FvAeBrEgFdBkBdAmATEzDkDvD}CbD_CtB{AvLiKzKeJ~C_DfKyJ|D{DlBiB|BcChBkBbCuB^c@RLTFbNnP~EgGeAsA"
+      },
+      {
+        "routeId": "overall_1",
+        "routeLabel": "高速道路ルート",
+        "routeDescription": "遠方移動に適したルートです。有料道路料金は別途必要です。",
+        "routeType": "toll_allowed",
+        "strategy": "toll_allowed",
+        "usesToll": true,
+        "totalDistanceMeters": 75841,
+        "totalDurationSeconds": 10784,
+        "segmentBreakdown": {
+          "outbound": {
+            "routeId": "route_0",
+            "routeStrategy": "time_priority",
+            "distanceMeters": 28997,
+            "durationSeconds": 4063
+          },
+          "returnCommon": {
+            "distanceMeters": 20699,
+            "durationSeconds": 3788
+          },
+          "returnSelectable": {
+            "routeId": "route_2",
+            "routeStrategy": "toll_allowed",
+            "routeLabel": "高速道路ルート",
+            "routeDescription": "遠方移動に適したルートです。有料道路料金は別途必要です。",
+            "routeType": "toll_allowed",
+            "strategy": "toll_allowed",
+            "distanceMeters": 26145,
+            "durationSeconds": 2933,
+            "usesToll": true,
+            "encodedPolyline": "{h`yEcinuYi@ECEcA?S|@`@Hb@C|@SnA@x`@jAn@OpEsCVYVg@j@aBX]~GgFjDaBXGzC?tCJbANnI`Cv@`@j@^bEfDd@n@vDbJl@z@j@f@`Aj@zGfBjC}QdGgc@LiB?oDQeXMwBKiAzKcBbBC|@D|@RrAb@RIxB`AjVxKhFrC`FrCjAp@xAz@zAx@lFbDdD|BnFdEnI`Gx@h@[`AKn@ShBI^[p@d@\\`@LTGHI~@eB|@eAb@w@zC{GLE~BkHvFyQhAuCjAaCr@mAzAqBdBkB~AqAzByAbCiApHeCbCkAjBoAdByAjBsBjBmCfCcF`Wki@~@aCz@sCj@gCf@iDXwDHiDAsDyFo}CEgI?kHLgILaEDe@ZmGl@qIdAkKlAeJz@iF|AeInBsIxIe[`Mmc@pBqIz@eE^wB`AgGbAmIj@oGf@oHbAaRFwDb@eH`@eEXqDd@qDl@aDr@uCr@yBrAeDhA_C|AgCxAsBjBqBzAuAbAu@pCeBrCoAlFiBvIkCxAi@pWaIbBi@vFiCvDuB~DmCRYpAoAlAcBdBgBPMHQj@q@t@{Av@sBV_@\\GpDjD|AfBvHpH`CzBTXFVnFnFTTTD|@bAp@jAh@lAbA|ChDbNd@|Av@dBbAdBdElGfA`Bt@xAbAhCzEzOdBzEnCrGjArCdA|CZtAZdBhAjJv@hDxD|Nt@pBz@`B|@pAz@bAD?hErERVn`BsbBjIuIpDqD`KkK~HcItAwAxZm[r@eA~EgGeAsA"
+          }
+        },
+        "encodedPolyline": "{h`yEcinuYi@ECEcA?S|@`@Hb@C|@SnA@x`@jAn@OpEsCVYVg@j@aBX]~GgFjDaBXGzC?tCJbANnI`Cv@`@j@^bEfDd@n@vDbJl@z@j@f@`Aj@zGfBjC}QdGgc@LiB?oDQeXMwBKiAzKcBbBC|@D|@RrAb@RIxB`AjVxKhFrC`FrCjAp@xAz@zAx@lFbDdD|BnFdEnI`Gx@h@[`AKn@ShBI^[p@d@\\`@LTGHI~@eB|@eAb@w@zC{GLE~BkHvFyQhAuCjAaCr@mAzAqBdBkB~AqAzByAbCiApHeCbCkAjBoAdByAjBsBjBmCfCcF`Wki@~@aCz@sCj@gCf@iDXwDHiDAsDyFo}CEgI?kHLgILaEDe@ZmGl@qIdAkKlAeJz@iF|AeInBsIxIe[`Mmc@pBqIz@eE^wB`AgGbAmIj@oGf@oHbAaRFwDb@eH`@eEXqDd@qDl@aDr@uCr@yBrAeDhA_C|AgCxAsBjBqBzAuAbAu@pCeBrCoAlFiBvIkCxAi@pWaIbBi@vFiCvDuB~DmCRYpAoAlAcBdBgBPMHQj@q@t@{Av@sBV_@\\GpDjD|AfBvHpH`CzBTXFVnFnFTTTD|@bAp@jAh@lAbA|ChDbNd@|Av@dBbAdBdElGfA`Bt@xAbAhCzEzOdBzEnCrGjArCdA|CZtAZdBhAjJv@hDxD|Nt@pBz@`B|@pAz@bAD?hErERVn`BsbBjIuIpDqD`KkK~HcItAwAxZm[r@eA~EgGeAsA"
+      }
+    ],
+    "selectedOverallRouteId": "overall_0",
+    "preFixedFareConfirmable": true,
+    "fallbackReason": null
+  },
+  "totalDistanceMeters": 71167,
+  "totalDurationSeconds": 10882,
+  "preFixedFareScope": "outbound_and_return",
+  "returnFareStatus": "fixed_candidate",
+  "returnSelectedRouteId": "route_0",
+  "selectedRouteId": "route_0",
+  "selectedRouteLabel": "時間優先ルート",
+  "selectedRouteDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+  "selectedRouteType": "time_priority",
+  "selectedUsesToll": false,
+  "selectedRouteIndex": 0,
+  "selectedRouteStrategy": "time_priority",
+  "selectedRouteSource": "google_routes",
+  "encodedPolyline": "orgxE}~dvYdArA_FfGs@dAeGjG{KqDi@]]e@iCwEoEfEc@ZsE`EiHzGiAjAqW~TaExCsCnBsCzBiC|BiCnCw@`ACT}FpGkZl[q^t]_EvDg@^}CrCcIdHyA~A_HfI}RnTkD~Di@v@{@|@uAdBgCpDmE~FcFtGgA|A}CdEm@~@cAnBq@bBcBzFcArCoAjCe@z@cBbCcDpD_GpGqBhCeCxDk@hAMDyB|DmAfCaAlCs@tCc@|Ba@dDu@dIWxDk@rMSbC_@bDy@jEeC`KEB}@dEqBdIqAdEqBdGyB|FsBxEq@nAuA~CyBrDkBhD{CjGcDhHuBpF_B|EiA~Dy@pDk@pD_@~CSjCUjFIdEQtBQhAoGrY_AlD_AhCaApB}KlRuEvIii@heAoBdDiA~AqAzAaCvBoA|@iBbA}B`A}E~A}E|AuB~@uBpAoB|A}A~A_BrBwAbCaAlBeBrEyOtb@{AjEw@rC}@fEa`@t|B{AdJsEtXq@jF[zDI~C?hENnDXfDd@bDp@~C|@zCv@tBhBbEZ\\rE|IlIjPxBnEfEbIVp@hChEbB~C^l@|Tnb@dCbE~A~B`K`MjP`SdAjAlAzAl\\~`@vDbEhHzGjGdFvHbHvF|EpFdFdGpG|CtDpO|RnBlCpA~AhBdCnMfPlDjEn@t@?JvCdD|\\zb@bRxU~JlMhBnCL@FDtKfNhAfBjBxDp@hB|@fD^lB^hC^`FLxB{B`D}ArB_BnBy@hAKTcErF{CfEdCrF|@pAdH`JlCnAjBv@",
+  "routeToken": "CqMCCqwBMqkBGo0BCi4CFgxLc5EJRiEAshTf2AfA3gvu8QO_9wGM4waj-rYapsKrRdy1uV-RkBCk2TIAEih70uwgPpYbGBoIOn_s9epIEddwnWp9UCtc7MqL0nOn5niKAxaat2NkGgwADgoXASyyHimVAgAqCksZE2EAcmoYXwAyAgMBPbpGOT9FSJFjP0iFxJX2qs-SiK0BIhd1QTgtYXFXUE12VzFyN3dQby03VDZBMBAFGlkKVwoYCg0KAggBEQAAAAAAgGZAESlcj8JVqLRAEhQIABADEAYQExASEAEYAkIEGgIIBRoGCgQIAhACIhsKF3VBOC1hcUxtTVBXMXI3d1BvLTdUNkEwcAEoASIVAImKUdEqwY5ci-NZ6b0YE7STxXgSGhgKCg3-uTcVFXavg1MSCg2yuzcVFUetg1M",
+  "routeSummary": "DEFAULT_ROUTE",
+  "tollInfo": null,
+  "tollPreference": null,
+  "tollExcludedFromFare": true,
+  "intermediateWaypoint": null,
+  "routeCandidates": [
+    {
+      "routeId": "route_0",
+      "routeIndex": 0,
+      "label": "時間優先ルート",
+      "routeLabel": "時間優先ルート",
+      "routeDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+      "routeType": "time_priority",
+      "routeStrategy": "time_priority",
+      "strategy": "time_priority",
+      "routeSource": "google_routes",
+      "distanceMeters": 28997,
+      "durationSeconds": 4063,
+      "distanceKm": 29,
+      "encodedPolyline": "orgxE}~dvYdArA_FfGs@dAeGjG{KqDi@]]e@iCwEoEfEc@ZsE`EiHzGiAjAqW~TaExCsCnBsCzBiC|BiCnCw@`ACT}FpGkZl[q^t]_EvDg@^}CrCcIdHyA~A_HfI}RnTkD~Di@v@{@|@uAdBgCpDmE~FcFtGgA|A}CdEm@~@cAnBq@bBcBzFcArCoAjCe@z@cBbCcDpD_GpGqBhCeCxDk@hAMDyB|DmAfCaAlCs@tCc@|Ba@dDu@dIWxDk@rMSbC_@bDy@jEeC`KEB}@dEqBdIqAdEqBdGyB|FsBxEq@nAuA~CyBrDkBhD{CjGcDhHuBpF_B|EiA~Dy@pDk@pD_@~CSjCUjFIdEQtBQhAoGrY_AlD_AhCaApB}KlRuEvIii@heAoBdDiA~AqAzAaCvBoA|@iBbA}B`A}E~A}E|AuB~@uBpAoB|A}A~A_BrBwAbCaAlBeBrEyOtb@{AjEw@rC}@fEa`@t|B{AdJsEtXq@jF[zDI~C?hENnDXfDd@bDp@~C|@zCv@tBhBbEZ\\rE|IlIjPxBnEfEbIVp@hChEbB~C^l@|Tnb@dCbE~A~B`K`MjP`SdAjAlAzAl\\~`@vDbEhHzGjGdFvHbHvF|EpFdFdGpG|CtDpO|RnBlCpA~AhBdCnMfPlDjEn@t@?JvCdD|\\zb@bRxU~JlMhBnCL@FDtKfNhAfBjBxDp@hB|@fD^lB^hC^`FLxB{B`D}ArB_BnBy@hAKTcErF{CfEdCrF|@pAdH`JlCnAjBv@",
+      "routeToken": "CqMCCqwBMqkBGo0BCi4CFgxLc5EJRiEAshTf2AfA3gvu8QO_9wGM4waj-rYapsKrRdy1uV-RkBCk2TIAEih70uwgPpYbGBoIOn_s9epIEddwnWp9UCtc7MqL0nOn5niKAxaat2NkGgwADgoXASyyHimVAgAqCksZE2EAcmoYXwAyAgMBPbpGOT9FSJFjP0iFxJX2qs-SiK0BIhd1QTgtYXFXUE12VzFyN3dQby03VDZBMBAFGlkKVwoYCg0KAggBEQAAAAAAgGZAESlcj8JVqLRAEhQIABADEAYQExASEAEYAkIEGgIIBRoGCgQIAhACIhsKF3VBOC1hcUxtTVBXMXI3d1BvLTdUNkEwcAEoASIVAImKUdEqwY5ci-NZ6b0YE7STxXgSGhgKCg3-uTcVFXavg1MSCg2yuzcVFUetg1M",
+      "routeSummary": "DEFAULT_ROUTE",
+      "roadType": "general",
+      "avoidTolls": true,
+      "avoidHighways": false,
+      "routingPreference": "TRAFFIC_AWARE",
+      "generationReason": "time_priority_route",
+      "dedupeDecision": "kept",
+      "usesToll": false,
+      "tollInfo": null,
+      "tollPreference": null,
+      "tollExcludedFromFare": true,
+      "intermediateWaypoint": null
+    },
+    {
+      "routeId": "route_1",
+      "routeIndex": 1,
+      "label": "一般道優先ルート",
+      "routeLabel": "一般道優先ルート",
+      "routeDescription": "有料道路を使わず、一般道を優先して算定した走行予定ルートです。",
+      "routeType": "general_road_priority",
+      "routeStrategy": "general_road_priority",
+      "strategy": "general_road_priority",
+      "routeSource": "google_routes",
+      "distanceMeters": 28997,
+      "durationSeconds": 4060,
+      "distanceKm": 29,
+      "encodedPolyline": "orgxE}~dvYdArA_FfGs@dAeGjG{KqDi@]]e@iCwEoEfEc@ZsE`EiHzGiAjAqW~TaExCsCnBsCzBiC|BiCnCw@`ACT}FpGkZl[q^t]_EvDg@^}CrCcIdHyA~A_HfI}RnTkD~Di@v@{@|@uAdBgCpDmE~FcFtGgA|A}CdEm@~@cAnBq@bBcBzFcArCoAjCe@z@cBbCcDpD_GpGqBhCeCxDk@hAMDyB|DmAfCaAlCs@tCc@|Ba@dDu@dIWxDk@rMSbC_@bDy@jEeC`KEB}@dEqBdIqAdEqBdGyB|FsBxEq@nAuA~CyBrDkBhD{CjGcDhHuBpF_B|EiA~Dy@pDk@pD_@~CSjCUjFIdEQtBQhAoGrY_AlD_AhCaApB}KlRuEvIii@heAoBdDiA~AqAzAaCvBoA|@iBbA}B`A}E~A}E|AuB~@uBpAoB|A}A~A_BrBwAbCaAlBeBrEyOtb@{AjEw@rC}@fEa`@t|B{AdJsEtXq@jF[zDI~C?hENnDXfDd@bDp@~C|@zCv@tBhBbEZ\\rE|IlIjPxBnEfEbIVp@hChEbB~C^l@|Tnb@dCbE~A~B`K`MjP`SdAjAlAzAl\\~`@vDbEhHzGjGdFvHbHvF|EpFdFdGpG|CtDpO|RnBlCpA~AhBdCnMfPlDjEn@t@?JvCdD|\\zb@bRxU~JlMhBnCL@FDtKfNhAfBjBxDp@hB|@fD^lB^hC^`FLxB{B`D}ArB_BnBy@hAKTcErF{CfEdCrF|@pAdH`JlCnAjBv@",
+      "routeToken": "CqUCCqwBMqkBGo0BCi4CFgxLc5EJRiEAshTf2AfA3gvu8QO_9wGM4waj-rYapsKrRdy1uV-RkBCk2TIAEih70uwgPpYbGBoIOn_s9epIEddwnWp9UCtc7MqL0nOn5niKAxaat2NkGgwADgoXASyyHimVAgAqCksZE2EAcmoYXwAyAgMBPbpGOT9FSJFjP0iFxJX2qs-SiK0BIhd1QTgtYXFMZk9PNjByN3dQdEluemlBSRAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEdejcD3qpLRAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXdUE4LWF1V0dPTzYwcjd3UHRJbnppQUlwASgBIhUAiYpR0e5GbM1HKbXiE_a5sTDrtRgaGAoKDf65NxUVdq-DUxIKDbK7NxUVR62DUw",
+      "routeSummary": "DEFAULT_ROUTE",
+      "roadType": "general",
+      "avoidTolls": true,
+      "avoidHighways": true,
+      "routingPreference": "TRAFFIC_AWARE",
+      "generationReason": "general_road_priority_route",
+      "dedupeDecision": "kept",
+      "usesToll": false,
+      "tollInfo": null,
+      "tollPreference": null,
+      "tollExcludedFromFare": false,
+      "intermediateWaypoint": null
+    },
+    {
+      "routeId": "route_2",
+      "routeIndex": 2,
+      "label": "高速道路ルート",
+      "routeLabel": "高速道路ルート",
+      "routeDescription": "遠方移動に適したルートです。有料道路料金は別途必要です。",
+      "routeType": "toll_allowed",
+      "routeStrategy": "toll_allowed",
+      "strategy": "toll_allowed",
+      "routeSource": "google_routes",
+      "distanceMeters": 29022,
+      "durationSeconds": 2726,
+      "distanceKm": 29,
+      "encodedPolyline": "orgxE}~dvYdArA_FfGs@dAeGjG{KqDi@]]e@iCwEoEfEc@ZsE`EiHzGiAjAqW~TaExCsCnBsCzBiC|BiCnCw@`ACT}FpGkZl[q^t]_EvDg@^}CrCcIdHyA~A_HfI}RnTkD~Di@v@{@|@uAdBgCpDmE~FcFtGgA|A}CdEm@~@cAnBq@bBcBzFcArCoAjCe@z@cBbCcDpD_GpGqBhCeCxDk@hAMDyB|DmAfCaAlCs@tCc@|Ba@dDu@dIWxDk@rMSbC_@bDy@jEeC`KEB}@dEqBdIqAdEqBdGyB|FsBxEq@nAuA~CyBrDkBhD{CjGcDhHuBpF_B|EiA~Dy@pDk@pD_@~CSjCUjFIdEQtBQhAeGvXOJy@fC{@rBo@lAuBvCiD~F}BrEg@dA_@n@SHea@tw@wMjWuA|BqAdBmBrByBfB_B`AcCjA}CfAaGhBuBz@aB|@}B`BuAjAyAdBkA`BsA|B}ApDwS`k@sAjE_AxDcBtJyf@lvCy@zFa@dEO`DCnD@fBHn@DvBThCb@jDXzAt@zC`AtCtAdDfBxD~l@djAjDrGlBhDdBrCfEfGlFzGx@~@n@|@jFjGhGvHzDxEr@v@l^fc@xEzElf@`d@xCxCzCjDdS~V`GnH`I~JVNlGhHdBbBv@n@B@vCdD|\\zb@bRxU~JlMhBnCL@FDtKfNhAfBjBxDp@hB|@fD^lB^hC^`FLxB{B`D}ArB_BnBy@hAKTcErF{CfEdCrF|@pAdH`JlCnAjBv@",
+      "routeToken": "CrQCCr8BMrwBGqABCjUCFg5Xc5EJRiEAshTf2AfA3gvu8QO_9wGM4waj-rYa7NL5ApPGyxWQj-hJleMzkZAQpNkyABIwe9LsID6WGxgaCDp_7PXqSBHXcJ1qfVArmML9nJyTmfVc7MqL0nOn5niKAxaat2NkGg4ADgoXASw95RYDKZUCACoMSxkTYQByAmkBGF8AMgIDAT26Rjk_RUiRYz9I_8GgpuWz9KiIASIXdVE4LWF2eWpDZENCcjd3UHg5S1A2QVkQBRpXClUKGAoNCgIIAREAAAAAAIBmQBGEwMqhRUmvQBISCAAQAxAGEBMQEhgCQgQaAggFGgYKBAgCEAIiGwoXdVE4LWFvenZCOUNCcjd3UHg5S1A2QVlwASgBIhUAiYpR0bUPAk8634Zuv2jKxNO-KaEaGAoKDf65NxUVdq-DUxIKDbK7NxUVR62DUw",
+      "routeSummary": "DEFAULT_ROUTE",
+      "roadType": "toll",
+      "avoidTolls": false,
+      "avoidHighways": false,
+      "routingPreference": "TRAFFIC_AWARE",
+      "generationReason": "toll_allowed_route",
+      "dedupeDecision": "kept",
+      "usesToll": true,
+      "tollInfo": {
+        "estimatedPrice": [
+          {
+            "currencyCode": "JPY",
+            "units": "2370"
+          }
+        ]
+      },
+      "tollPreference": "allow",
+      "tollExcludedFromFare": true,
+      "intermediateWaypoint": null
+    }
+  ],
+  "alternativeRoutes": [
+    {
+      "routeId": "route_0",
+      "routeIndex": 0,
+      "label": "時間優先ルート",
+      "routeLabel": "時間優先ルート",
+      "routeDescription": "所要時間を優先して算定した走行予定ルートです。有料道路を含む場合、有料道路料金は別途必要です。",
+      "routeType": "time_priority",
+      "routeStrategy": "time_priority",
+      "strategy": "time_priority",
+      "routeSource": "google_routes",
+      "distanceMeters": 28997,
+      "durationSeconds": 4063,
+      "distanceKm": 29,
+      "encodedPolyline": "orgxE}~dvYdArA_FfGs@dAeGjG{KqDi@]]e@iCwEoEfEc@ZsE`EiHzGiAjAqW~TaExCsCnBsCzBiC|BiCnCw@`ACT}FpGkZl[q^t]_EvDg@^}CrCcIdHyA~A_HfI}RnTkD~Di@v@{@|@uAdBgCpDmE~FcFtGgA|A}CdEm@~@cAnBq@bBcBzFcArCoAjCe@z@cBbCcDpD_GpGqBhCeCxDk@hAMDyB|DmAfCaAlCs@tCc@|Ba@dDu@dIWxDk@rMSbC_@bDy@jEeC`KEB}@dEqBdIqAdEqBdGyB|FsBxEq@nAuA~CyBrDkBhD{CjGcDhHuBpF_B|EiA~Dy@pDk@pD_@~CSjCUjFIdEQtBQhAoGrY_AlD_AhCaApB}KlRuEvIii@heAoBdDiA~AqAzAaCvBoA|@iBbA}B`A}E~A}E|AuB~@uBpAoB|A}A~A_BrBwAbCaAlBeBrEyOtb@{AjEw@rC}@fEa`@t|B{AdJsEtXq@jF[zDI~C?hENnDXfDd@bDp@~C|@zCv@tBhBbEZ\\rE|IlIjPxBnEfEbIVp@hChEbB~C^l@|Tnb@dCbE~A~B`K`MjP`SdAjAlAzAl\\~`@vDbEhHzGjGdFvHbHvF|EpFdFdGpG|CtDpO|RnBlCpA~AhBdCnMfPlDjEn@t@?JvCdD|\\zb@bRxU~JlMhBnCL@FDtKfNhAfBjBxDp@hB|@fD^lB^hC^`FLxB{B`D}ArB_BnBy@hAKTcErF{CfEdCrF|@pAdH`JlCnAjBv@",
+      "routeToken": "CqMCCqwBMqkBGo0BCi4CFgxLc5EJRiEAshTf2AfA3gvu8QO_9wGM4waj-rYapsKrRdy1uV-RkBCk2TIAEih70uwgPpYbGBoIOn_s9epIEddwnWp9UCtc7MqL0nOn5niKAxaat2NkGgwADgoXASyyHimVAgAqCksZE2EAcmoYXwAyAgMBPbpGOT9FSJFjP0iFxJX2qs-SiK0BIhd1QTgtYXFXUE12VzFyN3dQby03VDZBMBAFGlkKVwoYCg0KAggBEQAAAAAAgGZAESlcj8JVqLRAEhQIABADEAYQExASEAEYAkIEGgIIBRoGCgQIAhACIhsKF3VBOC1hcUxtTVBXMXI3d1BvLTdUNkEwcAEoASIVAImKUdEqwY5ci-NZ6b0YE7STxXgSGhgKCg3-uTcVFXavg1MSCg2yuzcVFUetg1M",
+      "routeSummary": "DEFAULT_ROUTE",
+      "roadType": "general",
+      "avoidTolls": true,
+      "avoidHighways": false,
+      "routingPreference": "TRAFFIC_AWARE",
+      "generationReason": "time_priority_route",
+      "dedupeDecision": "kept",
+      "usesToll": false,
+      "tollInfo": null,
+      "tollPreference": null,
+      "tollExcludedFromFare": true,
+      "intermediateWaypoint": null
+    },
+    {
+      "routeId": "route_1",
+      "routeIndex": 1,
+      "label": "一般道優先ルート",
+      "routeLabel": "一般道優先ルート",
+      "routeDescription": "有料道路を使わず、一般道を優先して算定した走行予定ルートです。",
+      "routeType": "general_road_priority",
+      "routeStrategy": "general_road_priority",
+      "strategy": "general_road_priority",
+      "routeSource": "google_routes",
+      "distanceMeters": 28997,
+      "durationSeconds": 4060,
+      "distanceKm": 29,
+      "encodedPolyline": "orgxE}~dvYdArA_FfGs@dAeGjG{KqDi@]]e@iCwEoEfEc@ZsE`EiHzGiAjAqW~TaExCsCnBsCzBiC|BiCnCw@`ACT}FpGkZl[q^t]_EvDg@^}CrCcIdHyA~A_HfI}RnTkD~Di@v@{@|@uAdBgCpDmE~FcFtGgA|A}CdEm@~@cAnBq@bBcBzFcArCoAjCe@z@cBbCcDpD_GpGqBhCeCxDk@hAMDyB|DmAfCaAlCs@tCc@|Ba@dDu@dIWxDk@rMSbC_@bDy@jEeC`KEB}@dEqBdIqAdEqBdGyB|FsBxEq@nAuA~CyBrDkBhD{CjGcDhHuBpF_B|EiA~Dy@pDk@pD_@~CSjCUjFIdEQtBQhAoGrY_AlD_AhCaApB}KlRuEvIii@heAoBdDiA~AqAzAaCvBoA|@iBbA}B`A}E~A}E|AuB~@uBpAoB|A}A~A_BrBwAbCaAlBeBrEyOtb@{AjEw@rC}@fEa`@t|B{AdJsEtXq@jF[zDI~C?hENnDXfDd@bDp@~C|@zCv@tBhBbEZ\\rE|IlIjPxBnEfEbIVp@hChEbB~C^l@|Tnb@dCbE~A~B`K`MjP`SdAjAlAzAl\\~`@vDbEhHzGjGdFvHbHvF|EpFdFdGpG|CtDpO|RnBlCpA~AhBdCnMfPlDjEn@t@?JvCdD|\\zb@bRxU~JlMhBnCL@FDtKfNhAfBjBxDp@hB|@fD^lB^hC^`FLxB{B`D}ArB_BnBy@hAKTcErF{CfEdCrF|@pAdH`JlCnAjBv@",
+      "routeToken": "CqUCCqwBMqkBGo0BCi4CFgxLc5EJRiEAshTf2AfA3gvu8QO_9wGM4waj-rYapsKrRdy1uV-RkBCk2TIAEih70uwgPpYbGBoIOn_s9epIEddwnWp9UCtc7MqL0nOn5niKAxaat2NkGgwADgoXASyyHimVAgAqCksZE2EAcmoYXwAyAgMBPbpGOT9FSJFjP0iFxJX2qs-SiK0BIhd1QTgtYXFMZk9PNjByN3dQdEluemlBSRAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEdejcD3qpLRAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXdUE4LWF1V0dPTzYwcjd3UHRJbnppQUlwASgBIhUAiYpR0e5GbM1HKbXiE_a5sTDrtRgaGAoKDf65NxUVdq-DUxIKDbK7NxUVR62DUw",
+      "routeSummary": "DEFAULT_ROUTE",
+      "roadType": "general",
+      "avoidTolls": true,
+      "avoidHighways": true,
+      "routingPreference": "TRAFFIC_AWARE",
+      "generationReason": "general_road_priority_route",
+      "dedupeDecision": "kept",
+      "usesToll": false,
+      "tollInfo": null,
+      "tollPreference": null,
+      "tollExcludedFromFare": false,
+      "intermediateWaypoint": null
+    },
+    {
+      "routeId": "route_2",
+      "routeIndex": 2,
+      "label": "高速道路ルート",
+      "routeLabel": "高速道路ルート",
+      "routeDescription": "遠方移動に適したルートです。有料道路料金は別途必要です。",
+      "routeType": "toll_allowed",
+      "routeStrategy": "toll_allowed",
+      "strategy": "toll_allowed",
+      "routeSource": "google_routes",
+      "distanceMeters": 29022,
+      "durationSeconds": 2726,
+      "distanceKm": 29,
+      "encodedPolyline": "orgxE}~dvYdArA_FfGs@dAeGjG{KqDi@]]e@iCwEoEfEc@ZsE`EiHzGiAjAqW~TaExCsCnBsCzBiC|BiCnCw@`ACT}FpGkZl[q^t]_EvDg@^}CrCcIdHyA~A_HfI}RnTkD~Di@v@{@|@uAdBgCpDmE~FcFtGgA|A}CdEm@~@cAnBq@bBcBzFcArCoAjCe@z@cBbCcDpD_GpGqBhCeCxDk@hAMDyB|DmAfCaAlCs@tCc@|Ba@dDu@dIWxDk@rMSbC_@bDy@jEeC`KEB}@dEqBdIqAdEqBdGyB|FsBxEq@nAuA~CyBrDkBhD{CjGcDhHuBpF_B|EiA~Dy@pDk@pD_@~CSjCUjFIdEQtBQhAeGvXOJy@fC{@rBo@lAuBvCiD~F}BrEg@dA_@n@SHea@tw@wMjWuA|BqAdBmBrByBfB_B`AcCjA}CfAaGhBuBz@aB|@}B`BuAjAyAdBkA`BsA|B}ApDwS`k@sAjE_AxDcBtJyf@lvCy@zFa@dEO`DCnD@fBHn@DvBThCb@jDXzAt@zC`AtCtAdDfBxD~l@djAjDrGlBhDdBrCfEfGlFzGx@~@n@|@jFjGhGvHzDxEr@v@l^fc@xEzElf@`d@xCxCzCjDdS~V`GnH`I~JVNlGhHdBbBv@n@B@vCdD|\\zb@bRxU~JlMhBnCL@FDtKfNhAfBjBxDp@hB|@fD^lB^hC^`FLxB{B`D}ArB_BnBy@hAKTcErF{CfEdCrF|@pAdH`JlCnAjBv@",
+      "routeToken": "CrQCCr8BMrwBGqABCjUCFg5Xc5EJRiEAshTf2AfA3gvu8QO_9wGM4waj-rYa7NL5ApPGyxWQj-hJleMzkZAQpNkyABIwe9LsID6WGxgaCDp_7PXqSBHXcJ1qfVArmML9nJyTmfVc7MqL0nOn5niKAxaat2NkGg4ADgoXASw95RYDKZUCACoMSxkTYQByAmkBGF8AMgIDAT26Rjk_RUiRYz9I_8GgpuWz9KiIASIXdVE4LWF2eWpDZENCcjd3UHg5S1A2QVkQBRpXClUKGAoNCgIIAREAAAAAAIBmQBGEwMqhRUmvQBISCAAQAxAGEBMQEhgCQgQaAggFGgYKBAgCEAIiGwoXdVE4LWFvenZCOUNCcjd3UHg5S1A2QVlwASgBIhUAiYpR0bUPAk8634Zuv2jKxNO-KaEaGAoKDf65NxUVdq-DUxIKDbK7NxUVR62DUw",
+      "routeSummary": "DEFAULT_ROUTE",
+      "roadType": "toll",
+      "avoidTolls": false,
+      "avoidHighways": false,
+      "routingPreference": "TRAFFIC_AWARE",
+      "generationReason": "toll_allowed_route",
+      "dedupeDecision": "kept",
+      "usesToll": true,
+      "tollInfo": {
+        "estimatedPrice": [
+          {
+            "currencyCode": "JPY",
+            "units": "2370"
+          }
+        ]
+      },
+      "tollPreference": "allow",
+      "tollExcludedFromFare": true,
+      "intermediateWaypoint": null
+    }
+  ],
+  "routeCandidateCount": 3,
+  "distinctRouteCount": 3,
+  "alternativeRouteCount": 3,
+  "multipleRoutesAvailable": true,
+  "preFixedFareConfirmable": true,
+  "routeDedupedCount": 3,
+  "routeGenerationStrategies": [],
+  "fallbackReason": null,
+  "selectedAt": "2026-06-26T05:35:54.158Z",
+  "selectedTrafficZoneId": "keiyo",
+  "selectedTrafficZoneLabel": "京葉交通圏",
+  "trafficZoneCoefficient": 1.2,
+  "detectedMunicipality": "千葉市中央区",
+  "trafficZoneDetectionMethod": "auto_address",
+  "trafficZoneDetectionSource": "origin_address",
+  "baseDistanceFareAmount": 32300,
+  "adjustedDistanceFareAmount": 38760,
+  "preFixedFareMode": true,
+  "routeProvider": "google_routes",
+  "distanceMeters": 71167,
+  "durationSeconds": 10882,
+  "estimateCalculationVersion": "v1"
+}
