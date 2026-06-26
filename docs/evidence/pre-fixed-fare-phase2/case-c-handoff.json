@@ -1,0 +1,1735 @@
+{
+  "estimateNumber": "EST-20260626-2598",
+  "createdAt": "2026-06-26T04:16:02.710Z",
+  "total": 7840,
+  "distanceKm": 7,
+  "usageSummary": [
+    {
+      "label": "移動方法",
+      "value": "無料車いす"
+    },
+    {
+      "label": "介助内容",
+      "value": "乗降介助"
+    },
+    {
+      "label": "階段介助",
+      "value": "階段介助なし"
+    },
+    {
+      "label": "送迎方法",
+      "value": "往復"
+    },
+    {
+      "label": "待機・付き添い",
+      "value": "待機（30分）"
+    },
+    {
+      "label": "帰りの予定",
+      "value": "帰りに立ち寄る"
+    },
+    {
+      "label": "立ち寄り先",
+      "value": "蘇我駅"
+    },
+    {
+      "label": "運賃方式",
+      "value": "事前確定運賃"
+    },
+    {
+      "label": "計算対象距離",
+      "value": "7.0km"
+    }
+  ],
+  "breakdown": {
+    "baseFare": 0,
+    "pickupFee": 800,
+    "specialVehicleFee": 1000,
+    "distanceFare": 3840,
+    "wheelchairFee": 0,
+    "assistanceFee": 1100,
+    "stairFee": 0,
+    "waitingFee": 800,
+    "escortFee": 0
+  },
+  "quoteSnapshot": {
+    "fareMode": "pre_fixed_fare",
+    "distancePricing": {
+      "mode": "patternA",
+      "patternA": {
+        "initialDistanceKm": 1.06,
+        "initialFare": 500,
+        "incrementDistanceKm": 0.221,
+        "incrementFare": 100
+      },
+      "patternB": {
+        "perKmRate": 450
+      }
+    },
+    "fareComponents": {
+      "time": [
+        {
+          "key": "timeBaseFare",
+          "label": "時間制運賃",
+          "calculator": "time_block",
+          "params": {
+            "baseMinutes": 30,
+            "baseAmount": 5000,
+            "perBlockMinutes": 15,
+            "perBlockAmount": 1200
+          }
+        },
+        {
+          "key": "pickupFee",
+          "label": "迎車料金",
+          "calculator": "fixed_fee_ref",
+          "feeRef": "pickupFee"
+        },
+        {
+          "key": "specialVehicleFee",
+          "label": "特殊車両使用料",
+          "calculator": "fixed_fee_ref",
+          "feeRef": "specialVehicleFee"
+        }
+      ],
+      "distance": [
+        {
+          "key": "pickupFee",
+          "label": "迎車料金",
+          "calculator": "fixed_fee_ref",
+          "feeRef": "pickupFee"
+        },
+        {
+          "key": "specialVehicleFee",
+          "label": "特殊車両使用料",
+          "calculator": "fixed_fee_ref",
+          "feeRef": "specialVehicleFee"
+        },
+        {
+          "key": "distanceFare",
+          "label": "距離運賃",
+          "calculator": "distance_pricing_ref",
+          "pricingRef": "distancePricing"
+        }
+      ],
+      "distance_time": [
+        {
+          "key": "pickupFee",
+          "label": "迎車料金",
+          "calculator": "fixed_fee_ref",
+          "feeRef": "pickupFee"
+        },
+        {
+          "key": "specialVehicleFee",
+          "label": "特殊車両使用料",
+          "calculator": "fixed_fee_ref",
+          "feeRef": "specialVehicleFee"
+        },
+        {
+          "key": "distanceFare",
+          "label": "距離運賃",
+          "calculator": "distance_pricing_ref",
+          "pricingRef": "distancePricing"
+        },
+        {
+          "key": "timeAdjustment",
+          "label": "予定時間加算（概算）",
+          "calculator": "time_block",
+          "params": {
+            "baseMinutes": 20,
+            "baseAmount": 0,
+            "perBlockMinutes": 10,
+            "perBlockAmount": 300
+          }
+        }
+      ],
+      "pre_fixed_fare": [
+        {
+          "key": "pickupFee",
+          "label": "迎車料金",
+          "calculator": "fixed_fee_ref",
+          "feeRef": "pickupFee"
+        },
+        {
+          "key": "specialVehicleFee",
+          "label": "特殊車両使用料",
+          "calculator": "fixed_fee_ref",
+          "feeRef": "specialVehicleFee"
+        },
+        {
+          "key": "distanceFare",
+          "label": "距離運賃",
+          "calculator": "distance_pricing_ref",
+          "pricingRef": "distancePricing"
+        },
+        {
+          "key": "timeAdjustment",
+          "label": "予定時間加算（概算）",
+          "calculator": "time_block",
+          "params": {
+            "baseMinutes": 20,
+            "baseAmount": 0,
+            "perBlockMinutes": 10,
+            "perBlockAmount": 300
+          }
+        }
+      ]
+    },
+    "fareBasis": {
+      "fareMode": "pre_fixed_fare",
+      "fareModeLabel": "事前確定運賃",
+      "durationMinutes": 21,
+      "distanceKm": 7,
+      "distanceMultiplier": 1,
+      "sections": [
+        {
+          "key": "pickupFee",
+          "title": "迎車料金",
+          "rules": [
+            "迎車料金 800円"
+          ],
+          "usage": "",
+          "amountLabel": "迎車料金",
+          "amount": 800
+        },
+        {
+          "key": "specialVehicleFee",
+          "title": "特殊車両使用料",
+          "rules": [
+            "特殊車両使用料 1000円"
+          ],
+          "usage": "",
+          "amountLabel": "特殊車両使用料",
+          "amount": 1000
+        },
+        {
+          "key": "distanceFare",
+          "title": "距離部分",
+          "rules": [
+            "初乗 1.06km まで 500円",
+            "以後 221m ごとに 100円加算",
+            "認可距離制運賃 3200円 × 平準化係数 1.2 = 3840円"
+          ],
+          "usage": "送迎方法：往復\n往路距離：3.3km\n復路距離：3.7km\n計算対象距離：7.0km",
+          "usageLines": [
+            {
+              "label": "送迎方法",
+              "value": "往復"
+            },
+            {
+              "label": "往路距離",
+              "value": "3.3km"
+            },
+            {
+              "label": "復路距離",
+              "value": "3.7km"
+            },
+            {
+              "label": "計算対象距離",
+              "value": "7.0km"
+            }
+          ],
+          "amountLabel": "距離運賃",
+          "amount": 3840
+        },
+        {
+          "key": "timeAdjustment",
+          "title": "予定時間加算（概算）",
+          "rules": [
+            "初回 20分 0円",
+            "以後 10分ごとに 300円加算"
+          ],
+          "usage": "ルート予定時間: 21分（Google Routes API の概算。認可メーターの低速走行加算とは異なります）",
+          "amountLabel": "予定時間加算（概算）",
+          "amount": 300
+        }
+      ],
+      "notices": [
+        "表示は見積時点の運賃設定に基づく計算根拠です。",
+        "時間加算はルート予定時間に基づく概算です。実走行では認可メーター（低速走行時の時間距離併用）が適用されます。",
+        "待機時間は運賃計算に含まれません。",
+        "距離運賃には交通圏平準化係数（1.2）を適用しています。介助料・待機料・実費には適用しません。"
+      ]
+    },
+    "fixedFareTotal": 5940,
+    "fixedFareBreakdown": [
+      {
+        "key": "pickupFee",
+        "label": "迎車料金",
+        "amount": 800,
+        "calculator": "fixed_fee_ref"
+      },
+      {
+        "key": "specialVehicleFee",
+        "label": "特殊車両使用料",
+        "amount": 1000,
+        "calculator": "fixed_fee_ref"
+      },
+      {
+        "key": "distanceFare",
+        "label": "距離運賃",
+        "amount": 3840,
+        "calculator": "distance_pricing_ref"
+      },
+      {
+        "key": "timeAdjustment",
+        "label": "予定時間加算（概算）",
+        "amount": 300,
+        "calculator": "time_block"
+      }
+    ],
+    "pickupFee": 800,
+    "specialVehicleFeeEnabled": true,
+    "specialVehicleFeeAmount": 1000,
+    "serviceFees": [
+      {
+        "key": "specialVehicleFee",
+        "label": "特殊車両使用料",
+        "amount": 1000
+      },
+      {
+        "key": "assistanceFee",
+        "label": "介助料金",
+        "amount": 1100
+      },
+      {
+        "key": "waitingFee",
+        "label": "待機料金",
+        "amount": 800
+      }
+    ],
+    "expenses": [],
+    "roadType": "general",
+    "distanceKm": 7,
+    "billedDistanceKm": 7,
+    "routePlan": {
+      "tripType": "round_trip",
+      "returnPlanType": "return_with_stop",
+      "outboundRoutePlan": {
+        "origin": {
+          "address": "千葉市中央区出洲港8-3-2"
+        },
+        "destination": {
+          "address": "千葉メディカルセンター"
+        },
+        "waypoint": null,
+        "distanceMeters": 3297,
+        "durationSeconds": 554,
+        "selectedRouteId": "route_0",
+        "selectedRoute": {
+          "routeId": "route_0",
+          "routeLabel": "おすすめルート",
+          "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+          "routeSource": "google_routes",
+          "routeStrategy": "recommended",
+          "distanceMeters": 3297,
+          "durationSeconds": 554,
+          "distanceKm": 3.3,
+          "durationMinutes": 9,
+          "encodedPolyline": "orgxE}~dvYdArAhBgCqBiCCQZ_JC]OKiE]iCOOZiA~@ALHR|F{EzC}BxCoBdFcDvIiFzDmBbHqC|CoAtHoC~By@|@a@rE}A_A{DSqAuGaYCK|V_KLf@g@R",
+          "routeLabels": [
+            "DEFAULT_ROUTE"
+          ],
+          "routeToken": "CpACCpcBMpQBGnkKIQIWCTlzkQlGIQCuIIVJnZwDtNJer9Fx3McIrqINr8MSABIke9LsIDXMzMCaeRCuw0Xjz4hZSS3-g1pNtwHrgYH1wiACPIiLGg4AHBiHAWX_____DwUGCyoJS2dnX1sCHR0KPbpGOT9FPhfiPkiyxLeY3L3C_OQBIhdBZjA5YXJLeEhQVzZyN3dQN3BDYThRYxAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEfLSTWIQ6YdAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXQWYwOWFvN2dHX1c2cjd3UDdwQ2E4UWNwASgBIhUAiYpR0WMMKM9JS8xHjNHDfUtIxUoaGAoKDf65NxUVdq-DUxIKDbK7NxUVR62DUw",
+          "routeSummary": "DEFAULT_ROUTE",
+          "tollInfo": null,
+          "tollPreference": null,
+          "tollExcludedFromFare": false,
+          "intermediateWaypoint": null,
+          "routeLegs": [
+            {
+              "legIndex": 0,
+              "distanceMeters": 3297,
+              "durationSeconds": 554,
+              "encodedPolyline": "orgxE}~dvYdArAhBgCqBiCCQZ_JC]OKiE]iCOOZiA~@ALHR|F{EzC}BxCoBdFcDvIiFzDmBbHqC|CoAtHoC~By@|@a@rE}A_A{DSqAuGaYCK|V_KLf@g@R",
+              "startLatLng": {
+                "lat": 35.597363,
+                "lng": 140.1139062
+              },
+              "endLatLng": {
+                "lat": 35.584832899999995,
+                "lng": 140.1313286
+              }
+            }
+          ],
+          "roadType": "general",
+          "avoidTolls": true,
+          "avoidHighways": true,
+          "rawRouteIndex": 0,
+          "routeType": "recommended",
+          "usesToll": false
+        },
+        "selectedRouteLabel": "おすすめルート",
+        "selectedRouteDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+        "selectedRouteType": "recommended",
+        "selectedUsesToll": false,
+        "selectedRouteIndex": 0,
+        "selectedRouteStrategy": "recommended",
+        "selectedRouteSource": "google_routes",
+        "encodedPolyline": "orgxE}~dvYdArAhBgCqBiCCQZ_JC]OKiE]iCOOZiA~@ALHR|F{EzC}BxCoBdFcDvIiFzDmBbHqC|CoAtHoC~By@|@a@rE}A_A{DSqAuGaYCK|V_KLf@g@R",
+        "routeToken": "CpACCpcBMpQBGnkKIQIWCTlzkQlGIQCuIIVJnZwDtNJer9Fx3McIrqINr8MSABIke9LsIDXMzMCaeRCuw0Xjz4hZSS3-g1pNtwHrgYH1wiACPIiLGg4AHBiHAWX_____DwUGCyoJS2dnX1sCHR0KPbpGOT9FPhfiPkiyxLeY3L3C_OQBIhdBZjA5YXJLeEhQVzZyN3dQN3BDYThRYxAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEfLSTWIQ6YdAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXQWYwOWFvN2dHX1c2cjd3UDdwQ2E4UWNwASgBIhUAiYpR0WMMKM9JS8xHjNHDfUtIxUoaGAoKDf65NxUVdq-DUxIKDbK7NxUVR62DUw",
+        "routeSummary": "DEFAULT_ROUTE",
+        "tollInfo": null,
+        "tollPreference": null,
+        "tollExcludedFromFare": false,
+        "intermediateWaypoint": null,
+        "roadType": "general",
+        "routeCandidates": [
+          {
+            "routeId": "route_0",
+            "routeIndex": 0,
+            "label": "おすすめルート",
+            "routeLabel": "おすすめルート",
+            "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+            "routeType": "recommended",
+            "routeStrategy": "recommended",
+            "strategy": "recommended",
+            "routeSource": "google_routes",
+            "distanceMeters": 3297,
+            "durationSeconds": 554,
+            "distanceKm": 3.3,
+            "encodedPolyline": "orgxE}~dvYdArAhBgCqBiCCQZ_JC]OKiE]iCOOZiA~@ALHR|F{EzC}BxCoBdFcDvIiFzDmBbHqC|CoAtHoC~By@|@a@rE}A_A{DSqAuGaYCK|V_KLf@g@R",
+            "routeToken": "CpACCpcBMpQBGnkKIQIWCTlzkQlGIQCuIIVJnZwDtNJer9Fx3McIrqINr8MSABIke9LsIDXMzMCaeRCuw0Xjz4hZSS3-g1pNtwHrgYH1wiACPIiLGg4AHBiHAWX_____DwUGCyoJS2dnX1sCHR0KPbpGOT9FPhfiPkiyxLeY3L3C_OQBIhdBZjA5YXJLeEhQVzZyN3dQN3BDYThRYxAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEfLSTWIQ6YdAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXQWYwOWFvN2dHX1c2cjd3UDdwQ2E4UWNwASgBIhUAiYpR0WMMKM9JS8xHjNHDfUtIxUoaGAoKDf65NxUVdq-DUxIKDbK7NxUVR62DUw",
+            "routeSummary": "DEFAULT_ROUTE",
+            "roadType": "general",
+            "avoidTolls": true,
+            "avoidHighways": true,
+            "usesToll": false,
+            "tollInfo": null,
+            "tollPreference": null,
+            "tollExcludedFromFare": false,
+            "intermediateWaypoint": null
+          }
+        ],
+        "preFixedFareConfirmable": false,
+        "routeCandidateCount": 1,
+        "distinctRouteCount": 1,
+        "fallbackReason": "only_one_distinct_route",
+        "selectedAt": "2026-06-26T04:16:02.703Z"
+      },
+      "returnRoutePlan": {
+        "origin": {
+          "address": "千葉メディカルセンター"
+        },
+        "destination": {
+          "address": "千葉市中央区出洲港8-3-2"
+        },
+        "waypoint": {
+          "waypointLabel": "蘇我駅",
+          "waypointAddress": "蘇我駅",
+          "stopType": null,
+          "waypointLatLng": {
+            "latitude": 35.5812881,
+            "longitude": 140.1320087
+          }
+        },
+        "distanceMeters": 3653,
+        "durationSeconds": 718,
+        "selectedRouteId": "route_0",
+        "selectedRoute": {
+          "routeId": "route_0",
+          "routeLabel": "おすすめルート",
+          "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+          "routeSource": "google_routes",
+          "routeStrategy": "recommended",
+          "distanceMeters": 3653,
+          "durationSeconds": 718,
+          "distanceKm": 3.7,
+          "durationMinutes": 12,
+          "encodedPolyline": "amdxEsehvYPJEJr@zErA|LPr@qMjDwCbAeDnAiMlEUNyFhBoIlCiE~AgGlCcGrCuNnImGlE{DrCgFfEwBnBRPlBn@pBf@\\RV`@pDlE",
+          "routeLabels": [
+            "DEFAULT_ROUTE"
+          ],
+          "routeToken": "CucBCnAybhpTChgCFgUhb5o2RiEAjxGPpQiLpK0CkMG7AgASFKOEWihDcUs_9EqormvZGmh70uwgGgYABQWXAQcqBUUCHUoDPRDKYD9FukY5P0iYm6Wb7aGq1VciF0F2MDlhdGZHQVlLRXI3d1B1WTZRa1FvEAUaWgpYChgKDQoCCAERAAAAAACAZkARUrgehevqgUASFggAEAMQBhATEBIQARAAGAJCBBoCCAUaBgoECAIQAiIaChZBdjA5YXJwR2dvU3Z2QS01anBDUkNncAEoASIVAImKUdEDYmnBmL3IkggiC5qShpqkGhgKCg0TQDUVFYExhlMSCg2pRTUVFWVxhlM",
+          "routeSummary": "DEFAULT_ROUTE",
+          "tollInfo": null,
+          "tollPreference": null,
+          "tollExcludedFromFare": false,
+          "intermediateWaypoint": {
+            "waypointLabel": "蘇我駅",
+            "waypointAddress": "蘇我駅",
+            "waypointLatLng": {
+              "latitude": 35.5812881,
+              "longitude": 140.1320087
+            }
+          },
+          "routeLegs": [
+            {
+              "legIndex": 0,
+              "distanceMeters": 590,
+              "durationSeconds": 238,
+              "encodedPolyline": "edexEykhvYs@Vs@Zl@fCvJ{DpGgCNPLD`@?r@W",
+              "startLatLng": {
+                "lat": 35.584832899999995,
+                "lng": 140.1313286
+              },
+              "endLatLng": {
+                "lat": 35.5812881,
+                "lng": 140.1320087
+              }
+            },
+            {
+              "legIndex": 1,
+              "distanceMeters": 3063,
+              "durationSeconds": 480,
+              "encodedPolyline": "amdxEsehvYPJEJr@zErA|LPr@qMjDwCbAeDnAiMlEUNyFhBoIlCiE~AgGlCcGrCuNnImGlE{DrCgFfEwBnBRPlBn@pBf@\\RV`@pDlE",
+              "startLatLng": {
+                "lat": 35.5811347,
+                "lng": 140.13034249999998
+              },
+              "endLatLng": {
+                "lat": 35.597363,
+                "lng": 140.1139062
+              }
+            }
+          ],
+          "roadType": "general",
+          "avoidTolls": true,
+          "avoidHighways": true,
+          "rawRouteIndex": 0,
+          "routeType": "recommended",
+          "usesToll": false
+        },
+        "selectedRouteLabel": "おすすめルート",
+        "selectedRouteDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+        "selectedRouteType": "recommended",
+        "selectedUsesToll": false,
+        "selectedRouteIndex": 0,
+        "selectedRouteStrategy": "recommended",
+        "selectedRouteSource": "google_routes",
+        "encodedPolyline": "amdxEsehvYPJEJr@zErA|LPr@qMjDwCbAeDnAiMlEUNyFhBoIlCiE~AgGlCcGrCuNnImGlE{DrCgFfEwBnBRPlBn@pBf@\\RV`@pDlE",
+        "routeToken": "CucBCnAybhpTChgCFgUhb5o2RiEAjxGPpQiLpK0CkMG7AgASFKOEWihDcUs_9EqormvZGmh70uwgGgYABQWXAQcqBUUCHUoDPRDKYD9FukY5P0iYm6Wb7aGq1VciF0F2MDlhdGZHQVlLRXI3d1B1WTZRa1FvEAUaWgpYChgKDQoCCAERAAAAAACAZkARUrgehevqgUASFggAEAMQBhATEBIQARAAGAJCBBoCCAUaBgoECAIQAiIaChZBdjA5YXJwR2dvU3Z2QS01anBDUkNncAEoASIVAImKUdEDYmnBmL3IkggiC5qShpqkGhgKCg0TQDUVFYExhlMSCg2pRTUVFWVxhlM",
+        "routeSummary": "DEFAULT_ROUTE",
+        "tollInfo": null,
+        "tollPreference": null,
+        "tollExcludedFromFare": false,
+        "intermediateWaypoint": {
+          "waypointLabel": "蘇我駅",
+          "waypointAddress": "蘇我駅",
+          "waypointLatLng": {
+            "latitude": 35.5812881,
+            "longitude": 140.1320087
+          }
+        },
+        "roadType": "general",
+        "routeCandidates": [
+          {
+            "routeId": "route_0",
+            "routeIndex": 0,
+            "label": "おすすめルート",
+            "routeLabel": "おすすめルート",
+            "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+            "routeType": "recommended",
+            "routeStrategy": "recommended",
+            "strategy": "recommended",
+            "routeSource": "google_routes",
+            "distanceMeters": 3653,
+            "durationSeconds": 718,
+            "distanceKm": 3.7,
+            "encodedPolyline": "amdxEsehvYPJEJr@zErA|LPr@qMjDwCbAeDnAiMlEUNyFhBoIlCiE~AgGlCcGrCuNnImGlE{DrCgFfEwBnBRPlBn@pBf@\\RV`@pDlE",
+            "routeToken": "CucBCnAybhpTChgCFgUhb5o2RiEAjxGPpQiLpK0CkMG7AgASFKOEWihDcUs_9EqormvZGmh70uwgGgYABQWXAQcqBUUCHUoDPRDKYD9FukY5P0iYm6Wb7aGq1VciF0F2MDlhdGZHQVlLRXI3d1B1WTZRa1FvEAUaWgpYChgKDQoCCAERAAAAAACAZkARUrgehevqgUASFggAEAMQBhATEBIQARAAGAJCBBoCCAUaBgoECAIQAiIaChZBdjA5YXJwR2dvU3Z2QS01anBDUkNncAEoASIVAImKUdEDYmnBmL3IkggiC5qShpqkGhgKCg0TQDUVFYExhlMSCg2pRTUVFWVxhlM",
+            "routeSummary": "DEFAULT_ROUTE",
+            "roadType": "general",
+            "avoidTolls": true,
+            "avoidHighways": true,
+            "usesToll": false,
+            "tollInfo": null,
+            "tollPreference": null,
+            "tollExcludedFromFare": false,
+            "intermediateWaypoint": {
+              "waypointLabel": "蘇我駅",
+              "waypointAddress": "蘇我駅",
+              "waypointLatLng": {
+                "latitude": 35.5812881,
+                "longitude": 140.1320087
+              }
+            }
+          }
+        ],
+        "preFixedFareConfirmable": false,
+        "routeCandidateCount": 1,
+        "distinctRouteCount": 1,
+        "fallbackReason": "only_one_distinct_route",
+        "selectedAt": "2026-06-26T04:16:02.703Z"
+      },
+      "overallRouteSelection": {
+        "routePlanType": "return_with_stop",
+        "selectionPhase": "overall",
+        "fixedOutboundRouteId": "route_0",
+        "commonSegments": [
+          {
+            "key": "outbound",
+            "label": "千葉市中央区出洲港8-3-2 → 千葉メディカルセンター",
+            "originAddress": "千葉市中央区出洲港8-3-2",
+            "destinationAddress": "千葉メディカルセンター",
+            "distanceMeters": 3297,
+            "durationSeconds": 554,
+            "routeId": "route_0",
+            "routeStrategy": "recommended",
+            "encodedPolyline": "orgxE}~dvYdArAhBgCqBiCCQZ_JC]OKiE]iCOOZiA~@ALHR|F{EzC}BxCoBdFcDvIiFzDmBbHqC|CoAtHoC~By@|@a@rE}A_A{DSqAuGaYCK|V_KLf@g@R"
+          },
+          {
+            "key": "return_common",
+            "label": "千葉メディカルセンター → 蘇我駅",
+            "originAddress": "千葉メディカルセンター",
+            "destinationAddress": "蘇我駅",
+            "distanceMeters": 590,
+            "durationSeconds": 234,
+            "routeId": null,
+            "routeStrategy": "recommended",
+            "encodedPolyline": "edexEykhvYs@Vs@Zl@fCvJ{DpGgCNPLD`@?r@W"
+          }
+        ],
+        "selectableSegment": {
+          "key": "return_selectable",
+          "label": "蘇我駅 → 千葉市中央区出洲港8-3-2",
+          "originAddress": "蘇我駅",
+          "destinationAddress": "千葉市中央区出洲港8-3-2"
+        },
+        "overallRouteCandidates": [
+          {
+            "routeId": "overall_0",
+            "routeLabel": "おすすめルート",
+            "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+            "routeType": "recommended",
+            "strategy": "recommended",
+            "usesToll": false,
+            "totalDistanceMeters": 6950,
+            "totalDurationSeconds": 1268,
+            "segmentBreakdown": {
+              "outbound": {
+                "routeId": "route_0",
+                "routeStrategy": "recommended",
+                "distanceMeters": 3297,
+                "durationSeconds": 554
+              },
+              "returnCommon": {
+                "distanceMeters": 590,
+                "durationSeconds": 234
+              },
+              "returnSelectable": {
+                "routeId": "route_0",
+                "routeStrategy": "recommended",
+                "routeLabel": "おすすめルート",
+                "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+                "routeType": "recommended",
+                "strategy": "recommended",
+                "distanceMeters": 3063,
+                "durationSeconds": 480,
+                "usesToll": false,
+                "encodedPolyline": "amdxEsehvYPJEJr@zErA|LPr@qMjDwCbAeDnAiMlEUNyFhBoIlCiE~AgGlCcGrCuNnImGlE{DrCgFfEwBnBRPlBn@pBf@\\RV`@pDlE"
+              }
+            },
+            "encodedPolyline": "amdxEsehvYPJEJr@zErA|LPr@qMjDwCbAeDnAiMlEUNyFhBoIlCiE~AgGlCcGrCuNnImGlE{DrCgFfEwBnBRPlBn@pBf@\\RV`@pDlE"
+          }
+        ],
+        "selectedOverallRouteId": null,
+        "preFixedFareConfirmable": false,
+        "fallbackReason": "only_one_distinct_route"
+      },
+      "totalDistanceMeters": 6950,
+      "totalDurationSeconds": 1272,
+      "preFixedFareScope": "outbound_and_return",
+      "returnFareStatus": "fixed_candidate"
+    },
+    "tripType": "round_trip",
+    "returnPlanType": "return_with_stop",
+    "outboundRoutePlan": {
+      "origin": {
+        "address": "千葉市中央区出洲港8-3-2"
+      },
+      "destination": {
+        "address": "千葉メディカルセンター"
+      },
+      "waypoint": null,
+      "distanceMeters": 3297,
+      "durationSeconds": 554,
+      "selectedRouteId": "route_0",
+      "selectedRoute": {
+        "routeId": "route_0",
+        "routeLabel": "おすすめルート",
+        "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+        "routeSource": "google_routes",
+        "routeStrategy": "recommended",
+        "distanceMeters": 3297,
+        "durationSeconds": 554,
+        "distanceKm": 3.3,
+        "durationMinutes": 9,
+        "encodedPolyline": "orgxE}~dvYdArAhBgCqBiCCQZ_JC]OKiE]iCOOZiA~@ALHR|F{EzC}BxCoBdFcDvIiFzDmBbHqC|CoAtHoC~By@|@a@rE}A_A{DSqAuGaYCK|V_KLf@g@R",
+        "routeLabels": [
+          "DEFAULT_ROUTE"
+        ],
+        "routeToken": "CpACCpcBMpQBGnkKIQIWCTlzkQlGIQCuIIVJnZwDtNJer9Fx3McIrqINr8MSABIke9LsIDXMzMCaeRCuw0Xjz4hZSS3-g1pNtwHrgYH1wiACPIiLGg4AHBiHAWX_____DwUGCyoJS2dnX1sCHR0KPbpGOT9FPhfiPkiyxLeY3L3C_OQBIhdBZjA5YXJLeEhQVzZyN3dQN3BDYThRYxAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEfLSTWIQ6YdAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXQWYwOWFvN2dHX1c2cjd3UDdwQ2E4UWNwASgBIhUAiYpR0WMMKM9JS8xHjNHDfUtIxUoaGAoKDf65NxUVdq-DUxIKDbK7NxUVR62DUw",
+        "routeSummary": "DEFAULT_ROUTE",
+        "tollInfo": null,
+        "tollPreference": null,
+        "tollExcludedFromFare": false,
+        "intermediateWaypoint": null,
+        "routeLegs": [
+          {
+            "legIndex": 0,
+            "distanceMeters": 3297,
+            "durationSeconds": 554,
+            "encodedPolyline": "orgxE}~dvYdArAhBgCqBiCCQZ_JC]OKiE]iCOOZiA~@ALHR|F{EzC}BxCoBdFcDvIiFzDmBbHqC|CoAtHoC~By@|@a@rE}A_A{DSqAuGaYCK|V_KLf@g@R",
+            "startLatLng": {
+              "lat": 35.597363,
+              "lng": 140.1139062
+            },
+            "endLatLng": {
+              "lat": 35.584832899999995,
+              "lng": 140.1313286
+            }
+          }
+        ],
+        "roadType": "general",
+        "avoidTolls": true,
+        "avoidHighways": true,
+        "rawRouteIndex": 0,
+        "routeType": "recommended",
+        "usesToll": false
+      },
+      "selectedRouteLabel": "おすすめルート",
+      "selectedRouteDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+      "selectedRouteType": "recommended",
+      "selectedUsesToll": false,
+      "selectedRouteIndex": 0,
+      "selectedRouteStrategy": "recommended",
+      "selectedRouteSource": "google_routes",
+      "encodedPolyline": "orgxE}~dvYdArAhBgCqBiCCQZ_JC]OKiE]iCOOZiA~@ALHR|F{EzC}BxCoBdFcDvIiFzDmBbHqC|CoAtHoC~By@|@a@rE}A_A{DSqAuGaYCK|V_KLf@g@R",
+      "routeToken": "CpACCpcBMpQBGnkKIQIWCTlzkQlGIQCuIIVJnZwDtNJer9Fx3McIrqINr8MSABIke9LsIDXMzMCaeRCuw0Xjz4hZSS3-g1pNtwHrgYH1wiACPIiLGg4AHBiHAWX_____DwUGCyoJS2dnX1sCHR0KPbpGOT9FPhfiPkiyxLeY3L3C_OQBIhdBZjA5YXJLeEhQVzZyN3dQN3BDYThRYxAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEfLSTWIQ6YdAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXQWYwOWFvN2dHX1c2cjd3UDdwQ2E4UWNwASgBIhUAiYpR0WMMKM9JS8xHjNHDfUtIxUoaGAoKDf65NxUVdq-DUxIKDbK7NxUVR62DUw",
+      "routeSummary": "DEFAULT_ROUTE",
+      "tollInfo": null,
+      "tollPreference": null,
+      "tollExcludedFromFare": false,
+      "intermediateWaypoint": null,
+      "roadType": "general",
+      "routeCandidates": [
+        {
+          "routeId": "route_0",
+          "routeIndex": 0,
+          "label": "おすすめルート",
+          "routeLabel": "おすすめルート",
+          "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+          "routeType": "recommended",
+          "routeStrategy": "recommended",
+          "strategy": "recommended",
+          "routeSource": "google_routes",
+          "distanceMeters": 3297,
+          "durationSeconds": 554,
+          "distanceKm": 3.3,
+          "encodedPolyline": "orgxE}~dvYdArAhBgCqBiCCQZ_JC]OKiE]iCOOZiA~@ALHR|F{EzC}BxCoBdFcDvIiFzDmBbHqC|CoAtHoC~By@|@a@rE}A_A{DSqAuGaYCK|V_KLf@g@R",
+          "routeToken": "CpACCpcBMpQBGnkKIQIWCTlzkQlGIQCuIIVJnZwDtNJer9Fx3McIrqINr8MSABIke9LsIDXMzMCaeRCuw0Xjz4hZSS3-g1pNtwHrgYH1wiACPIiLGg4AHBiHAWX_____DwUGCyoJS2dnX1sCHR0KPbpGOT9FPhfiPkiyxLeY3L3C_OQBIhdBZjA5YXJLeEhQVzZyN3dQN3BDYThRYxAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEfLSTWIQ6YdAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXQWYwOWFvN2dHX1c2cjd3UDdwQ2E4UWNwASgBIhUAiYpR0WMMKM9JS8xHjNHDfUtIxUoaGAoKDf65NxUVdq-DUxIKDbK7NxUVR62DUw",
+          "routeSummary": "DEFAULT_ROUTE",
+          "roadType": "general",
+          "avoidTolls": true,
+          "avoidHighways": true,
+          "usesToll": false,
+          "tollInfo": null,
+          "tollPreference": null,
+          "tollExcludedFromFare": false,
+          "intermediateWaypoint": null
+        }
+      ],
+      "preFixedFareConfirmable": false,
+      "routeCandidateCount": 1,
+      "distinctRouteCount": 1,
+      "fallbackReason": "only_one_distinct_route",
+      "selectedAt": "2026-06-26T04:16:02.703Z"
+    },
+    "returnRoutePlan": {
+      "origin": {
+        "address": "千葉メディカルセンター"
+      },
+      "destination": {
+        "address": "千葉市中央区出洲港8-3-2"
+      },
+      "waypoint": {
+        "waypointLabel": "蘇我駅",
+        "waypointAddress": "蘇我駅",
+        "stopType": null,
+        "waypointLatLng": {
+          "latitude": 35.5812881,
+          "longitude": 140.1320087
+        }
+      },
+      "distanceMeters": 3653,
+      "durationSeconds": 718,
+      "selectedRouteId": "route_0",
+      "selectedRoute": {
+        "routeId": "route_0",
+        "routeLabel": "おすすめルート",
+        "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+        "routeSource": "google_routes",
+        "routeStrategy": "recommended",
+        "distanceMeters": 3653,
+        "durationSeconds": 718,
+        "distanceKm": 3.7,
+        "durationMinutes": 12,
+        "encodedPolyline": "amdxEsehvYPJEJr@zErA|LPr@qMjDwCbAeDnAiMlEUNyFhBoIlCiE~AgGlCcGrCuNnImGlE{DrCgFfEwBnBRPlBn@pBf@\\RV`@pDlE",
+        "routeLabels": [
+          "DEFAULT_ROUTE"
+        ],
+        "routeToken": "CucBCnAybhpTChgCFgUhb5o2RiEAjxGPpQiLpK0CkMG7AgASFKOEWihDcUs_9EqormvZGmh70uwgGgYABQWXAQcqBUUCHUoDPRDKYD9FukY5P0iYm6Wb7aGq1VciF0F2MDlhdGZHQVlLRXI3d1B1WTZRa1FvEAUaWgpYChgKDQoCCAERAAAAAACAZkARUrgehevqgUASFggAEAMQBhATEBIQARAAGAJCBBoCCAUaBgoECAIQAiIaChZBdjA5YXJwR2dvU3Z2QS01anBDUkNncAEoASIVAImKUdEDYmnBmL3IkggiC5qShpqkGhgKCg0TQDUVFYExhlMSCg2pRTUVFWVxhlM",
+        "routeSummary": "DEFAULT_ROUTE",
+        "tollInfo": null,
+        "tollPreference": null,
+        "tollExcludedFromFare": false,
+        "intermediateWaypoint": {
+          "waypointLabel": "蘇我駅",
+          "waypointAddress": "蘇我駅",
+          "waypointLatLng": {
+            "latitude": 35.5812881,
+            "longitude": 140.1320087
+          }
+        },
+        "routeLegs": [
+          {
+            "legIndex": 0,
+            "distanceMeters": 590,
+            "durationSeconds": 238,
+            "encodedPolyline": "edexEykhvYs@Vs@Zl@fCvJ{DpGgCNPLD`@?r@W",
+            "startLatLng": {
+              "lat": 35.584832899999995,
+              "lng": 140.1313286
+            },
+            "endLatLng": {
+              "lat": 35.5812881,
+              "lng": 140.1320087
+            }
+          },
+          {
+            "legIndex": 1,
+            "distanceMeters": 3063,
+            "durationSeconds": 480,
+            "encodedPolyline": "amdxEsehvYPJEJr@zErA|LPr@qMjDwCbAeDnAiMlEUNyFhBoIlCiE~AgGlCcGrCuNnImGlE{DrCgFfEwBnBRPlBn@pBf@\\RV`@pDlE",
+            "startLatLng": {
+              "lat": 35.5811347,
+              "lng": 140.13034249999998
+            },
+            "endLatLng": {
+              "lat": 35.597363,
+              "lng": 140.1139062
+            }
+          }
+        ],
+        "roadType": "general",
+        "avoidTolls": true,
+        "avoidHighways": true,
+        "rawRouteIndex": 0,
+        "routeType": "recommended",
+        "usesToll": false
+      },
+      "selectedRouteLabel": "おすすめルート",
+      "selectedRouteDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+      "selectedRouteType": "recommended",
+      "selectedUsesToll": false,
+      "selectedRouteIndex": 0,
+      "selectedRouteStrategy": "recommended",
+      "selectedRouteSource": "google_routes",
+      "encodedPolyline": "amdxEsehvYPJEJr@zErA|LPr@qMjDwCbAeDnAiMlEUNyFhBoIlCiE~AgGlCcGrCuNnImGlE{DrCgFfEwBnBRPlBn@pBf@\\RV`@pDlE",
+      "routeToken": "CucBCnAybhpTChgCFgUhb5o2RiEAjxGPpQiLpK0CkMG7AgASFKOEWihDcUs_9EqormvZGmh70uwgGgYABQWXAQcqBUUCHUoDPRDKYD9FukY5P0iYm6Wb7aGq1VciF0F2MDlhdGZHQVlLRXI3d1B1WTZRa1FvEAUaWgpYChgKDQoCCAERAAAAAACAZkARUrgehevqgUASFggAEAMQBhATEBIQARAAGAJCBBoCCAUaBgoECAIQAiIaChZBdjA5YXJwR2dvU3Z2QS01anBDUkNncAEoASIVAImKUdEDYmnBmL3IkggiC5qShpqkGhgKCg0TQDUVFYExhlMSCg2pRTUVFWVxhlM",
+      "routeSummary": "DEFAULT_ROUTE",
+      "tollInfo": null,
+      "tollPreference": null,
+      "tollExcludedFromFare": false,
+      "intermediateWaypoint": {
+        "waypointLabel": "蘇我駅",
+        "waypointAddress": "蘇我駅",
+        "waypointLatLng": {
+          "latitude": 35.5812881,
+          "longitude": 140.1320087
+        }
+      },
+      "roadType": "general",
+      "routeCandidates": [
+        {
+          "routeId": "route_0",
+          "routeIndex": 0,
+          "label": "おすすめルート",
+          "routeLabel": "おすすめルート",
+          "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+          "routeType": "recommended",
+          "routeStrategy": "recommended",
+          "strategy": "recommended",
+          "routeSource": "google_routes",
+          "distanceMeters": 3653,
+          "durationSeconds": 718,
+          "distanceKm": 3.7,
+          "encodedPolyline": "amdxEsehvYPJEJr@zErA|LPr@qMjDwCbAeDnAiMlEUNyFhBoIlCiE~AgGlCcGrCuNnImGlE{DrCgFfEwBnBRPlBn@pBf@\\RV`@pDlE",
+          "routeToken": "CucBCnAybhpTChgCFgUhb5o2RiEAjxGPpQiLpK0CkMG7AgASFKOEWihDcUs_9EqormvZGmh70uwgGgYABQWXAQcqBUUCHUoDPRDKYD9FukY5P0iYm6Wb7aGq1VciF0F2MDlhdGZHQVlLRXI3d1B1WTZRa1FvEAUaWgpYChgKDQoCCAERAAAAAACAZkARUrgehevqgUASFggAEAMQBhATEBIQARAAGAJCBBoCCAUaBgoECAIQAiIaChZBdjA5YXJwR2dvU3Z2QS01anBDUkNncAEoASIVAImKUdEDYmnBmL3IkggiC5qShpqkGhgKCg0TQDUVFYExhlMSCg2pRTUVFWVxhlM",
+          "routeSummary": "DEFAULT_ROUTE",
+          "roadType": "general",
+          "avoidTolls": true,
+          "avoidHighways": true,
+          "usesToll": false,
+          "tollInfo": null,
+          "tollPreference": null,
+          "tollExcludedFromFare": false,
+          "intermediateWaypoint": {
+            "waypointLabel": "蘇我駅",
+            "waypointAddress": "蘇我駅",
+            "waypointLatLng": {
+              "latitude": 35.5812881,
+              "longitude": 140.1320087
+            }
+          }
+        }
+      ],
+      "preFixedFareConfirmable": false,
+      "routeCandidateCount": 1,
+      "distinctRouteCount": 1,
+      "fallbackReason": "only_one_distinct_route",
+      "selectedAt": "2026-06-26T04:16:02.703Z"
+    },
+    "overallRouteSelection": {
+      "routePlanType": "return_with_stop",
+      "selectionPhase": "overall",
+      "fixedOutboundRouteId": "route_0",
+      "commonSegments": [
+        {
+          "key": "outbound",
+          "label": "千葉市中央区出洲港8-3-2 → 千葉メディカルセンター",
+          "originAddress": "千葉市中央区出洲港8-3-2",
+          "destinationAddress": "千葉メディカルセンター",
+          "distanceMeters": 3297,
+          "durationSeconds": 554,
+          "routeId": "route_0",
+          "routeStrategy": "recommended",
+          "encodedPolyline": "orgxE}~dvYdArAhBgCqBiCCQZ_JC]OKiE]iCOOZiA~@ALHR|F{EzC}BxCoBdFcDvIiFzDmBbHqC|CoAtHoC~By@|@a@rE}A_A{DSqAuGaYCK|V_KLf@g@R"
+        },
+        {
+          "key": "return_common",
+          "label": "千葉メディカルセンター → 蘇我駅",
+          "originAddress": "千葉メディカルセンター",
+          "destinationAddress": "蘇我駅",
+          "distanceMeters": 590,
+          "durationSeconds": 234,
+          "routeId": null,
+          "routeStrategy": "recommended",
+          "encodedPolyline": "edexEykhvYs@Vs@Zl@fCvJ{DpGgCNPLD`@?r@W"
+        }
+      ],
+      "selectableSegment": {
+        "key": "return_selectable",
+        "label": "蘇我駅 → 千葉市中央区出洲港8-3-2",
+        "originAddress": "蘇我駅",
+        "destinationAddress": "千葉市中央区出洲港8-3-2"
+      },
+      "overallRouteCandidates": [
+        {
+          "routeId": "overall_0",
+          "routeLabel": "おすすめルート",
+          "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+          "routeType": "recommended",
+          "strategy": "recommended",
+          "usesToll": false,
+          "totalDistanceMeters": 6950,
+          "totalDurationSeconds": 1268,
+          "segmentBreakdown": {
+            "outbound": {
+              "routeId": "route_0",
+              "routeStrategy": "recommended",
+              "distanceMeters": 3297,
+              "durationSeconds": 554
+            },
+            "returnCommon": {
+              "distanceMeters": 590,
+              "durationSeconds": 234
+            },
+            "returnSelectable": {
+              "routeId": "route_0",
+              "routeStrategy": "recommended",
+              "routeLabel": "おすすめルート",
+              "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+              "routeType": "recommended",
+              "strategy": "recommended",
+              "distanceMeters": 3063,
+              "durationSeconds": 480,
+              "usesToll": false,
+              "encodedPolyline": "amdxEsehvYPJEJr@zErA|LPr@qMjDwCbAeDnAiMlEUNyFhBoIlCiE~AgGlCcGrCuNnImGlE{DrCgFfEwBnBRPlBn@pBf@\\RV`@pDlE"
+            }
+          },
+          "encodedPolyline": "amdxEsehvYPJEJr@zErA|LPr@qMjDwCbAeDnAiMlEUNyFhBoIlCiE~AgGlCcGrCuNnImGlE{DrCgFfEwBnBRPlBn@pBf@\\RV`@pDlE"
+        }
+      ],
+      "selectedOverallRouteId": null,
+      "preFixedFareConfirmable": false,
+      "fallbackReason": "only_one_distinct_route"
+    },
+    "totalDistanceMeters": 6950,
+    "totalDurationSeconds": 1272,
+    "preFixedFareScope": "outbound_and_return",
+    "returnFareStatus": "fixed_candidate",
+    "returnSelectedRouteId": "route_0",
+    "selectedRouteId": "route_0",
+    "selectedRouteLabel": "おすすめルート",
+    "selectedRouteDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+    "selectedRouteType": "recommended",
+    "selectedUsesToll": false,
+    "selectedRouteIndex": 0,
+    "selectedRouteStrategy": "recommended",
+    "selectedRouteSource": "google_routes",
+    "encodedPolyline": "orgxE}~dvYdArAhBgCqBiCCQZ_JC]OKiE]iCOOZiA~@ALHR|F{EzC}BxCoBdFcDvIiFzDmBbHqC|CoAtHoC~By@|@a@rE}A_A{DSqAuGaYCK|V_KLf@g@R",
+    "routeToken": "CpACCpcBMpQBGnkKIQIWCTlzkQlGIQCuIIVJnZwDtNJer9Fx3McIrqINr8MSABIke9LsIDXMzMCaeRCuw0Xjz4hZSS3-g1pNtwHrgYH1wiACPIiLGg4AHBiHAWX_____DwUGCyoJS2dnX1sCHR0KPbpGOT9FPhfiPkiyxLeY3L3C_OQBIhdBZjA5YXJLeEhQVzZyN3dQN3BDYThRYxAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEfLSTWIQ6YdAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXQWYwOWFvN2dHX1c2cjd3UDdwQ2E4UWNwASgBIhUAiYpR0WMMKM9JS8xHjNHDfUtIxUoaGAoKDf65NxUVdq-DUxIKDbK7NxUVR62DUw",
+    "routeSummary": "DEFAULT_ROUTE",
+    "tollInfo": null,
+    "tollPreference": null,
+    "tollExcludedFromFare": false,
+    "intermediateWaypoint": null,
+    "routeCandidates": [
+      {
+        "routeId": "route_0",
+        "routeIndex": 0,
+        "label": "おすすめルート",
+        "routeLabel": "おすすめルート",
+        "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+        "routeType": "recommended",
+        "routeStrategy": "recommended",
+        "strategy": "recommended",
+        "routeSource": "google_routes",
+        "distanceMeters": 3297,
+        "durationSeconds": 554,
+        "distanceKm": 3.3,
+        "encodedPolyline": "orgxE}~dvYdArAhBgCqBiCCQZ_JC]OKiE]iCOOZiA~@ALHR|F{EzC}BxCoBdFcDvIiFzDmBbHqC|CoAtHoC~By@|@a@rE}A_A{DSqAuGaYCK|V_KLf@g@R",
+        "routeToken": "CpACCpcBMpQBGnkKIQIWCTlzkQlGIQCuIIVJnZwDtNJer9Fx3McIrqINr8MSABIke9LsIDXMzMCaeRCuw0Xjz4hZSS3-g1pNtwHrgYH1wiACPIiLGg4AHBiHAWX_____DwUGCyoJS2dnX1sCHR0KPbpGOT9FPhfiPkiyxLeY3L3C_OQBIhdBZjA5YXJLeEhQVzZyN3dQN3BDYThRYxAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEfLSTWIQ6YdAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXQWYwOWFvN2dHX1c2cjd3UDdwQ2E4UWNwASgBIhUAiYpR0WMMKM9JS8xHjNHDfUtIxUoaGAoKDf65NxUVdq-DUxIKDbK7NxUVR62DUw",
+        "routeSummary": "DEFAULT_ROUTE",
+        "roadType": "general",
+        "avoidTolls": true,
+        "avoidHighways": true,
+        "usesToll": false,
+        "tollInfo": null,
+        "tollPreference": null,
+        "tollExcludedFromFare": false,
+        "intermediateWaypoint": null
+      }
+    ],
+    "alternativeRoutes": [
+      {
+        "routeId": "route_0",
+        "routeIndex": 0,
+        "label": "おすすめルート",
+        "routeLabel": "おすすめルート",
+        "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+        "routeType": "recommended",
+        "routeStrategy": "recommended",
+        "strategy": "recommended",
+        "routeSource": "google_routes",
+        "distanceMeters": 3297,
+        "durationSeconds": 554,
+        "distanceKm": 3.3,
+        "encodedPolyline": "orgxE}~dvYdArAhBgCqBiCCQZ_JC]OKiE]iCOOZiA~@ALHR|F{EzC}BxCoBdFcDvIiFzDmBbHqC|CoAtHoC~By@|@a@rE}A_A{DSqAuGaYCK|V_KLf@g@R",
+        "routeToken": "CpACCpcBMpQBGnkKIQIWCTlzkQlGIQCuIIVJnZwDtNJer9Fx3McIrqINr8MSABIke9LsIDXMzMCaeRCuw0Xjz4hZSS3-g1pNtwHrgYH1wiACPIiLGg4AHBiHAWX_____DwUGCyoJS2dnX1sCHR0KPbpGOT9FPhfiPkiyxLeY3L3C_OQBIhdBZjA5YXJLeEhQVzZyN3dQN3BDYThRYxAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEfLSTWIQ6YdAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXQWYwOWFvN2dHX1c2cjd3UDdwQ2E4UWNwASgBIhUAiYpR0WMMKM9JS8xHjNHDfUtIxUoaGAoKDf65NxUVdq-DUxIKDbK7NxUVR62DUw",
+        "routeSummary": "DEFAULT_ROUTE",
+        "roadType": "general",
+        "avoidTolls": true,
+        "avoidHighways": true,
+        "usesToll": false,
+        "tollInfo": null,
+        "tollPreference": null,
+        "tollExcludedFromFare": false,
+        "intermediateWaypoint": null
+      }
+    ],
+    "routeCandidateCount": 1,
+    "distinctRouteCount": 1,
+    "alternativeRouteCount": 1,
+    "multipleRoutesAvailable": false,
+    "preFixedFareConfirmable": false,
+    "routeDedupedCount": 1,
+    "routeGenerationStrategies": [],
+    "fallbackReason": "only_one_distinct_route",
+    "selectedAt": "2026-06-26T04:16:02.703Z",
+    "selectedTrafficZoneId": "keiyo",
+    "selectedTrafficZoneLabel": "京葉交通圏",
+    "trafficZoneCoefficient": 1.2,
+    "detectedMunicipality": "千葉市中央区",
+    "trafficZoneDetectionMethod": "auto_address",
+    "trafficZoneDetectionSource": "origin_address",
+    "baseDistanceFareAmount": 3200,
+    "adjustedDistanceFareAmount": 3840,
+    "preFixedFareMode": true,
+    "routeProvider": "google_routes",
+    "distanceMeters": 6950,
+    "durationSeconds": 1272,
+    "estimateCalculationVersion": "v1"
+  },
+  "routePlan": {
+    "tripType": "round_trip",
+    "returnPlanType": "return_with_stop",
+    "outboundRoutePlan": {
+      "provider": "google_routes",
+      "roadType": "general",
+      "origin": {
+        "address": "千葉市中央区出洲港8-3-2"
+      },
+      "destination": {
+        "address": "千葉メディカルセンター"
+      },
+      "waypoint": null,
+      "selectedRouteId": "route_0",
+      "encodedPolyline": "orgxE}~dvYdArAhBgCqBiCCQZ_JC]OKiE]iCOOZiA~@ALHR|F{EzC}BxCoBdFcDvIiFzDmBbHqC|CoAtHoC~By@|@a@rE}A_A{DSqAuGaYCK|V_KLf@g@R",
+      "routeLabel": "おすすめルート",
+      "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+      "routeSummary": "DEFAULT_ROUTE",
+      "routeStrategy": "recommended",
+      "routeSource": "google_routes",
+      "routeToken": "CpACCpcBMpQBGnkKIQIWCTlzkQlGIQCuIIVJnZwDtNJer9Fx3McIrqINr8MSABIke9LsIDXMzMCaeRCuw0Xjz4hZSS3-g1pNtwHrgYH1wiACPIiLGg4AHBiHAWX_____DwUGCyoJS2dnX1sCHR0KPbpGOT9FPhfiPkiyxLeY3L3C_OQBIhdBZjA5YXJLeEhQVzZyN3dQN3BDYThRYxAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEfLSTWIQ6YdAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXQWYwOWFvN2dHX1c2cjd3UDdwQ2E4UWNwASgBIhUAiYpR0WMMKM9JS8xHjNHDfUtIxUoaGAoKDf65NxUVdq-DUxIKDbK7NxUVR62DUw",
+      "distanceMeters": 3297,
+      "durationSeconds": 554,
+      "tollInfo": null,
+      "tollPreference": null,
+      "tollExcludedFromFare": false,
+      "intermediateWaypoint": null,
+      "routeLegs": [
+        {
+          "legIndex": 0,
+          "distanceMeters": 3297,
+          "durationSeconds": 554,
+          "encodedPolyline": "orgxE}~dvYdArAhBgCqBiCCQZ_JC]OKiE]iCOOZiA~@ALHR|F{EzC}BxCoBdFcDvIiFzDmBbHqC|CoAtHoC~By@|@a@rE}A_A{DSqAuGaYCK|V_KLf@g@R",
+          "startLatLng": {
+            "lat": 35.597363,
+            "lng": 140.1139062
+          },
+          "endLatLng": {
+            "lat": 35.584832899999995,
+            "lng": 140.1313286
+          }
+        }
+      ],
+      "routes": [
+        {
+          "routeId": "route_0",
+          "routeLabel": "おすすめルート",
+          "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+          "routeSource": "google_routes",
+          "routeStrategy": "recommended",
+          "distanceMeters": 3297,
+          "durationSeconds": 554,
+          "distanceKm": 3.3,
+          "durationMinutes": 9,
+          "encodedPolyline": "orgxE}~dvYdArAhBgCqBiCCQZ_JC]OKiE]iCOOZiA~@ALHR|F{EzC}BxCoBdFcDvIiFzDmBbHqC|CoAtHoC~By@|@a@rE}A_A{DSqAuGaYCK|V_KLf@g@R",
+          "routeLabels": [
+            "DEFAULT_ROUTE"
+          ],
+          "routeToken": "CpACCpcBMpQBGnkKIQIWCTlzkQlGIQCuIIVJnZwDtNJer9Fx3McIrqINr8MSABIke9LsIDXMzMCaeRCuw0Xjz4hZSS3-g1pNtwHrgYH1wiACPIiLGg4AHBiHAWX_____DwUGCyoJS2dnX1sCHR0KPbpGOT9FPhfiPkiyxLeY3L3C_OQBIhdBZjA5YXJLeEhQVzZyN3dQN3BDYThRYxAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEfLSTWIQ6YdAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXQWYwOWFvN2dHX1c2cjd3UDdwQ2E4UWNwASgBIhUAiYpR0WMMKM9JS8xHjNHDfUtIxUoaGAoKDf65NxUVdq-DUxIKDbK7NxUVR62DUw",
+          "routeSummary": "DEFAULT_ROUTE",
+          "tollInfo": null,
+          "tollPreference": null,
+          "tollExcludedFromFare": false,
+          "intermediateWaypoint": null,
+          "routeLegs": [
+            {
+              "legIndex": 0,
+              "distanceMeters": 3297,
+              "durationSeconds": 554,
+              "encodedPolyline": "orgxE}~dvYdArAhBgCqBiCCQZ_JC]OKiE]iCOOZiA~@ALHR|F{EzC}BxCoBdFcDvIiFzDmBbHqC|CoAtHoC~By@|@a@rE}A_A{DSqAuGaYCK|V_KLf@g@R",
+              "startLatLng": {
+                "lat": 35.597363,
+                "lng": 140.1139062
+              },
+              "endLatLng": {
+                "lat": 35.584832899999995,
+                "lng": 140.1313286
+              }
+            }
+          ],
+          "roadType": "general",
+          "avoidTolls": true,
+          "avoidHighways": true,
+          "rawRouteIndex": 0,
+          "routeType": "recommended",
+          "usesToll": false
+        }
+      ],
+      "routeCandidates": [
+        {
+          "routeId": "route_0",
+          "routeLabel": "おすすめルート",
+          "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+          "routeSource": "google_routes",
+          "routeStrategy": "recommended",
+          "distanceMeters": 3297,
+          "durationSeconds": 554,
+          "distanceKm": 3.3,
+          "durationMinutes": 9,
+          "encodedPolyline": "orgxE}~dvYdArAhBgCqBiCCQZ_JC]OKiE]iCOOZiA~@ALHR|F{EzC}BxCoBdFcDvIiFzDmBbHqC|CoAtHoC~By@|@a@rE}A_A{DSqAuGaYCK|V_KLf@g@R",
+          "routeLabels": [
+            "DEFAULT_ROUTE"
+          ],
+          "routeToken": "CpACCpcBMpQBGnkKIQIWCTlzkQlGIQCuIIVJnZwDtNJer9Fx3McIrqINr8MSABIke9LsIDXMzMCaeRCuw0Xjz4hZSS3-g1pNtwHrgYH1wiACPIiLGg4AHBiHAWX_____DwUGCyoJS2dnX1sCHR0KPbpGOT9FPhfiPkiyxLeY3L3C_OQBIhdBZjA5YXJLeEhQVzZyN3dQN3BDYThRYxAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEfLSTWIQ6YdAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXQWYwOWFvN2dHX1c2cjd3UDdwQ2E4UWNwASgBIhUAiYpR0WMMKM9JS8xHjNHDfUtIxUoaGAoKDf65NxUVdq-DUxIKDbK7NxUVR62DUw",
+          "routeSummary": "DEFAULT_ROUTE",
+          "tollInfo": null,
+          "tollPreference": null,
+          "tollExcludedFromFare": false,
+          "intermediateWaypoint": null,
+          "routeLegs": [
+            {
+              "legIndex": 0,
+              "distanceMeters": 3297,
+              "durationSeconds": 554,
+              "encodedPolyline": "orgxE}~dvYdArAhBgCqBiCCQZ_JC]OKiE]iCOOZiA~@ALHR|F{EzC}BxCoBdFcDvIiFzDmBbHqC|CoAtHoC~By@|@a@rE}A_A{DSqAuGaYCK|V_KLf@g@R",
+              "startLatLng": {
+                "lat": 35.597363,
+                "lng": 140.1139062
+              },
+              "endLatLng": {
+                "lat": 35.584832899999995,
+                "lng": 140.1313286
+              }
+            }
+          ],
+          "roadType": "general",
+          "avoidTolls": true,
+          "avoidHighways": true,
+          "rawRouteIndex": 0,
+          "routeType": "recommended",
+          "usesToll": false
+        }
+      ],
+      "selectedAt": "2026-06-26T04:16:02.703Z",
+      "preFixedFareConfirmable": false,
+      "multipleRoutesAvailable": false,
+      "routeCandidateCount": 1,
+      "distinctRouteCount": 1,
+      "alternativeRouteCount": 1,
+      "routeDedupedCount": 1,
+      "routeGenerationStrategies": [
+        "recommended",
+        "shorter_distance",
+        "arterial_road",
+        "toll_allowed"
+      ],
+      "rawRouteCount": 2,
+      "fallbackReason": "only_one_distinct_route"
+    },
+    "returnRoutePlan": {
+      "provider": "google_routes",
+      "roadType": "general",
+      "origin": {
+        "address": "千葉メディカルセンター"
+      },
+      "destination": {
+        "address": "千葉市中央区出洲港8-3-2"
+      },
+      "waypoint": {
+        "waypointLabel": "蘇我駅",
+        "waypointAddress": "蘇我駅",
+        "stopType": null,
+        "waypointLatLng": {
+          "latitude": 35.5812881,
+          "longitude": 140.1320087
+        }
+      },
+      "selectedRouteId": "route_0",
+      "encodedPolyline": "amdxEsehvYPJEJr@zErA|LPr@qMjDwCbAeDnAiMlEUNyFhBoIlCiE~AgGlCcGrCuNnImGlE{DrCgFfEwBnBRPlBn@pBf@\\RV`@pDlE",
+      "routeLabel": "おすすめルート",
+      "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+      "routeSummary": "DEFAULT_ROUTE",
+      "routeStrategy": "recommended",
+      "routeSource": "google_routes",
+      "routeToken": "CucBCnAybhpTChgCFgUhb5o2RiEAjxGPpQiLpK0CkMG7AgASFKOEWihDcUs_9EqormvZGmh70uwgGgYABQWXAQcqBUUCHUoDPRDKYD9FukY5P0iYm6Wb7aGq1VciF0F2MDlhdGZHQVlLRXI3d1B1WTZRa1FvEAUaWgpYChgKDQoCCAERAAAAAACAZkARUrgehevqgUASFggAEAMQBhATEBIQARAAGAJCBBoCCAUaBgoECAIQAiIaChZBdjA5YXJwR2dvU3Z2QS01anBDUkNncAEoASIVAImKUdEDYmnBmL3IkggiC5qShpqkGhgKCg0TQDUVFYExhlMSCg2pRTUVFWVxhlM",
+      "distanceMeters": 3653,
+      "durationSeconds": 718,
+      "tollInfo": null,
+      "tollPreference": null,
+      "tollExcludedFromFare": false,
+      "intermediateWaypoint": {
+        "waypointLabel": "蘇我駅",
+        "waypointAddress": "蘇我駅",
+        "waypointLatLng": {
+          "latitude": 35.5812881,
+          "longitude": 140.1320087
+        }
+      },
+      "routeLegs": [
+        {
+          "legIndex": 0,
+          "distanceMeters": 590,
+          "durationSeconds": 238,
+          "encodedPolyline": "edexEykhvYs@Vs@Zl@fCvJ{DpGgCNPLD`@?r@W",
+          "startLatLng": {
+            "lat": 35.584832899999995,
+            "lng": 140.1313286
+          },
+          "endLatLng": {
+            "lat": 35.5812881,
+            "lng": 140.1320087
+          }
+        },
+        {
+          "legIndex": 1,
+          "distanceMeters": 3063,
+          "durationSeconds": 480,
+          "encodedPolyline": "amdxEsehvYPJEJr@zErA|LPr@qMjDwCbAeDnAiMlEUNyFhBoIlCiE~AgGlCcGrCuNnImGlE{DrCgFfEwBnBRPlBn@pBf@\\RV`@pDlE",
+          "startLatLng": {
+            "lat": 35.5811347,
+            "lng": 140.13034249999998
+          },
+          "endLatLng": {
+            "lat": 35.597363,
+            "lng": 140.1139062
+          }
+        }
+      ],
+      "routes": [
+        {
+          "routeId": "route_0",
+          "routeLabel": "おすすめルート",
+          "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+          "routeSource": "google_routes",
+          "routeStrategy": "recommended",
+          "distanceMeters": 3653,
+          "durationSeconds": 718,
+          "distanceKm": 3.7,
+          "durationMinutes": 12,
+          "encodedPolyline": "amdxEsehvYPJEJr@zErA|LPr@qMjDwCbAeDnAiMlEUNyFhBoIlCiE~AgGlCcGrCuNnImGlE{DrCgFfEwBnBRPlBn@pBf@\\RV`@pDlE",
+          "routeLabels": [
+            "DEFAULT_ROUTE"
+          ],
+          "routeToken": "CucBCnAybhpTChgCFgUhb5o2RiEAjxGPpQiLpK0CkMG7AgASFKOEWihDcUs_9EqormvZGmh70uwgGgYABQWXAQcqBUUCHUoDPRDKYD9FukY5P0iYm6Wb7aGq1VciF0F2MDlhdGZHQVlLRXI3d1B1WTZRa1FvEAUaWgpYChgKDQoCCAERAAAAAACAZkARUrgehevqgUASFggAEAMQBhATEBIQARAAGAJCBBoCCAUaBgoECAIQAiIaChZBdjA5YXJwR2dvU3Z2QS01anBDUkNncAEoASIVAImKUdEDYmnBmL3IkggiC5qShpqkGhgKCg0TQDUVFYExhlMSCg2pRTUVFWVxhlM",
+          "routeSummary": "DEFAULT_ROUTE",
+          "tollInfo": null,
+          "tollPreference": null,
+          "tollExcludedFromFare": false,
+          "intermediateWaypoint": {
+            "waypointLabel": "蘇我駅",
+            "waypointAddress": "蘇我駅",
+            "waypointLatLng": {
+              "latitude": 35.5812881,
+              "longitude": 140.1320087
+            }
+          },
+          "routeLegs": [
+            {
+              "legIndex": 0,
+              "distanceMeters": 590,
+              "durationSeconds": 238,
+              "encodedPolyline": "edexEykhvYs@Vs@Zl@fCvJ{DpGgCNPLD`@?r@W",
+              "startLatLng": {
+                "lat": 35.584832899999995,
+                "lng": 140.1313286
+              },
+              "endLatLng": {
+                "lat": 35.5812881,
+                "lng": 140.1320087
+              }
+            },
+            {
+              "legIndex": 1,
+              "distanceMeters": 3063,
+              "durationSeconds": 480,
+              "encodedPolyline": "amdxEsehvYPJEJr@zErA|LPr@qMjDwCbAeDnAiMlEUNyFhBoIlCiE~AgGlCcGrCuNnImGlE{DrCgFfEwBnBRPlBn@pBf@\\RV`@pDlE",
+              "startLatLng": {
+                "lat": 35.5811347,
+                "lng": 140.13034249999998
+              },
+              "endLatLng": {
+                "lat": 35.597363,
+                "lng": 140.1139062
+              }
+            }
+          ],
+          "roadType": "general",
+          "avoidTolls": true,
+          "avoidHighways": true,
+          "rawRouteIndex": 0,
+          "routeType": "recommended",
+          "usesToll": false
+        }
+      ],
+      "routeCandidates": [
+        {
+          "routeId": "route_0",
+          "routeLabel": "おすすめルート",
+          "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+          "routeSource": "google_routes",
+          "routeStrategy": "recommended",
+          "distanceMeters": 3653,
+          "durationSeconds": 718,
+          "distanceKm": 3.7,
+          "durationMinutes": 12,
+          "encodedPolyline": "amdxEsehvYPJEJr@zErA|LPr@qMjDwCbAeDnAiMlEUNyFhBoIlCiE~AgGlCcGrCuNnImGlE{DrCgFfEwBnBRPlBn@pBf@\\RV`@pDlE",
+          "routeLabels": [
+            "DEFAULT_ROUTE"
+          ],
+          "routeToken": "CucBCnAybhpTChgCFgUhb5o2RiEAjxGPpQiLpK0CkMG7AgASFKOEWihDcUs_9EqormvZGmh70uwgGgYABQWXAQcqBUUCHUoDPRDKYD9FukY5P0iYm6Wb7aGq1VciF0F2MDlhdGZHQVlLRXI3d1B1WTZRa1FvEAUaWgpYChgKDQoCCAERAAAAAACAZkARUrgehevqgUASFggAEAMQBhATEBIQARAAGAJCBBoCCAUaBgoECAIQAiIaChZBdjA5YXJwR2dvU3Z2QS01anBDUkNncAEoASIVAImKUdEDYmnBmL3IkggiC5qShpqkGhgKCg0TQDUVFYExhlMSCg2pRTUVFWVxhlM",
+          "routeSummary": "DEFAULT_ROUTE",
+          "tollInfo": null,
+          "tollPreference": null,
+          "tollExcludedFromFare": false,
+          "intermediateWaypoint": {
+            "waypointLabel": "蘇我駅",
+            "waypointAddress": "蘇我駅",
+            "waypointLatLng": {
+              "latitude": 35.5812881,
+              "longitude": 140.1320087
+            }
+          },
+          "routeLegs": [
+            {
+              "legIndex": 0,
+              "distanceMeters": 590,
+              "durationSeconds": 238,
+              "encodedPolyline": "edexEykhvYs@Vs@Zl@fCvJ{DpGgCNPLD`@?r@W",
+              "startLatLng": {
+                "lat": 35.584832899999995,
+                "lng": 140.1313286
+              },
+              "endLatLng": {
+                "lat": 35.5812881,
+                "lng": 140.1320087
+              }
+            },
+            {
+              "legIndex": 1,
+              "distanceMeters": 3063,
+              "durationSeconds": 480,
+              "encodedPolyline": "amdxEsehvYPJEJr@zErA|LPr@qMjDwCbAeDnAiMlEUNyFhBoIlCiE~AgGlCcGrCuNnImGlE{DrCgFfEwBnBRPlBn@pBf@\\RV`@pDlE",
+              "startLatLng": {
+                "lat": 35.5811347,
+                "lng": 140.13034249999998
+              },
+              "endLatLng": {
+                "lat": 35.597363,
+                "lng": 140.1139062
+              }
+            }
+          ],
+          "roadType": "general",
+          "avoidTolls": true,
+          "avoidHighways": true,
+          "rawRouteIndex": 0,
+          "routeType": "recommended",
+          "usesToll": false
+        }
+      ],
+      "selectedAt": "2026-06-26T04:16:02.703Z",
+      "preFixedFareConfirmable": false,
+      "multipleRoutesAvailable": false,
+      "routeCandidateCount": 1,
+      "distinctRouteCount": 1,
+      "alternativeRouteCount": 1,
+      "routeDedupedCount": 1,
+      "routeGenerationStrategies": [
+        "recommended"
+      ],
+      "rawRouteCount": 1,
+      "fallbackReason": "only_one_distinct_route"
+    },
+    "overallRouteSelection": {
+      "routePlanType": "return_with_stop",
+      "selectionPhase": "overall",
+      "fixedOutboundRouteId": "route_0",
+      "commonSegments": [
+        {
+          "key": "outbound",
+          "label": "千葉市中央区出洲港8-3-2 → 千葉メディカルセンター",
+          "originAddress": "千葉市中央区出洲港8-3-2",
+          "destinationAddress": "千葉メディカルセンター",
+          "distanceMeters": 3297,
+          "durationSeconds": 554,
+          "routeId": "route_0",
+          "routeStrategy": "recommended",
+          "encodedPolyline": "orgxE}~dvYdArAhBgCqBiCCQZ_JC]OKiE]iCOOZiA~@ALHR|F{EzC}BxCoBdFcDvIiFzDmBbHqC|CoAtHoC~By@|@a@rE}A_A{DSqAuGaYCK|V_KLf@g@R"
+        },
+        {
+          "key": "return_common",
+          "label": "千葉メディカルセンター → 蘇我駅",
+          "originAddress": "千葉メディカルセンター",
+          "destinationAddress": "蘇我駅",
+          "distanceMeters": 590,
+          "durationSeconds": 234,
+          "routeId": null,
+          "routeStrategy": "recommended",
+          "encodedPolyline": "edexEykhvYs@Vs@Zl@fCvJ{DpGgCNPLD`@?r@W"
+        }
+      ],
+      "selectableSegment": {
+        "key": "return_selectable",
+        "label": "蘇我駅 → 千葉市中央区出洲港8-3-2",
+        "originAddress": "蘇我駅",
+        "destinationAddress": "千葉市中央区出洲港8-3-2"
+      },
+      "overallRouteCandidates": [
+        {
+          "routeId": "overall_0",
+          "routeLabel": "おすすめルート",
+          "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+          "routeType": "recommended",
+          "strategy": "recommended",
+          "usesToll": false,
+          "totalDistanceMeters": 6950,
+          "totalDurationSeconds": 1268,
+          "segmentBreakdown": {
+            "outbound": {
+              "routeId": "route_0",
+              "routeStrategy": "recommended",
+              "distanceMeters": 3297,
+              "durationSeconds": 554
+            },
+            "returnCommon": {
+              "distanceMeters": 590,
+              "durationSeconds": 234
+            },
+            "returnSelectable": {
+              "routeId": "route_0",
+              "routeStrategy": "recommended",
+              "routeLabel": "おすすめルート",
+              "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+              "routeType": "recommended",
+              "strategy": "recommended",
+              "distanceMeters": 3063,
+              "durationSeconds": 480,
+              "usesToll": false,
+              "encodedPolyline": "amdxEsehvYPJEJr@zErA|LPr@qMjDwCbAeDnAiMlEUNyFhBoIlCiE~AgGlCcGrCuNnImGlE{DrCgFfEwBnBRPlBn@pBf@\\RV`@pDlE"
+            }
+          },
+          "encodedPolyline": "amdxEsehvYPJEJr@zErA|LPr@qMjDwCbAeDnAiMlEUNyFhBoIlCiE~AgGlCcGrCuNnImGlE{DrCgFfEwBnBRPlBn@pBf@\\RV`@pDlE",
+          "routeLegs": []
+        }
+      ],
+      "selectedOverallRouteId": null,
+      "preFixedFareConfirmable": false,
+      "fallbackReason": "only_one_distinct_route"
+    },
+    "returnWithStopSplitContext": {
+      "homeAddress": "千葉市中央区出洲港8-3-2",
+      "goalAddress": "千葉メディカルセンター",
+      "stopAddress": "蘇我駅",
+      "returnCommonRoute": {
+        "routeId": "",
+        "routeLabel": "おすすめルート",
+        "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+        "routeSource": "google_routes",
+        "routeStrategy": "recommended",
+        "distanceMeters": 590,
+        "durationSeconds": 234,
+        "distanceKm": 0.6,
+        "durationMinutes": 4,
+        "encodedPolyline": "edexEykhvYs@Vs@Zl@fCvJ{DpGgCNPLD`@?r@W",
+        "routeLabels": [
+          "DEFAULT_ROUTE"
+        ],
+        "routeToken": "CtQBClwyWho_ChACFgMVhekzRiEAv07g1hIAEgwCPIiL1oodVHTTcUoaAwA-DCoDcU92PT4X4j5FgJe0PUiDiMbog4-qtO8BIhdBZjA5YXZlQU10Q0JyN3dQeDlLUDZBWRAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEXsUrkdhB59AEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXQWYwOWFwWDZNTkNCcjd3UHg5S1A2QVlwASgBIhUAiYpR0RHBpaiLT_aTEP3BSWJm270aGAoKDYnQNRUVBliGUxIKDZzPNRUVOFWGUw",
+        "routeSummary": "DEFAULT_ROUTE",
+        "tollInfo": null,
+        "tollPreference": null,
+        "tollExcludedFromFare": false,
+        "intermediateWaypoint": null,
+        "routeLegs": [
+          {
+            "legIndex": 0,
+            "distanceMeters": 590,
+            "durationSeconds": 238,
+            "encodedPolyline": "edexEykhvYs@Vs@Zl@fCvJ{DpGgCNPLD`@?r@W",
+            "startLatLng": {
+              "lat": 35.584832899999995,
+              "lng": 140.1313286
+            },
+            "endLatLng": {
+              "lat": 35.5812881,
+              "lng": 140.1320087
+            }
+          }
+        ],
+        "roadType": "general",
+        "avoidTolls": true,
+        "avoidHighways": true,
+        "rawRouteIndex": 0,
+        "routeType": "recommended",
+        "usesToll": false
+      },
+      "selectableCandidates": [
+        {
+          "routeId": "route_0",
+          "routeLabel": "おすすめルート",
+          "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+          "routeSource": "google_routes",
+          "routeStrategy": "recommended",
+          "distanceMeters": 3063,
+          "durationSeconds": 480,
+          "distanceKm": 3.1,
+          "durationMinutes": 8,
+          "encodedPolyline": "amdxEsehvYPJEJr@zErA|LPr@qMjDwCbAeDnAiMlEUNyFhBoIlCiE~AgGlCcGrCuNnImGlE{DrCgFfEwBnBRPlBn@pBf@\\RV`@pDlE",
+          "routeLabels": [
+            "DEFAULT_ROUTE"
+          ],
+          "routeToken": "CucBCnAybhpTChgCFgUhb5o2RiEAjxGPpQiLpK0CkMG7AgASFKOEWihDcUs_9EqormvZGmh70uwgGgYABQWXAQcqBUUCHUoDPRDKYD9FukY5P0iYm6Wb7aGq1VciF0F2MDlhdGZHQVlLRXI3d1B1WTZRa1FvEAUaWgpYChgKDQoCCAERAAAAAACAZkARUrgehevqgUASFggAEAMQBhATEBIQARAAGAJCBBoCCAUaBgoECAIQAiIaChZBdjA5YXJwR2dvU3Z2QS01anBDUkNncAEoASIVAImKUdEDYmnBmL3IkggiC5qShpqkGhgKCg0TQDUVFYExhlMSCg2pRTUVFWVxhlM",
+          "routeSummary": "DEFAULT_ROUTE",
+          "tollInfo": null,
+          "tollPreference": null,
+          "tollExcludedFromFare": false,
+          "intermediateWaypoint": null,
+          "routeLegs": [
+            {
+              "legIndex": 0,
+              "distanceMeters": 3063,
+              "durationSeconds": 480,
+              "encodedPolyline": "amdxEsehvYPJEJr@zErA|LPr@qMjDwCbAeDnAiMlEUNyFhBoIlCiE~AgGlCcGrCuNnImGlE{DrCgFfEwBnBRPlBn@pBf@\\RV`@pDlE",
+              "startLatLng": {
+                "lat": 35.5811347,
+                "lng": 140.13034249999998
+              },
+              "endLatLng": {
+                "lat": 35.597363,
+                "lng": 140.1139062
+              }
+            }
+          ],
+          "roadType": "general",
+          "avoidTolls": true,
+          "avoidHighways": true,
+          "rawRouteIndex": 0,
+          "routeType": "recommended",
+          "usesToll": false
+        }
+      ]
+    },
+    "totalDistanceMeters": 6950,
+    "totalDurationSeconds": 1272,
+    "preFixedFareScope": "outbound_and_return",
+    "returnFareStatus": "fixed_candidate",
+    "preFixedFareConfirmable": false,
+    "multipleRoutesAvailable": false,
+    "pickup": {
+      "address": "千葉市中央区出洲港8-3-2",
+      "latLng": null,
+      "geocoding": null
+    },
+    "destination": {
+      "address": "千葉メディカルセンター",
+      "latLng": null
+    },
+    "provider": "google_routes",
+    "roadType": "general",
+    "selectedRouteId": "route_0",
+    "encodedPolyline": "orgxE}~dvYdArAhBgCqBiCCQZ_JC]OKiE]iCOOZiA~@ALHR|F{EzC}BxCoBdFcDvIiFzDmBbHqC|CoAtHoC~By@|@a@rE}A_A{DSqAuGaYCK|V_KLf@g@R",
+    "routeLabel": "おすすめルート",
+    "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+    "routeSummary": "DEFAULT_ROUTE",
+    "routeStrategy": "recommended",
+    "routeSource": "google_routes",
+    "routeToken": "CpACCpcBMpQBGnkKIQIWCTlzkQlGIQCuIIVJnZwDtNJer9Fx3McIrqINr8MSABIke9LsIDXMzMCaeRCuw0Xjz4hZSS3-g1pNtwHrgYH1wiACPIiLGg4AHBiHAWX_____DwUGCyoJS2dnX1sCHR0KPbpGOT9FPhfiPkiyxLeY3L3C_OQBIhdBZjA5YXJLeEhQVzZyN3dQN3BDYThRYxAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEfLSTWIQ6YdAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXQWYwOWFvN2dHX1c2cjd3UDdwQ2E4UWNwASgBIhUAiYpR0WMMKM9JS8xHjNHDfUtIxUoaGAoKDf65NxUVdq-DUxIKDbK7NxUVR62DUw",
+    "distanceMeters": 3297,
+    "durationSeconds": 554,
+    "tollInfo": null,
+    "tollPreference": null,
+    "tollExcludedFromFare": false,
+    "intermediateWaypoint": null,
+    "routes": [
+      {
+        "routeId": "route_0",
+        "routeLabel": "おすすめルート",
+        "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+        "routeSource": "google_routes",
+        "routeStrategy": "recommended",
+        "distanceMeters": 3297,
+        "durationSeconds": 554,
+        "distanceKm": 3.3,
+        "durationMinutes": 9,
+        "encodedPolyline": "orgxE}~dvYdArAhBgCqBiCCQZ_JC]OKiE]iCOOZiA~@ALHR|F{EzC}BxCoBdFcDvIiFzDmBbHqC|CoAtHoC~By@|@a@rE}A_A{DSqAuGaYCK|V_KLf@g@R",
+        "routeLabels": [
+          "DEFAULT_ROUTE"
+        ],
+        "routeToken": "CpACCpcBMpQBGnkKIQIWCTlzkQlGIQCuIIVJnZwDtNJer9Fx3McIrqINr8MSABIke9LsIDXMzMCaeRCuw0Xjz4hZSS3-g1pNtwHrgYH1wiACPIiLGg4AHBiHAWX_____DwUGCyoJS2dnX1sCHR0KPbpGOT9FPhfiPkiyxLeY3L3C_OQBIhdBZjA5YXJLeEhQVzZyN3dQN3BDYThRYxAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEfLSTWIQ6YdAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXQWYwOWFvN2dHX1c2cjd3UDdwQ2E4UWNwASgBIhUAiYpR0WMMKM9JS8xHjNHDfUtIxUoaGAoKDf65NxUVdq-DUxIKDbK7NxUVR62DUw",
+        "routeSummary": "DEFAULT_ROUTE",
+        "tollInfo": null,
+        "tollPreference": null,
+        "tollExcludedFromFare": false,
+        "intermediateWaypoint": null,
+        "routeLegs": [
+          {
+            "legIndex": 0,
+            "distanceMeters": 3297,
+            "durationSeconds": 554,
+            "encodedPolyline": "orgxE}~dvYdArAhBgCqBiCCQZ_JC]OKiE]iCOOZiA~@ALHR|F{EzC}BxCoBdFcDvIiFzDmBbHqC|CoAtHoC~By@|@a@rE}A_A{DSqAuGaYCK|V_KLf@g@R",
+            "startLatLng": {
+              "lat": 35.597363,
+              "lng": 140.1139062
+            },
+            "endLatLng": {
+              "lat": 35.584832899999995,
+              "lng": 140.1313286
+            }
+          }
+        ],
+        "roadType": "general",
+        "avoidTolls": true,
+        "avoidHighways": true,
+        "rawRouteIndex": 0,
+        "routeType": "recommended",
+        "usesToll": false
+      }
+    ],
+    "routeCandidates": [
+      {
+        "routeId": "route_0",
+        "routeLabel": "おすすめルート",
+        "routeDescription": "時間と距離のバランスを考慮した標準的なルートです。",
+        "routeSource": "google_routes",
+        "routeStrategy": "recommended",
+        "distanceMeters": 3297,
+        "durationSeconds": 554,
+        "distanceKm": 3.3,
+        "durationMinutes": 9,
+        "encodedPolyline": "orgxE}~dvYdArAhBgCqBiCCQZ_JC]OKiE]iCOOZiA~@ALHR|F{EzC}BxCoBdFcDvIiFzDmBbHqC|CoAtHoC~By@|@a@rE}A_A{DSqAuGaYCK|V_KLf@g@R",
+        "routeLabels": [
+          "DEFAULT_ROUTE"
+        ],
+        "routeToken": "CpACCpcBMpQBGnkKIQIWCTlzkQlGIQCuIIVJnZwDtNJer9Fx3McIrqINr8MSABIke9LsIDXMzMCaeRCuw0Xjz4hZSS3-g1pNtwHrgYH1wiACPIiLGg4AHBiHAWX_____DwUGCyoJS2dnX1sCHR0KPbpGOT9FPhfiPkiyxLeY3L3C_OQBIhdBZjA5YXJLeEhQVzZyN3dQN3BDYThRYxAFGlsKWQoYCg0KAggBEQAAAAAAgGZAEfLSTWIQ6YdAEhYIABADEAYQExASEAEQABgCQgQaAggFGgYKBAgCEAIiGwoXQWYwOWFvN2dHX1c2cjd3UDdwQ2E4UWNwASgBIhUAiYpR0WMMKM9JS8xHjNHDfUtIxUoaGAoKDf65NxUVdq-DUxIKDbK7NxUVR62DUw",
+        "routeSummary": "DEFAULT_ROUTE",
+        "tollInfo": null,
+        "tollPreference": null,
+        "tollExcludedFromFare": false,
+        "intermediateWaypoint": null,
+        "routeLegs": [
+          {
+            "legIndex": 0,
+            "distanceMeters": 3297,
+            "durationSeconds": 554,
+            "encodedPolyline": "orgxE}~dvYdArAhBgCqBiCCQZ_JC]OKiE]iCOOZiA~@ALHR|F{EzC}BxCoBdFcDvIiFzDmBbHqC|CoAtHoC~By@|@a@rE}A_A{DSqAuGaYCK|V_KLf@g@R",
+            "startLatLng": {
+              "lat": 35.597363,
+              "lng": 140.1139062
+            },
+            "endLatLng": {
+              "lat": 35.584832899999995,
+              "lng": 140.1313286
+            }
+          }
+        ],
+        "roadType": "general",
+        "avoidTolls": true,
+        "avoidHighways": true,
+        "rawRouteIndex": 0,
+        "routeType": "recommended",
+        "usesToll": false
+      }
+    ],
+    "routeCandidateCount": 1,
+    "distinctRouteCount": 1,
+    "alternativeRouteCount": 1,
+    "routeDedupedCount": 1,
+    "routeGenerationStrategies": [
+      "recommended",
+      "shorter_distance",
+      "arterial_road",
+      "toll_allowed"
+    ],
+    "fallbackReason": "only_one_distinct_route"
+  },
+  "selections": {
+    "mobilityId": "free-wheelchair",
+    "assistanceId": "boarding-assist",
+    "stairId": "stair-none",
+    "tripTypeId": "round-trip",
+    "roundTripAddonId": "addon-waiting",
+    "returnPlanType": "return_with_stop",
+    "returnStopType": "",
+    "returnStopAddress": "蘇我駅",
+    "differentReturnAddress": "",
+    "roadType": "general"
+  },
+  "handoffSource": "lp-site-estimate",
+  "dtoVersion": 2
+}
