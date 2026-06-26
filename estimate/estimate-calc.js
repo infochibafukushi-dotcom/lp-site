@@ -840,6 +840,45 @@
     };
   }
 
+  function buildOverallRouteSelectionSnapshot(overallRouteSelection){
+    if(!overallRouteSelection){
+      return null;
+    }
+    const candidates = Array.isArray(overallRouteSelection.overallRouteCandidates)
+      ? overallRouteSelection.overallRouteCandidates.map(function(candidate){
+        return {
+          routeId: String(candidate.routeId || ""),
+          routeLabel: String(candidate.routeLabel || ""),
+          routeDescription: String(candidate.routeDescription || ""),
+          routeType: candidate.routeType || candidate.strategy || null,
+          strategy: candidate.strategy || candidate.routeType || null,
+          usesToll: candidate.usesToll === true,
+          totalDistanceMeters: Number(candidate.totalDistanceMeters) || 0,
+          totalDurationSeconds: Number(candidate.totalDurationSeconds) || 0,
+          segmentBreakdown: candidate.segmentBreakdown || null,
+          encodedPolyline: String(candidate.encodedPolyline || "")
+        };
+      })
+      : [];
+    return {
+      routePlanType: overallRouteSelection.routePlanType || "return_with_stop",
+      selectionPhase: overallRouteSelection.selectionPhase || null,
+      fixedOutboundRouteId: overallRouteSelection.fixedOutboundRouteId || null,
+      commonSegments: Array.isArray(overallRouteSelection.commonSegments)
+        ? overallRouteSelection.commonSegments.map(function(segment){
+          return Object.assign({}, segment);
+        })
+        : [],
+      selectableSegment: overallRouteSelection.selectableSegment
+        ? Object.assign({}, overallRouteSelection.selectableSegment)
+        : null,
+      overallRouteCandidates: candidates,
+      selectedOverallRouteId: overallRouteSelection.selectedOverallRouteId || null,
+      preFixedFareConfirmable: overallRouteSelection.preFixedFareConfirmable === true,
+      fallbackReason: overallRouteSelection.fallbackReason || null
+    };
+  }
+
   function buildStructuredRoutePlanSnapshot(state){
     const routePlan = state?.routePlan;
     if(!isStructuredRoutePlan(routePlan)){
@@ -853,6 +892,7 @@
       returnPlanType: routePlan.returnPlanType || null,
       outboundRoutePlan: outbound,
       returnRoutePlan: returnSnapshot,
+      overallRouteSelection: buildOverallRouteSelectionSnapshot(routePlan.overallRouteSelection),
       totalDistanceMeters: Number(routePlan.totalDistanceMeters) || 0,
       totalDurationSeconds: Number(routePlan.totalDurationSeconds) || 0,
       preFixedFareScope: routePlan.preFixedFareScope || "outbound_only",
@@ -1178,6 +1218,9 @@
       returnPlanType: routeSnapshot.returnPlanType || (isRoundTripSelected(config, state) ? resolveReturnPlanType(state) : null),
       outboundRoutePlan: routeSnapshot.outboundRoutePlan || null,
       returnRoutePlan: routeSnapshot.returnRoutePlan || null,
+      overallRouteSelection: routeSnapshot.routePlan?.overallRouteSelection
+        || buildOverallRouteSelectionSnapshot(state?.routePlan?.overallRouteSelection)
+        || null,
       totalDistanceMeters: routeSnapshot.totalDistanceMeters ?? resolveDistanceMeters(state),
       totalDurationSeconds: routeSnapshot.totalDurationSeconds ?? resolveDurationSeconds(state),
       preFixedFareScope: routeSnapshot.preFixedFareScope || null,

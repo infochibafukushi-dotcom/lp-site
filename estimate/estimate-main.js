@@ -280,6 +280,7 @@
       returnPlanType: isRoundTripActive() ? returnPlanType : null,
       outboundRoutePlan: outboundLeg,
       returnRoutePlan: returnLeg,
+      overallRouteSelection: opts.overallRouteSelection || null,
       totalDistanceMeters: totalDistanceMeters,
       totalDurationSeconds: totalDurationSeconds,
       preFixedFareScope: preFixedFareScope,
@@ -1703,12 +1704,37 @@
         destination: destination
       }));
       const returnRequest = getReturnLegRequest();
+      const useReturnWithStopSplit = Boolean(
+        returnRequest
+        && returnPlanType === "return_with_stop"
+        && isPreFixedFareMode()
+        && typeof window.EstimateDistanceApi.computeReturnWithStopOverallRouteSelection === "function"
+      );
       const returnPromise = returnRequest
-        ? window.EstimateDistanceApi.computeRouteDistance(Object.assign({}, apiOptions, {
-          origin: returnRequest.origin,
-          destination: returnRequest.destination,
-          intermediateAddress: returnRequest.intermediateAddress || ""
-        }))
+        ? (useReturnWithStopSplit
+          ? outboundPromise.then(function(outboundResult){
+            const outboundRoutes = Array.isArray(outboundResult?.routeCandidates)
+              ? outboundResult.routeCandidates
+              : (Array.isArray(outboundResult?.routes) ? outboundResult.routes : []);
+            const primaryOutbound = outboundRoutes[0] || null;
+            return window.EstimateDistanceApi.computeReturnWithStopOverallRouteSelection(Object.assign({}, apiOptions, {
+              homeAddress: returnRequest.destination,
+              goalAddress: returnRequest.origin,
+              stopAddress: returnRequest.intermediateAddress,
+              outboundRoute: primaryOutbound,
+              outboundRouteCandidates: outboundRoutes
+            })).then(function(splitResult){
+              return {
+                splitResult: splitResult,
+                apiResult: splitResult.returnLegApiResult
+              };
+            });
+          })
+          : window.EstimateDistanceApi.computeRouteDistance(Object.assign({}, apiOptions, {
+            origin: returnRequest.origin,
+            destination: returnRequest.destination,
+            intermediateAddress: returnRequest.intermediateAddress || ""
+          })))
         : Promise.resolve(null);
       const geocodePromise = typeof window.EstimateDistanceApi.geocodeAddress === "function"
         ? window.EstimateDistanceApi.geocodeAddress({
@@ -1732,7 +1758,9 @@
         : Promise.resolve(null);
       const results = await Promise.all([outboundPromise, returnPromise, geocodePromise, stopGeocodePromise]);
       const outboundResult = results[0];
-      const returnResult = results[1];
+      const returnPayload = results[1];
+      const returnResult = returnPayload?.apiResult || returnPayload;
+      const returnWithStopSplit = returnPayload?.splitResult || null;
       const geocoding = results[2];
       const stopGeocoding = results[3];
 
@@ -1788,6 +1816,7 @@
       const routePlan = buildStructuredRoutePlan(outboundLeg, returnLeg, {
         returnPlanType: returnPlanType,
         tripType: isRoundTripActive() ? "round_trip" : "one_way",
+        overallRouteSelection: returnWithStopSplit?.overallRouteSelection || null,
         pickup: {
           address: origin,
           latLng: geocoding?.location || null,

@@ -387,6 +387,347 @@
     return null;
   }
 
+  function buildSegmentSnapshot(key, label, originAddress, destinationAddress, route){
+    if(!route){
+      return {
+        key: key,
+        label: label,
+        originAddress: originAddress,
+        destinationAddress: destinationAddress,
+        distanceMeters: 0,
+        durationSeconds: 0
+      };
+    }
+    return {
+      key: key,
+      label: label,
+      originAddress: originAddress,
+      destinationAddress: destinationAddress,
+      distanceMeters: Number(route.distanceMeters) || 0,
+      durationSeconds: Number(route.durationSeconds) || 0,
+      routeId: String(route.routeId || "") || null,
+      routeStrategy: route.routeStrategy || null,
+      encodedPolyline: String(route.encodedPolyline || "")
+    };
+  }
+
+  function resolveRouteDisplayLabel(route, index){
+    if(global.PreFixedFareRoutePresentation && typeof global.PreFixedFareRoutePresentation.getRouteDisplayLabel === "function"){
+      return global.PreFixedFareRoutePresentation.getRouteDisplayLabel(route, index);
+    }
+    return String(route?.routeLabel || "");
+  }
+
+  function resolveRouteDisplayDescription(route){
+    if(global.PreFixedFareRoutePresentation && typeof global.PreFixedFareRoutePresentation.getRouteDisplayDescription === "function"){
+      return global.PreFixedFareRoutePresentation.getRouteDisplayDescription(route);
+    }
+    return String(route?.routeDescription || "");
+  }
+
+  function buildSelectableSegmentBreakdown(route){
+    return {
+      routeId: String(route.routeId || "") || null,
+      routeStrategy: route.routeStrategy || null,
+      routeLabel: resolveRouteDisplayLabel(route, 0),
+      routeDescription: resolveRouteDisplayDescription(route),
+      routeType: route.routeType || route.routeStrategy || null,
+      strategy: route.routeStrategy || null,
+      distanceMeters: Number(route.distanceMeters) || 0,
+      durationSeconds: Number(route.durationSeconds) || 0,
+      usesToll: routeUsesToll(route) || route.usesToll === true,
+      encodedPolyline: String(route.encodedPolyline || "")
+    };
+  }
+
+  function buildOverallRouteCandidate(outboundRoute, returnCommonRoute, selectableRoute, index){
+    const outboundMeters = Number(outboundRoute?.distanceMeters) || 0;
+    const outboundSeconds = Number(outboundRoute?.durationSeconds) || 0;
+    const commonMeters = Number(returnCommonRoute?.distanceMeters) || 0;
+    const commonSeconds = Number(returnCommonRoute?.durationSeconds) || 0;
+    const selectableMeters = Number(selectableRoute?.distanceMeters) || 0;
+    const selectableSeconds = Number(selectableRoute?.durationSeconds) || 0;
+    const usesToll = routeUsesToll(selectableRoute) || selectableRoute?.usesToll === true;
+    const routeLabel = resolveRouteDisplayLabel(selectableRoute, index);
+    const routeDescription = resolveRouteDisplayDescription(selectableRoute);
+    return {
+      routeId: "overall_" + index,
+      routeLabel: routeLabel,
+      routeDescription: routeDescription,
+      routeType: selectableRoute?.routeType || selectableRoute?.routeStrategy || null,
+      strategy: selectableRoute?.routeStrategy || null,
+      usesToll: usesToll,
+      totalDistanceMeters: outboundMeters + commonMeters + selectableMeters,
+      totalDurationSeconds: outboundSeconds + commonSeconds + selectableSeconds,
+      segmentBreakdown: {
+        outbound: {
+          routeId: String(outboundRoute?.routeId || "") || null,
+          routeStrategy: outboundRoute?.routeStrategy || null,
+          distanceMeters: outboundMeters,
+          durationSeconds: outboundSeconds
+        },
+        returnCommon: {
+          distanceMeters: commonMeters,
+          durationSeconds: commonSeconds
+        },
+        returnSelectable: buildSelectableSegmentBreakdown(selectableRoute)
+      },
+      encodedPolyline: String(selectableRoute?.encodedPolyline || ""),
+      routeLegs: []
+    };
+  }
+
+  function dedupeOverallRouteCandidates(candidates){
+    const deduped = [];
+    (candidates || []).forEach(function(candidate){
+      const selectable = candidate?.segmentBreakdown?.returnSelectable || null;
+      const duplicate = deduped.some(function(existing){
+        const existingSelectable = existing?.segmentBreakdown?.returnSelectable || null;
+        if(!selectable || !existingSelectable){
+          return false;
+        }
+        return isDuplicateRoute(
+          Object.assign({}, selectable, { encodedPolyline: selectable.encodedPolyline || "" }),
+          Object.assign({}, existingSelectable, { encodedPolyline: existingSelectable.encodedPolyline || "" })
+        );
+      });
+      if(!duplicate){
+        deduped.push(candidate);
+      }
+    });
+    return deduped.map(function(candidate, index){
+      return Object.assign({}, candidate, {
+        routeId: "overall_" + index
+      });
+    });
+  }
+
+  function buildReturnLegRouteLegs(returnCommonRoute, selectableRoute){
+    const leg0 = Array.isArray(returnCommonRoute?.routeLegs) && returnCommonRoute.routeLegs.length
+      ? Object.assign({}, returnCommonRoute.routeLegs[0], { legIndex: 0 })
+      : {
+        legIndex: 0,
+        distanceMeters: Number(returnCommonRoute?.distanceMeters) || 0,
+        durationSeconds: Number(returnCommonRoute?.durationSeconds) || 0,
+        encodedPolyline: String(returnCommonRoute?.encodedPolyline || "")
+      };
+    const leg1 = Array.isArray(selectableRoute?.routeLegs) && selectableRoute.routeLegs.length
+      ? Object.assign({}, selectableRoute.routeLegs[0], { legIndex: 1 })
+      : {
+        legIndex: 1,
+        distanceMeters: Number(selectableRoute?.distanceMeters) || 0,
+        durationSeconds: Number(selectableRoute?.durationSeconds) || 0,
+        encodedPolyline: String(selectableRoute?.encodedPolyline || "")
+      };
+    return [leg0, leg1];
+  }
+
+  function buildSynthesizedReturnLegApiResult(returnCommonRoute, selectableRoute, stopAddress){
+    const routeLegs = buildReturnLegRouteLegs(returnCommonRoute, selectableRoute);
+    const totalDistanceMeters = routeLegs.reduce(function(sum, leg){
+      return sum + (Number(leg.distanceMeters) || 0);
+    }, 0);
+    const totalDurationSeconds = routeLegs.reduce(function(sum, leg){
+      return sum + (Number(leg.durationSeconds) || 0);
+    }, 0);
+    const distanceKm = Math.round((totalDistanceMeters / 1000) * 10) / 10;
+    const durationMinutes = totalDurationSeconds > 0 ? Math.max(1, Math.round(totalDurationSeconds / 60)) : 0;
+    const waypointInfo = {
+      waypointLabel: stopAddress,
+      waypointAddress: stopAddress
+    };
+    const endLatLng = routeLegs[0]?.endLatLng || routeLegs[1]?.startLatLng || null;
+    if(endLatLng){
+      waypointInfo.waypointLatLng = {
+        latitude: endLatLng.lat,
+        longitude: endLatLng.lng
+      };
+    }
+    const synthesizedRoute = applyRoutePresentation(Object.assign({}, selectableRoute, {
+      routeId: String(selectableRoute?.routeId || "route_0"),
+      distanceMeters: totalDistanceMeters,
+      durationSeconds: totalDurationSeconds,
+      distanceKm: distanceKm,
+      durationMinutes: durationMinutes,
+      encodedPolyline: String(selectableRoute?.encodedPolyline || ""),
+      routeLegs: routeLegs,
+      intermediateWaypoint: Object.assign({}, selectableRoute?.intermediateWaypoint || {}, waypointInfo)
+    }), selectableRoute?.routeStrategy || "recommended");
+
+    return {
+      distanceKm: distanceKm,
+      durationMinutes: durationMinutes,
+      distanceMeters: totalDistanceMeters,
+      durationSeconds: totalDurationSeconds,
+      selectedRouteId: synthesizedRoute.routeId,
+      routes: [synthesizedRoute],
+      routeCandidates: [synthesizedRoute],
+      routeCandidateCount: 1,
+      distinctRouteCount: 1,
+      alternativeRouteCount: 1,
+      multipleRoutesAvailable: false,
+      preFixedFareConfirmable: false,
+      routeDedupedCount: 1,
+      routeGenerationStrategies: ["recommended"],
+      rawRouteCount: 1,
+      fallbackReason: "only_one_distinct_route"
+    };
+  }
+
+  async function computeSegmentRouteCandidates(options){
+    const apiKey = String(options?.apiKey || "").trim();
+    const origin = String(options?.origin || "").trim();
+    const destination = String(options?.destination || "").trim();
+    const userAvoidTolls = options?.roadType === "general";
+
+    if(!apiKey){
+      throw new Error("Google Maps APIキーが設定されていません。");
+    }
+    if(!origin || !destination){
+      throw new Error("出発地と目的地を入力してください。");
+    }
+
+    const routeGenerationStrategies = [
+      "recommended",
+      "shorter_distance",
+      "arterial_road",
+      "toll_allowed"
+    ];
+
+    const recommendedPool = await fetchRecommendedPool(options, userAvoidTolls);
+    if(!recommendedPool.length){
+      throw new Error("ルートが見つかりませんでした。住所を確認してください。");
+    }
+
+    const recommendedRoute = applyRoutePresentation(recommendedPool[0], "recommended");
+    const shorterDistanceRoute = pickShorterDistanceRoute(recommendedPool, recommendedRoute);
+    const arterialRoute = await fetchArterialRoute(options, userAvoidTolls);
+    const tollAllowedRoute = await fetchTollAllowedRoute(options, recommendedRoute);
+
+    const assembled = [
+      recommendedRoute,
+      shorterDistanceRoute,
+      arterialRoute,
+      tollAllowedRoute
+    ].filter(Boolean);
+
+    const deduped = assignRouteIds(dedupeRoutes(assembled)).slice(0, MAX_ROUTE_CANDIDATES);
+    const preFixedFareConfirmable = deduped.length >= 2;
+    const primary = deduped[0] || recommendedRoute;
+
+    return {
+      distanceKm: primary.distanceKm,
+      durationMinutes: primary.durationMinutes,
+      distanceMeters: primary.distanceMeters,
+      durationSeconds: primary.durationSeconds,
+      selectedRouteId: primary.routeId,
+      routes: deduped,
+      routeCandidates: deduped,
+      routeCandidateCount: deduped.length,
+      distinctRouteCount: deduped.length,
+      alternativeRouteCount: deduped.length,
+      multipleRoutesAvailable: preFixedFareConfirmable,
+      preFixedFareConfirmable: preFixedFareConfirmable,
+      routeDedupedCount: deduped.length,
+      routeGenerationStrategies: routeGenerationStrategies,
+      rawRouteCount: recommendedPool.length,
+      fallbackReason: preFixedFareConfirmable ? null : "only_one_distinct_route"
+    };
+  }
+
+  async function computeReturnWithStopOverallRouteSelection(options){
+    const apiKey = String(options?.apiKey || "").trim();
+    const homeAddress = String(options?.homeAddress || "").trim();
+    const goalAddress = String(options?.goalAddress || "").trim();
+    const stopAddress = String(options?.stopAddress || "").trim();
+    const outboundRoute = options?.outboundRoute || null;
+    const outboundRouteCandidates = Array.isArray(options?.outboundRouteCandidates)
+      ? options.outboundRouteCandidates
+      : (outboundRoute ? [outboundRoute] : []);
+    const userAvoidTolls = options?.roadType === "general";
+
+    if(!apiKey){
+      throw new Error("Google Maps APIキーが設定されていません。");
+    }
+    if(!homeAddress || !goalAddress || !stopAddress){
+      throw new Error("出発地・目的地・立ち寄り先を入力してください。");
+    }
+    if(!outboundRoute){
+      throw new Error("往路ルートが見つかりませんでした。");
+    }
+
+    const returnCommonRaw = await fetchRoutesRequest(options, buildRoutesRequestBody(options, {
+      origin: goalAddress,
+      destination: stopAddress,
+      computeAlternativeRoutes: false,
+      avoidTolls: userAvoidTolls,
+      avoidHighways: userAvoidTolls
+    }));
+    if(!returnCommonRaw.length){
+      throw new Error("復路共通区間（目的地 → 立ち寄り先）のルートが見つかりませんでした。");
+    }
+    const returnCommonRoute = applyRoutePresentation(normalizeRawRoute(returnCommonRaw[0], {
+      routeStrategy: "recommended",
+      avoidTolls: userAvoidTolls,
+      avoidHighways: userAvoidTolls,
+      roadType: userAvoidTolls ? "general" : "toll",
+      rawRouteIndex: 0
+    }), "recommended");
+
+    const selectableResult = await computeSegmentRouteCandidates(Object.assign({}, options, {
+      origin: stopAddress,
+      destination: homeAddress
+    }));
+    const selectableCandidates = Array.isArray(selectableResult?.routeCandidates)
+      ? selectableResult.routeCandidates
+      : [];
+    if(!selectableCandidates.length){
+      throw new Error("選択区間（立ち寄り先 → 出発地）のルートが見つかりませんでした。");
+    }
+
+    const outboundLabel = String(homeAddress) + " → " + String(goalAddress);
+    const returnCommonLabel = String(goalAddress) + " → " + String(stopAddress);
+    const selectableLabel = String(stopAddress) + " → " + String(homeAddress);
+
+    const assembledOverall = selectableCandidates.map(function(selectableRoute, index){
+      return buildOverallRouteCandidate(outboundRoute, returnCommonRoute, selectableRoute, index);
+    });
+    const overallRouteCandidates = dedupeOverallRouteCandidates(assembledOverall).slice(0, MAX_ROUTE_CANDIDATES);
+    const overallConfirmable = overallRouteCandidates.length >= 2;
+    const primarySelectable = selectableCandidates.find(function(route){
+      const primaryId = String(selectableResult?.selectedRouteId || "");
+      return primaryId && String(route?.routeId || "") === primaryId;
+    }) || selectableCandidates[0] || null;
+
+    const outboundNeedsSelection = outboundRouteCandidates.length >= 2;
+    const overallRouteSelection = {
+      routePlanType: "return_with_stop",
+      selectionPhase: outboundNeedsSelection ? "outbound" : "overall",
+      fixedOutboundRouteId: String(outboundRoute?.routeId || "") || null,
+      commonSegments: [
+        buildSegmentSnapshot("outbound", outboundLabel, homeAddress, goalAddress, outboundRoute),
+        buildSegmentSnapshot("return_common", returnCommonLabel, goalAddress, stopAddress, returnCommonRoute)
+      ],
+      selectableSegment: {
+        key: "return_selectable",
+        label: selectableLabel,
+        originAddress: stopAddress,
+        destinationAddress: homeAddress
+      },
+      overallRouteCandidates: overallRouteCandidates,
+      selectedOverallRouteId: null,
+      preFixedFareConfirmable: overallConfirmable,
+      fallbackReason: overallConfirmable ? null : "only_one_distinct_route"
+    };
+
+    return {
+      overallRouteSelection: overallRouteSelection,
+      returnLegApiResult: buildSynthesizedReturnLegApiResult(returnCommonRoute, primarySelectable, stopAddress),
+      returnCommonRoute: returnCommonRoute,
+      selectableResult: selectableResult
+    };
+  }
+
   async function computePreFixedFareRouteCandidates(options){
     const apiKey = String(options?.apiKey || "").trim();
     const origin = String(options?.origin || "").trim();
@@ -444,52 +785,7 @@
       };
     }
 
-    const routeGenerationStrategies = [
-      "recommended",
-      "shorter_distance",
-      "arterial_road",
-      "toll_allowed"
-    ];
-
-    const recommendedPool = await fetchRecommendedPool(options, userAvoidTolls);
-    if(!recommendedPool.length){
-      throw new Error("ルートが見つかりませんでした。住所を確認してください。");
-    }
-
-    const recommendedRoute = applyRoutePresentation(recommendedPool[0], "recommended");
-    const shorterDistanceRoute = pickShorterDistanceRoute(recommendedPool, recommendedRoute);
-    const arterialRoute = await fetchArterialRoute(options, userAvoidTolls);
-    const tollAllowedRoute = await fetchTollAllowedRoute(options, recommendedRoute);
-
-    const assembled = [
-      recommendedRoute,
-      shorterDistanceRoute,
-      arterialRoute,
-      tollAllowedRoute
-    ].filter(Boolean);
-
-    const deduped = assignRouteIds(dedupeRoutes(assembled)).slice(0, MAX_ROUTE_CANDIDATES);
-    const preFixedFareConfirmable = deduped.length >= 2;
-    const primary = deduped[0] || recommendedRoute;
-
-    return {
-      distanceKm: primary.distanceKm,
-      durationMinutes: primary.durationMinutes,
-      distanceMeters: primary.distanceMeters,
-      durationSeconds: primary.durationSeconds,
-      selectedRouteId: primary.routeId,
-      routes: deduped,
-      routeCandidates: deduped,
-      routeCandidateCount: deduped.length,
-      distinctRouteCount: deduped.length,
-      alternativeRouteCount: deduped.length,
-      multipleRoutesAvailable: preFixedFareConfirmable,
-      preFixedFareConfirmable: preFixedFareConfirmable,
-      routeDedupedCount: deduped.length,
-      routeGenerationStrategies: routeGenerationStrategies,
-      rawRouteCount: recommendedPool.length,
-      fallbackReason: preFixedFareConfirmable ? null : "only_one_distinct_route"
-    };
+    return computeSegmentRouteCandidates(options);
   }
 
   function normalizeRoute(route, index, context){
@@ -599,6 +895,7 @@
   global.EstimateDistanceApi = {
     computeRouteDistance: computeRouteDistance,
     computePreFixedFareRouteCandidates: computePreFixedFareRouteCandidates,
+    computeReturnWithStopOverallRouteSelection: computeReturnWithStopOverallRouteSelection,
     geocodeAddress: geocodeAddress
   };
 })(typeof window !== "undefined" ? window : globalThis);
