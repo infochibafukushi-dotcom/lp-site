@@ -1185,22 +1185,26 @@
     });
   }
 
+  function legRequiresRouteSelection(legPlan){
+    if(!legPlan || !isLegPreFixedFareConfirmable(legPlan)){
+      return false;
+    }
+    return legPlan.routeSelectionConfirmed !== true;
+  }
+
   function isRouteReviewComplete(routePlan){
     if(!routePlan){
       return false;
     }
+    if(isOverallRouteSelectionMode(routePlan)){
+      return hasOverallRouteSelected(routePlan);
+    }
     const outbound = routePlan.outboundRoutePlan || routePlan;
-    if(outbound && isLegPreFixedFareConfirmable(outbound)){
+    if(legRequiresRouteSelection(outbound)){
       return false;
     }
-    if(isOverallRouteSelectionMode(routePlan)){
-      if(!hasOverallRouteSelected(routePlan)){
-        return false;
-      }
-      return true;
-    }
     const returnLeg = routePlan.returnRoutePlan;
-    if(returnLeg && isLegPreFixedFareConfirmable(returnLeg)){
+    if(returnLeg && legRequiresRouteSelection(returnLeg)){
       return false;
     }
     return true;
@@ -1229,6 +1233,7 @@
       tollExcludedFromFare: route.tollExcludedFromFare === true,
       intermediateWaypoint: route.intermediateWaypoint || legPlan.waypoint || null,
       routeLegs: Array.isArray(route.routeLegs) ? route.routeLegs : (legPlan.routeLegs || []),
+      routeSelectionConfirmed: true,
       selectedAt: new Date().toISOString()
     });
     if(Array.isArray(next.routes)){
@@ -1400,15 +1405,15 @@
     if(!routePlan){
       return false;
     }
-    const outbound = routePlan.outboundRoutePlan || routePlan;
-    if(outbound && isLegPreFixedFareConfirmable(outbound)){
-      return true;
-    }
     if(isOverallRouteSelectionMode(routePlan)){
       return false;
     }
+    const outbound = routePlan.outboundRoutePlan || routePlan;
+    if(legRequiresRouteSelection(outbound)){
+      return true;
+    }
     const returnLeg = routePlan.returnRoutePlan;
-    if(returnLeg && isLegPreFixedFareConfirmable(returnLeg)){
+    if(returnLeg && legRequiresRouteSelection(returnLeg)){
       return true;
     }
     return false;
