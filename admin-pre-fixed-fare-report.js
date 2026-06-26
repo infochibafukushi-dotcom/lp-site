@@ -177,9 +177,18 @@
     bindOperationsSummaryButton();
   }
 
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", bind);
-  }else{
+  function bindOnce(){
+    if(global.__preFixedFareReportButtonsBound){
+      return;
+    }
+    global.__preFixedFareReportButtonsBound = true;
     bind();
   }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", bindOnce);
+  }else{
+    bindOnce();
+  }
+  window.addEventListener("load", bindOnce);
 })(typeof window !== "undefined" ? window : globalThis);
