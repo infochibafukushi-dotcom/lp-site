@@ -409,6 +409,170 @@
     };
   }
 
+  function resolveOverallRouteSelection(quoteSnapshot, routePlan){
+    return quoteSnapshot?.overallRouteSelection
+      || quoteSnapshot?.routePlan?.overallRouteSelection
+      || routePlan?.overallRouteSelection
+      || null;
+  }
+
+  function getOverallRoutePathLabel(overall){
+    const segments = Array.isArray(overall?.commonSegments) ? overall.commonSegments : [];
+    const selectable = overall?.selectableSegment || null;
+    const outbound = segments.find(function(segment){
+      return segment?.key === "outbound";
+    });
+    const returnCommon = segments.find(function(segment){
+      return segment?.key === "return_common";
+    });
+    const home = String(outbound?.originAddress || "出発地").trim();
+    const goal = String(outbound?.destinationAddress || returnCommon?.originAddress || "目的地").trim();
+    const stop = String(returnCommon?.destinationAddress || selectable?.originAddress || "立ち寄り先").trim();
+    return home + " → " + goal + " → " + stop + " → " + home;
+  }
+
+  function getSelectedOverallRouteCandidate(overall){
+    if(!overall){
+      return null;
+    }
+    const selectedId = String(overall.selectedOverallRouteId || "").trim();
+    if(!selectedId){
+      return null;
+    }
+    const candidates = Array.isArray(overall.overallRouteCandidates) ? overall.overallRouteCandidates : [];
+    return candidates.find(function(candidate){
+      return String(candidate?.routeId || "") === selectedId;
+    }) || null;
+  }
+
+  function candidateUsesToll(candidate){
+    if(!candidate){
+      return false;
+    }
+    if(candidate.usesToll === true){
+      return true;
+    }
+    const routeType = String(candidate.routeType || candidate.strategy || "").trim();
+    return routeType === "toll_allowed";
+  }
+
+  function buildOverallRoutePdfParagraph(text, layout, options){
+    const gap = Math.max(4, Number(layout?.routeMapTitleGap) || 6);
+    const fontSize = Math.max(9, Number(layout?.metaFont) - 1 || 10);
+    const color = options?.color || "#555";
+    const weight = options?.weight || "400";
+    const marginBottom = options?.marginBottom === undefined ? gap : options.marginBottom;
+    return (
+      "<p style=\"margin:0 0 " + marginBottom + "px;font-size:" + fontSize + "px;line-height:1.55;" +
+      "color:" + color + ";font-weight:" + weight + ";\">" +
+      escapeHtml(text) +
+      "</p>"
+    );
+  }
+
+  function buildOverallRoutePdfHtml(routePlan, quoteSnapshot, layout, options){
+    const returnPlanType = options?.returnPlanType || quoteSnapshot?.returnPlanType || routePlan?.returnPlanType || null;
+    if(returnPlanType !== "return_with_stop"){
+      return "";
+    }
+    const overall = resolveOverallRouteSelection(quoteSnapshot, routePlan);
+    if(!overall){
+      return "";
+    }
+
+    const gap = Math.max(4, Number(layout?.routeMapTitleGap) || 6);
+    const fontSize = Math.max(9, Number(layout?.metaFont) - 1 || 10);
+    const segments = Array.isArray(overall.commonSegments) ? overall.commonSegments : [];
+    const selectable = overall.selectableSegment || null;
+    const outbound = segments.find(function(segment){
+      return segment?.key === "outbound";
+    });
+    const returnCommon = segments.find(function(segment){
+      return segment?.key === "return_common";
+    });
+    const candidates = Array.isArray(overall.overallRouteCandidates) ? overall.overallRouteCandidates : [];
+    const selectedCandidate = getSelectedOverallRouteCandidate(overall);
+    const showSelectedRoute = Boolean(selectedCandidate);
+    const showReviewNotice = !showSelectedRoute
+      || candidates.length <= 1
+      || overall.fallbackReason === "only_one_distinct_route";
+    const reviewNotice = global.PreFixedFareStatus?.getSingleCandidateNotice?.()
+      || "ルート候補が1件のみのため、事前確定運賃としては確定せず、予約後に確認対応となります。";
+
+    const parts = [];
+    parts.push(
+      buildOverallRoutePdfParagraph("全体走行予定ルート：", layout, { color: "#333", weight: "700", marginBottom: 2 }) +
+      buildOverallRoutePdfParagraph(getOverallRoutePathLabel(overall), layout, { color: "#333", weight: "600" })
+    );
+
+    const commonLines = [];
+    if(outbound){
+      commonLines.push(String(outbound.label || (outbound.originAddress + " → " + outbound.destinationAddress)).trim());
+    }
+    if(returnCommon){
+      commonLines.push(String(returnCommon.label || (returnCommon.originAddress + " → " + returnCommon.destinationAddress)).trim());
+    }
+    if(commonLines.length){
+      parts.push(buildOverallRoutePdfParagraph("共通区間：", layout, { color: "#333", weight: "700", marginBottom: 2 }));
+      commonLines.forEach(function(line){
+        parts.push(buildOverallRoutePdfParagraph("・" + line, layout));
+      });
+    }
+
+    if(selectable){
+      const selectableLine = String(selectable.label || (selectable.originAddress + " → " + selectable.destinationAddress)).trim();
+      parts.push(buildOverallRoutePdfParagraph("選択区間：", layout, { color: "#333", weight: "700", marginBottom: 2 }));
+      parts.push(buildOverallRoutePdfParagraph("・" + selectableLine, layout, { marginBottom: gap }));
+    }
+
+    if(showReviewNotice){
+      parts.push(buildOverallRoutePdfParagraph(reviewNotice, layout, { color: "#8a6010", weight: "700" }));
+    }
+
+    if(showSelectedRoute){
+      const routeLabel = String(
+        selectedCandidate.routeLabel
+        || quoteSnapshot?.selectedRouteLabel
+        || ""
+      ).trim();
+      const routeDescription = String(
+        selectedCandidate.routeDescription
+        || quoteSnapshot?.selectedRouteDescription
+        || ""
+      ).trim();
+      const totalDistanceLabel = formatRouteDistanceMeters(
+        Number(selectedCandidate.totalDistanceMeters || quoteSnapshot?.totalDistanceMeters || routePlan?.totalDistanceMeters) || 0
+      );
+      const totalDurationLabel = formatRouteDurationSeconds(
+        Number(selectedCandidate.totalDurationSeconds || quoteSnapshot?.totalDurationSeconds || routePlan?.totalDurationSeconds) || 0
+      );
+
+      parts.push(buildOverallRoutePdfParagraph("選択ルート：" + routeLabel, layout, { color: "#333", weight: "700" }));
+      if(routeDescription){
+        parts.push(buildOverallRoutePdfParagraph(routeDescription, layout));
+      }
+      const meta = [];
+      if(totalDistanceLabel){
+        meta.push("合計距離：" + totalDistanceLabel);
+      }
+      if(totalDurationLabel){
+        meta.push("合計所要時間：" + totalDurationLabel);
+      }
+      if(meta.length){
+        parts.push(buildOverallRoutePdfParagraph(meta.join("　"), layout));
+      }
+      if(candidateUsesToll(selectedCandidate)){
+        parts.push(buildOverallRoutePdfParagraph(
+          "有料道路料金は見積料金に含まれず、別途必要です。",
+          layout,
+          { color: "#8a6010", weight: "700" }
+        ));
+      }
+    }
+
+    return "<div class=\"estimate-pdf-overall-route\" style=\"margin:0 0 " + gap + "px;\">" + parts.join("") + "</div>";
+  }
+
   function buildSelectedRouteLegPdfHtml(legPrefix, legPlan, quoteLeg, layout){
     if(!legPlan){
       return "";
@@ -463,9 +627,14 @@
     return parts.join("");
   }
 
-  function buildSelectedRoutesPdfHtml(routePlan, quoteSnapshot, layout){
+  function buildSelectedRoutesPdfHtml(routePlan, quoteSnapshot, layout, options){
     if(!routePlan){
       return "";
+    }
+    const statusOptions = buildRouteStatusOptions(routePlan, options, quoteSnapshot);
+    const overallHtml = buildOverallRoutePdfHtml(routePlan, quoteSnapshot, layout, statusOptions);
+    if(overallHtml){
+      return overallHtml;
     }
     if(routePlan.outboundRoutePlan){
       const outboundHtml = buildSelectedRouteLegPdfHtml(
@@ -488,11 +657,15 @@
   }
 
   function buildRouteMapHtml(routeMapDataUrl, layout, routePlan, options){
-    const statusOptions = buildRouteStatusOptions(routePlan, options, options?.quoteSnapshot);
-    const preFixedStatusHtml = global.PreFixedFareStatus && routePlan
-      ? global.PreFixedFareStatus.buildStatusPdfHtml(routePlan, layout, statusOptions)
-      : "";
-    const selectedRoutesHtml = buildSelectedRoutesPdfHtml(routePlan, options?.quoteSnapshot, layout);
+    const quoteSnapshot = options?.quoteSnapshot || null;
+    const statusOptions = buildRouteStatusOptions(routePlan, options, quoteSnapshot);
+    const overallHtml = buildOverallRoutePdfHtml(routePlan, quoteSnapshot, layout, statusOptions);
+    const preFixedStatusHtml = overallHtml
+      ? ""
+      : (global.PreFixedFareStatus && routePlan
+        ? global.PreFixedFareStatus.buildStatusPdfHtml(routePlan, layout, statusOptions)
+        : "");
+    const selectedRoutesHtml = buildSelectedRoutesPdfHtml(routePlan, quoteSnapshot, layout, statusOptions);
     const hasMap = Boolean(String(routeMapDataUrl || "").trim());
     if(!hasMap && !preFixedStatusHtml && !selectedRoutesHtml){
       return "";
@@ -506,14 +679,34 @@
     const returnMeters = routePlan?.returnRoutePlan
       ? Number(getRoutePlanPrimaryRoute({ routes: routePlan.returnRoutePlan.routes, selectedRouteId: routePlan.returnRoutePlan.selectedRouteId, distanceMeters: routePlan.returnRoutePlan.distanceMeters })?.distanceMeters || routePlan.returnRoutePlan.distanceMeters) || 0
       : 0;
-    const distanceLabel = routePlan?.tripType === "round_trip"
+    let distanceLabel = routePlan?.tripType === "round_trip"
       ? (
         (outboundMeters > 0 ? "往路：" + formatRouteDistanceMeters(outboundMeters) : "")
         + (returnMeters > 0 ? "　復路：" + formatRouteDistanceMeters(returnMeters) : "")
         + (Number(routePlan.totalDistanceMeters) > 0 ? "　合計：" + formatRouteDistanceMeters(routePlan.totalDistanceMeters) : "")
       )
       : formatRouteDistanceMeters(primaryRoute?.distanceMeters || routePlan?.distanceMeters);
-    const durationLabel = formatRouteDurationSeconds(routePlan?.totalDurationSeconds || primaryRoute?.durationSeconds || routePlan?.durationSeconds);
+    let durationLabel = formatRouteDurationSeconds(routePlan?.totalDurationSeconds || primaryRoute?.durationSeconds || routePlan?.durationSeconds);
+    if(overallHtml){
+      const overall = resolveOverallRouteSelection(quoteSnapshot, routePlan);
+      const selectedOverall = getSelectedOverallRouteCandidate(overall);
+      const totalMeters = Number(
+        selectedOverall?.totalDistanceMeters
+        || quoteSnapshot?.totalDistanceMeters
+        || routePlan?.totalDistanceMeters
+      ) || 0;
+      const totalSeconds = Number(
+        selectedOverall?.totalDurationSeconds
+        || quoteSnapshot?.totalDurationSeconds
+        || routePlan?.totalDurationSeconds
+      ) || 0;
+      if(totalMeters > 0){
+        distanceLabel = "合計：" + formatRouteDistanceMeters(totalMeters);
+      }
+      if(totalSeconds > 0){
+        durationLabel = formatRouteDurationSeconds(totalSeconds);
+      }
+    }
     if(roadLabel){
       infoParts.push("道路設定：" + roadLabel);
     }

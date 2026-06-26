@@ -208,9 +208,28 @@ fareConfirm=review
 
 ---
 
+### `overallRouteSelection`（帰り立ち寄りあり）
+
+| 属性 | 内容 |
+|------|------|
+| 型 | `OverallRouteSelection \| null` |
+| スコープ | トップレベルおよび `routePlan.overallRouteSelection` |
+| 意味 | `return_with_stop` 時の **全体走行予定ルート候補**（`S → G → 立ち寄り → S`） |
+| 主な子フィールド | `commonSegments` / `selectableSegment` / `overallRouteCandidates` / `selectedOverallRouteId` |
+
+**PDF表示（Phase 2-C）**
+
+- `estimate/estimate-pdf.js` が `quoteSnapshot.overallRouteSelection`（または `routePlan.overallRouteSelection`）を参照
+- 全体ルート構造（共通区間・選択区間）を常に表示
+- `selectedOverallRouteId` がある場合は該当 `overallRouteCandidate` のラベル・説明・合計距離・合計所要時間を表示
+- 候補1件または未選択時は確認対応文言を表示し、レッグ別「選択ルート（往路/復路）」表示は行わない
+
+---
+
 ## 変更履歴
 
 | 日付 | 内容 |
 |------|------|
 | 2026-06-25 | 初版作成（`preFixedFareConfirmable` / `fallbackReason` / `returnFareStatus` の現行意味を明文化） |
 | 2026-06-26 | 帰り立ち寄り時の結果画面・PDF説明で経路構造（目的地 → 立ち寄り先 → 出発地）を候補1件時も維持する旨を追記 |
+| 2026-06-26 | `overallRouteSelection` の PDF 正式表示（Phase 2-C）を `quote-snapshot-fields.md` に追記 |
