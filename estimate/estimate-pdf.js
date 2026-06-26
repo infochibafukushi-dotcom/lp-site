@@ -660,8 +660,14 @@
     const quoteSnapshot = options?.quoteSnapshot || null;
     const statusOptions = buildRouteStatusOptions(routePlan, options, quoteSnapshot);
     const overallHtml = buildOverallRoutePdfHtml(routePlan, quoteSnapshot, layout, statusOptions);
+    const overallStatusHtml = global.PreFixedFareStatus
+      && routePlan
+      && typeof global.PreFixedFareStatus.isOverallRouteSelectionConfirmable === "function"
+      && global.PreFixedFareStatus.isOverallRouteSelectionConfirmable(routePlan)
+      ? global.PreFixedFareStatus.buildStatusPdfHtml(routePlan, layout, statusOptions)
+      : "";
     const preFixedStatusHtml = overallHtml
-      ? ""
+      ? overallStatusHtml
       : (global.PreFixedFareStatus && routePlan
         ? global.PreFixedFareStatus.buildStatusPdfHtml(routePlan, layout, statusOptions)
         : "");
