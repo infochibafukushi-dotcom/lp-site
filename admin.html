@@ -1394,7 +1394,7 @@ body{
       <span class="toggle-state">閉じています</span>
     </button>
     <div class="card-body js-card-body">
-      <p class="note">本カードから2種類のPDFを出力できます。①は公示要件対応表・算定式・係数など制度説明寄り、②は Phase 2 / Phase 3-B の実装内容・ルート候補選択・証跡保存の説明寄りです。</p>
+      <p class="note">本カードから3種類のPDFを出力できます。①は公示要件対応表・算定式・係数など制度説明寄り、②は Phase 2 / Phase 3-B の実装内容・ルート候補選択・証跡保存の説明寄り、③は事前確定Mの本番運用・監査説明寄りです。</p>
       <div style="margin-top:16px;">
         <p class="note" style="margin-bottom:8px;"><strong>① 事前確定運賃システム概要書 兼 関東運輸局公示要件対応表</strong><br>関東運輸局の事前確定運賃公示要件に対するシステム対応、算定式、係数、ルート算定、同意証跡、保存設計をまとめた説明資料です。</p>
         <div class="actions">
@@ -1408,6 +1408,13 @@ body{
           <button type="button" id="preFixedFareApprovalSummaryExportBtn">事前確定運賃システム説明資料PDFを出力</button>
         </div>
         <div class="preview" id="preFixedFareApprovalSummaryStatus">まだ出力していません。</div>
+      </div>
+      <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e5e5e5;">
+        <p class="note" style="margin-bottom:8px;"><strong>③ 事前確定運賃M 運用・監査説明資料</strong><br>LP見積からメーターアプリ運行・精算・完了までの本番フロー、driver-proxy構成、整合性確認、caseRecords・meter_fixed_fare_runs、本番E2E確認結果をまとめた説明資料を出力します。</p>
+        <div class="actions">
+          <button type="button" id="preFixedFareOperationsSummaryExportBtn">事前確定運賃M 運用・監査説明資料PDFを出力</button>
+        </div>
+        <div class="preview" id="preFixedFareOperationsSummaryStatus">まだ出力していません。</div>
       </div>
     </div>
   </div>
@@ -1438,6 +1445,8 @@ body{
 <script src="./shared/pre-fixed-fare-report-pdf.js"></script>
 <script src="./shared/pre-fixed-fare-approval-summary-data.js"></script>
 <script src="./shared/pre-fixed-fare-approval-summary-pdf.js"></script>
+<script src="./shared/pre-fixed-fare-operations-summary-data.js"></script>
+<script src="./shared/pre-fixed-fare-operations-summary-pdf.js"></script>
 <script src="./admin-pre-fixed-fare-report.js"></script>
 <script>
 const CONFIG_PATH = 'data/config.json';

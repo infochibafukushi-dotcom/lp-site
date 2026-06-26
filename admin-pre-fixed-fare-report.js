@@ -16,6 +16,13 @@
     box.textContent = message || "";
   }
 
+  function setOperationsSummaryStatus(message, type){
+    const box = document.getElementById("preFixedFareOperationsSummaryStatus");
+    if(!box) return;
+    box.className = "preview" + (type ? " " + type : "");
+    box.textContent = message || "";
+  }
+
   async function fetchJson(path){
     const response = await fetch(path + "?" + Date.now(), { cache: "no-store" });
     if(!response.ok){
@@ -77,6 +84,19 @@
     setApprovalSummaryStatus("PDFを保存しました。", "success");
   }
 
+  async function generatePreFixedFareOperationsSummaryPdf(){
+    if(!global.PreFixedFareOperationsSummaryPdf){
+      throw new Error("事前確定運賃M 運用・監査説明資料PDFモジュールの読み込みに失敗しました。");
+    }
+    await global.PreFixedFareOperationsSummaryPdf.generatePreFixedFareOperationsSummaryPdf();
+  }
+
+  async function exportOperationsSummaryPdf(){
+    setOperationsSummaryStatus("PDFを作成しています...", "warn");
+    await generatePreFixedFareOperationsSummaryPdf();
+    setOperationsSummaryStatus("PDFを保存しました。", "success");
+  }
+
   function bindRegulatoryButton(){
     const button = document.getElementById("preFixedFareReportExportBtn");
     if(!button) return;
@@ -126,9 +146,35 @@
     });
   }
 
+  function bindOperationsSummaryButton(){
+    const button = document.getElementById("preFixedFareOperationsSummaryExportBtn");
+    if(!button) return;
+    button.addEventListener("click", async function(){
+      button.disabled = true;
+      try{
+        await exportOperationsSummaryPdf();
+      }catch(error){
+        console.error(error);
+        const reason = String(error?.message || "");
+        if(
+          reason.includes("生成対象HTMLが空")
+          || reason.includes("組み立てに失敗")
+          || reason.includes("読み込みに失敗")
+        ){
+          setOperationsSummaryStatus(reason, "error");
+        }else{
+          setOperationsSummaryStatus("PDF作成に失敗しました。", "error");
+        }
+      }finally{
+        button.disabled = false;
+      }
+    });
+  }
+
   function bind(){
     bindRegulatoryButton();
     bindApprovalSummaryButton();
+    bindOperationsSummaryButton();
   }
 
   if(document.readyState === "loading"){
