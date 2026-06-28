@@ -312,6 +312,116 @@ main{
   color:inherit;
 }
 
+#seven-benefits-chibakea .card-grid-4{
+  display:grid;
+  gap:14px;
+  margin-top:16px;
+  align-items:stretch;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+}
+#seven-benefits-chibakea .card-benefit-item{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  height:100%;
+  border-radius:16px;
+  border:1px solid #e8e3db;
+  box-shadow:0 2px 12px rgba(0,0,0,0.06);
+  padding:14px 14px 12px;
+  background:#faf8f5;
+}
+#seven-benefits-chibakea .card-benefit-link{
+  display:flex;
+  flex-direction:column;
+  flex:1;
+  height:100%;
+  text-decoration:none;
+  color:inherit;
+}
+#seven-benefits-chibakea .card-benefit-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:8px;
+}
+#seven-benefits-chibakea .card-benefit-badge{
+  flex:0 0 auto;
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  font-weight:700;
+  color:#fff;
+  line-height:1;
+}
+#seven-benefits-chibakea .card-benefit-icon{
+  flex:0 0 auto;
+  font-size:26px;
+  line-height:1;
+}
+#seven-benefits-chibakea .card-benefit-item .card-item-title{
+  font-size:16px;
+  font-weight:700;
+  line-height:1.4;
+  margin:0 0 8px;
+}
+#seven-benefits-chibakea .card-benefit-item .section-text{
+  font-size:14px;
+  line-height:1.65;
+  margin:0;
+  margin-top:auto;
+  color:#4a4a4a;
+}
+#seven-benefits-chibakea .card-benefit-item img{
+  display:none;
+}
+#seven-benefits-chibakea .card-benefit-item--1{
+  background:#eef6ff;
+  border-color:#c8ddf5;
+}
+#seven-benefits-chibakea .card-benefit-item--1 .card-benefit-badge{background:#2563eb;}
+#seven-benefits-chibakea .card-benefit-item--1 .card-item-title{color:#1d4f9c;}
+#seven-benefits-chibakea .card-benefit-item--2{
+  background:#eef8f1;
+  border-color:#c8e6cf;
+}
+#seven-benefits-chibakea .card-benefit-item--2 .card-benefit-badge{background:#2d8a45;}
+#seven-benefits-chibakea .card-benefit-item--2 .card-item-title{color:#1f6b34;}
+#seven-benefits-chibakea .card-benefit-item--3{
+  background:#f7eef9;
+  border-color:#e5d0eb;
+}
+#seven-benefits-chibakea .card-benefit-item--3 .card-benefit-badge{background:#9b4dca;}
+#seven-benefits-chibakea .card-benefit-item--3 .card-item-title{color:#7a3aa3;}
+#seven-benefits-chibakea .card-benefit-item--4{
+  background:#fff6ee;
+  border-color:#f5dcc0;
+}
+#seven-benefits-chibakea .card-benefit-item--4 .card-benefit-badge{background:#e07a2f;}
+#seven-benefits-chibakea .card-benefit-item--4 .card-item-title{color:#b85f1f;}
+#seven-benefits-chibakea .card-benefit-item--5{
+  background:#eef5ff;
+  border-color:#c5d9f5;
+}
+#seven-benefits-chibakea .card-benefit-item--5 .card-benefit-badge{background:#3b82c4;}
+#seven-benefits-chibakea .card-benefit-item--5 .card-item-title{color:#2a6296;}
+#seven-benefits-chibakea .card-benefit-item--6{
+  background:#f0f8f1;
+  border-color:#cce8d0;
+}
+#seven-benefits-chibakea .card-benefit-item--6 .card-benefit-badge{background:#3d9b56;}
+#seven-benefits-chibakea .card-benefit-item--6 .card-item-title{color:#2a7540;}
+#seven-benefits-chibakea .card-benefit-item--7{
+  background:#fff0f3;
+  border-color:#f5d0d8;
+}
+#seven-benefits-chibakea .card-benefit-item--7 .card-benefit-badge{background:#d64565;}
+#seven-benefits-chibakea .card-benefit-item--7 .card-item-title{color:#b53450;}
+
 .media-row{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -453,27 +563,32 @@ footer{
     margin-top:18px;
   }
 
-  #seven-benefits-chibakea .card-item{
-    padding:16px 14px;
+  #seven-benefits-chibakea .card-benefit-item{
+    min-height:188px;
+    padding:18px 16px 16px;
   }
 
-  #seven-benefits-chibakea .card-item::before{
+  #seven-benefits-chibakea .card-benefit-badge{
     width:34px;
     height:34px;
-    font-size:14px;
+    font-size:15px;
+  }
+
+  #seven-benefits-chibakea .card-benefit-icon{
+    font-size:30px;
+  }
+
+  #seven-benefits-chibakea .card-benefit-item .card-item-title{
+    font-size:17px;
     margin-bottom:10px;
   }
 
-  #seven-benefits-chibakea .card-item-title{
-    font-size:17px;
-  }
-
-  #seven-benefits-chibakea .card-item .section-text{
+  #seven-benefits-chibakea .card-benefit-item .section-text{
     font-size:13px;
-    line-height:1.6;
+    line-height:1.65;
   }
 
-  #seven-benefits-chibakea .card-grid-4 .card-item:nth-child(7){
+  #seven-benefits-chibakea .card-grid-4 .card-benefit-item:nth-child(7){
     grid-column:auto;
   }
 
@@ -910,63 +1025,42 @@ footer{
     font-weight:700;
   }
 
-  #seven-benefits-chibakea .section-text{
+  #seven-benefits-chibakea > .section-inner > .section-text{
     font-size:15px;
     line-height:1.75;
     margin-bottom:4px;
   }
 
   #seven-benefits-chibakea .card-grid-4{
-    counter-reset:benefit-num;
-    grid-template-columns:repeat(2, minmax(0, 1fr));
-    gap:10px;
+    gap:12px;
     margin-top:14px;
   }
 
-  #seven-benefits-chibakea .card-item{
-    counter-increment:benefit-num;
-    border:1px solid #e8e3db;
-    background:#faf8f5;
-    box-shadow:0 2px 10px rgba(0,0,0,0.06);
-    padding:14px 12px;
-    min-width:0;
+  #seven-benefits-chibakea .card-benefit-item{
+    padding:14px 12px 12px;
   }
 
-  #seven-benefits-chibakea .card-item::before{
-    content:counter(benefit-num);
-    display:flex;
-    align-items:center;
-    justify-content:center;
+  #seven-benefits-chibakea .card-benefit-badge{
     width:30px;
     height:30px;
-    border-radius:50%;
-    background:#0057b8;
-    color:#fff;
     font-size:13px;
-    font-weight:700;
-    line-height:1;
-    margin-bottom:8px;
   }
 
-  #seven-benefits-chibakea .card-item img{
-    display:none;
+  #seven-benefits-chibakea .card-benefit-icon{
+    font-size:24px;
   }
 
-  #seven-benefits-chibakea .card-item-title{
+  #seven-benefits-chibakea .card-benefit-item .card-item-title{
     font-size:15px;
-    font-weight:700;
-    line-height:1.4;
-    margin:0 0 6px;
+    margin-bottom:6px;
   }
 
-  #seven-benefits-chibakea .card-item .section-text{
-    font-size:12px;
-    line-height:1.55;
-    margin:0;
-    color:#555;
+  #seven-benefits-chibakea .card-benefit-item .section-text{
+    font-size:13px;
+    line-height:1.6;
   }
 
-  #seven-benefits-chibakea .card-grid-4 .card-item:nth-child(7){
+  #seven-benefits-chibakea .card-grid-4 .card-benefit-item:nth-child(7){
     grid-column:1 / -1;
   }
 

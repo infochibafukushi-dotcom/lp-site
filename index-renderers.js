@@ -107,6 +107,8 @@
     `;
   }
 
+  const BENEFIT_CARD_ICONS = ["♿", "🏥", "👨‍👩‍👧", "🧮", "💗", "📍", "🕒"];
+
   function renderCardItems(items, textSize, textAlign){
     if(!Array.isArray(items) || items.length === 0){
       return `<div class="card-item">カードデータがありません</div>`;
@@ -128,14 +130,46 @@
     }).join("");
   }
 
+  function renderBenefitCardItems(items, textSize, textAlign){
+    if(!Array.isArray(items) || items.length === 0){
+      return `<div class="card-item">カードデータがありません</div>`;
+    }
+
+    return items.map((item, index) => {
+      const title = item?.title || "";
+      const text = item?.text || "";
+      const image = item?.image || "";
+      const link = item?.link || "#";
+      const num = index + 1;
+      const icon = BENEFIT_CARD_ICONS[index] || "✓";
+
+      const inner = `
+        <div class="card-benefit-head">
+          <span class="card-benefit-badge" aria-hidden="true">${num}</span>
+          <span class="card-benefit-icon" aria-hidden="true">${icon}</span>
+        </div>
+        ${image ? `<img src="${window.IndexUtils.escapeAttr(image)}" alt="${window.IndexUtils.escapeAttr(title)}" ${buildImageAttrs("lazy")}>` : ""}
+        ${title ? `<h3 class="card-item-title text-${window.IndexUtils.escapeAttr(textAlign || "left")}">${window.IndexUtils.escapeHtml(title)}</h3>` : ""}
+        ${text ? `<div class="section-text text-${window.IndexUtils.escapeAttr(textSize || "medium")} text-${window.IndexUtils.escapeAttr(textAlign || "left")}">${window.IndexUtils.escapeHtml(text)}</div>` : ""}
+      `;
+
+      return `<div class="card-item card-benefit-item card-benefit-item--${num}">${window.IndexUtils.wrapLink(link, inner, "card-link card-benefit-link")}</div>`;
+    }).join("");
+  }
+
   function renderCard4(section){
+    const isBenefitsSection = section?.sectionId === "seven-benefits-chibakea";
+    const cardsHtml = isBenefitsSection
+      ? renderBenefitCardItems(section.items || [], section.textSize || "medium", section.textAlign || "left")
+      : renderCardItems(section.items || [], section.textSize || "medium", section.textAlign || "left");
+
     return `
       <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#ffffff")}">
         <div class="section-inner">
           <h2 class="section-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "left")}">${window.IndexUtils.escapeHtml(section.title || "")}</h2>
           ${renderSectionLeadText(section)}
           <div class="card-grid-4">
-            ${renderCardItems(section.items || [], section.textSize || "medium", section.textAlign || "left")}
+            ${cardsHtml}
           </div>
           ${renderSectionBottomLinks(section)}
         </div>
