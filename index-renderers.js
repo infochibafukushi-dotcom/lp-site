@@ -21,6 +21,26 @@
     return window.IndexUtils.escapeHtml(text || "").replace(/\r?\n/g, "<br>");
   }
 
+  function renderSectionLeadText(section){
+    const text = String(section?.text || "").trim();
+    if(!text){
+      return "";
+    }
+
+    return `<p class="section-text text-${window.IndexUtils.escapeAttr(section.textSize || "medium")} text-${window.IndexUtils.escapeAttr(section.textAlign || "left")}">${window.IndexUtils.escapeHtml(text)}</p>`;
+  }
+
+  function menuListHasAnyPrice(groups){
+    if(!Array.isArray(groups)){
+      return false;
+    }
+
+    return groups.some((group) => {
+      const items = Array.isArray(group.items) ? group.items.filter((item) => item && item.visible !== false) : [];
+      return items.some((item) => String(item?.price || "").trim() !== "");
+    });
+  }
+
   function renderConfigFooterCtas(section, config){
     if(window.SectionBottomButtons && typeof window.SectionBottomButtons.renderConfigFooterCtas === "function"){
       return window.SectionBottomButtons.renderConfigFooterCtas(
@@ -113,6 +133,7 @@
       <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#ffffff")}">
         <div class="section-inner">
           <h2 class="section-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "left")}">${window.IndexUtils.escapeHtml(section.title || "")}</h2>
+          ${renderSectionLeadText(section)}
           <div class="card-grid-4">
             ${renderCardItems(section.items || [], section.textSize || "medium", section.textAlign || "left")}
           </div>
@@ -127,6 +148,7 @@
       <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#ffffff")}">
         <div class="section-inner">
           <h2 class="section-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "left")}">${window.IndexUtils.escapeHtml(section.title || "")}</h2>
+          ${renderSectionLeadText(section)}
           <div class="card-grid-3">
             ${renderCardItems(section.items || [], section.textSize || "medium", section.textAlign || "left")}
           </div>
@@ -141,6 +163,7 @@
       <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#ffffff")}">
         <div class="section-inner">
           <h2 class="section-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "left")}">${window.IndexUtils.escapeHtml(section.title || "")}</h2>
+          ${renderSectionLeadText(section)}
           <div class="card-grid-2">
             ${renderCardItems(section.items || [], section.textSize || "medium", section.textAlign || "left")}
           </div>
@@ -227,6 +250,8 @@
   function renderMenuList(section){
     const groups = Array.isArray(section.menuGroups) ? section.menuGroups : [];
     const bottomCard = section.menuBottomCard || { visible:false, title:'', text:'', buttonText:'', buttonUrl:'#' };
+    const showPrices = menuListHasAnyPrice(groups);
+    const leadHtml = renderSectionLeadText(section);
 
     const cardsHtml = groups.length ? groups.map((group, groupIndex) => {
       const items = Array.isArray(group.items) ? group.items.filter(item => item && item.visible !== false) : [];
@@ -245,6 +270,7 @@
             <div style="padding:0 16px;">
               ${items.length ? items.map((item, itemIndex) => `
                 <div style="padding:14px 0;${itemIndex < items.length - 1 ? 'border-bottom:1px solid #f3eee7;' : ''}">
+                  ${showPrices ? `
                   <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
                     <div style="min-width:0;flex:1 1 auto;">
                       <div style="font-size:clamp(18px, 1.8vw, 20px);font-weight:700;line-height:1.5;color:#2d2a26;">${window.IndexUtils.escapeHtml(item.name || '')}</div>
@@ -252,6 +278,12 @@
                     </div>
                     <div style="flex:0 0 auto;font-size:clamp(20px, 2.2vw, 24px);font-weight:800;line-height:1.2;color:#9a6b16;white-space:nowrap;padding-left:12px;letter-spacing:0.01em;">${window.IndexUtils.escapeHtml(item.price || '')}</div>
                   </div>
+                  ` : `
+                  <div style="min-width:0;">
+                    <div style="font-size:clamp(18px, 1.8vw, 20px);font-weight:700;line-height:1.5;color:#2d2a26;">${window.IndexUtils.escapeHtml(item.name || '')}</div>
+                    ${item.description ? `<div style="margin-top:6px;font-size:13px;line-height:1.8;color:#555;white-space:pre-line;word-break:break-word;">${window.IndexUtils.escapeHtml(item.description || '')}</div>` : ''}
+                  </div>
+                  `}
                 </div>
               `).join("") : `<div style="padding:16px 0;font-size:13px;color:#999;">メニューはまだありません</div>`}
             </div>
@@ -271,6 +303,7 @@
       <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#f7f5f0")};padding-left:20px;padding-right:20px;">
         <div class="section-inner" style="max-width:720px;">
           <h2 class="section-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "left")}">${window.IndexUtils.escapeHtml(section.title || "")}</h2>
+          ${leadHtml}
         </div>
         <div class="section-inner" style="max-width:720px;padding-top:8px;">
           ${cardsHtml}

@@ -1,77 +1,35 @@
 [
   {
-    "id": "section-002",
-    "type": "slider",
+    "id": "section-first-view",
+    "sectionId": "first-view-chibakea-taxi",
+    "type": "card1-right",
     "enabled": true,
-    "title": "千葉市全域｜24時間365日対応｜介護タクシー\n【ちばケアタクシー】",
-    "text": "車いす・ストレッチャー対応\n｜病院の通院・転院・お買い物・\n自由な外出をサポート",
-    "images": [
-      "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/slider/1777502291188-messageImage_1770383272387_0.jpg"
-    ],
-    "link": "#",
-    "textSize": "medium",
-    "bgColor": "#e87f00",
-    "alignY": "middle",
-    "sectionId": "chiba-city-24h-365days-kaigo-taxi-chibakeatakushi",
-    "image": "",
-    "titleAlign": "center",
-    "textAlign": "right",
-    "items": [],
-    "links": [
-      {
-        "text": "テスト1",
-        "url": "#",
-        "visible": true
-      },
-      {
-        "text": "テスト2",
-        "url": "#",
-        "visible": true
-      },
-      {
-        "text": "テスト3",
-        "url": "#",
-        "visible": false
-      }
-    ],
-    "menuGroups": [],
-    "menuBottomCard": {
-      "visible": false,
-      "title": "ご予約・ご相談はこちら",
-      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
-    }
-  },
-  {
-    "id": "section-001",
-    "type": "normal",
-    "enabled": true,
-    "title": "千葉市全域・四街道市・市原市に対応",
-    "text": "千葉市（中央区・若葉区・緑区・稲毛区・花見川区・美浜区）を中心に、四街道市、市原市など近隣エリアの介護タクシー・福祉タクシー送迎を承ります。病院への通院や転院、お買い物など、24時間365日いつでもお気軽にご相談ください。",
+    "title": "千葉市・四街道周辺の通院・退院・車いす移動を安心サポート",
+    "text": "ご家族・ケアマネジャー様からのご相談に対応。車いすのまま乗れる介護タクシーで、病院受診・退院・転院・施設入退所・お買い物・冠婚葬祭などの移動をサポートします。\n\n通院時間や退院時間が決まっている場合は、まず空き状況をご確認ください。車いす・ストレッチャー・階段介助・院内付き添いなど、必要な介助内容も事前に確認できます。",
     "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/sections/1773103736168-messageImage_1770383343976_0.jpg",
     "link": "#",
     "textSize": "medium",
-    "bgColor": "#e87f00",
+    "bgColor": "#f7f5f0",
     "alignY": "middle",
-    "sectionId": "chiba-city-yotsukaido-city-ichihara-city-ni",
     "titleAlign": "left",
     "textAlign": "left",
     "images": [],
     "items": [],
     "links": [
       {
-        "text": "",
-        "url": "#",
-        "visible": false
+        "text": "空き状況を確認する",
+        "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+        "visible": true
       },
       {
-        "text": "",
-        "url": "#",
-        "visible": false
+        "text": "料金目安を見る",
+        "url": "#ryokin-meyasu",
+        "visible": true
       },
       {
-        "text": "",
-        "url": "#",
-        "visible": false
+        "text": "対応サービスを見る",
+        "url": "#taiou-service-kaigo",
+        "visible": true
       }
     ],
     "menuGroups": [],
@@ -82,34 +40,34 @@
     }
   },
   {
-    "id": "section-1773049874928",
+    "id": "section-three-key-checks",
+    "sectionId": "three-key-checks",
     "type": "card3",
     "enabled": true,
-    "title": "ちばケアタクシーが選ばれる理由",
+    "title": "まず知りたい3つのことをすぐ確認できます",
+    "text": "介護タクシーを探すときに大切なのは、希望日時に利用できるか、身体状態に対応できるか、料金がどのくらいかです。ちばケアタクシーでは、予約前にこの3点を確認できます。",
     "textSize": "medium",
-    "bgColor": "#e87f00",
+    "bgColor": "#ffffff",
     "items": [
       {
-        "title": "【24時間365日対応】",
-        "text": "夜間の急な退院や早朝の通院など、お困りの際も柔軟にサポートいたします。",
+        "title": "希望日時に空きがあるか",
+        "text": "通院、退院、転院、施設入所など、移動日時が決まっている場合は空き状況が最優先です。ご希望日時と出発地・目的地をお知らせください。",
         "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773103749339-messageImage_1770383272387_0.jpg",
-        "link": "#"
+        "link": "https://infochibafukushi-dotcom.github.io/reservation-v4/"
       },
       {
-        "title": "【安心の介助技術】",
-        "text": "プロのドライバーがドア・ツー・ドアで安全にお運び。階段介助等もお任せください。",
+        "title": "車いす・介助に対応できるか",
+        "text": "車いす、ストレッチャー、階段介助、ベッドからの移乗、院内付き添いなど、必要なサポート内容を確認します。",
         "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773103755526-messageImage_1770383194104.jpg",
-        "link": "#"
+        "link": "#taiou-service-kaigo"
       },
       {
-        "title": "【充実の対応機材】",
-        "text": "車いすはもちろん、寝たきりのまま移動できるストレッチャーも完備しています。",
+        "title": "料金はいくらぐらいか",
+        "text": "距離、時間、介助内容、使用する機材によって料金が変わります。予約前に目安料金をご案内します。",
         "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773103763810-messageImage_1770383486552_0.jpg",
-        "link": "#"
+        "link": "#ryokin-meyasu"
       }
     ],
-    "sectionId": "reason-chiba-care-taxi",
-    "text": "",
     "image": "",
     "link": "#",
     "alignY": "middle",
@@ -141,99 +99,40 @@
     }
   },
   {
-    "id": "section-1773231572547",
-    "type": "card3",
-    "enabled": true,
-    "title": "幅広いご利用シーン",
-    "textSize": "medium",
-    "bgColor": "#e87f00",
-    "items": [
-      {
-        "title": "【通院・転院・退院】",
-        "text": "定期的な通院や、病院間の転院、お迎えが必要な退院時などにご活用ください。",
-        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773103749339-messageImage_1770383272387_0.jpg",
-        "link": "#"
-      },
-      {
-        "title": " 【お買い物・銀行など】",
-        "text": "日常のちょっとした外出や役所、銀行への付き添いなども丁寧に対応いたします。\n",
-        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773103755526-messageImage_1770383194104.jpg",
-        "link": "#"
-      },
-      {
-        "title": "【冠婚葬祭・お出かけ】",
-        "text": "ご親戚の結婚式や法事、お墓参り、ご家族との旅行など大切な一日を支えます。",
-        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773103763810-messageImage_1770383486552_0.jpg",
-        "link": "#"
-      }
-    ],
-    "sectionId": "usage-scenes",
-    "text": "",
-    "image": "",
-    "link": "#",
-    "alignY": "middle",
-    "titleAlign": "left",
-    "textAlign": "left",
-    "images": [],
-    "links": [
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      },
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      },
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      }
-    ],
-    "menuGroups": [],
-    "menuBottomCard": {
-      "visible": false,
-      "title": "ご予約・ご相談はこちら",
-      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
-    }
-  },
-  {
-    "id": "section-1773062931061",
+    "id": "section-usage-scenarios",
+    "sectionId": "usage-scenarios",
     "type": "card4",
     "enabled": true,
-    "title": "安心の対応機材ラインナップ",
+    "title": "通院・退院・施設送迎・日常の外出に対応します",
+    "text": "病院や施設への移動だけでなく、日常生活に必要なお出かけにもご利用いただけます。ご本人様の状態や付き添いの有無に合わせて、必要な介助内容を確認します。",
     "textSize": "medium",
-    "bgColor": "#e87f00",
+    "bgColor": "#f7f5f0",
     "items": [
       {
-        "title": "【車いす】",
-        "text": "標準的な自走式・介助式車いすのまま、安全にご乗車いただけます。\n",
+        "title": "通院・受診",
+        "text": "ご自宅から病院まで、車いすのまま移動できます。受付までの介助や院内付き添いもご相談ください。",
         "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062960486-messageImage_1770383251537.jpg",
         "link": "#"
       },
       {
-        "title": "【リクライニング車いす】",
-        "text": "長距離の移動でも疲れにくい、背もたれが倒れるタイプも完備。\n",
+        "title": "退院・転院",
+        "text": "病院からご自宅、施設、別の病院への移動に対応します。退院時間が決まっている場合は、早めのご相談がおすすめです。",
         "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062967741-messageImage_1770383272387_0.jpg",
         "link": "#"
       },
       {
-        "title": "【ストレッチャー】",
-        "text": "寝たきりの状態でも、横になったまま安全に搬送可能です。\n",
+        "title": "施設入所・ショートステイ",
+        "text": "ご自宅から施設、施設から病院、施設からご自宅への送迎に対応します。施設職員様・相談員様からのご相談も可能です。",
         "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062973797-messageImage_1770383486552_0.jpg",
         "link": "#"
       },
       {
-        "title": "【安心の介助用品】",
-        "text": "布担架やスロープなど、あらゆる段差や状況に対応する機材を完備。\n",
+        "title": "買い物・冠婚葬祭・外出",
+        "text": "お買い物、理美容室、銀行、役所、墓参り、冠婚葬祭など、日常の外出にもご利用いただけます。",
         "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062985662-messageImage_1770383194104.jpg",
         "link": "#"
       }
     ],
-    "sectionId": "equipment-line-up",
-    "text": "",
     "image": "",
     "link": "#",
     "alignY": "middle",
@@ -265,275 +164,68 @@
     }
   },
   {
-    "id": "section-1773231943645",
-    "type": "normal",
-    "enabled": true,
-    "title": "車両紹介・乗車定員について",
-    "text": "ちばケアタクシーの車両は、最大で「車いす1台～3台 ＋ 付き添い様5名」まで同時にご乗車可能です。\n広々とした室内空間で、ご家族や介助者の方もゆったりとご同乗いただけます。\n※ストレッチャー利用時の同乗人数については、事前にお電話にてご相談ください。\n",
-    "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/sections/1773103736168-messageImage_1770383343976_0.jpg",
-    "link": "#",
-    "textSize": "medium",
-    "bgColor": "#e87f00",
-    "alignY": "middle",
-    "sectionId": "vehicle-introduction-capacity",
-    "titleAlign": "left",
-    "textAlign": "left",
-    "images": [],
-    "items": [],
-    "links": [
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      },
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      },
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      }
-    ],
-    "menuGroups": [],
-    "menuBottomCard": {
-      "visible": false,
-      "title": "ご予約・ご相談はこちら",
-      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
-    }
-  },
-  {
-    "id": "section-1774052946395",
-    "sectionId": "goriyo-ryokin-no-meyasu-2",
-    "enabled": true,
-    "title": "【ご利用料金の目安】",
-    "textSize": "medium",
-    "bgColor": "#ffffff",
-    "alignY": "middle",
-    "titleAlign": "left",
-    "textAlign": "left",
-    "links": [
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      },
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      },
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      }
-    ],
-    "type": "normal",
-    "text": "【片道送迎】\n通院・施設利用・デイサービス・お買い物・外出など、さまざまな場面でご利用いただけます。\nご自宅内（ベッド・玄関）から車いすへの移乗介助、車両への乗降（リフト対応）まで対応し、目的地まで安全に送迎いたします。\n車いすのままご乗車可能で、安心してご利用いただけます。\n\n料金目安：〇〇〇円～\n※距離・介助内容により変動します",
-    "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/sections/1773103736168-messageImage_1770383343976_0.jpg",
-    "link": "#",
-    "images": [],
-    "items": [],
-    "menuGroups": [],
-    "menuBottomCard": {
-      "visible": false,
-      "title": "ご予約・ご相談はこちら",
-      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
-    }
-  },
-  {
-    "id": "section-1774053109067",
-    "sectionId": "goriyo-ryokin-no-meyasu-kopi",
-    "enabled": true,
-    "title": "",
-    "textSize": "medium",
-    "bgColor": "#ffffff",
-    "alignY": "middle",
-    "titleAlign": "left",
-    "textAlign": "left",
-    "links": [
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      },
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      },
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      }
-    ],
-    "type": "normal",
-    "text": "【往復送迎（待機あり）】\n通院・施設利用・デイサービス・お買い物・外出など、行き帰りをまとめてご利用いただけます。\nご自宅から目的地まで安全に送迎し、現地での待機にも対応しております。\n診察やお買い物後もスムーズにご帰宅いただけます。\n\n料金目安：〇〇〇円～\n※待機時間・距離・介助内容により変動します",
-    "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/sections/1773103736168-messageImage_1770383343976_0.jpg",
-    "link": "#",
-    "images": [],
-    "items": [],
-    "menuGroups": [],
-    "menuBottomCard": {
-      "visible": false,
-      "title": "ご予約・ご相談はこちら",
-      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
-    }
-  },
-  {
-    "id": "section-1774053361000",
-    "sectionId": "goriyo-ryokin-no-meyasu-kopi-2",
-    "enabled": true,
-    "title": "",
-    "textSize": "medium",
-    "bgColor": "#ffffff",
-    "alignY": "middle",
-    "titleAlign": "left",
-    "textAlign": "left",
-    "links": [
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      },
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      },
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      }
-    ],
-    "type": "normal",
-    "text": "【貸切・長時間利用】\n外出・お買い物・冠婚葬祭など、幅広い用途でご利用いただけます。\n複数箇所の移動や長時間のご利用にも対応しております。\n\n料金目安：〇〇〇円～\n※利用時間・距離・介助内容により変動します",
-    "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/sections/1773103736168-messageImage_1770383343976_0.jpg",
-    "link": "#",
-    "images": [],
-    "items": [],
-    "menuGroups": [],
-    "menuBottomCard": {
-      "visible": false,
-      "title": "ご予約・ご相談はこちら",
-      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
-    }
-  },
-  {
-    "id": "section-1773980387814",
-    "sectionId": "shii-price-menyu",
-    "enabled": true,
-    "title": "【料金一覧】",
-    "textSize": "medium",
-    "bgColor": "#f7f5f0",
-    "alignY": "middle",
-    "titleAlign": "center",
-    "textAlign": "left",
-    "links": [
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      },
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      },
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      }
-    ],
+    "id": "section-taiou-service",
+    "sectionId": "taiou-service-kaigo",
     "type": "menu-list",
-    "text": "料金やメニュー内容をカテゴリごとに掲載できます。",
+    "enabled": true,
+    "title": "必要な介助内容を事前に確認します",
+    "text": "「どこまでお願いできるかわからない」という場合も、まずはご相談ください。身体状態、住環境、目的地の状況に合わせて、対応できる内容を確認します。",
+    "textSize": "medium",
+    "bgColor": "#ffffff",
+    "alignY": "middle",
+    "titleAlign": "left",
+    "textAlign": "left",
     "menuGroups": [
       {
-        "title": "基本料金",
+        "title": "対応サービス・介助内容",
         "open": true,
         "items": [
           {
-            "name": "初乗り運賃料",
-            "price": "730円～",
-            "description": "最初の基本料金です。",
+            "name": "車いす乗車",
+            "price": "",
+            "description": "車いすのまま乗車できます。ご自身の車いすをご利用の場合は、サイズや固定可否を確認します。",
             "visible": true
           },
           {
-            "name": "予約配車料",
-            "price": "800円",
-            "description": "お迎え場所までの料金です。",
-            "visible": true
-          },
-          {
-            "name": "特殊車両使用料",
-            "price": "1000円",
-            "description": "〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇",
-            "visible": true
-          }
-        ]
-      },
-      {
-        "title": "介助料金",
-        "open": true,
-        "items": [
-          {
-            "name": "乗降介助",
-            "price": "1,000円",
-            "description": "院内付き添い等に対応します。",
-            "visible": true
-          },
-          {
-            "name": "身体介助",
-            "price": "1,600円",
-            "description": "〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇",
-            "visible": true
-          }
-        ]
-      },
-      {
-        "title": "機材レンタル料",
-        "open": true,
-        "items": [
-          {
-            "name": "車いす",
-            "price": "0円",
-            "description": "〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇",
+            "name": "車いす貸出",
+            "price": "",
+            "description": "車いすが必要な場合は、予約時にご相談ください。",
             "visible": true
           },
           {
             "name": "リクライニング車いす",
-            "price": "2,500円",
-            "description": "〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇",
+            "price": "",
+            "description": "座位保持が不安な方、長時間の移動が心配な方はご相談ください。",
             "visible": true
           },
           {
-            "name": "ストレッチャー",
-            "price": "5,000円",
-            "description": "〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇",
-            "visible": true
-          }
-        ]
-      },
-      {
-        "title": "その他",
-        "open": true,
-        "items": [
-          {
-            "name": "待機",
-            "price": "800円～",
-            "description": "〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇",
+            "name": "ストレッチャー対応",
+            "price": "",
+            "description": "寝たままの移動が必要な方、退院・転院時の移送が必要な方に対応します。",
             "visible": true
           },
           {
-            "name": "付き添い",
-            "price": "1600円～",
-            "description": "〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇〇",
+            "name": "階段・段差介助",
+            "price": "",
+            "description": "階段や段差がある場合は、階数、段数、手すりの有無、介助人数の必要性を確認します。",
+            "visible": true
+          },
+          {
+            "name": "ベッドからの移乗",
+            "price": "",
+            "description": "ベッド、車いす、ストレッチャー間の移乗が必要な場合は、身体状態を確認します。",
+            "visible": true
+          },
+          {
+            "name": "院内付き添い",
+            "price": "",
+            "description": "受付、診察室前までの移動、会計、薬局などの付き添いもご相談ください。",
+            "visible": true
+          },
+          {
+            "name": "ご家族・ヘルパー様の同乗",
+            "price": "",
+            "description": "付き添いの方も同乗できます。人数が多い場合は予約時にお知らせください。",
             "visible": true
           }
         ]
@@ -543,31 +235,137 @@
     "link": "#",
     "images": [],
     "items": [],
+    "links": [
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ],
     "menuBottomCard": {
-      "visible": true,
+      "visible": false,
       "title": "ご予約・ご相談はこちら",
-      "text": "※〇〇〇〇〇〇〇〇〇\n〇〇〇〇\n〇〇〇〇〇〇〇〇\n〇〇〇〇〇〇〇〇〇〇〇\nご予約・ご相談はこちら\n料金の詳細やご不明点はお気軽にお問い合わせください。"
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
     }
   },
   {
-    "id": "section-estimate-simulator-intro",
-    "sectionId": "gaisan-mitsumori-simulator",
-    "type": "normal",
+    "id": "section-vehicle-equipment",
+    "sectionId": "vehicle-equipment",
+    "type": "card1-left",
     "enabled": true,
-    "title": "料金確認・ご予約はこちら",
-    "text": "料金の目安を簡単に確認できます。\n\n移動方法や介助内容、距離を入力すると料金の目安をご確認いただけます。",
+    "title": "車いすのまま乗れる福祉車両でお迎えします",
+    "text": "リフト付き福祉車両で、車いすをご利用の方も安心して乗車できる環境を整えています。乗車人数、車いす台数、ストレッチャー使用の有無によってご案内できる内容が変わるため、予約時に確認します。\n\n・車いすのまま乗車可能\n・リフト付き福祉車両\n・車いす複数台の相談可能\n・ストレッチャー対応相談可能\n・車いす固定装置あり\n・AED・救急用品を準備\n・酸素・吸引器などの持ち込み相談可能\n\n※医療行為は行えません。酸素や吸引器などの医療機器をお持ち込みの場合は、事前に内容を確認いたします。",
+    "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/sections/1773103788406-messageImage_1770383251537.jpg",
+    "link": "#",
     "textSize": "medium",
     "bgColor": "#f7f5f0",
     "alignY": "middle",
-    "titleAlign": "center",
-    "textAlign": "center",
+    "titleAlign": "left",
+    "textAlign": "left",
+    "images": [],
+    "items": [],
+    "links": [
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ],
+    "menuGroups": [],
+    "menuBottomCard": {
+      "visible": false,
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
+    }
+  },
+  {
+    "id": "section-ryokin-meyasu",
+    "sectionId": "ryokin-meyasu",
+    "type": "menu-list",
+    "enabled": true,
+    "title": "料金は「運賃＋介助料＋機材使用料」で決まります",
+    "text": "介護タクシーの料金は、通常のタクシー運賃だけでなく、介助内容や使用する機材によって変わります。予約前に、できるだけわかりやすく料金目安をご案内します。",
+    "textSize": "medium",
+    "bgColor": "#f7f5f0",
+    "alignY": "middle",
+    "titleAlign": "left",
+    "textAlign": "left",
+    "menuGroups": [
+      {
+        "title": "料金の内訳",
+        "open": true,
+        "items": [
+          {
+            "name": "基本運賃",
+            "price": "",
+            "description": "距離または時間に応じた運賃です。",
+            "visible": true
+          },
+          {
+            "name": "迎車料金",
+            "price": "",
+            "description": "お迎えに伺うための料金です。",
+            "visible": true
+          },
+          {
+            "name": "基本介助料",
+            "price": "",
+            "description": "玄関から車両までの移動、乗車・降車時の介助などにかかる料金です。",
+            "visible": true
+          },
+          {
+            "name": "階段介助料",
+            "price": "",
+            "description": "階段や段差がある場合、状況に応じて追加料金がかかります。",
+            "visible": true
+          },
+          {
+            "name": "院内付き添い料",
+            "price": "",
+            "description": "受付、会計、薬局、診察室前までの付き添いなど、時間に応じて料金がかかります。",
+            "visible": true
+          },
+          {
+            "name": "機材使用料",
+            "price": "",
+            "description": "車いす、リクライニング車いす、ストレッチャーなどを使用する場合の料金です。",
+            "visible": true
+          }
+        ]
+      }
+    ],
     "image": "",
     "link": "#",
     "images": [],
     "items": [],
     "links": [
       {
-        "text": "料金を確認する",
+        "text": "料金目安を確認する",
+        "url": "./estimate/",
+        "visible": true
+      },
+      {
+        "text": "見積もりを相談する",
         "url": "./estimate/",
         "visible": true
       },
@@ -575,91 +373,22 @@
         "text": "",
         "url": "#",
         "visible": false
-      },
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
       }
     ],
-    "menuGroups": [],
     "menuBottomCard": {
-      "visible": false,
-      "title": "ご予約・ご相談はこちら",
-      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
-    },
-    "configFooterCtas": {
       "visible": true,
-      "text": "料金の目安が分かったらお気軽にご相談ください"
+      "title": "",
+      "text": "実際の料金は、走行距離、所要時間、待機時間、介助内容、当日の状況により変わる場合があります。"
     }
   },
   {
-    "id": "section-1773246274578",
-    "type": "card3",
+    "id": "section-aki-yoyaku",
+    "sectionId": "aki-jokyo-yoyaku-hoho",
+    "type": "card1-right",
     "enabled": true,
-    "title": "ご利用者様・ご家族様の声",
-    "textSize": "medium",
-    "bgColor": "#e87f00",
-    "items": [
-      {
-        "title": "【丁寧な介助で安心】",
-        "text": "「初めての利用で不安でしたが、電話から当日の介助まで親切で助かりました」\n",
-        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773103749339-messageImage_1770383272387_0.jpg",
-        "link": "#"
-      },
-      {
-        "title": "【機材が清潔で快適】",
-        "text": "「ストレッチャーでの転院でしたが、車両も機材も綺麗で心地よく移動できました」\n",
-        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773103755526-messageImage_1770383194104.jpg",
-        "link": "#"
-      },
-      {
-        "title": "【急な退院にも対応】",
-        "text": "「24時間対応なので、夜間の急な退院時にもすぐ駆けつけてくれ心強かったです」",
-        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773103763810-messageImage_1770383486552_0.jpg",
-        "link": "#"
-      }
-    ],
-    "sectionId": "go-go-no",
-    "text": "",
-    "image": "",
-    "link": "#",
-    "alignY": "middle",
-    "titleAlign": "left",
-    "textAlign": "left",
-    "images": [],
-    "links": [
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      },
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      },
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      }
-    ],
-    "menuGroups": [],
-    "menuBottomCard": {
-      "visible": false,
-      "title": "ご予約・ご相談はこちら",
-      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
-    }
-  },
-  {
-    "id": "section-1773246586759",
-    "sectionId": "go-yoyaku-kara-tojitsu-made-no-nagare",
-    "type": "normal",
-    "enabled": true,
-    "title": "ご予約から当日までの流れ",
-    "text": "お問合せ：お電話・LINE・フォームより承ります。\n\n内容確認：日時、場所、身体状況をお伺いし概算を提示。\n\nご予約：内容にご納得いただければ予約確定です。\n\n当日送迎：安全・丁寧にご指定の場所までお運びします。\n",
-    "image": "",
+    "title": "空き状況を確認して、そのまま予約できます",
+    "text": "通院や退院は時間が決まっていることが多いため、まずはご希望日時の空き状況をご確認ください。予約時に、出発地・目的地・利用日時・車いすの有無・必要な介助内容をお知らせいただくと、スムーズにご案内できます。\n\n・ご利用日時\n・出発地\n・目的地\n・片道・往復・立ち寄りの有無\n・ご利用者様の身体状態\n・車いす・ストレッチャーの有無\n・階段・段差の有無\n・院内付き添いの有無\n・同乗者の人数",
+    "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/sections/1773103782069-messageImage_1770383436537_0.jpg",
     "link": "#",
     "textSize": "medium",
     "bgColor": "#ffffff",
@@ -670,6 +399,59 @@
     "items": [],
     "links": [
       {
+        "text": "空き状況を確認する",
+        "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+        "visible": true
+      },
+      {
+        "text": "LINEで相談する",
+        "url": "https://lin.ee/XA05KN5",
+        "visible": true
+      },
+      {
+        "text": "電話する",
+        "url": "tel:09063314289",
+        "visible": true
+      }
+    ],
+    "menuGroups": [],
+    "menuBottomCard": {
+      "visible": false,
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
+    }
+  },
+  {
+    "id": "section-hajimete",
+    "sectionId": "hajimete-no-kata",
+    "type": "card2",
+    "enabled": true,
+    "title": "初めての介護タクシーでも安心してご相談ください",
+    "text": "介護タクシーを初めて利用する方は、何を伝えればよいか、どこまで頼めるのか、料金はいくらかかるのか不安に感じることがあります。予約前の相談だけでも大丈夫です。",
+    "textSize": "medium",
+    "bgColor": "#f7f5f0",
+    "items": [
+      {
+        "title": "ご家族の方へ",
+        "text": "「病院まで連れて行けるか不安」「車いすのまま移動したい」「仕事で付き添えない」「退院の迎えをお願いしたい」このような場合もご相談ください。身体状態や必要な介助を確認し、利用方法と料金目安をご案内します。",
+        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773103749339-messageImage_1770383272387_0.jpg",
+        "link": "#"
+      },
+      {
+        "title": "ご本人様へ",
+        "text": "歩行に不安がある方、車いすをご利用の方、病院や買い物への移動にお困りの方もご相談ください。ご家族やケアマネジャー様からの代理相談も可能です。",
+        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773103755526-messageImage_1770383194104.jpg",
+        "link": "#"
+      }
+    ],
+    "image": "",
+    "link": "#",
+    "alignY": "middle",
+    "titleAlign": "left",
+    "textAlign": "left",
+    "images": [],
+    "links": [
+      {
         "text": "",
         "url": "#",
         "visible": false
@@ -693,56 +475,239 @@
     }
   },
   {
-    "id": "section-1773579425987",
-    "sectionId": "tesuto",
+    "id": "section-caremanager",
+    "sectionId": "caremanager-sodanin",
+    "type": "card1-left",
     "enabled": true,
-    "title": "Q＆A【よくある質問】",
+    "title": "ケアマネジャー・相談員の方からのご相談にも対応します",
+    "text": "ご利用者様の通院、退院、転院、施設入退所など、移動に関するご相談を承ります。身体状態、介助内容、利用目的、料金目安を整理し、ご家族様にも説明しやすい形でご案内します。\n\n・空き状況の確認\n・料金目安の確認\n・対応可能な身体状態の確認\n・車いす・ストレッチャー対応\n・階段・移乗介助の相談\n・院内付き添いの相談\n・領収書・見積書の相談\n・定期通院の相談",
+    "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/sections/1773103736168-messageImage_1770383343976_0.jpg",
+    "link": "#",
+    "textSize": "medium",
+    "bgColor": "#ffffff",
+    "alignY": "middle",
+    "titleAlign": "left",
+    "textAlign": "left",
+    "images": [],
+    "items": [],
+    "links": [
+      {
+        "text": "ケアマネ・相談員として問い合わせる",
+        "url": "https://docs.google.com/forms/d/e/1FAIpQLSc2FZoU0Mz4IxiUQadXuc4rdiaqZn1iWmLhvc4jmj1uk2wF4g/viewform?usp=header",
+        "visible": true
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ],
+    "menuGroups": [],
+    "menuBottomCard": {
+      "visible": false,
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
+    }
+  },
+  {
+    "id": "section-shisetsu-byoin",
+    "sectionId": "shisetsu-byoin-kankeisha",
+    "type": "card3",
+    "enabled": true,
+    "title": "施設・病院からの退院・転院・受診送迎にも対応します",
+    "text": "介護施設、病院、地域連携室、相談室、ショートステイ事業所などからのご相談にも対応します。退院時間や受診時間に合わせて、車いす・ストレッチャーでの移動を調整します。",
+    "textSize": "medium",
+    "bgColor": "#f7f5f0",
+    "items": [
+      {
+        "title": "退院時のご自宅送迎",
+        "text": "病院からご自宅までの退院送迎に対応します。退院時間、病棟、荷物、車いす・ストレッチャーの有無を確認します。",
+        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062960486-messageImage_1770383251537.jpg",
+        "link": "#"
+      },
+      {
+        "title": "転院・施設入退所",
+        "text": "病院から病院、病院から施設、ご自宅から施設への移動に対応します。時間指定がある場合は早めにご相談ください。",
+        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062967741-messageImage_1770383272387_0.jpg",
+        "link": "#"
+      },
+      {
+        "title": "施設からの受診送迎",
+        "text": "施設入居者様の通院、検査、受診送迎に対応します。施設職員様やご家族様の同乗もご相談ください。",
+        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062973797-messageImage_1770383486552_0.jpg",
+        "link": "#"
+      }
+    ],
+    "image": "",
+    "link": "#",
+    "alignY": "middle",
+    "titleAlign": "left",
+    "textAlign": "left",
+    "images": [],
+    "links": [
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ],
+    "menuGroups": [],
+    "menuBottomCard": {
+      "visible": false,
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
+    }
+  },
+  {
+    "id": "section-taiou-area",
+    "sectionId": "taiou-area",
+    "type": "menu-list",
+    "enabled": true,
+    "title": "千葉市・四街道市を中心に対応します",
+    "text": "千葉市内、四街道市周辺を中心に、通院・退院・転院・施設送迎などに対応します。その他の地域も、距離や予約状況により対応できる場合があります。",
+    "textSize": "medium",
+    "bgColor": "#ffffff",
+    "alignY": "middle",
+    "titleAlign": "left",
+    "textAlign": "left",
+    "menuGroups": [
+      {
+        "title": "対応エリア",
+        "open": true,
+        "items": [
+          {
+            "name": "主な対応エリア",
+            "price": "",
+            "description": "千葉市中央区、若葉区、緑区、花見川区、稲毛区、美浜区、四街道市",
+            "visible": true
+          },
+          {
+            "name": "ご相談可能エリア",
+            "price": "",
+            "description": "佐倉市、八千代市、市原市、船橋市、市川市、習志野市、その他近隣地域",
+            "visible": true
+          },
+          {
+            "name": "長距離・県外移動",
+            "price": "",
+            "description": "転院、退院、空港、駅、遠方の病院などもご相談ください。",
+            "visible": true
+          }
+        ]
+      }
+    ],
+    "image": "",
+    "link": "#",
+    "images": [],
+    "items": [],
+    "links": [
+      {
+        "text": "対応エリアを相談する",
+        "url": "tel:09063314289",
+        "visible": true
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ],
+    "menuBottomCard": {
+      "visible": false,
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
+    }
+  },
+  {
+    "id": "section-faq",
+    "sectionId": "faq-yokuaru",
+    "type": "accordion",
+    "enabled": true,
+    "title": "よくあるご質問",
+    "text": "",
     "textSize": "medium",
     "bgColor": "#dcfce7",
     "alignY": "middle",
     "titleAlign": "left",
     "textAlign": "left",
-    "links": [
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      },
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      },
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      }
-    ],
-    "type": "accordion",
-    "text": "",
     "items": [
       {
-        "title": "質問1",
-        "text": "回答を入力してください。",
+        "title": "当日でも利用できますか？",
+        "text": "空きがあれば対応できる場合があります。通院・退院など時間が決まっている場合は、できるだけ早めにご相談ください。",
         "image": "",
         "link": "#"
       },
       {
-        "title": "質問2",
-        "text": "回答を入力してください。",
+        "title": "車いすのまま乗れますか？",
+        "text": "はい、車いすのまま乗車できます。車いすの種類やサイズによって確認が必要な場合があります。",
         "image": "",
         "link": "#"
       },
       {
-        "title": "質問3",
-        "text": "回答を入力してください。",
+        "title": "家族も一緒に乗れますか？",
+        "text": "はい、同乗できます。人数により車内スペースが変わるため、予約時にお知らせください。",
         "image": "",
         "link": "#"
       },
       {
-        "title": "質問4",
-        "text": "回答を入力してください。",
+        "title": "病院の受付まで付き添ってもらえますか？",
+        "text": "ご相談可能です。院内付き添いの内容や時間により、付き添い料がかかる場合があります。",
+        "image": "",
+        "link": "#"
+      },
+      {
+        "title": "階段がある家でも利用できますか？",
+        "text": "状況により対応できる場合があります。階数、段数、手すりの有無、介助人数の必要性を事前に確認します。",
+        "image": "",
+        "link": "#"
+      },
+      {
+        "title": "ストレッチャーは使えますか？",
+        "text": "寝たままの移動が必要な場合はご相談ください。身体状態、搬送経路、目的地の状況を確認します。",
+        "image": "",
+        "link": "#"
+      },
+      {
+        "title": "料金は事前にわかりますか？",
+        "text": "出発地、目的地、介助内容がわかれば、目安料金をご案内できます。実際の料金は、移動時間や追加介助により変わる場合があります。",
+        "image": "",
+        "link": "#"
+      },
+      {
+        "title": "ケアマネジャーから予約できますか？",
+        "text": "はい、ご相談いただけます。ご本人様・ご家族様の同意や必要情報を確認したうえでご案内します。",
+        "image": "",
+        "link": "#"
+      },
+      {
+        "title": "退院の迎えもお願いできますか？",
+        "text": "はい、退院時のお迎えもご相談ください。退院時間、病棟、荷物、車いす・ストレッチャーの有無を確認します。",
+        "image": "",
+        "link": "#"
+      },
+      {
+        "title": "福祉タクシー券は使えますか？",
+        "text": "自治体や券種、登録状況により取扱いが異なります。ご利用予定の福祉タクシー券や手帳をお持ちの場合は、予約時にお知らせください。",
         "image": "",
         "link": "#"
       }
@@ -750,109 +715,6 @@
     "image": "",
     "link": "#",
     "images": [],
-    "menuGroups": [],
-    "menuBottomCard": {
-      "visible": false,
-      "title": "ご予約・ご相談はこちら",
-      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
-    }
-  },
-  {
-    "id": "section-1773060504302",
-    "type": "card1-right",
-    "enabled": true,
-    "title": "代表挨拶・サービスへの想い",
-    "text": "代表の笑顔の写真とともに、「安心・安全な外出を全力でサポートします」という一言を添えます。",
-    "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/sections/1773103782069-messageImage_1770383436537_0.jpg",
-    "link": "#",
-    "textSize": "medium",
-    "bgColor": "#e87f00",
-    "alignY": "middle",
-    "sectionId": "service-heno-i",
-    "titleAlign": "left",
-    "textAlign": "left",
-    "images": [],
-    "items": [],
-    "links": [
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      },
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      },
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      }
-    ],
-    "menuGroups": [],
-    "menuBottomCard": {
-      "visible": false,
-      "title": "ご予約・ご相談はこちら",
-      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
-    }
-  },
-  {
-    "id": "section-1773060508054",
-    "type": "card1-left",
-    "enabled": true,
-    "title": "事業所案内・最新の活動状況",
-    "text": " 会社名、住所、営業許可番号。\n右（画像）： TikTokやインスタのQRコード、または活動中の写真。",
-    "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/sections/1773103788406-messageImage_1770383251537.jpg",
-    "link": "#",
-    "textSize": "medium",
-    "bgColor": "#e87f00",
-    "alignY": "middle",
-    "sectionId": "annai-no-katsudo-jokyo",
-    "titleAlign": "left",
-    "textAlign": "left",
-    "images": [],
-    "items": [],
-    "links": [
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      },
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      },
-      {
-        "text": "",
-        "url": "#",
-        "visible": false
-      }
-    ],
-    "menuGroups": [],
-    "menuBottomCard": {
-      "visible": false,
-      "title": "ご予約・ご相談はこちら",
-      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
-    }
-  },
-  {
-    "id": "section-1773401444426",
-    "sectionId": "kaigo-taxi-kaigyo-partner-boshu-1000-wo-seru-kaigo-taxi-no-niyori-na-ga-meru-shita-ga-dekimasu",
-    "type": "normal",
-    "enabled": true,
-    "title": "介護タクシー開業パートナー募集  【年商1000万円以上を目指せる介護タクシー事業 】 地域の通院搬送需要により、継続的な利用が見込める安定した事業が期待できます。",
-    "text": "介護タクシーの開業方法や許可申請の流れ、車両準備、営業方法など、開業に必要な情報や準備をサポートするパートナー制度を準備しています。\nまた、開業後の集客を支援するホームページ（LP）や予約システム、LINE導線など、開業直後から利用できる集客環境も提供予定です。\n\n二種免許をお持ちの方や介護資格を活かして独立を目指す方、これから介護タクシー事業を始めたい方など、開業を検討されている方に向けてサポートを行う予定です。\n制度の詳細は今後このページでご案内します。\nFC加盟の3つのメリット\n① 開業方法・許可申請のサポート\n\n介護タクシーの開業には、許可申請や車両準備、営業方法など様々な手続きがあります。\n開業までの流れを分かりやすく案内し、準備をサポートします。\n\n② 集客用ホームページ（LP）を提供\n\nスマートフォン対応の集客ホームページを用意し、料金案内やサービス内容、問い合わせ導線などを整えた状態で利用できます。\n開業直後からインターネットでの集客が可能になります。\n\n③ 予約システムとLINE導線\n\n24時間予約受付ができる予約システムと、公式LINEからの問い合わせ導線を整備。\n電話だけに頼らない予約管理と顧客対応が可能になります。",
-    "image": "",
-    "link": "#",
-    "textSize": "medium",
-    "bgColor": "#ffffff",
-    "alignY": "middle",
-    "titleAlign": "left",
-    "textAlign": "left",
-    "images": [],
-    "items": [],
     "links": [
       {
         "text": "",
