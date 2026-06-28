@@ -81,16 +81,31 @@
 }
 @media (max-width:640px){
   .carechan-bubble-wrap{
-    display:none !important;
+    display:block;
+  }
+  .carechan-bubble{
+    max-width:118px;
+    padding:6px 10px;
+    font-size:11px;
+    line-height:1.35;
+    border-radius:12px;
+    border-width:1.5px;
+  }
+  .carechan-bubble::after{
+    right:16px;
+    bottom:-6px;
+    border-left-width:6px;
+    border-right-width:6px;
+    border-top-width:6px;
   }
   .carechan-widget{
-    bottom:96px !important;
+    bottom:104px !important;
     right:10px !important;
-    gap:0;
+    gap:4px;
   }
   .carechan-trigger img,
   .carechan-trigger svg{
-    width:48px !important;
+    width:52px !important;
   }
   .carechan-trigger{
     box-shadow:0 2px 10px rgba(0,0,0,0.12);
