@@ -124,7 +124,7 @@
     );
   }
 
-  function buildChapter1(regulatory){
+  function buildChapter1(regulatory, data){
     const coefficientRows = (regulatory.coefficientRows || []).map(function(row){
       return [row.area, numberLabel(row.coefficient), row.basis, row.appliedAt];
     });
@@ -141,6 +141,8 @@
     return (
       subsection("算定式と運賃算定根拠",
         (regulatory.notices?.fareBasisNote ? "<p>" + escapeHtml(regulatory.notices.fareBasisNote) + "</p>" : "") +
+        (data?.fareTableAppendixNote ? "<p>" + escapeHtml(data.fareTableAppendixNote) + "</p>" : "") +
+        (data?.fareFeeDisplayNote ? "<p>" + escapeHtml(data.fareFeeDisplayNote) + "</p>" : "") +
         buildList(regulatory.notices?.formulas) +
         "<p><strong>" + escapeHtml(regulatory.notices?.formulaText || "") + "</strong></p>"
       ) +
@@ -153,7 +155,6 @@
         )
       ) +
       subsection("運賃と各種料金の区分",
-        "<p>迎車料金・予約料金・介助料等は事前確定運賃とは区分し、見積明細上も別行で表示する。</p>" +
         buildTable(
           ["区分", "事前確定運賃に含めるか", "扱い"],
           fareFeeRows,
@@ -207,10 +208,10 @@
       subsection("条件入力とシステムフロー", buildList(approval.systemFlow)) +
       subsection("Google Routes API によるルート候補生成", routeTypes + "<p>" + escapeHtml(approval.dedupeNote || "") + "</p>") +
       subsection("判定ロジック（preFixedFareConfirmable）",
-        buildTable(
+        buildSplitTables(
           ["条件", "システム", "予約URL", "ボタン", "扱い"],
           judgmentRows,
-          { className: "table-judgment", colWidths: ["22%", "18%", "18%", "18%", "24%"] }
+          { className: "table-judgment", colWidths: ["22%", "18%", "18%", "18%", "24%"], maxRowsPerTable: 3 }
         ) +
         buildList(approval.judgmentNotes)
       ) +
@@ -250,8 +251,9 @@
     );
   }
 
-  function buildChapter3(operations){
+  function buildChapter3(operations, data){
     const arch = operations.productionArchitecture || {};
+    const driverRoute = data?.driverRouteDisplay || {};
     const archRows = (arch.components || []).map(function(row){
       return [row.component, row.role, row.path];
     });
@@ -308,6 +310,10 @@
           { className: "table-integrity", colWidths: ["32%", "68%"] }
         ) +
         buildList(operations.integrityChecks?.verificationFlow)
+      ) +
+      subsection("運転者への同一ルート表示",
+        buildList(driverRoute.points) +
+        (driverRoute.visualCheckNote ? "<p>" + escapeHtml(driverRoute.visualCheckNote) + "</p>" : "")
       ) +
       subsection("caseRecords 保存項目",
         buildSplitTables(
@@ -425,8 +431,9 @@
         )
       ) +
       subsection(preLaunchTitle,
-        "<p>以下は運用開始前の目視確認項目（確認予定）です。提出直前に確認完了後は、見出しを「運用開始前確認結果」に変更できます。</p>" +
-        buildList(preLaunchChecks)
+        "<p>" + escapeHtml(data.preLaunchCheckIntro || "以下は運用開始前の目視確認項目（確認予定）です。") + "</p>" +
+        buildList(preLaunchChecks) +
+        (data.preLaunchCheckSwapNote ? "<p class='prelaunch-swap-note'>" + escapeHtml(data.preLaunchCheckSwapNote) + "</p>" : "")
       ) +
       subsection("根拠資料・確認資料一覧", buildList(data.referenceMaterials))
     );
@@ -444,9 +451,9 @@
       "<div class='pre-fixed-fare-integrated-summary'>" +
       buildCover(meta, data.title) +
       buildToc(data.toc) +
-      chapterBlock(1, "システム基本方針と公示要件対応", positioning[1], buildChapter1(regulatory), { first: true }) +
+      chapterBlock(1, "システム基本方針と公示要件対応", positioning[1], buildChapter1(regulatory, data), { first: true }) +
       chapterBlock(2, "利用者向け見積シミュレーターの動作と判定ロジック", positioning[2], buildChapter2(approval)) +
-      chapterBlock(3, "運行・精算における運用フローと監査証跡", positioning[3], buildChapter3(operations)) +
+      chapterBlock(3, "運行・精算における運用フローと監査証跡", positioning[3], buildChapter3(operations, data)) +
       chapterBlock(4, "旅客都合変更時の途中終了運用", positioning[4], buildChapter4(pct, data)) +
       chapterBlock(5, "確認済み証跡と運用開始前確認項目", positioning[5], buildChapter5(data), { last: true }) +
       "<p class='footer-note'>" + escapeHtml(data.footerNote || "") + "</p>" +
@@ -555,7 +562,7 @@
 
   function getHtml2PdfOptions(filename){
     return {
-      margin: [6, 6, 6, 6],
+      margin: [6, 6, 10, 6],
       filename: filename || PDF_FILENAME,
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollX: 0, scrollY: 0 },
@@ -564,9 +571,33 @@
         mode: ["css", "legacy"],
         after: [".cover-page", ".toc-page"],
         before: [".chapter-block:not(.chapter-block-first)"],
-        avoid: [".table-avoid-break", "tr", "h3", "h4"]
+        avoid: [".table-avoid-break", "tr", "h2", "h3", "h4"]
       }
     };
+  }
+
+  function addPageNumbers(pdf){
+    const totalPages = pdf.internal.getNumberOfPages();
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    pdf.setFontSize(8);
+    pdf.setTextColor(80, 80, 80);
+    for(let pageNum = 1; pageNum <= totalPages; pageNum++){
+      pdf.setPage(pageNum);
+      pdf.text(String(pageNum) + " / " + String(totalPages), pageWidth / 2, pageHeight - 4.5, { align: "center" });
+    }
+    return pdf;
+  }
+
+  async function writePdfFromElement(reportElement, mode){
+    const options = getHtml2PdfOptions();
+    const worker = html2pdf().set(options).from(reportElement);
+    const pdf = await worker.toPdf().get("pdf");
+    addPageNumbers(pdf);
+    if(mode === "blob"){
+      return pdf.output("blob");
+    }
+    pdf.save(options.filename);
   }
 
   async function renderToElement(reportData){
@@ -587,10 +618,7 @@
     await ensureHtml2Pdf();
     const rendered = await renderToElement(reportData);
     try{
-      const blob = await html2pdf()
-        .set(getHtml2PdfOptions())
-        .from(rendered.reportElement)
-        .outputPdf("blob");
+      const blob = await writePdfFromElement(rendered.reportElement, "blob");
       return { blob: blob, htmlText: rendered.htmlText };
     }finally{
       rendered.wrapper.remove();
@@ -601,10 +629,7 @@
     await ensureHtml2Pdf();
     const rendered = await renderToElement(reportData);
     try{
-      await html2pdf()
-        .set(getHtml2PdfOptions())
-        .from(rendered.reportElement)
-        .save();
+      await writePdfFromElement(rendered.reportElement, "save");
     }finally{
       rendered.wrapper.remove();
     }
