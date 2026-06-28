@@ -79,6 +79,23 @@
   height:auto;
   display:block;
 }
+@media (max-width:640px){
+  .carechan-bubble-wrap{
+    display:none !important;
+  }
+  .carechan-widget{
+    bottom:96px !important;
+    right:10px !important;
+    gap:0;
+  }
+  .carechan-trigger img,
+  .carechan-trigger svg{
+    width:48px !important;
+  }
+  .carechan-trigger{
+    box-shadow:0 2px 10px rgba(0,0,0,0.12);
+  }
+}
 .carechan-arm{
   transform-origin:78px 78px;
   animation:carechan-beckon 3s ease-in-out infinite;

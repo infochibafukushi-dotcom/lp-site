@@ -631,6 +631,120 @@ footer{
   }
 }
 
+@media (max-width: 640px){
+  body{
+    overflow-x:hidden;
+  }
+
+  main{
+    padding-bottom:132px;
+  }
+
+  .section{
+    padding:28px 16px;
+    scroll-margin-top:84px;
+  }
+
+  .section-title{
+    font-size:22px;
+    line-height:1.45;
+  }
+
+  .section-text{
+    font-size:16px;
+    line-height:1.8;
+  }
+
+  .media-row,
+  .media-row.reverse{
+    grid-template-columns:1fr;
+    direction:ltr;
+    gap:16px;
+    align-items:start;
+  }
+
+  .media-row > div{
+    min-width:0;
+    width:100%;
+  }
+
+  .media-row img{
+    width:100%;
+    max-height:none;
+    object-fit:cover;
+  }
+
+  .card-grid-2,
+  .card-grid-3,
+  .card-grid-4{
+    grid-template-columns:1fr;
+    gap:14px;
+    margin-top:16px;
+  }
+
+  .card-item{
+    padding:16px;
+  }
+
+  .card-item img{
+    width:100%;
+    height:auto;
+    aspect-ratio:16 / 9;
+    object-fit:cover;
+    object-position:center;
+    display:block;
+    margin:0 0 12px;
+    border-radius:10px;
+    background:#f3f4f6;
+  }
+
+  .card-item-title{
+    font-size:18px;
+    line-height:1.45;
+    margin:0 0 8px;
+  }
+
+  .card-item .section-text{
+    font-size:15px;
+    line-height:1.75;
+    margin:0;
+  }
+
+  .section-bottom-links,
+  .section-bottom-links.count-1,
+  .section-bottom-links.count-2,
+  .section-bottom-links.count-3,
+  .section-bottom-links.left,
+  .section-bottom-links.center,
+  .section-bottom-links.right{
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:10px;
+    margin-top:18px;
+  }
+
+  .section-bottom-link{
+    width:100%;
+    min-width:0;
+    min-height:48px;
+    padding:12px 16px;
+    font-size:15px;
+    line-height:1.45;
+    white-space:normal;
+    word-break:keep-all;
+    overflow-wrap:break-word;
+    writing-mode:horizontal-tb;
+    text-align:center;
+    border-radius:12px;
+  }
+
+  .section-config-footer-ctas .section-bottom-links{
+    display:flex;
+    flex-direction:column;
+  }
+}
+
 @media (max-width: 420px){
   header{
     padding:8px 6px;
@@ -651,23 +765,9 @@ footer{
     font-size:11px;
   }
 
-  .card-grid-3{
-    gap:8px;
-  }
-  .card-grid-3 .card-item{
-    padding:8px;
-  }
-  .card-grid-3 .card-item-title{
-    font-size:13px;
-  }
-  .card-grid-3 .section-text{
-    font-size:11px;
-  }
-
   .section-bottom-link{
-    min-width:0;
-    padding:10px 8px;
-    font-size:13px;
+    font-size:15px;
+    padding:12px 14px;
   }
 }
 </style>
