@@ -454,7 +454,15 @@ async function main(){
     const appendixGenerated = await page.evaluate(function(){
       const options = {
         config: {},
-        estimateConfig: { version: 1, pdfFooter: { businessName: "ちばケアタクシー" } }
+        estimateConfig: {
+          version: 1,
+          pdfFooter: { businessName: "ちばケアタクシー" },
+          trafficZones: {
+            items: [
+              { id: "keiyo", label: "京葉交通圏", coefficient: 1.2, order: 1 }
+            ]
+          }
+        }
       };
       const fullSet = window.PreFixedFareSubmissionAppendixWord.buildWordDocumentHtml("submission-appendix-set", options);
       const helper = window.PreFixedFareSubmissionAppendixWord.buildWordDocumentHtml("application-helper", options);
@@ -476,6 +484,14 @@ async function main(){
     assert(
       appendixGenerated.helperHtml.includes("本シートは公式申請様式ではありません"),
       "記入補助シートに注意文言がありません"
+    );
+    assert(
+      appendixGenerated.fullSetHtml.includes("株式会社 千葉福祉サポート"),
+      "別紙セットに事業者名がありません"
+    );
+    assert(
+      !appendixGenerated.helperHtml.includes("営業区域</td><td>京葉交通圏"),
+      "記入補助シートの営業区域が自動列挙されています"
     );
     const appendixSetPath = await writeUtf8FileSafe(
       path.join(outputDir, "pre-fixed-fare-submission-appendix-set.html"),

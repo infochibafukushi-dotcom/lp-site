@@ -38,6 +38,22 @@
     return "<tr><td class='check-col'>☐</td><td>" + escapeHtml(label) + "</td></tr>";
   }
 
+  function formatBusinessMetaLine(meta){
+    return "事業者名：" + escapeHtml(meta?.companyName || "") + "　屋号：" + escapeHtml(meta?.tradeName || "");
+  }
+
+  function renderCoefficientReference(payload){
+    const rows = payload.coefficientReferenceRows || payload.meta?.coefficientReferenceRows || [];
+    if(!rows.length){
+      return "";
+    }
+    return (
+      "<h3 class='subsection-title'>参考：千葉県内交通圏の平準化係数（申請欄への自動転記ではない）</h3>" +
+      "<p class='footer-note'>以下はシステム設定値の参考一覧です。申請欄には、申請対象の交通圏に対応する関東運輸局公示の係数を転記してください。</p>" +
+      buildTable(["交通圏", "参考係数"], rows, { className: "table-reference" })
+    );
+  }
+
   function getWordCss(){
     return [
       "@page { size: A4; margin: 2cm; }",
@@ -85,11 +101,12 @@
     return (
       "<div class='word-section'>" +
       "<h1 class='doc-title'>" + escapeHtml(payload.title) + "</h1>" +
-      "<p class='meta-line'>作成日：" + escapeHtml(payload.meta?.createdAt || "") + "　事業者名：" + escapeHtml(payload.meta?.businessName || "") + "</p>" +
+      "<p class='meta-line'>作成日：" + escapeHtml(payload.meta?.createdAt || "") + "　" + formatBusinessMetaLine(payload.meta) + "</p>" +
       buildList(payload.intro) +
       "<h2 class='section-title'>公式リンク欄</h2><ul>" + linksHtml + "</ul>" +
       "<h2 class='section-title'>記入補助項目</h2>" +
       buildKeyValueTable(payload.helperFields || []) +
+      renderCoefficientReference(payload) +
       "<p class='footer-note'>" + escapeHtml(payload.notice || "") + "</p>" +
       "</div>"
     );
@@ -99,9 +116,10 @@
     return (
       "<div class='word-section'>" +
       "<h1 class='doc-title'>" + escapeHtml(payload.title) + "</h1>" +
-      "<p class='meta-line'>事業者名：" + escapeHtml(payload.meta?.businessName || "") + "　営業区域：" + escapeHtml(payload.meta?.operatingArea || "") + "</p>" +
+      "<p class='meta-line'>" + formatBusinessMetaLine(payload.meta) + "</p>" +
       buildList(payload.intro) +
       buildKeyValueTable(payload.fields || []) +
+      renderCoefficientReference(payload) +
       "</div>"
     );
   }
@@ -180,6 +198,7 @@
       }).join("");
       return (
         "<h1 class='doc-title'>" + escapeHtml(payload.title) + "</h1>" +
+        "<p class='meta-line'>" + formatBusinessMetaLine(payload.meta) + "</p>" +
         buildList(payload.intro) +
         parts
       );

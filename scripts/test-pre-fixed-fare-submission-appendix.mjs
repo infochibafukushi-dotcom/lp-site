@@ -17,6 +17,10 @@ const DOCUMENTS = [
       "関東運輸局 タクシー関係申請手続き（運賃関係）",
       "事前確定運賃認可申請様式（Word）",
       "本シートは公式申請様式ではありません",
+      "株式会社 千葉福祉サポート",
+      "屋号",
+      "申請書本体に記載の営業区域に合わせて記入",
+      "申請対象交通圏について、関東運輸局公示の係数を転記",
       "記入補助項目"
     ]
   },
@@ -38,6 +42,9 @@ const DOCUMENTS = [
       "迎車料金",
       "予約料金",
       "介助料",
+      "会社料金表に基づき記入",
+      "実費に基づき記入",
+      "キャンセルポリシーに基づき記入",
       "事前確定運賃に含めるか"
     ]
   },
@@ -136,14 +143,26 @@ async function main(){
     const results = await page.evaluate(function(docs){
       const options = {
         config: {},
-        estimateConfig: { version: 1, pdfFooter: { businessName: "ちばケアタクシー" } }
+        estimateConfig: {
+          version: 1,
+          pdfFooter: { businessName: "ちばケアタクシー" },
+          trafficZones: {
+            items: [
+              { id: "keiyo", label: "京葉交通圏", coefficient: 1.2, order: 1 },
+              { id: "togashi", label: "東葛交通圏", coefficient: 1.15, order: 2 }
+            ]
+          }
+        }
       };
       return docs.map(function(doc){
         const built = window.PreFixedFareSubmissionAppendixWord.buildWordDocumentHtml(doc.id, options);
+        const helperTableMatch = built.html.match(/記入補助項目<\/h2>[\s\S]*?<\/table>/);
+        const helperTableHtml = helperTableMatch ? helperTableMatch[0] : "";
         return {
           id: doc.id,
           filename: built.payload.wordFilename,
           html: built.html,
+          helperTableHtml: helperTableHtml,
           checklistCount: (built.html.match(/☐/g) || []).length,
           pasteBoxCount: (built.html.match(/paste-box/g) || []).length,
           tableCount: (built.html.match(/<table/g) || []).length
@@ -181,6 +200,14 @@ async function main(){
     const distance = results.find(function(item){ return item.id === "distance-fare-table"; });
     assert(!distance.html.includes("円/km") && !distance.html.match(/初乗運賃<\/td><td>\d+/),
       "距離制運賃表に仮の金額が入っています");
+
+    const helper = results.find(function(item){ return item.id === "application-helper"; });
+    assert(!helper.helperTableHtml.includes("京葉交通圏"), "記入補助欄に交通圏が自動列挙されています");
+    assert(helper.html.includes("参考：千葉県内交通圏の平準化係数"), "参考係数一覧がありません");
+
+    const fullSet = results.find(function(item){ return item.id === "submission-appendix-set"; });
+    assert(fullSet.html.includes("株式会社 千葉福祉サポート"), "別紙セットに正式な事業者名がありません");
+    assert(fullSet.html.includes("屋号"), "別紙セットに屋号欄がありません");
 
     console.log("PASS submission appendix Word HTML tests");
     console.log(JSON.stringify({

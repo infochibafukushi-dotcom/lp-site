@@ -1,6 +1,11 @@
 (function(global){
   const SYSTEM_NAME = "LP見積・予約連携システム";
   const FILL_IN_PLACEHOLDER = "申請書本体・認可運賃表に基づき記入";
+  const DEFAULT_COMPANY_NAME = "株式会社 千葉福祉サポート";
+  const DEFAULT_TRADE_NAME = "ちばケアタクシー";
+  const OPERATING_AREA_FILL = "申請書本体に記載の営業区域に合わせて記入";
+  const TRAFFIC_ZONE_FILL = "申請書本体に記載の営業区域に対応する交通圏を記入";
+  const COEFFICIENT_FILL = "申請対象交通圏について、関東運輸局公示の係数を転記";
 
   const KANTO_UNCHIN_PAGE = "https://wwwtb.mlit.go.jp/kanto/jidou_koutu/tabi2/taxi_jigyoukaisi/unchin.html";
 
@@ -35,41 +40,26 @@
     });
   }
 
-  function valueOrUnset(value){
-    const text = String(value || "").trim();
-    return text || "未設定";
+  function detectCompanyName(config){
+    const text = String(config?.companyName || "").trim();
+    return text || DEFAULT_COMPANY_NAME;
   }
 
-  function detectBusinessName(config, estimateConfig){
-    return valueOrUnset(
+  function detectTradeName(config, estimateConfig){
+    return String(
       estimateConfig?.pdfFooter?.businessName
       || config?.businessName
-      || config?.companyName
       || config?.shopName
-    );
+      || ""
+    ).trim() || DEFAULT_TRADE_NAME;
   }
 
-  function detectOperatingArea(estimateConfig){
+  function buildCoefficientReferenceRows(estimateConfig){
     const zones = Array.isArray(estimateConfig?.trafficZones?.items)
       ? estimateConfig.trafficZones.items
       : [];
     if(!zones.length){
-      return "未設定";
-    }
-    return zones
-      .slice()
-      .sort(function(a, b){ return (a.order || 0) - (b.order || 0); })
-      .map(function(zone){ return String(zone?.label || "").trim(); })
-      .filter(Boolean)
-      .join(" / ") || "未設定";
-  }
-
-  function coefficientSummary(estimateConfig){
-    const zones = Array.isArray(estimateConfig?.trafficZones?.items)
-      ? estimateConfig.trafficZones.items
-      : [];
-    if(!zones.length){
-      return "関東運輸局公示済み平準化係数（申請書に基づき記入）";
+      return [];
     }
     return zones
       .slice()
@@ -77,34 +67,37 @@
       .map(function(zone){
         const label = String(zone?.label || "").trim();
         const coef = Number(zone?.coefficient);
-        return label + (Number.isFinite(coef) ? "：" + coef.toFixed(2) : "");
+        return [
+          label || "（名称未設定）",
+          Number.isFinite(coef) ? coef.toFixed(2) : "関東運輸局公示を確認"
+        ];
       })
-      .filter(Boolean)
-      .join(" / ");
+      .filter(function(row){ return row[0]; });
   }
 
   function serviceFeeRows(){
     return [
-      ["乗車地から降車地までの運賃", FILL_IN_PLACEHOLDER, "含める", "事前確定運賃として表示", "事前確定運賃の本体"],
-      ["迎車料金", FILL_IN_PLACEHOLDER, "原則別枠", "別行表示", "事前確定運賃とは区分"],
-      ["予約料金", FILL_IN_PLACEHOLDER, "別枠", "別行表示", "事前確定運賃とは区分"],
-      ["介助料", FILL_IN_PLACEHOLDER, "別枠", "別行表示", "介護タクシーサービス料金"],
-      ["待機料", FILL_IN_PLACEHOLDER, "別枠", "別行表示", "実待機に応じて精算"],
-      ["付き添い料", FILL_IN_PLACEHOLDER, "別枠", "別行表示", "実対応に応じて精算"],
-      ["有料道路代", FILL_IN_PLACEHOLDER, "別枠", "別行表示", "実費・別料金"],
-      ["駐車場代", FILL_IN_PLACEHOLDER, "別枠", "別行表示", "実費・別料金"],
-      ["福祉タクシー券", FILL_IN_PLACEHOLDER, "精算側", "精算時表示", "運賃算定ではなく精算時充当"],
-      ["障害者割引", FILL_IN_PLACEHOLDER, "別枠", "別行表示", "適用時は割引前後を表示"],
-      ["深夜早朝割増", FILL_IN_PLACEHOLDER, "別枠", "別行表示", "適用時は明細上で区分"],
-      ["キャンセル料", FILL_IN_PLACEHOLDER, "別枠", "別行表示", "キャンセルポリシーに基づく"]
+      ["乗車地から降車地までの運賃", "申請書本体・認可運賃表に基づき記入", "含める", "事前確定運賃として表示", "事前確定運賃の本体"],
+      ["迎車料金", "申請書本体・認可料金表に基づき記入、または会社料金表に基づき記入", "原則別枠", "別行表示", "事前確定運賃とは区分"],
+      ["予約料金", "申請書本体・認可料金表に基づき記入、または会社料金表に基づき記入", "別枠", "別行表示", "事前確定運賃とは区分"],
+      ["介助料", "会社料金表に基づき記入", "別枠", "別行表示", "介護タクシーサービス料金"],
+      ["待機料", "会社料金表に基づき記入", "別枠", "別行表示", "実待機に応じて精算"],
+      ["付き添い料", "会社料金表に基づき記入", "別枠", "別行表示", "実対応に応じて精算"],
+      ["有料道路代", "実費に基づき記入", "別枠", "別行表示", "実費・別料金"],
+      ["駐車場代", "実費に基づき記入", "別枠", "別行表示", "実費・別料金"],
+      ["福祉タクシー券", "市町村の福祉タクシー券取扱いに基づき精算時充当", "精算側", "精算時表示", "運賃算定ではなく精算時充当"],
+      ["障害者割引", "申請書本体・認可運賃表または制度に基づき記入", "別枠", "別行表示", "適用時は割引前後を表示"],
+      ["深夜早朝割増", "申請書本体・認可運賃表に基づき記入", "別枠", "別行表示", "適用時は明細上で区分"],
+      ["キャンセル料", "キャンセルポリシーに基づき記入", "別枠", "別行表示", "キャンセルポリシーに基づく"]
     ];
   }
 
-  function distanceFareFields(){
+  function distanceFareFields(meta){
     return [
-      ["事業者名", ""],
-      ["営業区域", ""],
-      ["適用交通圏", ""],
+      ["事業者名", meta.companyName],
+      ["屋号", meta.tradeName],
+      ["営業区域", meta.operatingArea],
+      ["適用交通圏", meta.trafficZone],
       ["運賃種別", "距離制運賃"],
       ["初乗運賃", FILL_IN_PLACEHOLDER],
       ["初乗距離", FILL_IN_PLACEHOLDER],
@@ -122,7 +115,8 @@
 
   function applicationHelperFields(meta){
     return [
-      ["事業者名", meta.businessName],
+      ["事業者名", meta.companyName],
+      ["屋号", meta.tradeName],
       ["営業区域", meta.operatingArea],
       ["適用する事前確定運賃の対象", "介護タクシー（福祉輸送限定）における事前確定運賃"],
       ["使用システム名", SYSTEM_NAME],
@@ -256,9 +250,12 @@
     const config = options?.config || {};
     const estimateConfig = options?.estimateConfig || {};
     return {
-      businessName: detectBusinessName(config, estimateConfig),
-      operatingArea: detectOperatingArea(estimateConfig),
-      coefficientSummary: coefficientSummary(estimateConfig),
+      companyName: detectCompanyName(config),
+      tradeName: detectTradeName(config, estimateConfig),
+      operatingArea: OPERATING_AREA_FILL,
+      trafficZone: TRAFFIC_ZONE_FILL,
+      coefficientSummary: COEFFICIENT_FILL,
+      coefficientReferenceRows: buildCoefficientReferenceRows(estimateConfig),
       createdAt: todayJst(),
       createdBy: "LP管理画面",
       systemName: SYSTEM_NAME
@@ -291,6 +288,7 @@
         ],
         officialLinks: OFFICIAL_LINKS,
         helperFields: applicationHelperFields(meta),
+        coefficientReferenceRows: meta.coefficientReferenceRows,
         notice: "本シートは公式申請様式ではありません。正式提出時は、関東運輸局が公表する最新の認可申請様式を使用してください。"
       });
     }
@@ -301,18 +299,8 @@
           "本別紙は、事前確定運賃の算定元となる距離制運賃表を示すものである。",
           "実際の申請時には、申請予定または認可後の距離制運賃表に基づき、初乗運賃・加算運賃・時間距離併用運賃等を記入する。"
         ],
-        fields: distanceFareFields().map(function(row){
-          if(row[0] === "事業者名"){
-            return [row[0], meta.businessName];
-          }
-          if(row[0] === "営業区域"){
-            return [row[0], meta.operatingArea];
-          }
-          if(row[0] === "適用交通圏"){
-            return [row[0], meta.operatingArea];
-          }
-          return row;
-        })
+        fields: distanceFareFields(meta),
+        coefficientReferenceRows: meta.coefficientReferenceRows
       });
     }
 
@@ -369,6 +357,11 @@
   global.PreFixedFareSubmissionAppendixData = {
     DOCUMENTS: DOCUMENTS,
     FILL_IN_PLACEHOLDER: FILL_IN_PLACEHOLDER,
+    DEFAULT_COMPANY_NAME: DEFAULT_COMPANY_NAME,
+    DEFAULT_TRADE_NAME: DEFAULT_TRADE_NAME,
+    OPERATING_AREA_FILL: OPERATING_AREA_FILL,
+    TRAFFIC_ZONE_FILL: TRAFFIC_ZONE_FILL,
+    COEFFICIENT_FILL: COEFFICIENT_FILL,
     buildMeta: buildMeta,
     buildDocumentPayload: buildDocumentPayload
   };
