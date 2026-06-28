@@ -2,33 +2,35 @@
   {
     "id": "section-first-view",
     "sectionId": "first-view-chibakea-taxi",
-    "type": "card1-right",
+    "type": "slider",
     "enabled": true,
-    "title": "千葉市・四街道周辺の通院・退院・車いす移動を安心サポート",
-    "text": "ご家族・ケアマネジャー様からのご相談に対応。車いすのまま乗れる介護タクシーで、病院受診・退院・転院・施設入退所・お買い物・冠婚葬祭などの移動をサポートします。\n\n通院時間や退院時間が決まっている場合は、まず空き状況をご確認ください。車いす・ストレッチャー・階段介助・院内付き添いなど、必要な介助内容も事前に確認できます。",
-    "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/sections/1773103736168-messageImage_1770383343976_0.jpg",
-    "link": "#",
+    "title": "千葉市・近隣市の介護タクシー\nちばケアタクシー",
+    "text": "通院・退院・転院・施設送迎・車いす移動に対応。\n千葉市を中心に、近隣市・千葉県内の移動もご相談ください。\n24時間予約受付。",
     "textSize": "medium",
     "bgColor": "#f7f5f0",
     "alignY": "middle",
     "titleAlign": "left",
     "textAlign": "left",
-    "images": [],
+    "images": [
+      "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062960486-messageImage_1770383251537.jpg"
+    ],
+    "image": "",
+    "link": "#",
     "items": [],
     "links": [
       {
-        "text": "空き状況を確認する",
+        "text": "予約する",
         "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
         "visible": true
       },
       {
-        "text": "料金目安を見る",
-        "url": "#ryokin-meyasu",
+        "text": "お見積り",
+        "url": "./estimate/",
         "visible": true
       },
       {
-        "text": "対応サービスを見る",
-        "url": "#taiou-service-kaigo",
+        "text": "空き状況",
+        "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
         "visible": true
       }
     ],
@@ -44,28 +46,28 @@
     "sectionId": "three-key-checks",
     "type": "card3",
     "enabled": true,
-    "title": "まず知りたい3つのことをすぐ確認できます",
-    "text": "介護タクシーを探すときに大切なのは、希望日時に利用できるか、身体状態に対応できるか、料金がどのくらいかです。ちばケアタクシーでは、予約前にこの3点を確認できます。",
+    "title": "予約・お見積り・空き状況をすぐ確認できます",
+    "text": "",
     "textSize": "medium",
     "bgColor": "#ffffff",
     "items": [
       {
-        "title": "希望日時に空きがあるか",
-        "text": "通院、退院、転院、施設入所など、移動日時が決まっている場合は空き状況が最優先です。ご希望日時と出発地・目的地をお知らせください。",
-        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773103749339-messageImage_1770383272387_0.jpg",
+        "title": "予約する",
+        "text": "通院・退院・転院・施設送迎など、ご希望日時が決まっている方はこちらからご予約ください。",
+        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/sections/1773103782069-messageImage_1770383436537_0.jpg",
         "link": "https://infochibafukushi-dotcom.github.io/reservation-v4/"
       },
       {
-        "title": "車いす・介助に対応できるか",
-        "text": "車いす、ストレッチャー、階段介助、ベッドからの移乗、院内付き添いなど、必要なサポート内容を確認します。",
-        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773103755526-messageImage_1770383194104.jpg",
-        "link": "#taiou-service-kaigo"
+        "title": "お見積り",
+        "text": "出発地・目的地・介助内容を入力して、料金の目安を確認できます。",
+        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062967741-messageImage_1770383272387_0.jpg",
+        "link": "./estimate/"
       },
       {
-        "title": "料金はいくらぐらいか",
-        "text": "距離、時間、介助内容、使用する機材によって料金が変わります。予約前に目安料金をご案内します。",
-        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773103763810-messageImage_1770383486552_0.jpg",
-        "link": "#ryokin-meyasu"
+        "title": "空き状況",
+        "text": "当日・翌日・希望日時の空き状況を確認したい方はこちらからご相談ください。",
+        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/footer/1773052808077-messageImage_1770430107621.jpg",
+        "link": "https://infochibafukushi-dotcom.github.io/reservation-v4/"
       }
     ],
     "image": "",
@@ -99,36 +101,76 @@
     }
   },
   {
+    "id": "section-seven-benefits",
+    "sectionId": "seven-benefits-chibakea",
+    "type": "card1-left",
+    "enabled": true,
+    "title": "ちばケアタクシーが選ばれる7つの理由",
+    "text": "車いすをご利用の方や歩行に不安のある方が、安心して外出できるようサポートします。\n\n1. 車いすのまま乗車可能\n2. 通院・退院・転院に対応\n3. ご家族・ケアマネ様から予約可能\n4. 料金目安を事前に確認可能\n5. 院内付き添い・階段介助も相談可能\n6. 千葉市・近隣市を中心に対応\n7. 24時間予約受付",
+    "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062967741-messageImage_1770383272387_0.jpg",
+    "link": "#",
+    "textSize": "medium",
+    "bgColor": "#ffffff",
+    "alignY": "middle",
+    "titleAlign": "left",
+    "textAlign": "left",
+    "images": [],
+    "items": [],
+    "links": [
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ],
+    "menuGroups": [],
+    "menuBottomCard": {
+      "visible": false,
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
+    }
+  },
+  {
     "id": "section-usage-scenarios",
     "sectionId": "usage-scenarios",
     "type": "card4",
     "enabled": true,
-    "title": "通院・退院・施設送迎・日常の外出に対応します",
-    "text": "病院や施設への移動だけでなく、日常生活に必要なお出かけにもご利用いただけます。ご本人様の状態や付き添いの有無に合わせて、必要な介助内容を確認します。",
+    "title": "このような移動でご利用いただけます",
+    "text": "",
     "textSize": "medium",
     "bgColor": "#f7f5f0",
     "items": [
       {
         "title": "通院・受診",
-        "text": "ご自宅から病院まで、車いすのまま移動できます。受付までの介助や院内付き添いもご相談ください。",
+        "text": "病院受診、検査、リハビリ通院などに対応します。",
         "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062960486-messageImage_1770383251537.jpg",
         "link": "#"
       },
       {
         "title": "退院・転院",
-        "text": "病院からご自宅、施設、別の病院への移動に対応します。退院時間が決まっている場合は、早めのご相談がおすすめです。",
+        "text": "病院からご自宅・施設・別の病院への移動に対応します。",
         "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062967741-messageImage_1770383272387_0.jpg",
         "link": "#"
       },
       {
-        "title": "施設入所・ショートステイ",
-        "text": "ご自宅から施設、施設から病院、施設からご自宅への送迎に対応します。施設職員様・相談員様からのご相談も可能です。",
+        "title": "施設入退所・ショートステイ",
+        "text": "ご自宅から施設、施設から病院などの送迎に対応します。",
         "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062973797-messageImage_1770383486552_0.jpg",
         "link": "#"
       },
       {
         "title": "買い物・冠婚葬祭・外出",
-        "text": "お買い物、理美容室、銀行、役所、墓参り、冠婚葬祭など、日常の外出にもご利用いただけます。",
+        "text": "買い物、理美容室、役所、墓参り、冠婚葬祭などにもご利用いただけます。",
         "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062985662-messageImage_1770383194104.jpg",
         "link": "#"
       }
@@ -385,7 +427,7 @@
     "id": "section-aki-yoyaku",
     "sectionId": "aki-jokyo-yoyaku-hoho",
     "type": "card1-right",
-    "enabled": true,
+    "enabled": false,
     "title": "空き状況を確認して、そのまま予約できます",
     "text": "通院や退院は時間が決まっていることが多いため、まずはご希望日時の空き状況をご確認ください。予約時に、出発地・目的地・利用日時・車いすの有無・必要な介助内容をお知らせいただくと、スムーズにご案内できます。\n\n・ご利用日時\n・出発地\n・目的地\n・片道・往復・立ち寄りの有無\n・ご利用者様の身体状態\n・車いす・ストレッチャーの有無\n・階段・段差の有無\n・院内付き添いの有無\n・同乗者の人数",
     "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/sections/1773103782069-messageImage_1770383436537_0.jpg",
