@@ -101,6 +101,29 @@ function assert(condition, message){
   }
 }
 
+async function writeUtf8FileSafe(filePath, content){
+  for(let attempt = 0; attempt < 5; attempt++){
+    try{
+      fs.writeFileSync(filePath, content, "utf8");
+      return filePath;
+    }catch(error){
+      if(error?.code !== "EBUSY" || attempt === 4){
+        if(error?.code === "EBUSY"){
+          const altPath = filePath.replace(/(\.[^.]+)$/, "-" + Date.now() + "$1");
+          fs.writeFileSync(altPath, content, "utf8");
+          console.warn("WARN locked file, wrote alternate:", altPath);
+          return altPath;
+        }
+        throw error;
+      }
+      await new Promise(function(resolve){
+        setTimeout(resolve, 400);
+      });
+    }
+  }
+  return filePath;
+}
+
 async function assertIntegratedPdfLayout(filePath){
   const parser = new PDFParse({ data: fs.readFileSync(filePath) });
   const info = await parser.getInfo();
@@ -412,8 +435,52 @@ async function main(){
     assert(wordGenerated.filename === INTEGRATED_WORD_FILENAME, "④Word出力ファイル名が不正");
     assert(wordGenerated.html.includes("根拠資料・確認資料一覧"), "④Word HTMLに根拠資料一覧がありません");
     assert(wordGenerated.html.includes("本番D1上の当該テスト予約は削除済み"), "④Word HTMLにE2E注記がありません");
-    const wordPath = path.join(outputDir, INTEGRATED_WORD_FILENAME);
-    fs.writeFileSync(wordPath, "\ufeff" + wordGenerated.html, "utf8");
+    const wordPath = await writeUtf8FileSafe(path.join(outputDir, INTEGRATED_WORD_FILENAME), "\ufeff" + wordGenerated.html);
+
+    const appendixButtonsVisible = await page.evaluate(function(){
+      return [
+        "preFixedFareAppendixApplicationHelperBtn",
+        "preFixedFareAppendixDistanceFareBtn",
+        "preFixedFareAppendixServiceFeeBtn",
+        "preFixedFareAppendixDeviceChecklistBtn",
+        "preFixedFareAppendixScreenshotSheetBtn",
+        "preFixedFareAppendixFullSetBtn"
+      ].every(function(id){
+        return Boolean(document.getElementById(id));
+      });
+    });
+    assert(appendixButtonsVisible, "提出用別紙ボタンが表示されていません");
+
+    const appendixGenerated = await page.evaluate(function(){
+      const options = {
+        config: {},
+        estimateConfig: { version: 1, pdfFooter: { businessName: "ちばケアタクシー" } }
+      };
+      const fullSet = window.PreFixedFareSubmissionAppendixWord.buildWordDocumentHtml("submission-appendix-set", options);
+      const helper = window.PreFixedFareSubmissionAppendixWord.buildWordDocumentHtml("application-helper", options);
+      return {
+        fullSetFilename: fullSet.payload.wordFilename,
+        fullSetHtml: fullSet.html,
+        helperHtml: helper.html
+      };
+    });
+    assert(
+      appendixGenerated.fullSetFilename === "pre-fixed-fare-submission-appendix-set.html",
+      "別紙セットのファイル名が不正"
+    );
+    assert(
+      appendixGenerated.fullSetHtml.includes("別紙1　距離制運賃表")
+        && appendixGenerated.fullSetHtml.includes("別紙4　画面スクリーンショット台紙"),
+      "別紙セットに全別紙が含まれていません"
+    );
+    assert(
+      appendixGenerated.helperHtml.includes("本シートは公式申請様式ではありません"),
+      "記入補助シートに注意文言がありません"
+    );
+    const appendixSetPath = await writeUtf8FileSafe(
+      path.join(outputDir, "pre-fixed-fare-submission-appendix-set.html"),
+      "\ufeff" + appendixGenerated.fullSetHtml
+    );
 
     console.log("PASS browser manual PDF verification");
     console.log(JSON.stringify({
@@ -423,7 +490,8 @@ async function main(){
       integratedPdf: integrated.filePath,
       integratedSize: integrated.size,
       integratedFilename: INTEGRATED_FILENAME,
-      integratedWordHtml: wordPath
+      integratedWordHtml: wordPath,
+      submissionAppendixSetHtml: appendixSetPath
     }, null, 2));
   }finally{
     await browser.close();

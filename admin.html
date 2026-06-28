@@ -1424,6 +1424,18 @@ body{
         </div>
         <div class="preview" id="preFixedFareIntegratedSummaryStatus">まだ出力していません。</div>
       </div>
+      <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e5e5e5;">
+        <p class="note" style="margin-bottom:8px;"><strong>提出用 別紙・確認資料</strong><br>事前確定運賃認可の事前相談・提出時に、統合説明資料へ添付しやすい別紙・確認資料を出力します。正式な認可申請様式は関東運輸局の公式様式を使用し、本画面では記入補助・別紙・確認台紙を作成します。</p>
+        <div class="actions" style="flex-wrap:wrap; gap:8px;">
+          <button type="button" id="preFixedFareAppendixApplicationHelperBtn">事前確定運賃 認可申請様式リンク・記入補助シートを出力</button>
+          <button type="button" id="preFixedFareAppendixDistanceFareBtn">距離制運賃表 別紙を出力</button>
+          <button type="button" id="preFixedFareAppendixServiceFeeBtn">料金表 別紙を出力</button>
+          <button type="button" id="preFixedFareAppendixDeviceChecklistBtn">実機目視確認チェックリストを出力</button>
+          <button type="button" id="preFixedFareAppendixScreenshotSheetBtn">画面スクリーンショット台紙を出力</button>
+          <button type="button" id="preFixedFareAppendixFullSetBtn">提出用 別紙セットをまとめて出力</button>
+        </div>
+        <div class="preview" id="preFixedFareSubmissionAppendixStatus">まだ出力していません。</div>
+      </div>
     </div>
   </div>
 
@@ -1458,6 +1470,10 @@ body{
 <script src="./shared/pre-fixed-fare-integrated-summary-data.js?v=39e326a1"></script>
 <script src="./shared/pre-fixed-fare-integrated-summary-pdf.js?v=39e326a1"></script>
 <script src="./shared/pre-fixed-fare-integrated-summary-word.js?v=39e326a1"></script>
+<script src="./shared/pre-fixed-fare-submission-appendix-data.js?v=appendix01"></script>
+<script src="./shared/pre-fixed-fare-submission-appendix-word.js?v=appendix01"></script>
+<script src="./shared/pre-fixed-fare-submission-appendix-pdf.js?v=appendix01"></script>
+<script src="./admin-pre-fixed-fare-submission-appendix.js?v=appendix01"></script>
 <script src="./admin-pre-fixed-fare-report.js?v=39e326a1"></script>
 <script>
 const CONFIG_PATH = 'data/config.json';
