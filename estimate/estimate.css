@@ -906,6 +906,36 @@
 .estimate-total-section{
   margin-top:16px;
 }
+.estimate-total-section--hero{
+  margin-top:0;
+  margin-bottom:18px;
+  padding:18px 14px;
+  background:#fff8f0;
+  border:1px solid #f0dfc8;
+  border-radius:14px;
+}
+.estimate-result-notes--hero{
+  margin-top:10px;
+  text-align:center;
+}
+.estimate-cta-group--result{
+  margin:0 0 20px;
+}
+.estimate-cta-group--result .estimate-cta-primary{
+  width:100%;
+}
+.estimate-cta-group--secondary{
+  margin-top:12px;
+}
+.estimate-result-route-block{
+  margin-top:18px;
+}
+.estimate-result-actions{
+  margin-top:18px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
 .estimate-total-rule{
   margin:12px 0;
   text-align:center;

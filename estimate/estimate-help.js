@@ -15,7 +15,9 @@
 
   function formatAmountBadge(amount){
     const n = Number(amount) || 0;
-    if(n <= 0) return "";
+    if(n <= 0){
+      return `<span class="estimate-choice-amount">＋0円</span>`;
+    }
     return `<span class="estimate-choice-amount">＋¥${n.toLocaleString("ja-JP")}</span>`;
   }
 

@@ -207,7 +207,7 @@
           label: "送迎方法",
           items: [
             tripItem("one-way", "片道", "片道の送迎です。", 1, { distanceMultiplier: 1, showInSelector: true }),
-            tripItem("round-trip", "往復", "往復の送迎です。距離運賃は2倍で計算します。", 2, { distanceMultiplier: 2, showInSelector: true }),
+            tripItem("round-trip", "往復", "往路・復路をそれぞれ確認して料金目安を計算します。帰りの時間や立ち寄りがある場合もご相談ください。", 2, { distanceMultiplier: 2, showInSelector: true }),
             tripItem("waiting", "待機（旧）", "旧設定項目です。", 3, { distanceMultiplier: 2, waitingFeeRef: "waiting30min", showInSelector: false }),
             tripItem("hospital-escort", "病院付き添い（旧）", "旧設定項目です。", 4, { distanceMultiplier: 2, escortFeeRef: "escort30min", showInSelector: false })
           ]

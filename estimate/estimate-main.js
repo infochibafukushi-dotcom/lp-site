@@ -2796,34 +2796,38 @@
         <h3>見積結果</h3>
         ${renderEstimateNumberBox()}
         ${renderRegisterWarningBox()}
-        ${renderRouteSelectionSection(result)}
-        ${routeCardHtml}
-        ${renderUsageSummary(result)}
-        ${renderFareBasis(result)}
-        <div class="estimate-breakdown-groups">
-          ${renderFareSections(result)}
-        </div>
-        <div class="estimate-total-section">
-          <div class="estimate-total-rule" aria-hidden="true"></div>
+        <div class="estimate-total-section estimate-total-section--hero">
           <div class="estimate-total-box">
             <div class="estimate-total-label">${escapeHtml(totalLabel)}</div>
             <div class="estimate-total-amount">${escapeHtml(formatResultTotalAmount(result.total))}</div>
           </div>
-          <div class="estimate-total-rule" aria-hidden="true"></div>
-          <div class="estimate-result-notes">${escapeHtml(getResultNotes())}</div>
+          <div class="estimate-result-notes estimate-result-notes--hero">${escapeHtml(getResultNotes())}</div>
         </div>
+        <div class="estimate-cta-group estimate-cta-group--result">
+          <a class="estimate-cta-primary" href="${escapeAttr(reservationUrl)}" rel="noopener noreferrer">${escapeHtml(getReservationCtaLabel())}</a>
+          ${getReservationReviewNotice()
+            ? '<p class="estimate-reservation-review-notice estimate-reservation-review-notice--result">' + escapeHtml(getReservationReviewNotice()) + "</p>"
+            : ""}
+        </div>
+        <div class="estimate-breakdown-groups">
+          ${renderFareSections(result)}
+        </div>
+        ${renderUsageSummary(result)}
+        ${renderFareBasis(result)}
         ${renderCalculationBasis(result)}
-        <button type="button" class="estimate-pdf-btn" id="estimatePdfBtn">見積書PDFを保存</button>
-        <div class="estimate-pdf-feedback" id="estimatePdfFeedback" aria-live="polite"></div>
-        <button type="button" class="estimate-copy-url-btn" id="estimateCopyUrlBtn">見積URLをコピー</button>
-        <div class="estimate-copy-url-feedback" id="estimateCopyUrlFeedback" aria-live="polite"></div>
-        <button type="button" class="estimate-reset-btn estimate-reset-btn--bottom" id="estimateResetBtnBottom">最初からやり直す</button>
+        <div class="estimate-result-route-block">
+          ${renderRouteSelectionSection(result)}
+          ${routeCardHtml}
+        </div>
+        <div class="estimate-result-actions">
+          <button type="button" class="estimate-pdf-btn" id="estimatePdfBtn">見積書PDFを保存</button>
+          <div class="estimate-pdf-feedback" id="estimatePdfFeedback" aria-live="polite"></div>
+          <button type="button" class="estimate-copy-url-btn" id="estimateCopyUrlBtn">見積URLをコピー</button>
+          <div class="estimate-copy-url-feedback" id="estimateCopyUrlFeedback" aria-live="polite"></div>
+          <button type="button" class="estimate-reset-btn estimate-reset-btn--bottom" id="estimateResetBtnBottom">最初からやり直す</button>
+        </div>
       </section>
-      ${getReservationReviewNotice()
-        ? '<p class="estimate-reservation-review-notice estimate-reservation-review-notice--result">' + escapeHtml(getReservationReviewNotice()) + "</p>"
-        : ""}
-      <div class="estimate-cta-group">
-        <a class="estimate-cta-primary" href="${escapeAttr(reservationUrl)}" rel="noopener noreferrer">${escapeHtml(getReservationCtaLabel())}</a>
+      <div class="estimate-cta-group estimate-cta-group--secondary">
         <div class="estimate-cta-secondary-row">
           <a class="estimate-cta-secondary" href="${escapeAttr(lineUrl)}" target="_blank" rel="noopener noreferrer">LINEで相談する</a>
           <a class="estimate-cta-secondary" href="${escapeAttr(phoneUrl)}">電話で問い合わせる</a>

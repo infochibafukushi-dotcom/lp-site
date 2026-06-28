@@ -472,7 +472,7 @@
         {
           "id": "round-trip",
           "label": "往復",
-          "description": "往復の送迎です。距離運賃は2倍で計算します。",
+          "description": "往路・復路をそれぞれ確認して料金目安を計算します。帰りの時間や立ち寄りがある場合もご相談ください。",
           "amount": 0,
           "visible": true,
           "order": 2,
