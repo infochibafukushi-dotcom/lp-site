@@ -58,19 +58,19 @@
       {
         "title": "予約する",
         "text": "通院・退院・施設送迎のご予約はこちら。",
-        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/sections/1773103782069-messageImage_1770383436537_0.jpg",
+        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1782684888377-ChatGPT-Image-2026629-07_14_30.png",
         "link": "https://infochibafukushi-dotcom.github.io/reservation-v4/"
       },
       {
         "title": "お見積り",
         "text": "出発地・目的地から料金目安を確認できます。",
-        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062967741-messageImage_1770383272387_0.jpg",
+        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1782684894989-ChatGPT-Image-2026629-07_14_36.png",
         "link": "./estimate/"
       },
       {
         "title": "空き状況",
         "text": "希望日時の空き状況を確認できます。",
-        "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/footer/1773052808077-messageImage_1770430107621.jpg",
+        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1782684947120-ChatGPT-Image-2026629-07_15_40.png",
         "link": "https://infochibafukushi-dotcom.github.io/reservation-v4/"
       }
     ],
