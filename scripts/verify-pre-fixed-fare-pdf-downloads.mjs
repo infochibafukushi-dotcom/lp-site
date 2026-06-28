@@ -10,6 +10,7 @@ const adminUrl = "file:///" + path.join(rootDir, "admin.html").replace(/\\/g, "/
 const DEFAULT_CHROME = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 const OPERATIONS_FILENAME = "pre-fixed-fare-operations-summary.pdf";
 const INTEGRATED_FILENAME = "pre-fixed-fare-integrated-summary.pdf";
+const INTEGRATED_WORD_FILENAME = "pre-fixed-fare-integrated-summary-word.html";
 
 const OPERATIONS_CHECKS = [
   "1. 事前確定運賃Mの概要",
@@ -392,6 +393,28 @@ async function main(){
     assert(forbiddenFound.length === 0, "④PDF本文に避ける表現: " + forbiddenFound.join(", "));
     await assertIntegratedPdfLayout(integrated.filePath);
 
+    const integratedWordButtonVisible = await page.evaluate(function(){
+      return Boolean(document.getElementById("preFixedFareIntegratedSummaryWordExportBtn"));
+    });
+    assert(integratedWordButtonVisible, "④Wordボタンが表示されていません");
+
+    const wordGenerated = await page.evaluate(function(){
+      const data = window.PreFixedFareIntegratedSummaryData.buildReportData({
+        config: {},
+        estimateConfig: { version: 1, pdfFooter: { businessName: "ちばケアタクシー" } }
+      });
+      const html = window.PreFixedFareIntegratedSummaryWord.buildWordDocumentHtml(data);
+      return {
+        filename: window.PreFixedFareIntegratedSummaryWord.WORD_FILENAME,
+        html: html
+      };
+    });
+    assert(wordGenerated.filename === INTEGRATED_WORD_FILENAME, "④Word出力ファイル名が不正");
+    assert(wordGenerated.html.includes("根拠資料・確認資料一覧"), "④Word HTMLに根拠資料一覧がありません");
+    assert(wordGenerated.html.includes("本番D1上の当該テスト予約は削除済み"), "④Word HTMLにE2E注記がありません");
+    const wordPath = path.join(outputDir, INTEGRATED_WORD_FILENAME);
+    fs.writeFileSync(wordPath, "\ufeff" + wordGenerated.html, "utf8");
+
     console.log("PASS browser manual PDF verification");
     console.log(JSON.stringify({
       operationsPdf: operations.filePath,
@@ -399,7 +422,8 @@ async function main(){
       operationsFilename: OPERATIONS_FILENAME,
       integratedPdf: integrated.filePath,
       integratedSize: integrated.size,
-      integratedFilename: INTEGRATED_FILENAME
+      integratedFilename: INTEGRATED_FILENAME,
+      integratedWordHtml: wordPath
     }, null, 2));
   }finally{
     await browser.close();

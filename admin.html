@@ -1420,6 +1420,7 @@ body{
         <p class="note" style="margin-bottom:8px;"><strong>④ 事前確定運賃システム 統合説明資料</strong><br>①公示要件対応表、②利用者向け見積・ルート選択ロジック、③メーターアプリ運行・精算・監査証跡を1冊にまとめた、運輸局提出・説明用の統合資料を出力します。</p>
         <div class="actions">
           <button type="button" id="preFixedFareIntegratedSummaryExportBtn">事前確定運賃システム 統合説明資料PDFを出力</button>
+          <button type="button" id="preFixedFareIntegratedSummaryWordExportBtn">事前確定運賃システム 統合説明資料 Word編集用HTMLを出力</button>
         </div>
         <div class="preview" id="preFixedFareIntegratedSummaryStatus">まだ出力していません。</div>
       </div>
@@ -1456,6 +1457,7 @@ body{
 <script src="./shared/pre-fixed-fare-operations-summary-pdf.js?v=39e326a1"></script>
 <script src="./shared/pre-fixed-fare-integrated-summary-data.js?v=39e326a1"></script>
 <script src="./shared/pre-fixed-fare-integrated-summary-pdf.js?v=39e326a1"></script>
+<script src="./shared/pre-fixed-fare-integrated-summary-word.js?v=39e326a1"></script>
 <script src="./admin-pre-fixed-fare-report.js?v=39e326a1"></script>
 <script>
 const CONFIG_PATH = 'data/config.json';

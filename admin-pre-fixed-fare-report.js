@@ -127,6 +127,29 @@
     setIntegratedSummaryStatus("PDFを保存しました。", "success");
   }
 
+  async function generatePreFixedFareIntegratedSummaryWord(){
+    if(!global.PreFixedFareIntegratedSummaryWord){
+      throw new Error("事前確定運賃システム 統合説明資料 Wordモジュールの読み込みに失敗しました。");
+    }
+
+    const [config, estimateConfigFromFile] = await Promise.all([
+      fetchJson(CONFIG_PATH).catch(function(){ return {}; }),
+      fetchJson(ESTIMATE_CONFIG_PATH).catch(function(){ return {}; })
+    ]);
+    const estimateConfig = getEstimateConfigFromEditor() || estimateConfigFromFile;
+
+    return global.PreFixedFareIntegratedSummaryWord.generatePreFixedFareIntegratedSummaryWord({
+      config: config,
+      estimateConfig: estimateConfig
+    });
+  }
+
+  async function exportIntegratedSummaryWord(){
+    setIntegratedSummaryStatus("Word編集用HTMLを作成しています...", "warn");
+    const result = await generatePreFixedFareIntegratedSummaryWord();
+    setIntegratedSummaryStatus("Word編集用HTMLを保存しました。（" + String(result?.filename || "") + "）", "success");
+  }
+
   function bindRegulatoryButton(){
     const button = document.getElementById("preFixedFareReportExportBtn");
     if(!button) return;
@@ -202,28 +225,53 @@
   }
 
   function bindIntegratedSummaryButton(){
-    const button = document.getElementById("preFixedFareIntegratedSummaryExportBtn");
-    if(!button) return;
-    button.addEventListener("click", async function(){
-      button.disabled = true;
-      try{
-        await exportIntegratedSummaryPdf();
-      }catch(error){
-        console.error(error);
-        const reason = String(error?.message || "");
-        if(
-          reason.includes("生成対象HTMLが空")
-          || reason.includes("組み立てに失敗")
-          || reason.includes("読み込みに失敗")
-        ){
-          setIntegratedSummaryStatus(reason, "error");
-        }else{
-          setIntegratedSummaryStatus("PDF作成に失敗しました。", "error");
+    const pdfButton = document.getElementById("preFixedFareIntegratedSummaryExportBtn");
+    if(pdfButton){
+      pdfButton.addEventListener("click", async function(){
+        pdfButton.disabled = true;
+        try{
+          await exportIntegratedSummaryPdf();
+        }catch(error){
+          console.error(error);
+          const reason = String(error?.message || "");
+          if(
+            reason.includes("生成対象HTMLが空")
+            || reason.includes("組み立てに失敗")
+            || reason.includes("読み込みに失敗")
+          ){
+            setIntegratedSummaryStatus(reason, "error");
+          }else{
+            setIntegratedSummaryStatus("PDF作成に失敗しました。", "error");
+          }
+        }finally{
+          pdfButton.disabled = false;
         }
-      }finally{
-        button.disabled = false;
-      }
-    });
+      });
+    }
+
+    const wordButton = document.getElementById("preFixedFareIntegratedSummaryWordExportBtn");
+    if(wordButton){
+      wordButton.addEventListener("click", async function(){
+        wordButton.disabled = true;
+        try{
+          await exportIntegratedSummaryWord();
+        }catch(error){
+          console.error(error);
+          const reason = String(error?.message || "");
+          if(
+            reason.includes("組み立てに失敗")
+            || reason.includes("読み込みに失敗")
+            || reason.includes("生成に失敗")
+          ){
+            setIntegratedSummaryStatus(reason, "error");
+          }else{
+            setIntegratedSummaryStatus("Word編集用HTMLの作成に失敗しました。", "error");
+          }
+        }finally{
+          wordButton.disabled = false;
+        }
+      });
+    }
   }
 
   function bind(){
