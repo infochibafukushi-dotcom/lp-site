@@ -36,16 +36,14 @@ const REQUIRED_CONTENT = [
   "根拠資料・確認資料一覧",
   "本番D1 migration 0005 適用確認",
   "運用開始前確認項目",
-  "事前確定運賃M以外の通常メーターモードの基本動作確認",
-  "通常メーター運行には表示されない",
-  "申請予定または認可後の距離制運賃表",
-  "実際の申請時には、申請予定または認可後の距離制運賃表を別紙として添付",
-  "運転者への同一ルート表示",
-  "quoteSnapshot",
-  "snapshotHashVerified",
-  "confirmedFareMatchesSnapshot",
-  "管理画面の目視確認（確認予定）",
-  "案件詳細の実機目視確認（確認予定）"
+  "コード・API・DB上の動作確認後、提出前または運用開始前に運用者が画面上で最終目視確認を行う項目",
+  "管理画面予約詳細の目視確認",
+  "運転者画面における同一ルートまたは主要経由地点の目視確認",
+  "通常メーター新規運行導線の目視確認",
+  "コード・API・DB上確認済み",
+  "主要経由地点・予約情報の読取確認済み",
+  "同意導線・保存はコード・API・DB上確認済み",
+  "通常メーター運行には表示されない"
 ];
 
 const FORBIDDEN_PHRASES = [
@@ -129,6 +127,25 @@ async function main(){
       return moduleCheck.text.includes(item);
     });
     assert(forbiddenFound.length === 0, "避ける表現が含まれています: " + forbiddenFound.join(", "));
+
+    const mainTableUnconfirmed = ["table-multi-route", "table-requirements"].some(function(marker){
+      const start = moduleCheck.text.indexOf(marker);
+      if(start < 0){
+        return false;
+      }
+      const end = moduleCheck.text.indexOf("</div>", start + marker.length + 200);
+      const chunk = moduleCheck.text.slice(start, end > start ? end : start + 4000);
+      return chunk.includes("未確認");
+    });
+    assert(!mainTableUnconfirmed, "主要表（公示要件対応表・ルート選択表）に「未確認」が残っています");
+    assert(
+      !moduleCheck.text.includes("確認予定"),
+      "「確認予定」は第5章以外に残さない方針です"
+    );
+    assert(
+      moduleCheck.text.includes("申請予定または認可後の距離制運賃表"),
+      "根拠資料一覧に運賃表別紙項目がありません"
+    );
     assert(
       moduleCheck.text.includes("chapter-block-first"),
       "第1章ブロックのページ区切り調整クラスがありません"

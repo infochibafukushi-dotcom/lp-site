@@ -175,7 +175,8 @@
       ) +
       subsection("quoteSnapshot・証跡保存",
         "<h4>確認できる項目</h4>" + buildList(regulatory.snapshotConfirmed) +
-        "<h4>追加確認が必要な項目</h4>" + buildList(regulatory.snapshotUnconfirmed)
+        "<h4>" + escapeHtml(regulatory.snapshotUnconfirmedTitle || "追加確認が必要な項目") + "</h4>" +
+        buildList(regulatory.snapshotUnconfirmed)
       ) +
       subsection("公示要件対応表",
         buildSplitTables(
@@ -312,6 +313,7 @@
         buildList(operations.integrityChecks?.verificationFlow)
       ) +
       subsection("運転者への同一ルート表示",
+        (driverRoute.status ? "<p><strong>現状：</strong>" + escapeHtml(driverRoute.status) + "</p>" : "") +
         buildList(driverRoute.points) +
         (driverRoute.visualCheckNote ? "<p>" + escapeHtml(driverRoute.visualCheckNote) + "</p>" : "")
       ) +
@@ -431,7 +433,7 @@
         )
       ) +
       subsection(preLaunchTitle,
-        "<p>" + escapeHtml(data.preLaunchCheckIntro || "以下は運用開始前の目視確認項目（確認予定）です。") + "</p>" +
+        "<p>" + escapeHtml(data.preLaunchCheckIntro || "以下は、コード・API・DB上の動作確認後、提出前または運用開始前に運用者が画面上で最終目視確認を行う項目である。") + "</p>" +
         buildList(preLaunchChecks) +
         (data.preLaunchCheckSwapNote ? "<p class='prelaunch-swap-note'>" + escapeHtml(data.preLaunchCheckSwapNote) + "</p>" : "")
       ) +
