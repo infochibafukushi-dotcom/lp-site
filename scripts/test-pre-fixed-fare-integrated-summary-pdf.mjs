@@ -35,13 +35,16 @@ const REQUIRED_CONTENT = [
   "本番D1上の当該テスト予約は削除済み",
   "根拠資料・確認資料一覧",
   "本番D1 migration 0005 適用確認",
-  "運用開始前確認項目"
+  "運用開始前確認項目",
+  "事前確定運賃M以外の通常メーターモードについても、運用開始前に基本動作確認を行う予定",
+  "通常メーター運行には表示されない"
 ];
 
 const FORBIDDEN_PHRASES = [
   "完全準拠",
   "自動的に通常運行開始へ遷移",
-  "満額収受"
+  "満額収受",
+  "認可済み"
 ];
 
 function resolveChromeExecutable(){
@@ -119,6 +122,12 @@ async function main(){
       moduleCheck.text.includes("chapter-block-first"),
       "第1章ブロックのページ区切り調整クラスがありません"
     );
+    assert(
+      moduleCheck.text.includes("subsection-block"),
+      "提出用サブセクションブロックがありません"
+    );
+    const gpsmCount = (moduleCheck.text.match(/GPSM/g) || []).length;
+    assert(gpsmCount <= 1, "GPSMの記載が多すぎます: " + gpsmCount);
 
     const textLength = await page.evaluate(function(){
       const data = window.PreFixedFareIntegratedSummaryData.buildReportData({

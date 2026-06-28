@@ -36,20 +36,29 @@
       }).join("");
       return "<tr>" + cells + "</tr>";
     }).join("");
-    return "<table" + (className ? " class='" + escapeHtml(className) + "'" : "") + ">" + colgroup + "<thead><tr>" + th + "</tr></thead><tbody>" + body + "</tbody></table>";
+    return "<table" + (className ? " class='" + escapeHtml(className) + " table-avoid-break'" : " class='table-avoid-break'") + ">" + colgroup + "<thead><tr>" + th + "</tr></thead><tbody>" + body + "</tbody></table>";
   }
 
-  function section(title, bodyHtml){
-    return (
-      "<section>" +
-      "<div class='report-section-title-block'><h2>" + escapeHtml(title) + "</h2></div>" +
-      "<div class='report-section-body'>" + bodyHtml + "</div>" +
-      "</section>"
-    );
+  function buildSplitTables(headers, rows, options){
+    const list = Array.isArray(rows) ? rows : [];
+    const maxRows = Number(options?.maxRowsPerTable) || 0;
+    if(!maxRows || list.length <= maxRows){
+      return buildTable(headers, list, options);
+    }
+    const chunks = [];
+    for(let index = 0; index < list.length; index += maxRows){
+      chunks.push(buildTable(headers, list.slice(index, index + maxRows), options));
+    }
+    return "<div class='table-group'>" + chunks.join("") + "</div>";
   }
 
   function subsection(title, bodyHtml){
-    return "<h3>" + escapeHtml(title) + "</h3>" + bodyHtml;
+    return (
+      "<div class='subsection-block'>" +
+      "<h3>" + escapeHtml(title) + "</h3>" +
+      "<div class='subsection-content'>" + bodyHtml + "</div>" +
+      "</div>"
+    );
   }
 
   function numberLabel(value){
@@ -107,9 +116,7 @@
     const classes = ["chapter-block"];
     if(options.first) classes.push("chapter-block-first");
     if(options.last) classes.push("chapter-block-last");
-    const pageBreak = options.first ? "" : "<div class='html2pdf__page-break'></div>";
     return (
-      pageBreak +
       "<div class='" + classes.join(" ") + "'>" +
       chapterHeader(chapterNum, title, positioning) +
       "<div class='chapter-body'>" + bodyHtml + "</div>" +
@@ -155,10 +162,10 @@
       ) +
       subsection("電子地図ルート算定", buildList(regulatory.mapAndRouteDesign)) +
       subsection("2以上のルート選択",
-        buildTable(
+        buildSplitTables(
           ["項目", "状況", "根拠"],
           multiRouteRows,
-          { className: "table-multi-route", colWidths: ["25%", "15%", "60%"] }
+          { className: "table-multi-route", colWidths: ["24%", "16%", "60%"], maxRowsPerTable: 4 }
         )
       ) +
       subsection("利用者への提示と同意",
@@ -170,10 +177,10 @@
         "<h4>追加確認が必要な項目</h4>" + buildList(regulatory.snapshotUnconfirmed)
       ) +
       subsection("公示要件対応表",
-        buildTable(
+        buildSplitTables(
           ["公示要件", "システム対応方針", "現状", "根拠"],
           requirementRows,
-          { className: "table-requirements", colWidths: ["25%", "30%", "15%", "30%"] }
+          { className: "table-requirements", colWidths: ["24%", "30%", "14%", "32%"], maxRowsPerTable: 4 }
         )
       )
     );
@@ -219,10 +226,10 @@
       ) +
       subsection("quoteSnapshot / handoff の保存",
         buildList(approval.snapshotIntro) +
-        buildTable(
+        buildSplitTables(
           ["フィールド", "説明"],
           snapshotRows,
-          { className: "table-snapshot", colWidths: ["30%", "70%"] }
+          { className: "table-snapshot", colWidths: ["28%", "72%"], maxRowsPerTable: 6 }
         ) +
         buildList(approval.snapshotFlow)
       ) +
@@ -303,10 +310,10 @@
         buildList(operations.integrityChecks?.verificationFlow)
       ) +
       subsection("caseRecords 保存項目",
-        buildTable(
+        buildSplitTables(
           ["フィールド", "説明"],
           caseRecordRows,
-          { className: "table-case-records", colWidths: ["30%", "70%"] }
+          { className: "table-case-records", colWidths: ["28%", "72%"], maxRowsPerTable: 6 }
         )
       ) +
       subsection("meter_fixed_fare_runs の start / complete 記録",
@@ -323,21 +330,22 @@
         "<p><strong>" + escapeHtml(operations.receiptDisplay?.example || "") + "</strong></p>"
       ) +
       subsection("本番E2E確認結果",
-        e2eCaseTables +
-        buildTable(
+        "<div class='table-group'>" + e2eCaseTables + "</div>" +
+        buildSplitTables(
           ["確認項目", "結果"],
           (e2e.checks || []).map(function(row){ return [row.item, row.result]; }),
-          { className: "table-e2e-checks", colWidths: ["72%", "28%"] }
+          { className: "table-e2e-checks", colWidths: ["74%", "26%"], maxRowsPerTable: 5 }
         )
       )
     );
   }
 
-  function buildChapter4(pct){
+  function buildChapter4(pct, data){
     if(!pct) return "<p>—</p>";
     const basicOp = pct.basicOperation || {};
     const audit = pct.auditTrail || {};
     const comparison = pct.completionComparison || {};
+    const meterAppFlow = Array.isArray(data?.integratedMeterAppFlow) ? data.integratedMeterAppFlow : [];
     const caseRecordAuditRows = (audit.caseRecords || []).map(function(row){
       return [row.field, row.value];
     });
@@ -360,7 +368,12 @@
         "<h4>途中終了のトリガー</h4>" + buildList(basicOp.triggers)
       ) +
       subsection("2. 金額の扱い", buildList(pct.fareHandling)) +
-      subsection("3. メーターアプリの操作導線", buildList(pct.meterAppFlow)) +
+      subsection("3. メーターアプリの操作導線",
+        buildList(meterAppFlow) +
+        (data?.passengerChangeMeterNote
+          ? "<p class='meter-mode-note'>" + escapeHtml(data.passengerChangeMeterNote) + "</p>"
+          : "")
+      ) +
       subsection("4. 保存される監査証跡",
         "<h4>caseRecords 側</h4>" +
         buildTable(["フィールド", "値"], caseRecordAuditRows, { className: "table-audit-case", colWidths: ["38%", "62%"] }) +
@@ -385,11 +398,11 @@
   function buildChapter5(data){
     const operations = data.operations || {};
     const e2e = operations.e2eEvidence || {};
-    const pct = operations.passengerChangeTermination || {};
     const verifiedChecks = (e2e.checks || []).filter(function(row){
       return row.result === "OK";
     });
     const preLaunchTitle = data.preLaunchChecksSectionTitle || "運用開始前確認項目";
+    const preLaunchChecks = Array.isArray(data.integratedPreLaunchChecks) ? data.integratedPreLaunchChecks : [];
 
     return (
       subsection("確認済み予約ID",
@@ -405,16 +418,15 @@
           : "")
       ) +
       subsection("確認済み内容",
-        buildTable(
+        buildSplitTables(
           ["確認項目", "結果"],
           verifiedChecks.map(function(row){ return [row.item, row.result]; }),
-          { className: "table-verified-checks", colWidths: ["72%", "28%"] }
+          { className: "table-verified-checks", colWidths: ["74%", "26%"], maxRowsPerTable: 5 }
         )
       ) +
       subsection(preLaunchTitle,
         "<p>以下は運用開始前の目視確認項目（確認予定）です。提出直前に確認完了後は、見出しを「運用開始前確認結果」に変更できます。</p>" +
-        "<p>" + escapeHtml(pct.verifiedNote || "") + "</p>" +
-        buildList(pct.preLaunchChecks)
+        buildList(preLaunchChecks)
       ) +
       subsection("根拠資料・確認資料一覧", buildList(data.referenceMaterials))
     );
@@ -431,13 +443,11 @@
     return (
       "<div class='pre-fixed-fare-integrated-summary'>" +
       buildCover(meta, data.title) +
-      "<div class='html2pdf__page-break'></div>" +
       buildToc(data.toc) +
-      "<div class='html2pdf__page-break'></div>" +
       chapterBlock(1, "システム基本方針と公示要件対応", positioning[1], buildChapter1(regulatory), { first: true }) +
       chapterBlock(2, "利用者向け見積シミュレーターの動作と判定ロジック", positioning[2], buildChapter2(approval)) +
       chapterBlock(3, "運行・精算における運用フローと監査証跡", positioning[3], buildChapter3(operations)) +
-      chapterBlock(4, "旅客都合変更時の途中終了運用", positioning[4], buildChapter4(pct)) +
+      chapterBlock(4, "旅客都合変更時の途中終了運用", positioning[4], buildChapter4(pct, data)) +
       chapterBlock(5, "確認済み証跡と運用開始前確認項目", positioning[5], buildChapter5(data), { last: true }) +
       "<p class='footer-note'>" + escapeHtml(data.footerNote || "") + "</p>" +
       "</div>"
@@ -489,30 +499,32 @@
       ".pre-fixed-fare-integrated-summary h1{font-size:19px;margin:0 0 4px;color:#111111;line-height:1.3;}" +
       ".pre-fixed-fare-integrated-summary .cover-title{font-size:22px;margin:24px 0 8px;text-align:center;}" +
       ".pre-fixed-fare-integrated-summary .cover-subtitle{font-size:13px;margin:0 0 20px;text-align:center;color:#444;}" +
-      ".pre-fixed-fare-integrated-summary .cover-page{margin:0 0 16px;padding:16px 0 12px;border-bottom:2px solid #ccc;}" +
-      ".pre-fixed-fare-integrated-summary .toc-page{margin:0 0 12px;}" +
-      ".pre-fixed-fare-integrated-summary .toc-heading{font-size:16px;margin:0 0 10px;}" +
-      ".pre-fixed-fare-integrated-summary .chapter-block{margin:0 0 12px;}" +
-      ".pre-fixed-fare-integrated-summary .chapter-start{margin:0 0 8px;}" +
-      ".pre-fixed-fare-integrated-summary .chapter-title{font-size:15px;margin:0 0 6px;border-bottom:2px solid #333;padding-bottom:4px;}" +
+      ".pre-fixed-fare-integrated-summary .cover-page{margin:0 0 12px;padding:12px 0 10px;border-bottom:2px solid #ccc;}" +
+      ".pre-fixed-fare-integrated-summary .toc-page{margin:0 0 10px;}" +
+      ".pre-fixed-fare-integrated-summary .toc-heading{font-size:16px;margin:0 0 8px;}" +
+      ".pre-fixed-fare-integrated-summary .chapter-block{margin:0 0 10px;}" +
+      ".pre-fixed-fare-integrated-summary .chapter-block-first{margin-top:0;}" +
+      ".pre-fixed-fare-integrated-summary .chapter-start{margin:0 0 8px;break-inside:avoid;page-break-inside:avoid;}" +
+      ".pre-fixed-fare-integrated-summary .chapter-title{font-size:15px;margin:0 0 6px;border-bottom:2px solid #333;padding-bottom:4px;break-after:avoid;page-break-after:avoid;}" +
       ".pre-fixed-fare-integrated-summary .chapter-positioning{font-size:10.5px;color:#444;margin:0 0 8px;}" +
-      ".pre-fixed-fare-integrated-summary h2{font-size:13.5px;margin:14px 0 6px;padding-bottom:2px;border-bottom:1px solid #ccc;color:#111111;break-after:avoid;page-break-after:avoid;}" +
-      ".pre-fixed-fare-integrated-summary h3{font-size:11.5px;margin:10px 0 5px;color:#111111;break-after:avoid;page-break-after:avoid;}" +
-      ".pre-fixed-fare-integrated-summary h4{font-size:10.5px;margin:8px 0 4px;color:#333;}" +
+      ".pre-fixed-fare-integrated-summary .subsection-block{margin:0 0 10px;}" +
+      ".pre-fixed-fare-integrated-summary .subsection-content{margin:0 0 4px;}" +
+      ".pre-fixed-fare-integrated-summary .table-group{margin:0 0 6px;}" +
+      ".pre-fixed-fare-integrated-summary h2{font-size:13.5px;margin:12px 0 6px;padding-bottom:2px;border-bottom:1px solid #ccc;color:#111111;break-after:avoid;page-break-after:avoid;}" +
+      ".pre-fixed-fare-integrated-summary h3{font-size:11.5px;margin:8px 0 5px;color:#111111;break-after:avoid;page-break-after:avoid;}" +
+      ".pre-fixed-fare-integrated-summary h4{font-size:10.5px;margin:6px 0 4px;color:#333;break-after:avoid;page-break-after:avoid;}" +
       ".pre-fixed-fare-integrated-summary p{margin:0 0 6px;color:#111111;}" +
       ".pre-fixed-fare-integrated-summary ul,.pre-fixed-fare-integrated-summary ol{margin:0 0 6px 16px;padding:0;}" +
       ".pre-fixed-fare-integrated-summary li{margin:0 0 3px;color:#111111;}" +
-      ".pre-fixed-fare-integrated-summary table{width:100%;border-collapse:collapse;table-layout:fixed;margin:5px 0 8px;background:#ffffff;}" +
-      ".pre-fixed-fare-integrated-summary th,.pre-fixed-fare-integrated-summary td{border:1px solid #d9d9d9;padding:5px 6px;vertical-align:top;white-space:normal;word-break:break-word;overflow-wrap:anywhere;color:#111111;background:#ffffff;box-sizing:border-box;font-size:9.5px;line-height:1.4;}" +
+      ".pre-fixed-fare-integrated-summary table{width:100%;border-collapse:collapse;table-layout:fixed;margin:4px 0 6px;background:#ffffff;break-inside:avoid;page-break-inside:avoid;}" +
+      ".pre-fixed-fare-integrated-summary thead{display:table-header-group;}" +
+      ".pre-fixed-fare-integrated-summary th,.pre-fixed-fare-integrated-summary td{border:1px solid #d9d9d9;padding:4px 5px;vertical-align:top;white-space:normal;word-break:break-word;overflow-wrap:anywhere;color:#111111;background:#ffffff;box-sizing:border-box;font-size:9.5px;line-height:1.35;}" +
       ".pre-fixed-fare-integrated-summary th{background:#f6f6f6;font-weight:700;}" +
-      ".pre-fixed-fare-integrated-summary section{break-inside:auto;page-break-inside:auto;margin:0 0 10px;}" +
-      ".pre-fixed-fare-integrated-summary .report-section-title-block{break-inside:avoid;page-break-inside:avoid;}" +
-      ".pre-fixed-fare-integrated-summary .report-section-body{break-inside:auto;page-break-inside:auto;}" +
-      ".pre-fixed-fare-integrated-summary tr{break-inside:auto;page-break-inside:auto;}" +
+      ".pre-fixed-fare-integrated-summary tr{break-inside:avoid;page-break-inside:avoid;}" +
       ".pre-fixed-fare-integrated-summary .table-cover-meta tr,.pre-fixed-fare-integrated-summary .table-toc tr,.pre-fixed-fare-integrated-summary .table-e2e-meta tr{break-inside:avoid;page-break-inside:avoid;}" +
       ".pre-fixed-fare-integrated-summary .table-requirements td,.pre-fixed-fare-integrated-summary .table-requirements th,.pre-fixed-fare-integrated-summary .table-phase3-evidence td,.pre-fixed-fare-integrated-summary .table-phase3-evidence th{font-size:8.5px;}" +
-      ".pre-fixed-fare-integrated-summary .footer-note{margin-top:16px;font-size:9.5px;color:#444;break-inside:avoid;page-break-inside:avoid;}" +
-      ".pre-fixed-fare-integrated-summary .e2e-reservation-note{margin:6px 0 0;font-size:9.5px;color:#444;}" +
+      ".pre-fixed-fare-integrated-summary .footer-note{margin-top:12px;font-size:9.5px;color:#444;break-inside:avoid;page-break-inside:avoid;}" +
+      ".pre-fixed-fare-integrated-summary .e2e-reservation-note,.pre-fixed-fare-integrated-summary .meter-mode-note{margin:6px 0 0;font-size:9.5px;color:#444;}" +
       "</style>" +
       reportHtml;
     return container;
@@ -543,12 +555,17 @@
 
   function getHtml2PdfOptions(filename){
     return {
-      margin: [8, 8, 8, 8],
+      margin: [6, 6, 6, 6],
       filename: filename || PDF_FILENAME,
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollX: 0, scrollY: 0 },
       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      pagebreak: { mode: ["css", "legacy"] }
+      pagebreak: {
+        mode: ["css", "legacy"],
+        after: [".cover-page", ".toc-page"],
+        before: [".chapter-block:not(.chapter-block-first)"],
+        avoid: [".table-avoid-break", "tr", "h3", "h4"]
+      }
     };
   }
 
