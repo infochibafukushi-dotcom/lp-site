@@ -13,10 +13,15 @@
     return escapeHtml(text).replace(/\n/g, "<br>");
   }
 
-  function formatAmountBadge(amount){
+  function formatAmountBadge(amount, options){
+    options = options || {};
     const n = Number(amount) || 0;
-    if(n <= 0){
+    const approximate = options.approximate === true;
+    if(n <= 0 && !approximate){
       return `<span class="estimate-choice-amount">＋0円</span>`;
+    }
+    if(approximate){
+      return `<span class="estimate-choice-amount">＋${n.toLocaleString("ja-JP")}円〜</span>`;
     }
     return `<span class="estimate-choice-amount">＋¥${n.toLocaleString("ja-JP")}</span>`;
   }
@@ -32,7 +37,9 @@
     const selectedClass = options.checked ? " is-selected" : "";
     const disabledClass = options.disabled ? " is-disabled" : "";
     const descHtml = formatDescriptionHtml(item.description);
-    const amountHtml = showAmount ? formatAmountBadge(item.amount) : "";
+    const amountHtml = showAmount
+      ? formatAmountBadge(item.amount, { approximate: options.approximateAmount === true })
+      : "";
 
     const descBlock = descHtml
       ? `<div class="estimate-choice-desc">${descHtml}</div>`

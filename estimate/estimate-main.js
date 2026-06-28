@@ -714,10 +714,14 @@
     const title = step.title;
     const addonItems = window.EstimateCalc.getRoundTripAddonItems(state.config);
     const addonChoices = addonItems.map(function(item){
-      return window.EstimateHelp.renderChoiceCard(item, {
+      const displayItem = Object.assign({}, item, {
+        amount: window.EstimateCalc.getAddonDisplayAmount(state.config, item)
+      });
+      return window.EstimateHelp.renderChoiceCard(displayItem, {
         name: step.choiceName,
         checked: item.id === state.roundTripAddonId,
-        showAmount: false
+        showAmount: true,
+        approximateAmount: true
       });
     }).join("");
 
@@ -3019,19 +3023,36 @@
 
   function refreshResultSection(result){
     const resultSection = document.querySelector(".estimate-result");
-    const ctaGroup = document.querySelector(".estimate-cta-group");
-    const disclaimer = document.querySelector(".estimate-disclaimer");
     if(!resultSection) return;
 
     const temp = document.createElement("div");
     temp.innerHTML = renderResult(result);
     const newResult = temp.querySelector(".estimate-result");
-    const newCta = temp.querySelector(".estimate-cta-group");
+    const newSecondary = temp.querySelector(".estimate-cta-group--secondary");
     const newDisclaimer = temp.querySelector(".estimate-disclaimer");
+    const oldSecondary = document.querySelector(".estimate-cta-group--secondary");
+    const oldDisclaimer = document.querySelector(".estimate-disclaimer");
 
-    if(newResult) resultSection.replaceWith(newResult);
-    if(newCta && ctaGroup) ctaGroup.replaceWith(newCta);
-    if(newDisclaimer && disclaimer) disclaimer.replaceWith(newDisclaimer);
+    if(newResult){
+      resultSection.replaceWith(newResult);
+    }
+    if(newSecondary && oldSecondary){
+      oldSecondary.replaceWith(newSecondary);
+    }else if(newSecondary && !oldSecondary){
+      const currentResult = document.querySelector(".estimate-result");
+      if(currentResult){
+        currentResult.insertAdjacentElement("afterend", newSecondary);
+      }
+    }
+    if(newDisclaimer && oldDisclaimer){
+      oldDisclaimer.replaceWith(newDisclaimer);
+    }else if(newDisclaimer && !oldDisclaimer){
+      const secondary = document.querySelector(".estimate-cta-group--secondary");
+      if(secondary){
+        secondary.insertAdjacentElement("afterend", newDisclaimer);
+      }
+    }
+
     renderRouteMapIfNeeded();
     bindCopyUrlButton();
   }

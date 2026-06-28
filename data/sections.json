@@ -53,19 +53,19 @@
     "items": [
       {
         "title": "予約する",
-        "text": "通院・退院・転院・施設送迎など、ご希望日時が決まっている方はこちらからご予約ください。",
+        "text": "通院・退院・施設送迎のご予約はこちら。",
         "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/sections/1773103782069-messageImage_1770383436537_0.jpg",
         "link": "https://infochibafukushi-dotcom.github.io/reservation-v4/"
       },
       {
         "title": "お見積り",
-        "text": "出発地・目的地・介助内容を入力して、料金の目安を確認できます。",
+        "text": "出発地・目的地から料金目安を確認できます。",
         "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062967741-messageImage_1770383272387_0.jpg",
         "link": "./estimate/"
       },
       {
         "title": "空き状況",
-        "text": "当日・翌日・希望日時の空き状況を確認したい方はこちらからご相談ください。",
+        "text": "希望日時の空き状況を確認できます。",
         "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/footer/1773052808077-messageImage_1770430107621.jpg",
         "link": "https://infochibafukushi-dotcom.github.io/reservation-v4/"
       }
@@ -152,25 +152,25 @@
     "items": [
       {
         "title": "通院・受診",
-        "text": "病院受診、検査、リハビリ通院などに対応します。",
+        "text": "病院受診・検査・リハビリ通院に。",
         "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062960486-messageImage_1770383251537.jpg",
         "link": "#"
       },
       {
         "title": "退院・転院",
-        "text": "病院からご自宅・施設・別の病院への移動に対応します。",
+        "text": "病院からご自宅・施設・別病院へ。",
         "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062967741-messageImage_1770383272387_0.jpg",
         "link": "#"
       },
       {
-        "title": "施設入退所・ショートステイ",
-        "text": "ご自宅から施設、施設から病院などの送迎に対応します。",
+        "title": "施設送迎",
+        "text": "入退所・ショートステイ・施設受診に。",
         "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062973797-messageImage_1770383486552_0.jpg",
         "link": "#"
       },
       {
-        "title": "買い物・冠婚葬祭・外出",
-        "text": "買い物、理美容室、役所、墓参り、冠婚葬祭などにもご利用いただけます。",
+        "title": "外出",
+        "text": "買い物・理美容室・冠婚葬祭に。",
         "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062985662-messageImage_1770383194104.jpg",
         "link": "#"
       }

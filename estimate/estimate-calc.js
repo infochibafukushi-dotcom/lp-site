@@ -102,6 +102,21 @@
     return visibleItems(config?.categories?.roundTripAddon?.items || []);
   }
 
+  function getAddonDisplayAmount(config, item){
+    if(!item){
+      return 0;
+    }
+    const waitingRef = String(item.waitingFeeRef || "").trim();
+    const escortRef = String(item.escortFeeRef || "").trim();
+    if(waitingRef && config?.waitingFees?.[waitingRef]){
+      return getFeeAmount(config.waitingFees[waitingRef]);
+    }
+    if(escortRef && config?.waitingFees?.[escortRef]){
+      return getFeeAmount(config.waitingFees[escortRef]);
+    }
+    return getFeeAmount(item);
+  }
+
   const RETURN_PLAN_TYPES = {
     SAME_RETURN: "same_return",
     RETURN_WITH_STOP: "return_with_stop",
@@ -1355,6 +1370,7 @@
     isRoundTripSelected: isRoundTripSelected,
     getTripTypeItems: getTripTypeItems,
     getRoundTripAddonItems: getRoundTripAddonItems,
+    getAddonDisplayAmount: getAddonDisplayAmount,
     RETURN_PLAN_TYPES: RETURN_PLAN_TYPES,
     isStructuredRoutePlan: isStructuredRoutePlan,
     getOutboundLegPlan: getOutboundLegPlan,
