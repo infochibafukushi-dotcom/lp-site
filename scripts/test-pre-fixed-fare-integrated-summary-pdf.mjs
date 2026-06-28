@@ -147,12 +147,24 @@ async function main(){
       "根拠資料一覧に運賃表別紙項目がありません"
     );
     assert(
-      moduleCheck.text.includes("chapter-block-first"),
-      "第1章ブロックのページ区切り調整クラスがありません"
+      moduleCheck.text.includes("pdf-page"),
+      "明示的ページブロック pdf-page がありません"
     );
     assert(
-      moduleCheck.text.includes("subsection-block"),
-      "提出用サブセクションブロックがありません"
+      (moduleCheck.text.match(/data-page-id=/g) || []).length === 13,
+      "ページブロック数が13ではありません"
+    );
+    assert(
+      moduleCheck.text.includes("quoteSnapshot / handoff の保存（続き）"),
+      "第2章7P相当の続き見出しがありません"
+    );
+    assert(
+      moduleCheck.text.includes("caseRecords・meter_fixed_fare_runs 保存項目"),
+      "第3章9P相当の補足見出しがありません"
+    );
+    assert(
+      moduleCheck.text.includes("本番E2E確認結果"),
+      "第3章10P相当のE2E見出しがありません"
     );
     const gpsmCount = (moduleCheck.text.match(/GPSM/g) || []).length;
     assert(gpsmCount <= 1, "GPSMの記載が多すぎます: " + gpsmCount);

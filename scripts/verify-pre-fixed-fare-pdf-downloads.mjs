@@ -103,6 +103,7 @@ function assert(condition, message){
 async function assertIntegratedPdfLayout(filePath){
   const parser = new PDFParse({ data: fs.readFileSync(filePath) });
   const info = await parser.getInfo();
+  assert(info.total === 13, "統合PDFのページ数が13ではありません: " + info.total);
   const pageNumbers = Array.from({ length: info.total }, function(_, index){
     return index + 1;
   });
@@ -130,14 +131,60 @@ async function assertIntegratedPdfLayout(filePath){
   });
   assert(blankPages.length === 0, "統合PDFに空白ページがあります: " + blankPages.join(", "));
 
-  const page3 = (shots.pages || []).find(function(page){
-    return page.pageNumber === 3;
+  const reviewDir = path.join(outputDir, "integrated-page-review");
+  if(!fs.existsSync(reviewDir)){
+    fs.mkdirSync(reviewDir, { recursive: true });
+  }
+  [6, 7, 8, 9, 10, 12, 13].forEach(function(pageNumber){
+    const shot = (shots.pages || []).find(function(page){
+      return page.pageNumber === pageNumber;
+    });
+    assert(shot, "統合PDFの" + pageNumber + "ページ目がありません");
+    assert(inkRatio(shot) >= 0.002, "統合PDFの" + pageNumber + "ページ目の内容が不足しています");
+    fs.writeFileSync(
+      path.join(reviewDir, "page-" + String(pageNumber).padStart(2, "0") + ".png"),
+      Buffer.from(shot.data)
+    );
   });
-  assert(page3, "統合PDFの3ページ目がありません");
-  assert(
-    inkRatio(page3) >= 0.002,
-    "統合PDFの3ページ目の内容が不足しています"
-  );
+
+  const page12 = (shots.pages || []).find(function(page){
+    return page.pageNumber === 12;
+  });
+  const page13 = (shots.pages || []).find(function(page){
+    return page.pageNumber === 13;
+  });
+  const page12BottomInk = (function(){
+    const startY = Math.floor(page12.height * 0.88);
+    let dark = 0;
+    let total = 0;
+    for(let y = startY; y < page12.height; y++){
+      for(let x = 0; x < page12.width; x++){
+        total++;
+        const index = (y * page12.width + x) * 4;
+        if(page12.data[index] < 200 || page12.data[index + 1] < 200 || page12.data[index + 2] < 200){
+          dark++;
+        }
+      }
+    }
+    return total > 0 ? dark / total : 0;
+  })();
+  const page13TopInk = (function(){
+    const endY = Math.floor(page13.height * 0.12);
+    let dark = 0;
+    let total = 0;
+    for(let y = 0; y < endY; y++){
+      for(let x = 0; x < page13.width; x++){
+        total++;
+        const index = (y * page13.width + x) * 4;
+        if(page13.data[index] < 200 || page13.data[index + 1] < 200 || page13.data[index + 2] < 200){
+          dark++;
+        }
+      }
+    }
+    return total > 0 ? dark / total : 0;
+  })();
+  assert(page12BottomInk < 0.008, "12P下部に次ページ内容がはみ出している可能性があります: ink=" + page12BottomInk);
+  assert(page13TopInk >= 0.01, "13P先頭に第5章タイトルが表示されていません: ink=" + page13TopInk);
 }
 
 async function clickButtonAndCheckStatus(page, buttonId, statusId){

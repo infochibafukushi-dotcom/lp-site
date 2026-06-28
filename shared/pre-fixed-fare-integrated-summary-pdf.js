@@ -1,6 +1,7 @@
 (function(global){
   const HTML2PDF_CDN = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
   const PDF_FILENAME = "pre-fixed-fare-integrated-summary.pdf";
+  const EXPECTED_PAGE_COUNT = 13;
 
   function escapeHtml(text){
     return String(text ?? "")
@@ -36,29 +37,33 @@
       }).join("");
       return "<tr>" + cells + "</tr>";
     }).join("");
-    return "<table" + (className ? " class='" + escapeHtml(className) + " table-avoid-break'" : " class='table-avoid-break'") + ">" + colgroup + "<thead><tr>" + th + "</tr></thead><tbody>" + body + "</tbody></table>";
-  }
-
-  function buildSplitTables(headers, rows, options){
-    const list = Array.isArray(rows) ? rows : [];
-    const maxRows = Number(options?.maxRowsPerTable) || 0;
-    if(!maxRows || list.length <= maxRows){
-      return buildTable(headers, list, options);
-    }
-    const chunks = [];
-    for(let index = 0; index < list.length; index += maxRows){
-      chunks.push(buildTable(headers, list.slice(index, index + maxRows), options));
-    }
-    return "<div class='table-group'>" + chunks.join("") + "</div>";
+    return "<table" + (className ? " class='" + escapeHtml(className) + "'" : "") + ">" + colgroup + "<thead><tr>" + th + "</tr></thead><tbody>" + body + "</tbody></table>";
   }
 
   function subsection(title, bodyHtml){
     return (
       "<div class='subsection-block'>" +
-      "<h3>" + escapeHtml(title) + "</h3>" +
+      "<h3 class='section-title'>" + escapeHtml(title) + "</h3>" +
       "<div class='subsection-content'>" + bodyHtml + "</div>" +
       "</div>"
     );
+  }
+
+  function pageBottomSpacer(large){
+    return "<div class='pdf-page-fill" + (large ? " pdf-page-fill--large" : "") + "' aria-hidden='true'></div>";
+  }
+
+  function pageClipGuard(){
+    return "<div class='pdf-page-clip-guard' aria-hidden='true'></div>";
+  }
+
+  function pdfPage(pageId, bodyHtml, options){
+    options = options || {};
+    const breakClass = options.isLast ? "" : " pdf-page-break";
+    const inner = "<div class='pdf-page-inner'>" + bodyHtml +
+      (options.padBottom ? pageBottomSpacer(true) + pageClipGuard() : "") +
+      "</div>";
+    return "<div class='pdf-page" + breakClass + "' data-page-id='" + escapeHtml(pageId) + "'>" + inner + "</div>";
   }
 
   function numberLabel(value){
@@ -68,7 +73,6 @@
 
   function buildCover(meta, title){
     return (
-      "<div class='cover-page'>" +
       "<h1 class='cover-title'>" + escapeHtml(title || "") + "</h1>" +
       "<p class='cover-subtitle'>" + escapeHtml(meta.subtitle || "") + "</p>" +
       buildTable(
@@ -81,8 +85,7 @@
           ["資料区分", meta.documentType || ""]
         ],
         { className: "table-cover-meta", colWidths: ["28%", "72%"] }
-      ) +
-      "</div>"
+      )
     );
   }
 
@@ -91,14 +94,12 @@
       return ["第" + item.chapter + "章", item.title];
     });
     return (
-      "<div class='toc-page'>" +
       "<h2 class='toc-heading'>目次</h2>" +
       buildTable(
         ["章", "タイトル"],
         rows,
         { className: "table-toc", colWidths: ["18%", "82%"] }
-      ) +
-      "</div>"
+      )
     );
   }
 
@@ -111,30 +112,27 @@
     );
   }
 
-  function chapterBlock(chapterNum, title, positioning, bodyHtml, options){
-    options = options || {};
-    const classes = ["chapter-block"];
-    if(options.first) classes.push("chapter-block-first");
-    if(options.last) classes.push("chapter-block-last");
+  function chapterSupplement(chapterNum, title, supplementTitle){
     return (
-      "<div class='" + classes.join(" ") + "'>" +
-      chapterHeader(chapterNum, title, positioning) +
-      "<div class='chapter-body'>" + bodyHtml + "</div>" +
+      "<div class='chapter-start chapter-start--continued'>" +
+      "<h2 class='chapter-title chapter-title--continued'>第" + escapeHtml(chapterNum) + "章　" + escapeHtml(title) + "</h2>" +
+      "<h3 class='chapter-supplement'>" + escapeHtml(supplementTitle) + "</h3>" +
       "</div>"
     );
   }
 
-  function buildChapter1(regulatory, data){
-    const coefficientRows = (regulatory.coefficientRows || []).map(function(row){
+  function mapRows(items, mapper){
+    return (items || []).map(mapper);
+  }
+
+  function buildChapter1Page3(regulatory, data){
+    const coefficientRows = mapRows(regulatory.coefficientRows, function(row){
       return [row.area, numberLabel(row.coefficient), row.basis, row.appliedAt];
     });
-    const fareFeeRows = (regulatory.fareAndFeeRows || []).map(function(row){
+    const fareFeeRows = mapRows(regulatory.fareAndFeeRows, function(row){
       return [row.category, row.include, row.handling];
     });
-    const requirementRows = (regulatory.requirementRows || []).map(function(row){
-      return [row.requirement, row.policy, row.current, row.evidence];
-    });
-    const multiRouteRows = (regulatory.multiRouteRows || []).map(function(row){
+    const multiRouteRows = mapRows(regulatory.multiRouteRows, function(row){
       return [row.item, row.status, row.basis];
     });
 
@@ -163,10 +161,29 @@
       ) +
       subsection("電子地図ルート算定", buildList(regulatory.mapAndRouteDesign)) +
       subsection("2以上のルート選択",
-        buildSplitTables(
+        buildTable(
           ["項目", "状況", "根拠"],
-          multiRouteRows,
-          { className: "table-multi-route", colWidths: ["24%", "16%", "60%"], maxRowsPerTable: 4 }
+          multiRouteRows.slice(0, 5),
+          { className: "table-multi-route", colWidths: ["24%", "16%", "60%"] }
+        )
+      )
+    );
+  }
+
+  function buildChapter1Page4(regulatory){
+    const multiRouteRows = mapRows(regulatory.multiRouteRows, function(row){
+      return [row.item, row.status, row.basis];
+    });
+    const requirementRows = mapRows(regulatory.requirementRows, function(row){
+      return [row.requirement, row.policy, row.current, row.evidence];
+    });
+
+    return (
+      subsection("2以上のルート選択（続き）",
+        buildTable(
+          ["項目", "状況", "根拠"],
+          multiRouteRows.slice(5),
+          { className: "table-multi-route", colWidths: ["24%", "16%", "60%"] }
         )
       ) +
       subsection("利用者への提示と同意",
@@ -175,33 +192,38 @@
       ) +
       subsection("quoteSnapshot・証跡保存",
         "<h4>確認できる項目</h4>" + buildList(regulatory.snapshotConfirmed) +
-        "<h4>" + escapeHtml(regulatory.snapshotUnconfirmedTitle || "追加確認が必要な項目") + "</h4>" +
+        "<h4>" + escapeHtml(regulatory.snapshotUnconfirmedTitle || "今後の強化候補") + "</h4>" +
         buildList(regulatory.snapshotUnconfirmed)
       ) +
       subsection("公示要件対応表",
-        buildSplitTables(
+        buildTable(
           ["公示要件", "システム対応方針", "現状", "根拠"],
-          requirementRows,
-          { className: "table-requirements", colWidths: ["24%", "30%", "14%", "32%"], maxRowsPerTable: 4 }
+          requirementRows.slice(0, 4),
+          { className: "table-requirements", colWidths: ["24%", "30%", "14%", "32%"] }
         )
       )
     );
   }
 
-  function buildChapter2(approval){
-    const judgmentRows = (approval.judgmentRows || []).map(function(row){
+  function buildChapter1Page5(regulatory){
+    const requirementRows = mapRows(regulatory.requirementRows, function(row){
+      return [row.requirement, row.policy, row.current, row.evidence];
+    });
+
+    return subsection("公示要件対応表（続き）",
+      buildTable(
+        ["公示要件", "システム対応方針", "現状", "根拠"],
+        requirementRows.slice(4),
+        { className: "table-requirements", colWidths: ["24%", "30%", "14%", "32%"] }
+      )
+    );
+  }
+
+  function buildChapter2Page6(approval){
+    const judgmentRows = mapRows(approval.judgmentRows, function(row){
       return [row.condition, row.system, row.reservationUrl, row.button, row.handling];
     });
-    const snapshotRows = (approval.snapshotFields || []).map(function(row){
-      return [row.field, row.description];
-    });
-    const phase3Rows = (approval.phase3EvidenceRows || []).map(function(row){
-      return [row.caseName, row.content, row.pdf, row.quoteSnapshot, row.handoff];
-    });
-    const phase2Rows = (approval.phase2EvidenceRows || []).map(function(row){
-      return [row.caseName, row.content, row.files];
-    });
-    const routeTypes = (approval.routeCandidateTypes || []).map(function(row){
+    const routeTypes = mapRows(approval.routeCandidateTypes, function(row){
       return "<p><strong>" + escapeHtml(row.name) + "</strong>：" + escapeHtml(row.description) + "</p>";
     }).join("");
 
@@ -209,10 +231,17 @@
       subsection("条件入力とシステムフロー", buildList(approval.systemFlow)) +
       subsection("Google Routes API によるルート候補生成", routeTypes + "<p>" + escapeHtml(approval.dedupeNote || "") + "</p>") +
       subsection("判定ロジック（preFixedFareConfirmable）",
-        buildSplitTables(
+        buildTable(
           ["条件", "システム", "予約URL", "ボタン", "扱い"],
-          judgmentRows,
-          { className: "table-judgment", colWidths: ["22%", "18%", "18%", "18%", "24%"], maxRowsPerTable: 3 }
+          judgmentRows.slice(0, 3),
+          { className: "table-judgment", colWidths: ["22%", "18%", "18%", "18%", "24%"] }
+        )
+      ) +
+      subsection("判定ロジック（preFixedFareConfirmable）（続き）",
+        buildTable(
+          ["条件", "システム", "予約URL", "ボタン", "扱い"],
+          judgmentRows.slice(3),
+          { className: "table-judgment", colWidths: ["22%", "18%", "18%", "18%", "24%"] }
         ) +
         buildList(approval.judgmentNotes)
       ) +
@@ -225,13 +254,35 @@
         buildList(approval.returnWithStop?.intro) +
         buildList(approval.returnWithStop?.structure) +
         buildList(approval.returnWithStop?.display)
-      ) +
+      )
+    );
+  }
+
+  function buildChapter2Page7(approval){
+    const snapshotRows = mapRows(approval.snapshotFields, function(row){
+      return [row.field, row.description];
+    });
+    const phase3Rows = mapRows(approval.phase3EvidenceRows, function(row){
+      return [row.caseName, row.content, row.pdf, row.quoteSnapshot, row.handoff];
+    });
+    const phase2Rows = mapRows(approval.phase2EvidenceRows, function(row){
+      return [row.caseName, row.content, row.files];
+    });
+
+    return (
       subsection("quoteSnapshot / handoff の保存",
         buildList(approval.snapshotIntro) +
-        buildSplitTables(
+        buildTable(
           ["フィールド", "説明"],
-          snapshotRows,
-          { className: "table-snapshot", colWidths: ["28%", "72%"], maxRowsPerTable: 6 }
+          snapshotRows.slice(0, 6),
+          { className: "table-snapshot", colWidths: ["28%", "72%"] }
+        )
+      ) +
+      subsection("quoteSnapshot / handoff の保存（続き）",
+        buildTable(
+          ["フィールド", "説明"],
+          snapshotRows.slice(6),
+          { className: "table-snapshot", colWidths: ["28%", "72%"] }
         ) +
         buildList(approval.snapshotFlow)
       ) +
@@ -252,40 +303,15 @@
     );
   }
 
-  function buildChapter3(operations, data){
+  function buildChapter3Page8(operations, data){
     const arch = operations.productionArchitecture || {};
     const driverRoute = data?.driverRouteDisplay || {};
-    const archRows = (arch.components || []).map(function(row){
+    const archRows = mapRows(arch.components, function(row){
       return [row.component, row.role, row.path];
     });
-    const integrityRows = (operations.integrityChecks?.checks || []).map(function(row){
+    const integrityRows = mapRows(operations.integrityChecks?.checks, function(row){
       return [row.name, row.description];
     });
-    const caseRecordRows = (operations.caseRecordsFields || []).map(function(row){
-      return [row.field, row.description];
-    });
-    const startRows = (operations.meterFixedFareRuns?.startRecord || []).map(function(row){
-      return [row.field, row.description];
-    });
-    const completeRows = (operations.meterFixedFareRuns?.completeRecord || []).map(function(row){
-      return [row.field, row.description];
-    });
-    const e2e = operations.e2eEvidence || {};
-    const e2eCaseTables = (e2e.cases || []).map(function(caseItem){
-      return buildTable(
-        ["項目", "内容"],
-        [
-          ["区分", caseItem.label],
-          ["予約ID", caseItem.reservationId],
-          ["日時", caseItem.datetime],
-          ["利用者", caseItem.userName],
-          ["見積番号", caseItem.estimateNo],
-          ["確定運賃", caseItem.confirmedFare],
-          ["表示", caseItem.displayLabel]
-        ],
-        { className: "table-e2e-meta", colWidths: ["28%", "72%"] }
-      );
-    }).join("");
 
     return (
       subsection("LP見積から完了までの流れ", buildList(operations.endToEndFlow)) +
@@ -316,12 +342,34 @@
         (driverRoute.status ? "<p><strong>現状：</strong>" + escapeHtml(driverRoute.status) + "</p>" : "") +
         buildList(driverRoute.points) +
         (driverRoute.visualCheckNote ? "<p>" + escapeHtml(driverRoute.visualCheckNote) + "</p>" : "")
-      ) +
+      )
+    );
+  }
+
+  function buildChapter3Page9(operations){
+    const caseRecordRows = mapRows(operations.caseRecordsFields, function(row){
+      return [row.field, row.description];
+    });
+    const startRows = mapRows(operations.meterFixedFareRuns?.startRecord, function(row){
+      return [row.field, row.description];
+    });
+    const completeRows = mapRows(operations.meterFixedFareRuns?.completeRecord, function(row){
+      return [row.field, row.description];
+    });
+
+    return (
       subsection("caseRecords 保存項目",
-        buildSplitTables(
+        buildTable(
           ["フィールド", "説明"],
-          caseRecordRows,
-          { className: "table-case-records", colWidths: ["28%", "72%"], maxRowsPerTable: 6 }
+          caseRecordRows.slice(0, 6),
+          { className: "table-case-records", colWidths: ["28%", "72%"] }
+        )
+      ) +
+      subsection("caseRecords 保存項目（続き）",
+        buildTable(
+          ["フィールド", "説明"],
+          caseRecordRows.slice(6),
+          { className: "table-case-records", colWidths: ["28%", "72%"] }
         )
       ) +
       subsection("meter_fixed_fare_runs の start / complete 記録",
@@ -336,37 +384,52 @@
         buildList(operations.receiptDisplay?.intro) +
         buildList(operations.receiptDisplay?.rules) +
         "<p><strong>" + escapeHtml(operations.receiptDisplay?.example || "") + "</strong></p>"
-      ) +
-      subsection("本番E2E確認結果",
-        "<div class='table-group'>" + e2eCaseTables + "</div>" +
-        buildSplitTables(
-          ["確認項目", "結果"],
-          (e2e.checks || []).map(function(row){ return [row.item, row.result]; }),
-          { className: "table-e2e-checks", colWidths: ["74%", "26%"], maxRowsPerTable: 5 }
-        )
       )
     );
   }
 
-  function buildChapter4(pct, data){
-    if(!pct) return "<p>—</p>";
+  function buildChapter3Page10(operations){
+    const e2e = operations.e2eEvidence || {};
+    const e2eCaseTables = (e2e.cases || []).map(function(caseItem){
+      return buildTable(
+        ["項目", "内容"],
+        [
+          ["区分", caseItem.label],
+          ["予約ID", caseItem.reservationId],
+          ["日時", caseItem.datetime],
+          ["利用者", caseItem.userName],
+          ["見積番号", caseItem.estimateNo],
+          ["確定運賃", caseItem.confirmedFare],
+          ["表示", caseItem.displayLabel]
+        ],
+        { className: "table-e2e-meta", colWidths: ["28%", "72%"] }
+      );
+    }).join("");
+
+    return (
+      "<div class='subsection-block'>" +
+      "<div class='subsection-content'>" +
+      e2eCaseTables +
+      buildTable(
+        ["確認項目", "結果"],
+        (e2e.checks || []).map(function(row){ return [row.item, row.result]; }),
+        { className: "table-e2e-checks", colWidths: ["74%", "26%"] }
+      ) +
+      "</div></div>"
+    );
+  }
+
+  function buildChapter4Page11(pct, data){
     const basicOp = pct.basicOperation || {};
     const audit = pct.auditTrail || {};
-    const comparison = pct.completionComparison || {};
     const meterAppFlow = Array.isArray(data?.integratedMeterAppFlow) ? data.integratedMeterAppFlow : [];
-    const caseRecordAuditRows = (audit.caseRecords || []).map(function(row){
+    const caseRecordAuditRows = mapRows(audit.caseRecords, function(row){
       return [row.field, row.value];
     });
-    const reservationAuditRows = (audit.reservationV4 || []).map(function(row){
+    const reservationAuditRows = mapRows(audit.reservationV4, function(row){
       return [row.field, row.value];
     });
-    const normalAuditRows = (audit.normalCompletion || []).map(function(row){
-      return [row.field, row.value];
-    });
-    const normalCompRows = (comparison.normal?.rows || []).map(function(row){
-      return [row.field, row.value];
-    });
-    const passengerCompRows = (comparison.passengerChange?.rows || []).map(function(row){
+    const normalAuditRows = mapRows(audit.normalCompletion, function(row){
       return [row.field, row.value];
     });
 
@@ -389,7 +452,20 @@
         buildTable(["フィールド", "値"], reservationAuditRows, { className: "table-audit-reservation", colWidths: ["38%", "62%"] }) +
         "<h4>通常完了の場合</h4>" +
         buildTable(["フィールド", "値"], normalAuditRows, { className: "table-audit-normal", colWidths: ["38%", "62%"] })
-      ) +
+      )
+    );
+  }
+
+  function buildChapter4Page12(pct){
+    const comparison = pct.completionComparison || {};
+    const normalCompRows = mapRows(comparison.normal?.rows, function(row){
+      return [row.field, row.value];
+    });
+    const passengerCompRows = mapRows(comparison.passengerChange?.rows, function(row){
+      return [row.field, row.value];
+    });
+
+    return (
       subsection("5. 通常完了との判別",
         "<h4>" + escapeHtml(comparison.normal?.label || "通常完了") + "</h4>" +
         buildTable(["フィールド", "値"], normalCompRows, { className: "table-comparison-normal", colWidths: ["38%", "62%"] }) +
@@ -403,7 +479,7 @@
     );
   }
 
-  function buildChapter5(data){
+  function buildChapter5Page13(data){
     const operations = data.operations || {};
     const e2e = operations.e2eEvidence || {};
     const verifiedChecks = (e2e.checks || []).filter(function(row){
@@ -426,40 +502,129 @@
           : "")
       ) +
       subsection("確認済み内容",
-        buildSplitTables(
+        buildTable(
           ["確認項目", "結果"],
           verifiedChecks.map(function(row){ return [row.item, row.result]; }),
-          { className: "table-verified-checks", colWidths: ["74%", "26%"], maxRowsPerTable: 5 }
+          { className: "table-verified-checks", colWidths: ["74%", "26%"] }
         )
       ) +
       subsection(preLaunchTitle,
-        "<p>" + escapeHtml(data.preLaunchCheckIntro || "以下は、コード・API・DB上の動作確認後、提出前または運用開始前に運用者が画面上で最終目視確認を行う項目である。") + "</p>" +
+        "<p>" + escapeHtml(data.preLaunchCheckIntro || "") + "</p>" +
         buildList(preLaunchChecks) +
         (data.preLaunchCheckSwapNote ? "<p class='prelaunch-swap-note'>" + escapeHtml(data.preLaunchCheckSwapNote) + "</p>" : "")
       ) +
-      subsection("根拠資料・確認資料一覧", buildList(data.referenceMaterials))
+      subsection("根拠資料・確認資料一覧", buildList(data.referenceMaterials)) +
+      "<p class='footer-note'>" + escapeHtml(data.footerNote || "") + "</p>"
     );
   }
 
-  function buildReportHtml(data){
-    const meta = data.meta || {};
+  function buildPagePlan(data){
     const positioning = data.chapterPositioning || {};
     const regulatory = data.regulatory || {};
     const approval = data.approval || {};
     const operations = data.operations || {};
     const pct = operations.passengerChangeTermination || {};
 
+    return [
+      { id: "p01-cover", html: buildCover(data.meta || {}, data.title) },
+      { id: "p02-toc", html: buildToc(data.toc) },
+      {
+        id: "p03-ch1-part1",
+        html: chapterHeader(1, "システム基本方針と公示要件対応", positioning[1]) + buildChapter1Page3(regulatory, data)
+      },
+      {
+        id: "p04-ch1-part2",
+        html: chapterSupplement(1, "システム基本方針と公示要件対応", "ルート選択・同意・証跡") + buildChapter1Page4(regulatory)
+      },
+      {
+        id: "p05-ch1-requirements",
+        html: chapterSupplement(1, "システム基本方針と公示要件対応", "公示要件対応表（続き）") + buildChapter1Page5(regulatory)
+      },
+      {
+        id: "p06-ch2-part1",
+        html: chapterHeader(2, "利用者向け見積シミュレーターの動作と判定ロジック", positioning[2]) + buildChapter2Page6(approval)
+      },
+      {
+        id: "p07-ch2-snapshot",
+        html: chapterSupplement(2, "利用者向け見積シミュレーターの動作と判定ロジック", "quoteSnapshot / handoff の保存（続き）") + buildChapter2Page7(approval)
+      },
+      {
+        id: "p08-ch3-part1",
+        html: chapterHeader(3, "運行・精算における運用フローと監査証跡", positioning[3]) + buildChapter3Page8(operations, data)
+      },
+      {
+        id: "p09-ch3-records",
+        html: chapterSupplement(3, "運行・精算における運用フローと監査証跡", "caseRecords・meter_fixed_fare_runs 保存項目") + buildChapter3Page9(operations)
+      },
+      {
+        id: "p10-ch3-e2e",
+        html: chapterSupplement(3, "運行・精算における運用フローと監査証跡", "本番E2E確認結果") + buildChapter3Page10(operations)
+      },
+      {
+        id: "p11-ch4-part1",
+        html: chapterHeader(4, "旅客都合変更時の途中終了運用", positioning[4]) + buildChapter4Page11(pct, data)
+      },
+      {
+        id: "p12-ch4-part2",
+        padBottom: true,
+        html: chapterSupplement(4, "旅客都合変更時の途中終了運用", "通常完了との判別・予約詳細表示") + buildChapter4Page12(pct)
+      },
+      {
+        id: "p13-ch5",
+        html: chapterHeader(5, "確認済み証跡と運用開始前確認項目", positioning[5]) + buildChapter5Page13(data)
+      }
+    ];
+  }
+
+  function buildReportHtml(data){
+    const pages = buildPagePlan(data);
     return (
       "<div class='pre-fixed-fare-integrated-summary'>" +
-      buildCover(meta, data.title) +
-      buildToc(data.toc) +
-      chapterBlock(1, "システム基本方針と公示要件対応", positioning[1], buildChapter1(regulatory, data), { first: true }) +
-      chapterBlock(2, "利用者向け見積シミュレーターの動作と判定ロジック", positioning[2], buildChapter2(approval)) +
-      chapterBlock(3, "運行・精算における運用フローと監査証跡", positioning[3], buildChapter3(operations, data)) +
-      chapterBlock(4, "旅客都合変更時の途中終了運用", positioning[4], buildChapter4(pct, data)) +
-      chapterBlock(5, "確認済み証跡と運用開始前確認項目", positioning[5], buildChapter5(data), { last: true }) +
-      "<p class='footer-note'>" + escapeHtml(data.footerNote || "") + "</p>" +
+      pages.map(function(page, index){
+        return pdfPage(page.id, page.html, {
+          padBottom: !!page.padBottom,
+          isLast: index === pages.length - 1
+        });
+      }).join("") +
       "</div>"
+    );
+  }
+
+  function getIntegratedPageCss(){
+    return (
+      ".pre-fixed-fare-integrated-summary,.pre-fixed-fare-integrated-summary *{box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Yu Gothic','Meiryo',sans-serif;background:transparent;color:#111111;}" +
+      ".pre-fixed-fare-integrated-summary{display:block;width:720px;background:#ffffff;color:#111111;line-height:1.42;font-size:10.5px;margin:0;padding:0;}" +
+      ".pre-fixed-fare-integrated-summary .pdf-page{width:720px;height:1000px;max-height:1000px;overflow:hidden;page-break-inside:avoid;break-inside:avoid;margin:0;padding:0;position:relative;}" +
+      ".pre-fixed-fare-integrated-summary .pdf-page-break{page-break-after:always !important;break-after:page !important;}" +
+      ".pre-fixed-fare-integrated-summary .pdf-page-inner{height:980px;max-height:980px;display:flex;flex-direction:column;overflow:hidden;padding:2px 0 0;}" +
+      ".pre-fixed-fare-integrated-summary .pdf-page-fill{flex:1 1 auto;min-height:24px;background:#ffffff;}" +
+      ".pre-fixed-fare-integrated-summary .pdf-page-fill--large{min-height:120px;}" +
+      ".pre-fixed-fare-integrated-summary .pdf-page-clip-guard{flex:0 0 56px;height:56px;background:#ffffff;}" +
+      ".pre-fixed-fare-integrated-summary h1{font-size:19px;margin:0 0 4px;color:#111111;line-height:1.3;}" +
+      ".pre-fixed-fare-integrated-summary .cover-title{font-size:22px;margin:20px 0 8px;text-align:center;}" +
+      ".pre-fixed-fare-integrated-summary .cover-subtitle{font-size:13px;margin:0 0 16px;text-align:center;color:#444;}" +
+      ".pre-fixed-fare-integrated-summary .toc-heading{font-size:16px;margin:8px 0 10px;}" +
+      ".pre-fixed-fare-integrated-summary .chapter-start{margin:0 0 6px;}" +
+      ".pre-fixed-fare-integrated-summary .chapter-title{font-size:15px;margin:0 0 5px;border-bottom:2px solid #333;padding-bottom:3px;}" +
+      ".pre-fixed-fare-integrated-summary .chapter-title--continued{font-size:14px;}" +
+      ".pre-fixed-fare-integrated-summary .chapter-supplement{font-size:12px;margin:0 0 8px;color:#333;border-bottom:1px solid #ddd;padding-bottom:3px;}" +
+      ".pre-fixed-fare-integrated-summary .chapter-positioning{font-size:10px;color:#444;margin:0 0 8px;}" +
+      ".pre-fixed-fare-integrated-summary .subsection-block{margin:0 0 8px;}" +
+      ".pre-fixed-fare-integrated-summary .subsection-content{margin:0;}" +
+      ".pre-fixed-fare-integrated-summary h2{font-size:13.5px;margin:0 0 6px;color:#111111;}" +
+      ".pre-fixed-fare-integrated-summary .section-title{font-size:11.5px;margin:0 0 4px;color:#111111;}" +
+      ".pre-fixed-fare-integrated-summary h4{font-size:10.5px;margin:5px 0 3px;color:#333;}" +
+      ".pre-fixed-fare-integrated-summary p{margin:0 0 5px;color:#111111;}" +
+      ".pre-fixed-fare-integrated-summary ul,.pre-fixed-fare-integrated-summary ol{margin:0 0 5px 16px;padding:0;}" +
+      ".pre-fixed-fare-integrated-summary li{margin:0 0 2px;color:#111111;}" +
+      ".pre-fixed-fare-integrated-summary table{width:100%;border-collapse:collapse;table-layout:fixed;margin:3px 0 5px;background:#ffffff;}" +
+      ".pre-fixed-fare-integrated-summary thead{display:table-header-group;}" +
+      ".pre-fixed-fare-integrated-summary th,.pre-fixed-fare-integrated-summary td{border:1px solid #d9d9d9;padding:3px 4px;vertical-align:top;white-space:normal;word-break:break-word;overflow-wrap:anywhere;color:#111111;background:#ffffff;font-size:9px;line-height:1.32;}" +
+      ".pre-fixed-fare-integrated-summary th{background:#f6f6f6;font-weight:700;}" +
+      ".pre-fixed-fare-integrated-summary tr{page-break-inside:avoid;break-inside:avoid;}" +
+      ".pre-fixed-fare-integrated-summary .table-requirements td,.pre-fixed-fare-integrated-summary .table-requirements th,.pre-fixed-fare-integrated-summary .table-phase3-evidence td,.pre-fixed-fare-integrated-summary .table-phase3-evidence th{font-size:8px;}" +
+      ".pre-fixed-fare-integrated-summary .footer-note{margin-top:8px;font-size:9px;color:#444;}" +
+      ".pre-fixed-fare-integrated-summary .e2e-reservation-note,.pre-fixed-fare-integrated-summary .meter-mode-note,.pre-fixed-fare-integrated-summary .prelaunch-swap-note{margin:4px 0 0;font-size:9px;color:#444;}"
     );
   }
 
@@ -500,48 +665,17 @@
     container.style.color = "#111111";
     container.style.padding = "0";
     container.style.margin = "0";
-
-    container.innerHTML =
-      "<style>" +
-      ".pre-fixed-fare-integrated-summary,.pre-fixed-fare-integrated-summary *{box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Yu Gothic','Meiryo',sans-serif;background:transparent;color:#111111;}" +
-      ".pre-fixed-fare-integrated-summary{display:block;visibility:visible;opacity:1;position:relative;top:0;left:0;width:720px;background:#ffffff;color:#111111;line-height:1.45;font-size:10.5px;padding:4px 0 0;margin:0;}" +
-      ".pre-fixed-fare-integrated-summary h1{font-size:19px;margin:0 0 4px;color:#111111;line-height:1.3;}" +
-      ".pre-fixed-fare-integrated-summary .cover-title{font-size:22px;margin:24px 0 8px;text-align:center;}" +
-      ".pre-fixed-fare-integrated-summary .cover-subtitle{font-size:13px;margin:0 0 20px;text-align:center;color:#444;}" +
-      ".pre-fixed-fare-integrated-summary .cover-page{margin:0 0 12px;padding:12px 0 10px;border-bottom:2px solid #ccc;}" +
-      ".pre-fixed-fare-integrated-summary .toc-page{margin:0 0 10px;}" +
-      ".pre-fixed-fare-integrated-summary .toc-heading{font-size:16px;margin:0 0 8px;}" +
-      ".pre-fixed-fare-integrated-summary .chapter-block{margin:0 0 10px;}" +
-      ".pre-fixed-fare-integrated-summary .chapter-block-first{margin-top:0;}" +
-      ".pre-fixed-fare-integrated-summary .chapter-start{margin:0 0 8px;break-inside:avoid;page-break-inside:avoid;}" +
-      ".pre-fixed-fare-integrated-summary .chapter-title{font-size:15px;margin:0 0 6px;border-bottom:2px solid #333;padding-bottom:4px;break-after:avoid;page-break-after:avoid;}" +
-      ".pre-fixed-fare-integrated-summary .chapter-positioning{font-size:10.5px;color:#444;margin:0 0 8px;}" +
-      ".pre-fixed-fare-integrated-summary .subsection-block{margin:0 0 10px;}" +
-      ".pre-fixed-fare-integrated-summary .subsection-content{margin:0 0 4px;}" +
-      ".pre-fixed-fare-integrated-summary .table-group{margin:0 0 6px;}" +
-      ".pre-fixed-fare-integrated-summary h2{font-size:13.5px;margin:12px 0 6px;padding-bottom:2px;border-bottom:1px solid #ccc;color:#111111;break-after:avoid;page-break-after:avoid;}" +
-      ".pre-fixed-fare-integrated-summary h3{font-size:11.5px;margin:8px 0 5px;color:#111111;break-after:avoid;page-break-after:avoid;}" +
-      ".pre-fixed-fare-integrated-summary h4{font-size:10.5px;margin:6px 0 4px;color:#333;break-after:avoid;page-break-after:avoid;}" +
-      ".pre-fixed-fare-integrated-summary p{margin:0 0 6px;color:#111111;}" +
-      ".pre-fixed-fare-integrated-summary ul,.pre-fixed-fare-integrated-summary ol{margin:0 0 6px 16px;padding:0;}" +
-      ".pre-fixed-fare-integrated-summary li{margin:0 0 3px;color:#111111;}" +
-      ".pre-fixed-fare-integrated-summary table{width:100%;border-collapse:collapse;table-layout:fixed;margin:4px 0 6px;background:#ffffff;break-inside:avoid;page-break-inside:avoid;}" +
-      ".pre-fixed-fare-integrated-summary thead{display:table-header-group;}" +
-      ".pre-fixed-fare-integrated-summary th,.pre-fixed-fare-integrated-summary td{border:1px solid #d9d9d9;padding:4px 5px;vertical-align:top;white-space:normal;word-break:break-word;overflow-wrap:anywhere;color:#111111;background:#ffffff;box-sizing:border-box;font-size:9.5px;line-height:1.35;}" +
-      ".pre-fixed-fare-integrated-summary th{background:#f6f6f6;font-weight:700;}" +
-      ".pre-fixed-fare-integrated-summary tr{break-inside:avoid;page-break-inside:avoid;}" +
-      ".pre-fixed-fare-integrated-summary .table-cover-meta tr,.pre-fixed-fare-integrated-summary .table-toc tr,.pre-fixed-fare-integrated-summary .table-e2e-meta tr{break-inside:avoid;page-break-inside:avoid;}" +
-      ".pre-fixed-fare-integrated-summary .table-requirements td,.pre-fixed-fare-integrated-summary .table-requirements th,.pre-fixed-fare-integrated-summary .table-phase3-evidence td,.pre-fixed-fare-integrated-summary .table-phase3-evidence th{font-size:8.5px;}" +
-      ".pre-fixed-fare-integrated-summary .footer-note{margin-top:12px;font-size:9.5px;color:#444;break-inside:avoid;page-break-inside:avoid;}" +
-      ".pre-fixed-fare-integrated-summary .e2e-reservation-note,.pre-fixed-fare-integrated-summary .meter-mode-note{margin:6px 0 0;font-size:9.5px;color:#444;}" +
-      "</style>" +
-      reportHtml;
+    container.innerHTML = "<style>" + getIntegratedPageCss() + "</style>" + reportHtml;
     return container;
   }
 
   function ensureRenderableContent(reportElement){
     if(!reportElement){
       throw new Error("統合説明資料PDFの生成対象要素が作成できませんでした。");
+    }
+    const pageCount = reportElement.querySelectorAll(".pdf-page").length;
+    if(pageCount !== EXPECTED_PAGE_COUNT){
+      throw new Error("統合説明資料PDFのページ数が不正です: " + pageCount + " (expected " + EXPECTED_PAGE_COUNT + ")");
     }
     const htmlLength = String(reportElement.innerHTML || "").trim().length;
     const textLength = String(reportElement.innerText || "").trim().length;
@@ -571,9 +705,8 @@
       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
       pagebreak: {
         mode: ["css", "legacy"],
-        after: [".cover-page", ".toc-page"],
-        before: [".chapter-block:not(.chapter-block-first)"],
-        avoid: [".table-avoid-break", "tr", "h2", "h3", "h4"]
+        before: [],
+        after: [".pdf-page-break"]
       }
     };
   }
@@ -612,7 +745,8 @@
     return {
       wrapper: wrapper,
       reportElement: reportElement,
-      htmlText: String(reportElement?.innerText || "")
+      htmlText: String(reportElement?.innerText || ""),
+      pageCount: reportElement.querySelectorAll(".pdf-page").length
     };
   }
 
@@ -621,7 +755,7 @@
     const rendered = await renderToElement(reportData);
     try{
       const blob = await writePdfFromElement(rendered.reportElement, "blob");
-      return { blob: blob, htmlText: rendered.htmlText };
+      return { blob: blob, htmlText: rendered.htmlText, pageCount: rendered.pageCount };
     }finally{
       rendered.wrapper.remove();
     }
@@ -651,6 +785,8 @@
 
   global.PreFixedFareIntegratedSummaryPdf = {
     PDF_FILENAME: PDF_FILENAME,
+    EXPECTED_PAGE_COUNT: EXPECTED_PAGE_COUNT,
+    buildPagePlan: buildPagePlan,
     buildReportHtml: buildReportHtml,
     renderPdfBlob: renderPdfBlob,
     savePdf: savePdf,
