@@ -44,6 +44,18 @@
       regulatory: regulatory,
       approval: approval,
       operations: operations,
+      e2eReservationNote: "※上記予約IDは本番環境におけるE2E確認時の検証IDである。確認完了後、予約データ整理により本番D1上の当該テスト予約は削除済み。確認結果は開発記録および本資料上の実施記録として保持している。",
+      referenceMaterials: [
+        "事前確定運賃システム概要書 兼 関東運輸局公示要件対応表",
+        "事前確定運賃システム説明資料",
+        "事前確定運賃M 運用・監査説明資料",
+        "reservation-v4 test:phase5 実行結果",
+        "care-taxi-meter 本番GitHub Pages反映確認",
+        "complete-fixed-fare 本番E2E確認結果",
+        "本番D1 migration 0005 適用確認",
+        "本番D1予約データ整理記録"
+      ],
+      preLaunchChecksSectionTitle: "運用開始前確認項目",
       footerNote: "本資料は運輸局提出用の統合説明資料案です。公示要件に沿った運用が説明可能な状態を示すものであり、最終的な申請書類への転記・体裁調整は申請担当者が行ってください。"
     };
   }

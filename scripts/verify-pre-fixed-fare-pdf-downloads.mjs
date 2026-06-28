@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import puppeteer from "puppeteer";
+import { PDFParse } from "pdf-parse";
 
 const rootDir = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const outputDir = path.join(rootDir, ".tmp-pdf-downloads");
@@ -57,7 +58,13 @@ const INTEGRATED_CHECKS = [
   "通常メーターで新規運行を開始",
   "completed_with_passenger_change",
   "passenger_requested_route_change",
-  "test:phase5 18/18 PASS"
+  "test:phase5 18/18 PASS",
+  "本番D1上の当該テスト予約は削除済み",
+  "根拠資料・確認資料一覧",
+  "本番D1 migration 0005 適用確認",
+  "運用開始前確認項目",
+  "本番D1上の当該テスト予約は削除済み",
+  "根拠資料・確認資料一覧"
 ];
 
 const FORBIDDEN_PHRASES = [
@@ -81,6 +88,46 @@ function assert(condition, message){
   if(!condition){
     throw new Error(message);
   }
+}
+
+async function assertIntegratedPdfLayout(filePath){
+  const parser = new PDFParse({ data: fs.readFileSync(filePath) });
+  const info = await parser.getInfo();
+  const pageNumbers = Array.from({ length: info.total }, function(_, index){
+    return index + 1;
+  });
+  const shots = await parser.getScreenshot({ partial: pageNumbers, imageBuffer: true, scale: 0.5 });
+  await parser.destroy();
+
+  function inkRatio(page){
+    let dark = 0;
+    const total = page.width * page.height;
+    for(let y = 0; y < page.height; y++){
+      for(let x = 0; x < page.width; x++){
+        const index = (y * page.width + x) * 4;
+        if(page.data[index] < 200 || page.data[index + 1] < 200 || page.data[index + 2] < 200){
+          dark++;
+        }
+      }
+    }
+    return total > 0 ? dark / total : 0;
+  }
+
+  const blankPages = (shots.pages || []).filter(function(page){
+    return inkRatio(page) < 0.001;
+  }).map(function(page){
+    return page.pageNumber;
+  });
+  assert(blankPages.length === 0, "統合PDFに空白ページがあります: " + blankPages.join(", "));
+
+  const page3 = (shots.pages || []).find(function(page){
+    return page.pageNumber === 3;
+  });
+  assert(page3, "統合PDFの3ページ目がありません");
+  assert(
+    inkRatio(page3) >= 0.002,
+    "統合PDFの3ページ目の内容が不足しています"
+  );
 }
 
 async function clickButtonAndCheckStatus(page, buttonId, statusId){
@@ -170,48 +217,12 @@ async function exportIntegratedPdf(page){
       config: {},
       estimateConfig: { version: 1, pdfFooter: { businessName: "ちばケアタクシー" } }
     });
-    const reportHtml = window.PreFixedFareIntegratedSummaryPdf.buildReportHtml(reportData);
-
-    if(typeof html2pdf === "undefined"){
-      await new Promise(function(resolve, reject){
-        const script = document.createElement("script");
-        script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
-        script.async = true;
-        script.setAttribute("data-pre-fixed-fare-report-pdf", "1");
-        script.onload = resolve;
-        script.onerror = function(){ reject(new Error("PDFライブラリの読み込みに失敗しました。")); };
-        document.head.appendChild(script);
-      });
-    }
-
-    const wrapper = document.createElement("div");
-    wrapper.style.position = "absolute";
-    wrapper.style.left = "0";
-    wrapper.style.top = "0";
-    wrapper.style.width = "720px";
-    wrapper.style.background = "#ffffff";
-    wrapper.innerHTML = reportHtml;
-    document.body.appendChild(wrapper);
-    const reportElement = wrapper.querySelector(".pre-fixed-fare-integrated-summary");
-    await new Promise(function(resolve){ requestAnimationFrame(resolve); });
-    await new Promise(function(resolve){ requestAnimationFrame(resolve); });
-
-    const blob = await html2pdf().set({
-      margin: [8, 8, 8, 8],
-      filename: expectedFilename,
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollX: 0, scrollY: 0 },
-      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      pagebreak: { mode: ["css", "legacy"] }
-    }).from(reportElement).outputPdf("blob");
-
-    const htmlText = String(reportElement?.innerText || "");
-    wrapper.remove();
-    const buffer = await blob.arrayBuffer();
+    const rendered = await window.PreFixedFareIntegratedSummaryPdf.renderPdfBlob(reportData);
+    const buffer = await rendered.blob.arrayBuffer();
     return {
       filename: expectedFilename,
       bytes: Array.from(new Uint8Array(buffer)),
-      htmlText: htmlText
+      htmlText: rendered.htmlText
     };
   }, INTEGRATED_FILENAME);
 
@@ -322,6 +333,7 @@ async function main(){
       return integrated.htmlText.includes(item);
     });
     assert(forbiddenFound.length === 0, "④PDF本文に避ける表現: " + forbiddenFound.join(", "));
+    await assertIntegratedPdfLayout(integrated.filePath);
 
     console.log("PASS browser manual PDF verification");
     console.log(JSON.stringify({

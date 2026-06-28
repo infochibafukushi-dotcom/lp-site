@@ -31,7 +31,11 @@ const REQUIRED_CONTENT = [
   "completed_with_passenger_change",
   "passenger_requested_route_change",
   "通常メーターで新規運行を開始",
-  "test:phase5 18/18 PASS"
+  "test:phase5 18/18 PASS",
+  "本番D1上の当該テスト予約は削除済み",
+  "根拠資料・確認資料一覧",
+  "本番D1 migration 0005 適用確認",
+  "運用開始前確認項目"
 ];
 
 const FORBIDDEN_PHRASES = [
@@ -111,6 +115,10 @@ async function main(){
       return moduleCheck.text.includes(item);
     });
     assert(forbiddenFound.length === 0, "避ける表現が含まれています: " + forbiddenFound.join(", "));
+    assert(
+      moduleCheck.text.includes("chapter-block-first"),
+      "第1章ブロックのページ区切り調整クラスがありません"
+    );
 
     const textLength = await page.evaluate(function(){
       const data = window.PreFixedFareIntegratedSummaryData.buildReportData({
