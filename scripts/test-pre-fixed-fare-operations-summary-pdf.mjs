@@ -19,16 +19,29 @@ const REQUIRED_SECTIONS = [
   "7. meter_fixed_fare_runs による start / complete 記録",
   "8. 領収書に「事前確定運賃」と表示すること",
   "9. 本番E2E確認結果",
-  "10. 今後対応予定"
+  "10. 旅客都合変更時の基本運用",
+  "11. 金額の扱い",
+  "12. メーターアプリ上の操作導線",
+  "13. 保存される監査証跡",
+  "14. 通常完了との判別方法",
+  "15. 予約詳細・管理画面の表示",
+  "16. 運用開始前の目視確認項目",
+  "17. 今後対応予定"
 ];
 
 const REQUIRED_E2E = [
   "209906021400",
+  "209906041030",
   "EST-PROD-SMOKE-1782485792",
   "12,000円",
   "事前確定運賃 12,000円",
+  "事前確定M 完了",
+  "事前確定M 旅客都合途中終了",
   "snapshotHashVerified",
-  "confirmedFareMatchesSnapshot"
+  "confirmedFareMatchesSnapshot",
+  "completed_with_passenger_change",
+  "passenger_requested_route_change",
+  "test:phase5 18/18 PASS"
 ];
 
 function resolveChromeExecutable(){

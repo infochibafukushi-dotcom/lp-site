@@ -109,9 +109,46 @@
     });
     const receipt = data.receiptDisplay || {};
     const e2e = data.e2eEvidence || {};
+    const e2eCases = e2e.cases || [];
     const e2eCheckRows = (e2e.checks || []).map(function(row){
       return [row.item, row.result];
     });
+    const pct = data.passengerChangeTermination || {};
+    const basicOp = pct.basicOperation || {};
+    const audit = pct.auditTrail || {};
+    const caseRecordAuditRows = (audit.caseRecords || []).map(function(row){
+      return [row.field, row.value];
+    });
+    const reservationAuditRows = (audit.reservationV4 || []).map(function(row){
+      return [row.field, row.value];
+    });
+    const normalAuditRows = (audit.normalCompletion || []).map(function(row){
+      return [row.field, row.value];
+    });
+    const comparison = pct.completionComparison || {};
+    const normalCompRows = (comparison.normal?.rows || []).map(function(row){
+      return [row.field, row.value];
+    });
+    const passengerCompRows = (comparison.passengerChange?.rows || []).map(function(row){
+      return [row.field, row.value];
+    });
+    const e2eCaseTables = e2eCases.map(function(caseItem){
+      return (
+        "<h3>" + escapeHtml(caseItem.label || "") + "（予約ID " + escapeHtml(caseItem.reservationId || "") + "）</h3>" +
+        buildTable(
+          ["項目", "値"],
+          [
+            ["予約ID", caseItem.reservationId || ""],
+            ["日時", caseItem.datetime || ""],
+            ["利用者", caseItem.userName || ""],
+            ["見積番号", caseItem.estimateNo || ""],
+            ["確定運賃", caseItem.confirmedFare || ""],
+            ["表示ラベル", caseItem.displayLabel || ""]
+          ],
+          { className: "table-e2e-meta", colWidths: ["28%", "72%"] }
+        )
+      );
+    }).join("");
 
     return (
       "<div class='pre-fixed-fare-operations-summary'>" +
@@ -189,17 +226,7 @@
         "<h3>表示例</h3><p><strong>" + escapeHtml(receipt.example || "") + "</strong></p>"
       ) +
       section("9. 本番E2E確認結果",
-        buildTable(
-          ["項目", "値"],
-          [
-            ["予約ID", e2e.reservationId || ""],
-            ["日時", e2e.datetime || ""],
-            ["利用者", e2e.userName || ""],
-            ["見積番号", e2e.estimateNo || ""],
-            ["確定運賃", e2e.confirmedFare || ""]
-          ],
-          { className: "table-e2e-meta", colWidths: ["28%", "72%"] }
-        ) +
+        e2eCaseTables +
         "<h3>確認結果</h3>" +
         buildTable(
           ["確認項目", "結果"],
@@ -207,7 +234,60 @@
           { className: "table-e2e-checks", colWidths: ["72%", "28%"] }
         )
       ) +
-      section("10. 今後対応予定", buildList(data.futurePlans)) +
+      section("10. 旅客都合変更時の基本運用",
+        buildList(basicOp.intro) +
+        "<h3>途中終了のトリガー</h3>" + buildList(basicOp.triggers)
+      ) +
+      section("11. 金額の扱い",
+        buildList(pct.fareHandling)
+      ) +
+      section("12. メーターアプリ上の操作導線",
+        buildList(pct.meterAppFlow)
+      ) +
+      section("13. 保存される監査証跡",
+        "<h3>caseRecords 側</h3>" +
+        buildTable(
+          ["フィールド", "値"],
+          caseRecordAuditRows,
+          { className: "table-audit-case", colWidths: ["38%", "62%"] }
+        ) +
+        "<h3>reservation-v4 / D1 側（旅客都合途中終了）</h3>" +
+        buildTable(
+          ["フィールド", "値"],
+          reservationAuditRows,
+          { className: "table-audit-reservation", colWidths: ["38%", "62%"] }
+        ) +
+        "<h3>通常完了の場合</h3>" +
+        buildTable(
+          ["フィールド", "値"],
+          normalAuditRows,
+          { className: "table-audit-normal", colWidths: ["38%", "62%"] }
+        )
+      ) +
+      section("14. 通常完了との判別方法",
+        "<h3>" + escapeHtml(comparison.normal?.label || "通常完了") + "</h3>" +
+        buildTable(
+          ["フィールド", "値"],
+          normalCompRows,
+          { className: "table-comparison-normal", colWidths: ["38%", "62%"] }
+        ) +
+        "<h3>" + escapeHtml(comparison.passengerChange?.label || "旅客都合途中終了") + "</h3>" +
+        buildTable(
+          ["フィールド", "値"],
+          passengerCompRows,
+          { className: "table-comparison-passenger", colWidths: ["38%", "62%"] }
+        )
+      ) +
+      section("15. 予約詳細・管理画面の表示",
+        "<h3>旅客都合途中終了時の表示項目</h3>" +
+        buildList(pct.adminDisplay?.passengerChangeItems) +
+        "<h3>通常完了時</h3><p>" + escapeHtml(pct.adminDisplay?.normalNote || "") + "</p>"
+      ) +
+      section("16. 運用開始前の目視確認項目",
+        "<p>" + escapeHtml(pct.verifiedNote || "") + "</p>" +
+        buildList(pct.preLaunchChecks)
+      ) +
+      section("17. 今後対応予定", buildList(data.futurePlans)) +
       "<p class='footer-note'>" + escapeHtml(data.footerNote || "") + "</p>" +
       "</div>"
     );

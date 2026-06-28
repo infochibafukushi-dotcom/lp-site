@@ -26,8 +26,9 @@
       overviewPoints: [
         "事前確定運賃M（以下「事前確定M」）は、LP見積時に確定した運賃をメーターアプリでそのまま運行・精算する方式です。",
         "見積・同意・snapshotHash・reservation-v4保存から、メーター読取・運行・精算・領収書・完了までを一貫して証跡化します。",
+        "運行開始後に旅客都合でルート変更・立ち寄り追加等が発生した場合は、事前確定M運送を途中終了し、以後は通常メーター等の別運送として新規開始します。",
         "本番構成は GitHub Pages（LP・メーター）→ Cloudflare Worker driver-proxy → reservation-v4 / Firebase / caseRecords です。",
-        "本番E2E確認（予約ID 209906021400）により、一連のフローが正常に動作することを確認済みです。"
+        "本番E2E確認（予約ID 209906021400：通常完了、209906041030：旅客都合途中終了）により、一連のフローが正常に動作することを確認済みです。"
       ],
       endToEndFlow: [
         "利用者がLP見積シミュレーターで走行予定ルート候補を選択し、見積額を確認する",
@@ -155,25 +156,132 @@
         example: "事前確定運賃 12,000円"
       },
       e2eEvidence: {
-        reservationId: "209906021400",
-        datetime: "2099-06-02 14:00",
-        userName: "スモークジロウ",
-        estimateNo: "EST-PROD-SMOKE-1782485792",
-        confirmedFare: "12,000円",
+        cases: [
+          {
+            label: "通常完了",
+            reservationId: "209906021400",
+            datetime: "2099-06-02 14:00",
+            userName: "スモークジロウ",
+            estimateNo: "EST-PROD-SMOKE-1782485792",
+            confirmedFare: "12,000円",
+            displayLabel: "事前確定M 完了"
+          },
+          {
+            label: "旅客都合途中終了",
+            reservationId: "209906041030",
+            datetime: "2099-06-04 10:30",
+            userName: "スモークジロウ",
+            estimateNo: "EST-PROD-SMOKE-PASSENGER-CHANGE",
+            confirmedFare: "12,000円",
+            displayLabel: "事前確定M 旅客都合途中終了"
+          }
+        ],
         checks: [
-          { item: "予約一覧表示", result: "OK" },
-          { item: "予約詳細表示", result: "OK" },
-          { item: "snapshotHashVerified", result: "OK" },
-          { item: "confirmedFareMatchesSnapshot", result: "OK" },
-          { item: "同意スナップショット", result: "OK" },
-          { item: "start-fixed-fare", result: "OK" },
-          { item: "fixed運行", result: "OK" },
-          { item: "精算保存", result: "OK" },
-          { item: "caseRecords保存", result: "OK" },
-          { item: "領収書「事前確定運賃 12,000円」表示", result: "OK" },
-          { item: "complete-fixed-fare", result: "OK" },
-          { item: "予約詳細「事前確定M 完了」", result: "OK" }
+          { item: "通常完了予約（209906021400）が「事前確定M 完了」と表示", result: "OK" },
+          { item: "旅客都合途中終了予約（209906041030）が「事前確定M 旅客都合途中終了」と表示", result: "OK" },
+          { item: "complete-fixed-fare API が completionStatus / completionReason / preFixedFareException を受信", result: "OK" },
+          { item: "D1 に completion_status / completion_reason / pre_fixed_fare_exception_json を保存", result: "OK" },
+          { item: "予約詳細APIで fixedFareCompletionStatus / fixedFareCompletionReason / preFixedFareException を返却", result: "OK" },
+          { item: "通常完了予約への影響なし", result: "OK" },
+          { item: "test:phase5 18/18 PASS", result: "OK" },
+          { item: "snapshotHashVerified（209906021400）", result: "OK" },
+          { item: "confirmedFareMatchesSnapshot（209906021400）", result: "OK" },
+          { item: "start-fixed-fare / 精算 / 領収書「事前確定運賃 12,000円」（209906021400）", result: "OK" }
         ]
+      },
+      passengerChangeTermination: {
+        basicOperation: {
+          intro: [
+            "事前確定運賃Mにおいて、運行開始後に旅客都合で走行ルート変更、予定外の立ち寄り追加、目的地変更、または当初選択した走行予定ルートから外れる変更が発生した場合は、その時点で事前確定運賃による運送を終了する。",
+            "この場合、当初同意済みの事前確定運賃額を収受し、以後の運送は通常メーター等による別運送として新規に開始する。"
+          ],
+          triggers: [
+            "走行ルート変更（旅客都合）",
+            "予定外の立ち寄り追加",
+            "目的地変更",
+            "当初選択した走行予定ルートから外れる変更"
+          ]
+        },
+        fareHandling: [
+          "当初の事前確定運賃額は変更しない",
+          "途中までの距離による割引・距離割りは行わない",
+          "途中までの時間による再計算は行わない",
+          "通常メーター分を同じ事前確定運賃記録に加算しない",
+          "変更後の運送は別案件・別運行として記録する"
+        ],
+        meterAppFlow: [
+          "事前確定運賃Mの運行中のみ「旅客都合変更で途中終了」ボタンを表示する",
+          "GPSM / 時間M / OBDM では表示しない",
+          "押下時に確認ダイアログを表示する",
+          "確定後、精算前画面へ進む",
+          "当初固定運賃額は変更しない",
+          "精算完了後、通常メーターで新規運行を開始する導線を表示する"
+        ],
+        auditTrail: {
+          caseRecords: [
+            { field: "status", value: "completed_with_passenger_change" },
+            { field: "fareMode", value: "pre_fixed_fare" },
+            { field: "completionReason", value: "passenger_requested_route_change" },
+            { field: "preFixedFareException", value: "例外情報オブジェクト" },
+            { field: "reservationId", value: "対象予約ID" },
+            { field: "confirmedFareYen", value: "当初確定運賃（円）" },
+            { field: "snapshotHash", value: "同意スナップショットハッシュ" },
+            { field: "監査ログ", value: "pre_fixed_fare_passenger_change" }
+          ],
+          reservationV4: [
+            { field: "meter_fixed_fare_runs.status", value: "completed" },
+            { field: "completion_status", value: "completed_with_passenger_change" },
+            { field: "completion_reason", value: "passenger_requested_route_change" },
+            { field: "pre_fixed_fare_exception_json", value: "JSON文字列" }
+          ],
+          normalCompletion: [
+            { field: "completion_status", value: "completed" },
+            { field: "completion_reason", value: "normal_completed" },
+            { field: "pre_fixed_fare_exception_json", value: "null" }
+          ]
+        },
+        completionComparison: {
+          normal: {
+            label: "通常完了",
+            rows: [
+              { field: "caseRecords.status", value: "completed" },
+              { field: "fixedFareCompletionStatus", value: "completed" },
+              { field: "fixedFareCompletionReason", value: "normal_completed" },
+              { field: "preFixedFareException", value: "なし" },
+              { field: "表示", value: "事前確定M 完了" }
+            ]
+          },
+          passengerChange: {
+            label: "旅客都合途中終了",
+            rows: [
+              { field: "caseRecords.status", value: "completed_with_passenger_change" },
+              { field: "fixedFareCompletionStatus", value: "completed_with_passenger_change" },
+              { field: "fixedFareCompletionReason", value: "passenger_requested_route_change" },
+              { field: "preFixedFareException", value: "あり" },
+              { field: "表示", value: "事前確定M 旅客都合途中終了" }
+            ]
+          }
+        },
+        adminDisplay: {
+          passengerChangeItems: [
+            "事前確定M 旅客都合途中終了",
+            "事前確定運賃M：旅客都合によるルート変更・立ち寄り追加のため途中終了",
+            "終了理由",
+            "終了日時",
+            "当初事前確定運賃",
+            "fareMode: pre_fixed_fare",
+            "以後の運送：通常メーター等の別運送として開始",
+            "終了地点",
+            "備考"
+          ],
+          normalNote: "通常完了では従来どおり「事前確定M 完了」と表示し、途中終了パネルは表示しない。"
+        },
+        preLaunchChecks: [
+          "管理画面の目視確認は運用者ログイン後に確認予定",
+          "案件詳細の実機目視確認は運用者ログイン後に確認予定",
+          "GPSM / 時間M / OBDM の実機回帰確認は運用開始前確認項目として実施予定"
+        ],
+        verifiedNote: "コード・API・D1・予約詳細表示の動作は確認済み。上記は運用開始前の目視確認項目として整理する。"
       },
       futurePlans: [
         "Firebase ID Token 検証を driver-proxy に追加し、curl等の直接アクセスをより厳密に制限する",
