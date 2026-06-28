@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="千葉市を中心に近隣エリアの通院・退院・転院・施設送迎に対応する介護タクシーです。車いすのまま乗車可能。ご家族・ケアマネジャー様からの予約、料金目安、お見積り、空き状況確認に対応します。">
+<meta name="description" content="千葉市を中心に近隣エリアの通院・退院・転院・施設送迎に対応する介護タクシーです。車いすのまま乗車可能。ご家族・ケアマネジャー様からの予約、概算見積、空き状況確認に対応します。">
 <title>千葉市近隣の介護タクシー｜車いす・通院・退院・転院送迎｜ちばケアタクシー</title>
 <meta property="og:type" content="website">
 <meta property="og:title" content="千葉市近隣の介護タクシー｜車いす・通院・退院・転院送迎｜ちばケアタクシー">
-<meta property="og:description" content="千葉市を中心に近隣エリアの通院・退院・転院・施設送迎に対応する介護タクシーです。車いすのまま乗車可能。ご家族・ケアマネジャー様からの予約、料金目安、お見積り、空き状況確認に対応します。">
+<meta property="og:description" content="千葉市を中心に近隣エリアの通院・退院・転院・施設送迎に対応する介護タクシーです。車いすのまま乗車可能。ご家族・ケアマネジャー様からの予約、概算見積、空き状況確認に対応します。">
 <meta property="og:url" content="https://infochibafukushi-dotcom.github.io/lp-site/">
 <meta property="og:image" content="https://infochibafukushi-dotcom.github.io/lp-site/assets/logo/1773058066605-image-1.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -80,11 +80,11 @@ header{
 }
 .top-buttons{
   display:grid;
-  grid-template-columns:repeat(3, minmax(0, 1fr));
+  grid-template-columns:repeat(2, minmax(0, 1fr));
   gap:8px;
   flex:1 1 auto;
   min-width:0;
-  max-width:560px;
+  max-width:420px;
 }
 .topbtn{
   padding:8px 12px;
@@ -419,6 +419,38 @@ footer{
   display:none !important;
 }
 
+@media (min-width: 769px){
+  #seven-benefits-chibakea .card-grid-4{
+    grid-template-columns:repeat(4, minmax(0, 1fr));
+    gap:16px;
+    margin-top:18px;
+  }
+
+  #seven-benefits-chibakea .card-item{
+    padding:16px 14px;
+  }
+
+  #seven-benefits-chibakea .card-item::before{
+    width:34px;
+    height:34px;
+    font-size:14px;
+    margin-bottom:10px;
+  }
+
+  #seven-benefits-chibakea .card-item-title{
+    font-size:17px;
+  }
+
+  #seven-benefits-chibakea .card-item .section-text{
+    font-size:13px;
+    line-height:1.6;
+  }
+
+  #seven-benefits-chibakea .card-grid-4 .card-item:nth-child(7){
+    grid-column:auto;
+  }
+}
+
 @media (min-width: 1024px){
   .section-inner{
     max-width:1500px !important;
@@ -539,13 +571,13 @@ footer{
     display:none !important;
   }
   .top-buttons{
-    gap:6px;
+    gap:8px;
     max-width:none;
   }
   .topbtn{
-    padding:8px 6px;
-    font-size:12px;
-    border-radius:6px;
+    padding:10px 8px;
+    font-size:13px;
+    border-radius:8px;
   }
 
   .section{
@@ -801,7 +833,62 @@ footer{
 
   #seven-benefits-chibakea .section-text{
     font-size:15px;
-    line-height:1.85;
+    line-height:1.75;
+    margin-bottom:4px;
+  }
+
+  #seven-benefits-chibakea .card-grid-4{
+    counter-reset:benefit-num;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:10px;
+    margin-top:14px;
+  }
+
+  #seven-benefits-chibakea .card-item{
+    counter-increment:benefit-num;
+    border:1px solid #e8e3db;
+    background:#faf8f5;
+    box-shadow:0 2px 10px rgba(0,0,0,0.06);
+    padding:14px 12px;
+    min-width:0;
+  }
+
+  #seven-benefits-chibakea .card-item::before{
+    content:counter(benefit-num);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:30px;
+    height:30px;
+    border-radius:50%;
+    background:#0057b8;
+    color:#fff;
+    font-size:13px;
+    font-weight:700;
+    line-height:1;
+    margin-bottom:8px;
+  }
+
+  #seven-benefits-chibakea .card-item img{
+    display:none;
+  }
+
+  #seven-benefits-chibakea .card-item-title{
+    font-size:15px;
+    font-weight:700;
+    line-height:1.4;
+    margin:0 0 6px;
+  }
+
+  #seven-benefits-chibakea .card-item .section-text{
+    font-size:12px;
+    line-height:1.55;
+    margin:0;
+    color:#555;
+  }
+
+  #seven-benefits-chibakea .card-grid-4 .card-item:nth-child(7){
+    grid-column:1 / -1;
   }
 
   .section-bottom-links,
@@ -852,11 +939,12 @@ footer{
     font-size:14px;
   }
   .top-buttons{
-    gap:4px;
+    gap:6px;
+    max-width:360px;
   }
   .topbtn{
-    padding:7px 4px;
-    font-size:11px;
+    padding:8px 6px;
+    font-size:12px;
   }
 
   .section-bottom-link{

@@ -5,7 +5,7 @@
     "type": "slider",
     "enabled": true,
     "title": "千葉市近隣の介護タクシー\nちばケアタクシー",
-    "text": "千葉市を中心に、通院・退院・転院・施設送迎・車いす移動に対応。\nご家族・ケアマネジャー様からの予約、料金目安の確認も可能です。\n24時間予約受付。",
+    "text": "千葉市近隣エリアの介護タクシーです。通院・退院・転院・施設送迎・車いす移動に対応。24時間予約受付。",
     "textSize": "medium",
     "bgColor": "#f7f5f0",
     "alignY": "middle",
@@ -19,19 +19,19 @@
     "items": [],
     "links": [
       {
-        "text": "予約する",
-        "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
-        "visible": true
+        "text": "",
+        "url": "#",
+        "visible": false
       },
       {
-        "text": "お見積り",
-        "url": "./estimate/",
-        "visible": true
+        "text": "",
+        "url": "#",
+        "visible": false
       },
       {
-        "text": "空き状況",
-        "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
-        "visible": true
+        "text": "",
+        "url": "#",
+        "visible": false
       }
     ],
     "menuGroups": [],
@@ -103,11 +103,11 @@
   {
     "id": "section-seven-benefits",
     "sectionId": "seven-benefits-chibakea",
-    "type": "card1-left",
+    "type": "card4",
     "enabled": true,
     "title": "ちばケアタクシーが選ばれる7つの理由",
-    "text": "車いすをご利用の方や歩行に不安のある方が、安心して外出できるようサポートします。\n\n1. 車いすのまま乗車可能\n2. 通院・退院・転院に対応\n3. ご家族・ケアマネ様から予約可能\n4. 料金目安を事前に確認可能\n5. 院内付き添い・階段介助も相談可能\n6. 千葉市・近隣市を中心に対応\n7. 24時間予約受付",
-    "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062967741-messageImage_1770383272387_0.jpg",
+    "text": "車いすをご利用の方や歩行に不安のある方が、安心して外出できるようサポートします。",
+    "image": "",
     "link": "#",
     "textSize": "medium",
     "bgColor": "#ffffff",
@@ -115,7 +115,50 @@
     "titleAlign": "left",
     "textAlign": "left",
     "images": [],
-    "items": [],
+    "items": [
+      {
+        "title": "車いすのまま乗車可能",
+        "text": "標準車いす対応。ご自身の車いす利用もご相談ください。",
+        "image": "",
+        "link": "#"
+      },
+      {
+        "title": "通院・退院・転院に対応",
+        "text": "病院受診、退院、転院、施設送迎に対応します。",
+        "image": "",
+        "link": "#"
+      },
+      {
+        "title": "ご家族・ケアマネ様から予約可能",
+        "text": "ご本人様以外の代理相談・予約にも対応します。",
+        "image": "",
+        "link": "#"
+      },
+      {
+        "title": "料金目安を事前に確認",
+        "text": "概算見積で、事前に料金の目安を確認できます。",
+        "image": "",
+        "link": "./estimate/"
+      },
+      {
+        "title": "待機・院内付き添いも相談可能",
+        "text": "受付、会計、薬局、施設内移動もご相談ください。",
+        "image": "",
+        "link": "#"
+      },
+      {
+        "title": "千葉市近隣エリアに対応",
+        "text": "千葉市を中心に、近隣市・千葉県内もご相談可能です。",
+        "image": "",
+        "link": "#"
+      },
+      {
+        "title": "24時間予約受付",
+        "text": "Web予約・LINE相談で、時間外も受付できます。",
+        "image": "",
+        "link": "#"
+      }
+    ],
     "links": [
       {
         "text": "",
@@ -389,8 +432,8 @@
           },
           {
             "name": "機材使用料",
-            "price": "無料",
-            "description": "標準車いすの貸出は無料です。リクライニング車いす・ストレッチャーなどは別途料金がかかります。",
+            "price": "0円〜",
+            "description": "標準車いすは0円でご利用いただけます。リクライニング車いす、ストレッチャーなどを使用する場合は別途料金がかかります。",
             "visible": true
           },
           {
