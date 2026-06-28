@@ -200,15 +200,21 @@ main{
   min-width:100%;
   flex:0 0 100%;
   padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 .slider-slide a,
 .slider-slide div{
-  display:block;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
 }
 .slider-slide img{
   width:100%;
   max-width:700px;
-  height:380px;
+  height:auto;
   object-fit:contain;
   object-position:center;
   border-radius:12px;
@@ -421,6 +427,73 @@ main{
 }
 #seven-benefits-chibakea .card-benefit-item--7 .card-benefit-badge{background:#d64565;}
 #seven-benefits-chibakea .card-benefit-item--7 .card-item-title{color:#b53450;}
+
+#payment-info-cards .card-grid-2{
+  gap:16px;
+  margin-top:16px;
+}
+#payment-info-cards .card-item{
+  display:flex;
+  flex-direction:column;
+  min-height:100%;
+  padding:0;
+  overflow:hidden;
+  border:1px solid #d9e2ec;
+  border-radius:16px;
+  background:#fff;
+  box-shadow:0 4px 16px rgba(30,75,122,0.08);
+}
+#payment-info-cards .card-link{
+  display:flex;
+  flex-direction:column;
+  flex:1;
+  height:100%;
+  padding:18px 18px 16px;
+  text-decoration:none;
+  color:inherit;
+}
+#payment-info-cards .card-item-title{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:0 0 10px;
+  font-size:20px;
+  font-weight:700;
+  line-height:1.4;
+  color:#1e4b7a;
+}
+#payment-info-cards .card-item-title::before{
+  content:"";
+  flex:0 0 8px;
+  width:8px;
+  height:28px;
+  border-radius:999px;
+  background:#1e4b7a;
+}
+#payment-info-cards .card-grid-2 .card-item:first-child .card-item-title::before{
+  background:#2563eb;
+}
+#payment-info-cards .card-grid-2 .card-item:last-child .card-item-title::before{
+  background:#0b8da6;
+}
+#payment-info-cards .card-item .section-text{
+  margin:0;
+  font-size:15px;
+  line-height:1.75;
+  color:#374151;
+}
+#payment-info-cards .card-link::after{
+  content:"詳しく見る →";
+  display:inline-block;
+  margin-top:auto;
+  padding-top:14px;
+  font-size:14px;
+  font-weight:700;
+  color:#1e4b7a;
+}
+#payment-info-cards > .section-inner > .section-text{
+  margin-bottom:4px;
+}
 
 .media-row{
   display:grid;
@@ -824,7 +897,11 @@ footer{
     height:46px;
   }
   .slider-slide img{
-    height:260px;
+    width:100%;
+    max-width:none;
+    height:auto;
+    object-fit:contain;
+    object-position:center center;
   }
 }
 
@@ -914,8 +991,10 @@ footer{
 
   #first-view-chibakea-taxi .slider-slide img{
     width:100%;
-    aspect-ratio:16 / 9;
-    object-fit:cover;
+    height:auto;
+    aspect-ratio:auto;
+    object-fit:contain;
+    object-position:center;
     border-radius:12px;
   }
 
@@ -925,33 +1004,57 @@ footer{
   }
 
   #three-key-checks .card-grid-3{
-    grid-template-columns:repeat(3, minmax(0, 1fr));
-    gap:8px;
+    grid-template-columns:1fr;
+    gap:12px;
     margin-top:14px;
   }
 
   #three-key-checks .card-item{
-    padding:12px 8px;
+    padding:14px;
     min-width:0;
   }
 
+  #three-key-checks .card-link{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    text-decoration:none;
+    color:inherit;
+  }
+
   #three-key-checks .card-item img{
-    display:none;
+    display:block;
+    width:100%;
+    height:auto;
+    aspect-ratio:auto;
+    object-fit:contain;
+    object-position:center;
+    margin:0;
+    border-radius:10px;
+    background:#f3f4f6;
   }
 
   #three-key-checks .card-item-title{
-    font-size:15px;
+    display:block;
+    width:100%;
+    box-sizing:border-box;
+    font-size:16px;
     font-weight:700;
     line-height:1.35;
-    margin:0 0 6px;
+    margin:0;
+    padding:12px 14px;
     text-align:center;
+    color:#fff;
+    background:#1e4b7a;
+    border-radius:10px;
   }
 
   #three-key-checks .card-item .section-text{
-    font-size:11px;
-    line-height:1.45;
+    font-size:14px;
+    line-height:1.6;
     margin:0;
-    text-align:center;
+    text-align:left;
+    color:#374151;
   }
 
   #usage-scenarios .card-grid-4{
@@ -1023,6 +1126,24 @@ footer{
   .card-grid-4 .card-item-title{
     font-size:19px;
     font-weight:700;
+  }
+
+  #payment-info-cards .card-grid-2{
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+
+  #payment-info-cards .card-link{
+    padding:16px 14px 14px;
+  }
+
+  #payment-info-cards .card-item-title{
+    font-size:18px;
+  }
+
+  #payment-info-cards .card-item .section-text{
+    font-size:14px;
+    line-height:1.7;
   }
 
   #seven-benefits-chibakea > .section-inner > .section-text{

@@ -188,6 +188,59 @@
     }
   },
   {
+    "id": "section-payment-info",
+    "sectionId": "payment-info-cards",
+    "type": "card2",
+    "enabled": true,
+    "title": "タクシー券・介護保険について",
+    "text": "ご利用前にご確認ください。詳しくはよくあるご質問もあわせてご覧ください。",
+    "textSize": "medium",
+    "bgColor": "#f7f5f0",
+    "alignY": "middle",
+    "titleAlign": "left",
+    "textAlign": "left",
+    "items": [
+      {
+        "title": "タクシー券について",
+        "text": "自治体の福祉タクシー券・障害者手帳による割引など、取扱いについてご案内します。ご利用予定の券種があれば予約時にお知らせください。",
+        "image": "",
+        "link": "#faq-yokuaru"
+      },
+      {
+        "title": "介護保険について",
+        "text": "当サービスは介護保険の適用外（自費）です。介護保険との関係や料金の考え方について、ご不明点はお気軽にご相談ください。",
+        "image": "",
+        "link": "#faq-yokuaru"
+      }
+    ],
+    "image": "",
+    "link": "#",
+    "images": [],
+    "links": [
+      {
+        "text": "よくあるご質問を見る",
+        "url": "#faq-yokuaru",
+        "visible": true
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ],
+    "menuGroups": [],
+    "menuBottomCard": {
+      "visible": false,
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
+    }
+  },
+  {
     "id": "section-usage-scenarios",
     "sectionId": "usage-scenarios",
     "type": "card4",
