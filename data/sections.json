@@ -12,7 +12,10 @@
     "titleAlign": "left",
     "textAlign": "left",
     "images": [
-      "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062960486-messageImage_1770383251537.jpg"
+      "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/slider/1782669505930-ChatGPT-Image-2026629-02_27_50.png",
+      "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/slider/1782669509302-ChatGPT-Image-2026629-02_27_59.png",
+      "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/slider/1782669512584-ChatGPT-Image-2026629-02_37_15.png",
+      "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/slider/1782669517673-ChatGPT-Image-2026629-02_37_15.png"
     ],
     "image": "",
     "link": "#",
@@ -468,7 +471,7 @@
     ],
     "menuBottomCard": {
       "visible": true,
-      "title": "",
+      "title": "ご予約・ご相談はこちら",
       "text": "実際の料金は、走行距離、所要時間、待機時間、介助内容、当日の状況により変わる場合があります。"
     }
   },
