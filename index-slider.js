@@ -9,6 +9,50 @@
     sliderTouchState = {};
   }
 
+  function getSliderSlides(track){
+    return track.querySelectorAll(".slider-slide:not(.slider-slide-clone)");
+  }
+
+  function getSliderRealTotal(track){
+    const stored = Number(track.dataset.realTotal);
+    if(stored > 0) return stored;
+    return getSliderSlides(track).length;
+  }
+
+  function ensureCloneSlide(track){
+    const existingClone = track.querySelector(".slider-slide-clone");
+    if(existingClone){
+      existingClone.remove();
+    }
+
+    const slides = getSliderSlides(track);
+    const realTotal = slides.length;
+    track.dataset.realTotal = String(realTotal);
+
+    if(realTotal <= 1) return realTotal;
+
+    const clone = slides[0].cloneNode(true);
+    clone.classList.add("slider-slide-clone");
+    clone.setAttribute("aria-hidden", "true");
+    track.appendChild(clone);
+    return realTotal;
+  }
+
+  function getLogicalIndex(visualIndex, realTotal){
+    if(realTotal <= 0) return 0;
+    if(visualIndex >= realTotal) return 0;
+    if(visualIndex < 0) return realTotal - 1;
+    return visualIndex;
+  }
+
+  function setSliderTransition(track, enabled){
+    track.style.transition = enabled ? "" : "none";
+  }
+
+  function applySliderTransform(track, visualIndex){
+    track.style.transform = `translateX(-${visualIndex * 100}%)`;
+  }
+
   function buildSliderDots(idx, total){
     const dotsWrap = document.getElementById(`slider-dots-${idx}`);
     if(!dotsWrap) return;
@@ -41,6 +85,34 @@
     dots.forEach((dot, i) => {
       dot.classList.toggle("active", i === activeDot);
     });
+  }
+
+  function handleSliderTransitionEnd(idx){
+    const track = document.getElementById(`slider-track-${idx}`);
+    if(!track) return;
+
+    const realTotal = getSliderRealTotal(track);
+    const current = Number(track.dataset.current || "0");
+
+    if(current === realTotal){
+      setSliderTransition(track, false);
+      track.dataset.current = "0";
+      applySliderTransform(track, 0);
+      void track.offsetHeight;
+      setSliderTransition(track, true);
+    }
+
+    track.dataset.transitioning = "false";
+  }
+
+  function bindSliderTransitionEnd(track, idx){
+    if(track.dataset.loopBound === "true") return;
+
+    track.addEventListener("transitionend", (e) => {
+      if(e.target !== track || e.propertyName !== "transform") return;
+      handleSliderTransitionEnd(idx);
+    });
+    track.dataset.loopBound = "true";
   }
 
   function attachSliderSwipe(shell, idx){
@@ -78,8 +150,8 @@
     const track = document.getElementById(`slider-track-${idx}`);
     if(!track) return null;
 
-    const slides = track.querySelectorAll(".slider-slide");
-    if(slides.length <= 1) return null;
+    const realTotal = getSliderRealTotal(track);
+    if(realTotal <= 1) return null;
 
     const id = setInterval(() => {
       moveSlider(idx, 1);
@@ -106,19 +178,20 @@
       const track = document.getElementById(`slider-track-${idx}`);
       if(!track) return;
 
-      const slides = track.querySelectorAll(".slider-slide");
-      const total = slides.length;
-
-      if(total === 0) return;
+      const realTotal = ensureCloneSlide(track);
+      if(realTotal === 0) return;
 
       track.dataset.current = "0";
+      track.dataset.transitioning = "false";
+      bindSliderTransitionEnd(track, idx);
       updateSliderPosition(idx);
-      if(total > 1){
-        buildSliderDots(idx, total);
+
+      if(realTotal > 1){
+        buildSliderDots(idx, realTotal);
       }
       attachSliderSwipe(shell, idx);
 
-      if(total > 1){
+      if(realTotal > 1){
         const timer = createSliderTimer(idx);
         if(timer){
           sliderTimers.push(timer);
@@ -142,46 +215,66 @@
     const track = document.getElementById(`slider-track-${idx}`);
     if(!track) return;
 
-    const slides = track.querySelectorAll(".slider-slide");
-    const total = slides.length;
-    if(total === 0) return;
+    const realTotal = getSliderRealTotal(track);
+    if(realTotal === 0) return;
 
     let current = Number(track.dataset.current || "0");
-    if(current < 0) current = total - 1;
-    if(current >= total) current = 0;
 
-    track.dataset.current = String(current);
-    track.style.transform = `translateX(-${current * 100}%)`;
-    updateSliderDots(idx, current, total);
+    if(current >= realTotal){
+      setSliderTransition(track, false);
+      current = 0;
+      track.dataset.current = "0";
+      applySliderTransform(track, 0);
+      void track.offsetHeight;
+      setSliderTransition(track, true);
+      track.dataset.transitioning = "false";
+    }else if(current < 0){
+      current = realTotal - 1;
+      track.dataset.current = String(current);
+      applySliderTransform(track, current);
+    }else{
+      track.dataset.current = String(current);
+      applySliderTransform(track, current);
+    }
+
+    updateSliderDots(idx, getLogicalIndex(current, realTotal), realTotal);
   }
 
   function moveSlider(idx, step){
     const track = document.getElementById(`slider-track-${idx}`);
     if(!track) return;
+    if(track.dataset.transitioning === "true") return;
 
-    const slides = track.querySelectorAll(".slider-slide");
-    const total = slides.length;
-    if(total === 0) return;
+    const realTotal = getSliderRealTotal(track);
+    if(realTotal <= 1) return;
 
     let current = Number(track.dataset.current || "0");
-    current += step;
 
-    if(current >= total) current = 0;
-    if(current < 0) current = total - 1;
+    if(step > 0){
+      if(current >= realTotal) return;
+      current += 1;
+      if(current === realTotal){
+        track.dataset.transitioning = "true";
+      }
+    }else{
+      current -= 1;
+      if(current < 0) current = realTotal - 1;
+    }
 
     track.dataset.current = String(current);
-    updateSliderPosition(idx);
+    applySliderTransform(track, current);
+    updateSliderDots(idx, getLogicalIndex(current, realTotal), realTotal);
   }
 
   function goToSliderDot(idx, dotIndex){
     const track = document.getElementById(`slider-track-${idx}`);
     if(!track) return;
+    if(track.dataset.transitioning === "true") return;
 
-    const slides = track.querySelectorAll(".slider-slide");
-    const total = slides.length;
-    if(total === 0) return;
+    const realTotal = getSliderRealTotal(track);
+    if(realTotal === 0) return;
 
-    const target = getSlideIndexFromDot(dotIndex, total);
+    const target = getSlideIndexFromDot(dotIndex, realTotal);
     track.dataset.current = String(target);
     updateSliderPosition(idx);
     resetSliderTimer(idx);
