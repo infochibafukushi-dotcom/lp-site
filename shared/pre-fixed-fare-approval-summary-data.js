@@ -49,7 +49,7 @@
           system: "preFixedFareConfirmable=false",
           reservationUrl: "fareConfirm=review あり",
           button: "確認対応として予約へ進む",
-          handling: "確認対応"
+          handling: "通常メーター運賃または確認対応（事前確定運賃として断定しない）"
         },
         {
           condition: "帰り立ち寄りあり・全体候補2件以上・選択済み",
@@ -61,8 +61,8 @@
       ],
       judgmentNotes: [
         "判定は quoteSnapshot.preFixedFareConfirmable および overallRouteSelection.preFixedFareConfirmable に反映される",
-        "候補1件時は fallbackReason: only_one_distinct_route 等を記録し、確認対応である理由を画面・PDF・JSON に残す",
-        "有料道路を含む候補を選択した場合でも、候補数が2件以上であれば事前確定運賃候補として扱う。有料道路料金自体は見積料金に含めない"
+        "候補1件時は fallbackReason: only_one_distinct_route 等を記録し、通常メーター運賃または確認対応として扱い、事前確定運賃として断定しない理由を画面・PDF・JSON に残す",
+        "有料道路を含む候補を選択した場合でも、候補数が2件以上であれば事前確定運賃候補として扱う。有料道路料金は事前確定運賃とは別の実費・別料金として扱い、見積料金に含めない"
       ],
       routeCandidateTypes: [
         {
@@ -86,7 +86,7 @@
       singleCandidate: {
         intro: [
           "電子地図APIの結果や経路条件により、実質的に異なる走行予定ルート候補が1件のみとなる場合があります。",
-          "この場合、本システムでは事前確定運賃候補としては扱わず、確認対応として予約に進む設計としています。",
+          "この場合、本システムでは事前確定運賃候補としては扱わず、通常メーター運賃または確認対応として予約に進む設計としています。",
           "これにより、2以上の走行予定ルート候補から利用者が選択できない場合に、事前確定運賃として断定しない安全側の運用としています。"
         ],
         ui: [

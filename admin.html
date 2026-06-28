@@ -1394,7 +1394,7 @@ body{
       <span class="toggle-state">閉じています</span>
     </button>
     <div class="card-body js-card-body">
-      <p class="note">本カードから3種類のPDFを出力できます。①は公示要件対応表・算定式・係数など制度説明寄り、②は Phase 2 / Phase 3-B の実装内容・ルート候補選択・証跡保存の説明寄り、③は事前確定Mの本番運用・監査説明寄りです。</p>
+      <p class="note">本カードから4種類のPDFを出力できます。①は公示要件対応表・算定式・係数など制度説明寄り、②は Phase 2 / Phase 3-B の実装内容・ルート候補選択・証跡保存の説明寄り、③は事前確定Mの本番運用・監査説明寄り、④は①②③を1冊にまとめた運輸局提出用の統合資料です。</p>
       <div style="margin-top:16px;">
         <p class="note" style="margin-bottom:8px;"><strong>① 事前確定運賃システム概要書 兼 関東運輸局公示要件対応表</strong><br>関東運輸局の事前確定運賃公示要件に対するシステム対応、算定式、係数、ルート算定、同意証跡、保存設計をまとめた説明資料です。</p>
         <div class="actions">
@@ -1415,6 +1415,13 @@ body{
           <button type="button" id="preFixedFareOperationsSummaryExportBtn">事前確定運賃M 運用・監査説明資料PDFを出力</button>
         </div>
         <div class="preview" id="preFixedFareOperationsSummaryStatus">まだ出力していません。</div>
+      </div>
+      <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e5e5e5;">
+        <p class="note" style="margin-bottom:8px;"><strong>④ 事前確定運賃システム 統合説明資料</strong><br>①公示要件対応表、②利用者向け見積・ルート選択ロジック、③メーターアプリ運行・精算・監査証跡を1冊にまとめた、運輸局提出・説明用の統合資料を出力します。</p>
+        <div class="actions">
+          <button type="button" id="preFixedFareIntegratedSummaryExportBtn">事前確定運賃システム 統合説明資料PDFを出力</button>
+        </div>
+        <div class="preview" id="preFixedFareIntegratedSummaryStatus">まだ出力していません。</div>
       </div>
     </div>
   </div>
@@ -1447,6 +1454,8 @@ body{
 <script src="./shared/pre-fixed-fare-approval-summary-pdf.js?v=39e326a1"></script>
 <script src="./shared/pre-fixed-fare-operations-summary-data.js?v=39e326a1"></script>
 <script src="./shared/pre-fixed-fare-operations-summary-pdf.js?v=39e326a1"></script>
+<script src="./shared/pre-fixed-fare-integrated-summary-data.js?v=39e326a1"></script>
+<script src="./shared/pre-fixed-fare-integrated-summary-pdf.js?v=39e326a1"></script>
 <script src="./admin-pre-fixed-fare-report.js?v=39e326a1"></script>
 <script>
 const CONFIG_PATH = 'data/config.json';

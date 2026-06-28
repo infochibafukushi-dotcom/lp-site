@@ -123,6 +123,7 @@
       section("2. 本資料の目的", buildList(data.purpose)) +
       section("3. 公示根拠", buildList(data.notices?.basis)) +
       section("4. 事前確定運賃の算定式",
+        (data.notices?.fareBasisNote ? "<p>" + escapeHtml(data.notices.fareBasisNote) + "</p>" : "") +
         buildList(data.notices?.formulas) +
         "<p><strong>" + escapeHtml(data.notices?.formulaText || "") + "</strong></p>"
       ) +
@@ -135,6 +136,7 @@
         "<p>" + escapeHtml(data.coefficientPolicy || "") + "</p>"
       ) +
       section("6. 運賃と各種料金の区分",
+        "<p>迎車料金・予約料金・介助料等は事前確定運賃とは区分し、見積明細上も別行で表示する。</p>" +
         buildTable(
           ["区分", "事前確定運賃に含めるか", "扱い"],
           fareFeeRows,

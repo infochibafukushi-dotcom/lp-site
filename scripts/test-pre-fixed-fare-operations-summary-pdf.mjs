@@ -39,6 +39,8 @@ const REQUIRED_E2E = [
   "事前確定M 旅客都合途中終了",
   "snapshotHashVerified",
   "confirmedFareMatchesSnapshot",
+  "通常メーターで新規運行を開始",
+  "/case/start",
   "completed_with_passenger_change",
   "passenger_requested_route_change",
   "test:phase5 18/18 PASS"

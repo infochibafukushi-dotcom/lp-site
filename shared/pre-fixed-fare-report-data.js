@@ -155,9 +155,10 @@
           "一般乗用旅客自動車運送事業の事前確定運賃算定に用いる係数について",
           "千葉県の係数適用日：令和7年7月18日"
         ],
+        fareBasisNote: "運賃算定根拠は、申請予定または認可後の距離制運賃表に基づく。",
         formulas: [
           "電子地図で推計走行距離を算定",
-          "距離制運賃を基準にする",
+          "距離制運賃を基準にする（申請予定または認可後の距離制運賃表に基づく）",
           "時間距離併用制運賃は除く",
           "関東運輸局長が定めた係数を乗じる",
           "1円単位を四捨五入する",
@@ -170,12 +171,12 @@
       coefficientPolicy: "本システムでは独自係数を用いず、関東運輸局が公示済みの平準化係数を使用する方針とする。",
       fareAndFeeRows: [
         { category: "乗車地から降車地までの運賃", include: "含める", handling: "事前確定運賃として固定" },
-        { category: "迎車料金", include: "原則別枠", handling: "各種料金として区分" },
-        { category: "予約料金", include: "別枠", handling: "各種料金として区分" },
-        { category: "介助料", include: "別枠", handling: "介護タクシーサービス料金として区分" },
-        { category: "待機料", include: "別枠", handling: "実待機時間に応じて精算" },
-        { category: "付き添い料", include: "別枠", handling: "実対応内容に応じて精算" },
-        { category: "有料道路代", include: "別枠", handling: "実費として区分" },
+        { category: "迎車料金", include: "原則別枠", handling: "事前確定運賃とは区分し、明細上も別行で表示" },
+        { category: "予約料金", include: "別枠", handling: "事前確定運賃とは区分し、明細上も別行で表示" },
+        { category: "介助料", include: "別枠", handling: "介護タクシーサービス料金として区分し、明細上も別行で表示" },
+        { category: "待機料", include: "別枠", handling: "実待機時間に応じて精算し、明細上も別行で表示" },
+        { category: "付き添い料", include: "別枠", handling: "実対応内容に応じて精算し、明細上も別行で表示" },
+        { category: "有料道路代", include: "別枠", handling: "実費として区分し、明細上も別行で表示" },
         { category: "福祉タクシー券", include: "決済・精算側", handling: "運賃算定ではなく精算時に充当" }
       ],
       mapAndRouteDesign: [

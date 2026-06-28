@@ -23,6 +23,13 @@
     box.textContent = message || "";
   }
 
+  function setIntegratedSummaryStatus(message, type){
+    const box = document.getElementById("preFixedFareIntegratedSummaryStatus");
+    if(!box) return;
+    box.className = "preview" + (type ? " " + type : "");
+    box.textContent = message || "";
+  }
+
   async function fetchJson(path){
     const response = await fetch(path + "?" + Date.now(), { cache: "no-store" });
     if(!response.ok){
@@ -95,6 +102,29 @@
     setOperationsSummaryStatus("PDFを作成しています...", "warn");
     await generatePreFixedFareOperationsSummaryPdf();
     setOperationsSummaryStatus("PDFを保存しました。", "success");
+  }
+
+  async function generatePreFixedFareIntegratedSummaryPdf(){
+    if(!global.PreFixedFareIntegratedSummaryPdf){
+      throw new Error("事前確定運賃システム 統合説明資料PDFモジュールの読み込みに失敗しました。");
+    }
+
+    const [config, estimateConfigFromFile] = await Promise.all([
+      fetchJson(CONFIG_PATH).catch(function(){ return {}; }),
+      fetchJson(ESTIMATE_CONFIG_PATH).catch(function(){ return {}; })
+    ]);
+    const estimateConfig = getEstimateConfigFromEditor() || estimateConfigFromFile;
+
+    await global.PreFixedFareIntegratedSummaryPdf.generatePreFixedFareIntegratedSummaryPdf({
+      config: config,
+      estimateConfig: estimateConfig
+    });
+  }
+
+  async function exportIntegratedSummaryPdf(){
+    setIntegratedSummaryStatus("PDFを作成しています...", "warn");
+    await generatePreFixedFareIntegratedSummaryPdf();
+    setIntegratedSummaryStatus("PDFを保存しました。", "success");
   }
 
   function bindRegulatoryButton(){
@@ -171,10 +201,36 @@
     });
   }
 
+  function bindIntegratedSummaryButton(){
+    const button = document.getElementById("preFixedFareIntegratedSummaryExportBtn");
+    if(!button) return;
+    button.addEventListener("click", async function(){
+      button.disabled = true;
+      try{
+        await exportIntegratedSummaryPdf();
+      }catch(error){
+        console.error(error);
+        const reason = String(error?.message || "");
+        if(
+          reason.includes("生成対象HTMLが空")
+          || reason.includes("組み立てに失敗")
+          || reason.includes("読み込みに失敗")
+        ){
+          setIntegratedSummaryStatus(reason, "error");
+        }else{
+          setIntegratedSummaryStatus("PDF作成に失敗しました。", "error");
+        }
+      }finally{
+        button.disabled = false;
+      }
+    });
+  }
+
   function bind(){
     bindRegulatoryButton();
     bindApprovalSummaryButton();
     bindOperationsSummaryButton();
+    bindIntegratedSummaryButton();
   }
 
   function bindOnce(){

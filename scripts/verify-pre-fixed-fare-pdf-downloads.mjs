@@ -8,6 +8,7 @@ const outputDir = path.join(rootDir, ".tmp-pdf-downloads");
 const adminUrl = "file:///" + path.join(rootDir, "admin.html").replace(/\\/g, "/");
 const DEFAULT_CHROME = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 const OPERATIONS_FILENAME = "pre-fixed-fare-operations-summary.pdf";
+const INTEGRATED_FILENAME = "pre-fixed-fare-integrated-summary.pdf";
 
 const OPERATIONS_CHECKS = [
   "1. 事前確定運賃Mの概要",
@@ -35,9 +36,34 @@ const OPERATIONS_CHECKS = [
   "事前確定M 旅客都合途中終了",
   "completed_with_passenger_change",
   "passenger_requested_route_change",
+  "通常メーターで新規運行を開始",
   "driver-proxy",
   "METER_DRIVER_TOKEN",
   "Firebase ID Token"
+];
+
+const INTEGRATED_CHECKS = [
+  "事前確定運賃システム 統合説明資料",
+  "関東運輸局提出・説明用",
+  "目次",
+  "第1章",
+  "第2章",
+  "第3章",
+  "第4章",
+  "第5章",
+  "旅客都合変更時の途中終了運用",
+  "209906021400",
+  "209906041030",
+  "通常メーターで新規運行を開始",
+  "completed_with_passenger_change",
+  "passenger_requested_route_change",
+  "test:phase5 18/18 PASS"
+];
+
+const FORBIDDEN_PHRASES = [
+  "完全準拠",
+  "自動的に通常運行開始へ遷移",
+  "満額収受"
 ];
 
 function resolveChromeExecutable(){
@@ -138,6 +164,66 @@ async function exportOperationsPdf(page){
   };
 }
 
+async function exportIntegratedPdf(page){
+  const result = await page.evaluate(async function(expectedFilename){
+    const reportData = window.PreFixedFareIntegratedSummaryData.buildReportData({
+      config: {},
+      estimateConfig: { version: 1, pdfFooter: { businessName: "ちばケアタクシー" } }
+    });
+    const reportHtml = window.PreFixedFareIntegratedSummaryPdf.buildReportHtml(reportData);
+
+    if(typeof html2pdf === "undefined"){
+      await new Promise(function(resolve, reject){
+        const script = document.createElement("script");
+        script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+        script.async = true;
+        script.setAttribute("data-pre-fixed-fare-report-pdf", "1");
+        script.onload = resolve;
+        script.onerror = function(){ reject(new Error("PDFライブラリの読み込みに失敗しました。")); };
+        document.head.appendChild(script);
+      });
+    }
+
+    const wrapper = document.createElement("div");
+    wrapper.style.position = "absolute";
+    wrapper.style.left = "0";
+    wrapper.style.top = "0";
+    wrapper.style.width = "720px";
+    wrapper.style.background = "#ffffff";
+    wrapper.innerHTML = reportHtml;
+    document.body.appendChild(wrapper);
+    const reportElement = wrapper.querySelector(".pre-fixed-fare-integrated-summary");
+    await new Promise(function(resolve){ requestAnimationFrame(resolve); });
+    await new Promise(function(resolve){ requestAnimationFrame(resolve); });
+
+    const blob = await html2pdf().set({
+      margin: [8, 8, 8, 8],
+      filename: expectedFilename,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollX: 0, scrollY: 0 },
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      pagebreak: { mode: ["css", "legacy"] }
+    }).from(reportElement).outputPdf("blob");
+
+    const htmlText = String(reportElement?.innerText || "");
+    wrapper.remove();
+    const buffer = await blob.arrayBuffer();
+    return {
+      filename: expectedFilename,
+      bytes: Array.from(new Uint8Array(buffer)),
+      htmlText: htmlText
+    };
+  }, INTEGRATED_FILENAME);
+
+  const filePath = path.join(outputDir, result.filename);
+  fs.writeFileSync(filePath, Buffer.from(result.bytes));
+  return {
+    filePath: filePath,
+    size: result.bytes.length,
+    htmlText: result.htmlText
+  };
+}
+
 async function main(){
   if(!fs.existsSync(outputDir)){
     fs.mkdirSync(outputDir, { recursive: true });
@@ -209,11 +295,42 @@ async function main(){
     assert(approvalCheck.title === "事前確定運賃システム説明資料", "②PDFデータタイトル不正");
     assert(approvalCheck.hasJudgment, "②判定ロジックデータなし");
 
+    const integratedButtonVisible = await page.evaluate(function(){
+      return Boolean(document.getElementById("preFixedFareIntegratedSummaryExportBtn"));
+    });
+    assert(integratedButtonVisible, "④ボタンが表示されていません");
+
+    const integratedFilenameCheck = await page.evaluate(function(){
+      return window.PreFixedFareIntegratedSummaryPdf.PDF_FILENAME;
+    });
+    assert(integratedFilenameCheck === INTEGRATED_FILENAME, "④出力ファイル名が不正: " + integratedFilenameCheck);
+
+    await clickButtonAndCheckStatus(
+      page,
+      "preFixedFareIntegratedSummaryExportBtn",
+      "preFixedFareIntegratedSummaryStatus"
+    );
+
+    const integrated = await exportIntegratedPdf(page);
+    assert(path.basename(integrated.filePath) === INTEGRATED_FILENAME, "④PDFファイル名が不正");
+    assert(integrated.size > 5000, "④PDFサイズが小さすぎます: " + integrated.size);
+    const missingIntegrated = INTEGRATED_CHECKS.filter(function(item){
+      return !integrated.htmlText.includes(item);
+    });
+    assert(missingIntegrated.length === 0, "④PDF本文に不足: " + missingIntegrated.join(", "));
+    const forbiddenFound = FORBIDDEN_PHRASES.filter(function(item){
+      return integrated.htmlText.includes(item);
+    });
+    assert(forbiddenFound.length === 0, "④PDF本文に避ける表現: " + forbiddenFound.join(", "));
+
     console.log("PASS browser manual PDF verification");
     console.log(JSON.stringify({
       operationsPdf: operations.filePath,
       operationsSize: operations.size,
-      operationsFilename: OPERATIONS_FILENAME
+      operationsFilename: OPERATIONS_FILENAME,
+      integratedPdf: integrated.filePath,
+      integratedSize: integrated.size,
+      integratedFilename: INTEGRATED_FILENAME
     }, null, 2));
   }finally{
     await browser.close();
