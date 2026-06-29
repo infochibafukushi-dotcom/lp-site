@@ -954,6 +954,24 @@ footer{
     grid-template-columns:1fr;
     gap:14px;
     margin-top:16px;
+    width:100%;
+    justify-items:stretch;
+  }
+
+  .card-grid-3 .card-item,
+  .card-grid-4 .card-item{
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    box-sizing:border-box;
+  }
+
+  .card-grid-3 .card-link,
+  .card-grid-4 .card-link{
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    width:100%;
   }
 
   .card-item{
@@ -962,6 +980,7 @@ footer{
 
   .card-item img{
     width:100%;
+    max-width:100%;
     height:auto;
     aspect-ratio:16 / 9;
     object-fit:cover;
@@ -1005,19 +1024,28 @@ footer{
 
   #three-key-checks .card-grid-3{
     grid-template-columns:1fr;
-    gap:12px;
+    gap:14px;
     margin-top:14px;
+    width:100%;
+    max-width:100%;
+    margin-left:auto;
+    margin-right:auto;
   }
 
   #three-key-checks .card-item{
     padding:14px;
     min-width:0;
+    width:100%;
+    max-width:100%;
+    margin:0 auto;
   }
 
   #three-key-checks .card-link{
     display:flex;
     flex-direction:column;
+    align-items:stretch;
     gap:10px;
+    width:100%;
     text-decoration:none;
     color:inherit;
   }
@@ -1025,9 +1053,10 @@ footer{
   #three-key-checks .card-item img{
     display:block;
     width:100%;
+    max-width:100%;
     height:auto;
-    aspect-ratio:auto;
-    object-fit:contain;
+    aspect-ratio:16 / 9;
+    object-fit:cover;
     object-position:center;
     margin:0;
     border-radius:10px;
@@ -1037,6 +1066,7 @@ footer{
   #three-key-checks .card-item-title{
     display:block;
     width:100%;
+    max-width:100%;
     box-sizing:border-box;
     font-size:16px;
     font-weight:700;
@@ -1047,14 +1077,22 @@ footer{
     color:#fff;
     background:#1e4b7a;
     border-radius:10px;
+    align-self:stretch;
   }
 
   #three-key-checks .card-item .section-text{
     font-size:14px;
     line-height:1.6;
     margin:0;
+    padding:0;
+    width:100%;
     text-align:left;
     color:#374151;
+  }
+
+  #ryokin-meyasu .section-bottom-links{
+    margin-top:20px;
+    margin-bottom:12px;
   }
 
   #usage-scenarios .card-grid-4{
@@ -1069,7 +1107,11 @@ footer{
   }
 
   #usage-scenarios .card-item img{
+    width:100%;
+    max-width:100%;
     aspect-ratio:4 / 3;
+    object-fit:cover;
+    object-position:center;
     margin-bottom:8px;
     border-radius:8px;
   }
