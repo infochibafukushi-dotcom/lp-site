@@ -1087,8 +1087,26 @@ footer{
     text-align:center;
   }
 
-  .slider-image-wrap{
-    aspect-ratio:4 / 3;
+  .slider-shell .slider-slide{
+    display:block;
+    align-items:stretch;
+  }
+
+  .slider-shell .slider-image-wrap{
+    aspect-ratio:auto;
+    height:auto;
+    overflow:hidden;
+    background:#ffffff;
+    border-radius:12px;
+  }
+
+  .slider-shell .slider-image-wrap img{
+    width:100%;
+    height:auto;
+    max-width:100%;
+    object-fit:contain;
+    object-position:center center;
+    display:block;
   }
 
   #three-key-checks .section-title.text-left,
