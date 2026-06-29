@@ -12,11 +12,7 @@
     "titleAlign": "left",
     "textAlign": "left",
     "images": [
-      "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/slider/1782669505930-ChatGPT-Image-2026629-02_27_50.png",
-      "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/slider/1782669509302-ChatGPT-Image-2026629-02_27_59.png",
-      "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/slider/1782669512584-ChatGPT-Image-2026629-02_37_15.png",
-      "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/slider/1782684112708-ChatGPT-Image-2026629-07_01_37.png",
-      "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/slider/1782684544034-ChatGPT-Image-2026629-07_08_56.png"
+      "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/slider/1782716980927-ChatGPT-Image-2026629-16_09_03.png"
     ],
     "image": "",
     "link": "#",
@@ -43,7 +39,8 @@
       "visible": false,
       "title": "ご予約・ご相談はこちら",
       "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
-    }
+    },
+    "mobileCardColumns": ""
   },
   {
     "id": "section-three-key-checks",
@@ -128,42 +125,49 @@
         "title": "車いすのまま乗車可能",
         "text": "標準車いす対応。ご自身の車いす利用もご相談ください。",
         "image": "",
+        "imageFit": "",
         "link": "#"
       },
       {
         "title": "通院・退院・転院に対応",
         "text": "病院受診、退院、転院、施設送迎に対応します。",
         "image": "",
+        "imageFit": "",
         "link": "#"
       },
       {
         "title": "ご家族・ケアマネ様から予約可能",
         "text": "ご本人様以外の代理相談・予約にも対応します。",
         "image": "",
+        "imageFit": "",
         "link": "#"
       },
       {
         "title": "料金目安を事前に確認",
         "text": "概算見積で、事前に料金の目安を確認できます。",
         "image": "",
+        "imageFit": "",
         "link": "./estimate/"
       },
       {
         "title": "待機・院内付き添いも相談可能",
         "text": "受付、会計、薬局、施設内移動もご相談ください。",
         "image": "",
+        "imageFit": "",
         "link": "#"
       },
       {
         "title": "千葉市近隣エリアに対応",
         "text": "千葉市を中心に、近隣市・千葉県内もご相談可能です。",
         "image": "",
+        "imageFit": "",
         "link": "#"
       },
       {
         "title": "24時間Web予約受付",
         "text": "Web予約・LINE相談で、時間外も受付できます。",
         "image": "",
+        "imageFit": "",
         "link": "#"
       }
     ],
@@ -189,7 +193,8 @@
       "visible": false,
       "title": "ご予約・ご相談はこちら",
       "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
-    }
+    },
+    "mobileCardColumns": "2"
   },
   {
     "id": "section-payment-info",
@@ -208,12 +213,14 @@
         "title": "タクシー券について",
         "text": "自治体の福祉タクシー券・障害者手帳による割引など、取扱いについてご案内します。ご利用予定の券種があれば予約時にお知らせください。",
         "image": "",
+        "imageFit": "",
         "link": "#faq-yokuaru"
       },
       {
         "title": "介護保険について",
         "text": "当サービスは介護保険の適用外（自費）です。介護保険との関係や料金の考え方について、ご不明点はお気軽にご相談ください。",
         "image": "",
+        "imageFit": "",
         "link": "#faq-yokuaru"
       }
     ],
@@ -242,7 +249,8 @@
       "visible": false,
       "title": "ご予約・ご相談はこちら",
       "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
-    }
+    },
+    "mobileCardColumns": "1"
   },
   {
     "id": "section-usage-scenarios",
@@ -258,24 +266,28 @@
         "title": "通院・受診",
         "text": "病院受診・検査・リハビリ通院に。",
         "image": "./assets/cards/1782669854804-ChatGPT-Image-2026629-02_59_44.png",
+        "imageFit": "",
         "link": "#"
       },
       {
         "title": "退院・転院",
         "text": "病院からご自宅・施設・別病院へ。",
         "image": "./assets/cards/card4-discharge-transfer.png",
+        "imageFit": "",
         "link": "#"
       },
       {
         "title": "施設送迎",
         "text": "入退所・ショートステイ・施設受診に。",
         "image": "./assets/cards/1782669871972-ChatGPT-Image-2026629-02_59_26.png",
+        "imageFit": "",
         "link": "#"
       },
       {
         "title": "外出",
         "text": "買い物・理美容室・冠婚葬祭に。",
         "image": "./assets/cards/1782669879643-ChatGPT-Image-2026629-02_59_20.png",
+        "imageFit": "",
         "link": "#"
       }
     ],
@@ -307,7 +319,8 @@
       "visible": false,
       "title": "ご予約・ご相談はこちら",
       "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
-    }
+    },
+    "mobileCardColumns": "2"
   },
   {
     "id": "section-taiou-service",
@@ -402,7 +415,8 @@
       "visible": false,
       "title": "ご予約・ご相談はこちら",
       "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
-    }
+    },
+    "mobileCardColumns": ""
   },
   {
     "id": "section-vehicle-equipment",
@@ -442,7 +456,8 @@
       "visible": false,
       "title": "ご予約・ご相談はこちら",
       "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
-    }
+    },
+    "mobileCardColumns": ""
   },
   {
     "id": "section-ryokin-meyasu",
@@ -531,7 +546,8 @@
       "visible": true,
       "title": "ご予約・ご相談はこちら",
       "text": "実際の料金は、走行距離、所要時間、待機時間、介助内容、当日の状況により変わる場合があります。"
-    }
+    },
+    "mobileCardColumns": ""
   },
   {
     "id": "section-aki-yoyaku",
@@ -571,7 +587,8 @@
       "visible": false,
       "title": "ご予約・ご相談はこちら",
       "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
-    }
+    },
+    "mobileCardColumns": ""
   },
   {
     "id": "section-hajimete",
@@ -626,7 +643,8 @@
       "visible": false,
       "title": "ご予約・ご相談はこちら",
       "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
-    }
+    },
+    "mobileCardColumns": "1"
   },
   {
     "id": "section-caremanager",
@@ -666,7 +684,8 @@
       "visible": false,
       "title": "ご予約・ご相談はこちら",
       "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
-    }
+    },
+    "mobileCardColumns": ""
   },
   {
     "id": "section-shisetsu-byoin",
@@ -794,7 +813,8 @@
       "visible": false,
       "title": "ご予約・ご相談はこちら",
       "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
-    }
+    },
+    "mobileCardColumns": ""
   },
   {
     "id": "section-about-us",
@@ -810,12 +830,14 @@
         "title": "企業理念",
         "text": "移動の不安を、安心に変える。\n\n通院、退院、転院、施設入退所・施設送迎、買い物、冠婚葬祭など、移動が必要な場面で「どうやって行けばよいのか分からない」「家族だけでは不安」「普通のタクシーでは乗り降りが難しい」というお悩みに寄り添います。\n\n私たちは、ただ目的地までお送りするだけではなく、ご利用者様の身体状態、ご家族の不安、ケアマネジャー様や施設・病院関係者様のご事情を丁寧に確認し、一件一件に合わせた安全で分かりやすい送迎を大切にします。\n\n移動は、通院や退院のためだけではありません。病院へ行くこと、家に帰ること、家族に会うこと、買い物に行くこと、地域で暮らし続けること。その一つひとつが、ご本人様とご家族にとって大切な生活の一部です。\n\nちばケアタクシーは、千葉市近隣の地域の皆さまが安心して外出できるよう、福祉車両と介助の視点で、移動の不安を安心に変えるサービスを目指します。",
         "image": "",
+        "imageFit": "",
         "link": "#"
       },
       {
         "title": "代表メッセージ",
         "text": "一件一件の送迎を大切にします。\n\n介護が必要になると、移動そのものが大きな不安になることがあります。\n\n病院へ行く、退院して家に帰る、施設へ移る、久しぶりに外出する。その一つひとつの移動には、ご本人様やご家族様の不安と希望があります。\n\nちばケアタクシーは、その不安を少しでも軽くし、安心して移動できる時間を提供したいという思いから生まれました。\n\n料金が分かりにくい、空き状況が分からない、どこまで介助をお願いできるのか分からない。そうした不安を減らすために、概算見積、空き状況確認、LINE相談、Web予約など、相談しやすい仕組みを整えています。\n\n「頼んでよかった」\n「またお願いしたい」\n「家族だけでは難しかったけれど、安心して外出できた」\n\nそう感じていただけるよう、一件一件の送迎を大切にしてまいります。\n\nちばケアタクシー\n株式会社 千葉福祉サポート",
         "image": "",
+        "imageFit": "",
         "link": "#"
       }
     ],
@@ -847,7 +869,8 @@
       "visible": false,
       "title": "ご予約・ご相談はこちら",
       "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
-    }
+    },
+    "mobileCardColumns": "1"
   },
   {
     "id": "section-faq",
@@ -888,6 +911,7 @@
       "visible": false,
       "title": "ご予約・ご相談はこちら",
       "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
-    }
+    },
+    "mobileCardColumns": ""
   }
 ]
