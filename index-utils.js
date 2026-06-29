@@ -376,6 +376,8 @@
     section.title = section.title || "";
     section.text = section.text || "";
     section.image = section.image || "";
+    section.imageFit = section.imageFit === "contain" || section.imageFit === "cover" ? section.imageFit : "";
+    section.mobileCardColumns = normalizeMobileCardColumns(section);
     section.link = section.link || "#";
     section.textSize = section.textSize || "medium";
     section.bgColor = section.bgColor || "#ffffff";
@@ -392,7 +394,9 @@
         title: item?.title || "",
         text: item?.text || "",
         image: item?.image || "",
-        link: item?.link || "#"
+        imageFit: item?.imageFit === "contain" || item?.imageFit === "cover" ? item.imageFit : "",
+        link: item?.link || "#",
+        faqId: item?.faqId || ""
       }));
     }
 
@@ -465,6 +469,75 @@
     return innerHtml;
   }
 
+  function getFeaturedFaqItems(faqData){
+    if(!faqData || !Array.isArray(faqData.items)) return [];
+    return faqData.items
+      .filter(function(item){
+        return item && item.featured === true && item.enabled !== false;
+      })
+      .sort(function(a, b){
+        return (Number(a.order) || 0) - (Number(b.order) || 0);
+      });
+  }
+
+  function faqItemToAccordionItem(item){
+    return {
+      title: String(item.question || item.title || "").trim(),
+      text: String(item.answer || item.text || "").trim(),
+      image: "",
+      link: "#",
+      faqId: item.id || ""
+    };
+  }
+
+  function shouldHydrateFaqSection(section){
+    if(!section || section.type !== "accordion") return false;
+    if(section.faqSource === "featured") return true;
+    return section.id === "section-faq" || section.sectionId === "faq-yokuaru";
+  }
+
+  function hydrateFaqSections(sections, faqData){
+    if(!Array.isArray(sections)) return sections;
+    const featured = getFeaturedFaqItems(faqData);
+    if(!featured.length) return sections;
+
+    return sections.map(function(section){
+      if(!shouldHydrateFaqSection(section)) return section;
+      return Object.assign({}, section, {
+        items: featured.map(faqItemToAccordionItem)
+      });
+    });
+  }
+
+  const MOBILE_CARD_COLUMNS = new Set(["1", "2", "3", "icons"]);
+
+  function normalizeMobileCardColumns(section){
+    const type = section?.type || "";
+    const raw = String(section?.mobileCardColumns || "").trim();
+
+    if(MOBILE_CARD_COLUMNS.has(raw)){
+      return raw;
+    }
+
+    if(type === "card4"){
+      return "2";
+    }
+
+    if(type === "card3" || type === "card2"){
+      return "1";
+    }
+
+    return "";
+  }
+
+  function getMobileCardGridClass(section){
+    const cols = normalizeMobileCardColumns(section);
+    if(!cols){
+      return "";
+    }
+    return `mobile-cols-${cols}`;
+  }
+
   window.IndexUtils = {
     escapeHtml: escapeHtml,
     escapeAttr: escapeAttr,
@@ -475,9 +548,13 @@
     slugifySectionId: slugifySectionId,
     ensureUniqueSectionIds: ensureUniqueSectionIds,
     ensureSectionShape: ensureSectionShape,
+    getMobileCardGridClass: getMobileCardGridClass,
+    normalizeMobileCardColumns: normalizeMobileCardColumns,
     getSectionAnchorAttr: getSectionAnchorAttr,
     applyTopButton: applyTopButton,
     applyFooterButton: applyFooterButton,
-    wrapLink: wrapLink
+    wrapLink: wrapLink,
+    getFeaturedFaqItems: getFeaturedFaqItems,
+    hydrateFaqSections: hydrateFaqSections
   };
 })();

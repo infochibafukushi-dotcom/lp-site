@@ -1983,6 +1983,27 @@ function ensureSectionLinks(section){
   return section.links;
 }
 
+const MOBILE_CARD_COLUMNS = new Set(['1', '2', '3', 'icons']);
+
+function normalizeAdminMobileCardColumns(section){
+  const type = section?.type || '';
+  const raw = String(section?.mobileCardColumns || '').trim();
+
+  if(MOBILE_CARD_COLUMNS.has(raw)){
+    return raw;
+  }
+
+  if(type === 'card4'){
+    return '2';
+  }
+
+  if(type === 'card3' || type === 'card2'){
+    return '1';
+  }
+
+  return '';
+}
+
 function ensureSectionShape(section, index){
   if(!section || typeof section !== 'object'){
     return createDefaultSection('normal', '新しいノーマル');
@@ -2001,6 +2022,7 @@ function ensureSectionShape(section, index){
   section.alignY = section.alignY || 'middle';
   section.titleAlign = section.titleAlign || 'left';
   section.textAlign = section.textAlign || 'left';
+  section.mobileCardColumns = normalizeAdminMobileCardColumns(section);
 
   if(!Array.isArray(section.images)) section.images = [];
   if(!Array.isArray(section.items)) section.items = [];
@@ -2011,6 +2033,7 @@ function ensureSectionShape(section, index){
       title: item?.title || '',
       text: item?.text || '',
       image: item?.image || '',
+      imageFit: item?.imageFit === 'contain' || item?.imageFit === 'cover' ? item.imageFit : '',
       link: item?.link || '#'
     }));
   }
@@ -2529,6 +2552,7 @@ function createDefaultSection(type, title){
     return {
       ...base,
       type: 'card4',
+      mobileCardColumns: '2',
       items: [
         { title:'カード1', text:'説明', image:'', link:'#' },
         { title:'カード2', text:'説明', image:'', link:'#' },
@@ -2542,6 +2566,7 @@ function createDefaultSection(type, title){
     return {
       ...base,
       type: 'card3',
+      mobileCardColumns: '1',
       items: [
         { title:'カード1', text:'説明', image:'', link:'#' },
         { title:'カード2', text:'説明', image:'', link:'#' },
@@ -2554,6 +2579,7 @@ function createDefaultSection(type, title){
     return {
       ...base,
       type: 'card2',
+      mobileCardColumns: '1',
       items: [
         { title:'カード1', text:'説明', image:'', link:'#' },
         { title:'カード2', text:'説明', image:'', link:'#' }
@@ -3685,6 +3711,18 @@ function renderSectionsEditor(){
               ${renderColorField(index, section.bgColor || '#ffffff')}
             </div>
 
+            ${section.type === 'card3' ? `
+            <div class="row">
+              <label>スマホ列数</label>
+              <select onchange="updateSectionField(${index}, 'mobileCardColumns', this.value)">
+                <option value="1" ${(!section.mobileCardColumns || section.mobileCardColumns === '1') ? 'selected' : ''}>1列（写真・文字入り向け）</option>
+                <option value="2" ${section.mobileCardColumns === '2' ? 'selected' : ''}>2列</option>
+                <option value="3" ${section.mobileCardColumns === '3' ? 'selected' : ''}>3列</option>
+                <option value="icons" ${section.mobileCardColumns === 'icons' ? 'selected' : ''}>3列（小アイコン型）</option>
+              </select>
+              <div class="small">390px幅でのカード並び。写真・文字入り・予約導線・重要訴求は「1列」、アイコン的な3カードのみ「3列（小アイコン型）」。2列・3列は例外時のみ使用。</div>
+            </div>` : ''}
+
             <div class="row">
               <label>上下位置</label>
               <select onchange="updateSectionField(${index}, 'alignY', this.value)">
@@ -3839,6 +3877,7 @@ function normalizeSectionBeforeSave(section, index){
   normalized.alignY = normalized.alignY || 'middle';
   normalized.bgColor = normalized.bgColor || '#ffffff';
   normalized.textSize = normalized.textSize || 'medium';
+  normalized.mobileCardColumns = normalizeAdminMobileCardColumns(normalized);
 
   ensureSectionLinks(normalized);
 
@@ -3855,6 +3894,7 @@ function normalizeSectionBeforeSave(section, index){
       title: item?.title || '',
       text: item?.text || '',
       image: item?.image || '',
+      imageFit: item?.imageFit === 'contain' || item?.imageFit === 'cover' ? item.imageFit : '',
       link: item?.link || '#'
     }));
   }

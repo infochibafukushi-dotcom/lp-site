@@ -49,6 +49,7 @@
     "id": "section-three-key-checks",
     "sectionId": "three-key-checks",
     "type": "card3",
+    "mobileCardColumns": "icons",
     "enabled": true,
     "title": "予約・お見積り・空き状況をすぐ確認できます",
     "text": "",
@@ -59,18 +60,21 @@
         "title": "予約する",
         "text": "通院・退院・施設送迎のご予約はこちら。",
         "image": "./assets/cards/1782684888377-ChatGPT-Image-2026629-07_14_30.png",
+        "imageFit": "contain",
         "link": "https://infochibafukushi-dotcom.github.io/reservation-v4/"
       },
       {
         "title": "お見積り",
         "text": "出発地・目的地から料金目安を確認できます。",
         "image": "./assets/cards/1782684894989-ChatGPT-Image-2026629-07_14_36.png",
+        "imageFit": "contain",
         "link": "./estimate/"
       },
       {
         "title": "空き状況",
         "text": "希望日時の空き状況を確認できます。",
         "image": "./assets/cards/1782684947120-ChatGPT-Image-2026629-07_15_40.png",
+        "imageFit": "contain",
         "link": "https://infochibafukushi-dotcom.github.io/reservation-v4/"
       }
     ],
@@ -583,12 +587,14 @@
         "title": "ご家族の方へ",
         "text": "「病院まで連れて行けるか不安」「車いすのまま移動したい」「仕事で付き添えない」「退院の迎えをお願いしたい」このような場合もご相談ください。身体状態や必要な介助を確認し、利用方法と料金目安をご案内します。",
         "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773103749339-messageImage_1770383272387_0.jpg",
+        "imageFit": "contain",
         "link": "#"
       },
       {
         "title": "ご本人様へ",
         "text": "歩行に不安がある方、車いすをご利用の方、病院や買い物への移動にお困りの方もご相談ください。ご家族やケアマネジャー様からの代理相談も可能です。",
         "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773103755526-messageImage_1770383194104.jpg",
+        "imageFit": "contain",
         "link": "#"
       }
     ],
@@ -666,6 +672,7 @@
     "id": "section-shisetsu-byoin",
     "sectionId": "shisetsu-byoin-kankeisha",
     "type": "card3",
+    "mobileCardColumns": "1",
     "enabled": true,
     "title": "施設・病院からの退院・転院・受診送迎にも対応します",
     "text": "介護施設、病院、地域連携室、相談室、ショートステイ事業所などからのご相談にも対応します。退院時間や受診時間に合わせて、車いす・ストレッチャーでの移動を調整します。",
@@ -676,18 +683,21 @@
         "title": "退院時のご自宅送迎",
         "text": "病院からご自宅までの退院送迎に対応します。退院時間、病棟、荷物、車いす・ストレッチャーの有無を確認します。",
         "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062960486-messageImage_1770383251537.jpg",
+        "imageFit": "contain",
         "link": "#"
       },
       {
         "title": "転院・施設入退所",
         "text": "病院から病院、病院から施設、ご自宅から施設への移動に対応します。時間指定がある場合は早めにご相談ください。",
         "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062967741-messageImage_1770383272387_0.jpg",
+        "imageFit": "contain",
         "link": "#"
       },
       {
         "title": "施設からの受診送迎",
         "text": "施設入居者様の通院、検査、受診送迎に対応します。施設職員様やご家族様の同乗もご相談ください。",
         "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/cards/1773062973797-messageImage_1770383486552_0.jpg",
+        "imageFit": "contain",
         "link": "#"
       }
     ],
@@ -844,6 +854,7 @@
     "sectionId": "faq-yokuaru",
     "type": "accordion",
     "enabled": true,
+    "faqSource": "featured",
     "title": "よくあるご質問",
     "text": "",
     "textSize": "medium",
@@ -851,68 +862,7 @@
     "alignY": "middle",
     "titleAlign": "left",
     "textAlign": "left",
-    "items": [
-      {
-        "title": "当日でも利用できますか？",
-        "text": "空きがあれば対応できる場合があります。通院・退院など時間が決まっている場合は、できるだけ早めにご相談ください。",
-        "image": "",
-        "link": "#"
-      },
-      {
-        "title": "車いすのまま乗れますか？",
-        "text": "はい、車いすのまま乗車できます。車いすの種類やサイズによって確認が必要な場合があります。",
-        "image": "",
-        "link": "#"
-      },
-      {
-        "title": "家族も一緒に乗れますか？",
-        "text": "はい、同乗できます。人数により車内スペースが変わるため、予約時にお知らせください。",
-        "image": "",
-        "link": "#"
-      },
-      {
-        "title": "病院の受付まで付き添ってもらえますか？",
-        "text": "ご相談可能です。院内付き添いの内容や時間により、付き添い料がかかる場合があります。",
-        "image": "",
-        "link": "#"
-      },
-      {
-        "title": "階段がある家でも利用できますか？",
-        "text": "状況により対応できる場合があります。階数、段数、手すりの有無、介助人数の必要性を事前に確認します。",
-        "image": "",
-        "link": "#"
-      },
-      {
-        "title": "ストレッチャーは使えますか？",
-        "text": "寝たままの移動が必要な場合はご相談ください。身体状態、搬送経路、目的地の状況を確認します。",
-        "image": "",
-        "link": "#"
-      },
-      {
-        "title": "料金は事前にわかりますか？",
-        "text": "はい。千葉市近隣の通院・退院・転院・施設送迎であれば、出発地・目的地・介助内容から料金目安をご案内できます。お見積りページでも概算をご確認いただけます。",
-        "image": "",
-        "link": "#"
-      },
-      {
-        "title": "ケアマネジャーから予約できますか？",
-        "text": "はい、ご相談いただけます。ご本人様・ご家族様の同意や必要情報を確認したうえでご案内します。",
-        "image": "",
-        "link": "#"
-      },
-      {
-        "title": "退院の迎えもお願いできますか？",
-        "text": "はい、退院時のお迎えもご相談ください。退院時間、病棟、荷物、車いす・ストレッチャーの有無を確認します。",
-        "image": "",
-        "link": "#"
-      },
-      {
-        "title": "福祉タクシー券は使えますか？",
-        "text": "自治体や券種、登録状況により取扱いが異なります。ご利用予定の福祉タクシー券や手帳をお持ちの場合は、予約時にお知らせください。",
-        "image": "",
-        "link": "#"
-      }
-    ],
+    "items": [],
     "image": "",
     "link": "#",
     "images": [],

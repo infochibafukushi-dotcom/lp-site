@@ -1,0 +1,92 @@
+[
+  {
+    "id": "first-view-chibakea-taxi",
+    "name": "01-slider",
+    "screenshot": "C:\\Users\\yamam\\OneDrive\\ドキュメント\\GitHub\\lp-site\\screenshots\\mobile-image-unify-390px\\01-slider.png",
+    "gridClass": null,
+    "frame": {
+      "w": 358,
+      "h": 269,
+      "objectFit": "fill",
+      "aspectRatio": "4 / 3"
+    },
+    "img": {
+      "w": 358,
+      "h": 269,
+      "objectFit": "cover",
+      "aspectRatio": "auto"
+    }
+  },
+  {
+    "id": "three-key-checks",
+    "name": "02-three-key-checks",
+    "screenshot": "C:\\Users\\yamam\\OneDrive\\ドキュメント\\GitHub\\lp-site\\screenshots\\mobile-image-unify-390px\\02-three-key-checks.png",
+    "gridClass": "card-grid-3 mobile-cols-icons",
+    "frame": {
+      "w": 96,
+      "h": 72,
+      "objectFit": "fill",
+      "aspectRatio": "4 / 3"
+    },
+    "img": {
+      "w": 96,
+      "h": 72,
+      "objectFit": "contain",
+      "aspectRatio": "auto"
+    }
+  },
+  {
+    "id": "shisetsu-byoin-kankeisha",
+    "name": "03-shisetsu-byoin-kankeisha",
+    "screenshot": "C:\\Users\\yamam\\OneDrive\\ドキュメント\\GitHub\\lp-site\\screenshots\\mobile-image-unify-390px\\03-shisetsu-byoin-kankeisha.png",
+    "gridClass": "card-grid-3 mobile-cols-1",
+    "frame": {
+      "w": 336,
+      "h": 252,
+      "objectFit": "fill",
+      "aspectRatio": "4 / 3"
+    },
+    "img": {
+      "w": 336,
+      "h": 252,
+      "objectFit": "contain",
+      "aspectRatio": "auto"
+    }
+  },
+  {
+    "id": "usage-scenarios",
+    "name": "04-usage-scenarios",
+    "screenshot": "C:\\Users\\yamam\\OneDrive\\ドキュメント\\GitHub\\lp-site\\screenshots\\mobile-image-unify-390px\\04-usage-scenarios.png",
+    "gridClass": "card-grid-4 mobile-cols-2",
+    "frame": {
+      "w": 148,
+      "h": 111,
+      "objectFit": "fill",
+      "aspectRatio": "4 / 3"
+    },
+    "img": {
+      "w": 148,
+      "h": 111,
+      "objectFit": "cover",
+      "aspectRatio": "auto"
+    }
+  },
+  {
+    "id": "hajimete-no-kata",
+    "name": "05-hajimete-no-kata",
+    "screenshot": "C:\\Users\\yamam\\OneDrive\\ドキュメント\\GitHub\\lp-site\\screenshots\\mobile-image-unify-390px\\05-hajimete-no-kata.png",
+    "gridClass": "card-grid-2 mobile-cols-1",
+    "frame": {
+      "w": 326,
+      "h": 245,
+      "objectFit": "fill",
+      "aspectRatio": "4 / 3"
+    },
+    "img": {
+      "w": 326,
+      "h": 245,
+      "objectFit": "contain",
+      "aspectRatio": "auto"
+    }
+  }
+]

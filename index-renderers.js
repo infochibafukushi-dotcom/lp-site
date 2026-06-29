@@ -6,6 +6,29 @@
     return 'loading="lazy" fetchpriority="low" decoding="async"';
   }
 
+  function resolveImageFit(fit, defaultFit = "cover"){
+    return fit === "contain" || fit === "cover" ? fit : defaultFit;
+  }
+
+  function imageWrapClass(wrapClass, fit, defaultFit = "cover"){
+    const resolved = resolveImageFit(fit, defaultFit);
+    return `${wrapClass}${resolved === "contain" ? " is-contain" : ""}`;
+  }
+
+  function renderImageWrap(src, alt, attrs, options = {}){
+    const {
+      wrapClass = "card-image",
+      defaultFit = "cover",
+      fit
+    } = options;
+
+    if(!src){
+      return "";
+    }
+
+    return `<div class="${imageWrapClass(wrapClass, fit, defaultFit)}"><img src="${window.IndexUtils.escapeAttr(src)}" alt="${window.IndexUtils.escapeAttr(alt || "")}" ${attrs}></div>`;
+  }
+
   function renderSectionBottomLinks(section){
     if(window.SectionBottomButtons && typeof window.SectionBottomButtons.render === "function"){
       return window.SectionBottomButtons.render(
@@ -55,9 +78,16 @@
 
   function renderNormal(section, config){
     const imageAttrs = buildImageAttrs(section?.__imagePriority);
-    const imageHtml = section.image
-      ? `<img class="normal-image" src="${window.IndexUtils.escapeAttr(section.image)}" alt="${window.IndexUtils.escapeAttr(section.title || "")}" ${imageAttrs}>`
-      : "";
+    const imageHtml = renderImageWrap(
+      section.image,
+      section.title || "",
+      imageAttrs,
+      {
+        wrapClass: "section-card-image",
+        defaultFit: "contain",
+        fit: section.imageFit
+      }
+    );
     const linkedImage = window.IndexUtils.wrapLink(section.link || "#", imageHtml, "");
 
     return `
@@ -79,7 +109,7 @@
     const slides = images.length
       ? images.map((src, imageIndex) => {
           const attrs = imageIndex === 0 ? imageAttrs : buildImageAttrs("lazy");
-          const image = `<img src="${window.IndexUtils.escapeAttr(src)}" alt="${window.IndexUtils.escapeAttr(section.title || "")}" ${attrs}>`;
+          const image = `<div class="slider-image-wrap"><img src="${window.IndexUtils.escapeAttr(src)}" alt="${window.IndexUtils.escapeAttr(section.title || "")}" ${attrs}></div>`;
           return `<div class="slider-slide">${window.IndexUtils.wrapLink(section.link || "#", image, "")}</div>`;
         }).join("")
       : `<div class="slider-empty">画像がまだありません</div>`;
@@ -121,7 +151,7 @@
       const link = item?.link || "#";
 
       const inner = `
-        ${image ? `<img src="${window.IndexUtils.escapeAttr(image)}" alt="${window.IndexUtils.escapeAttr(title)}" ${buildImageAttrs("lazy")}>` : ""}
+        ${renderImageWrap(image, title, buildImageAttrs("lazy"), { fit: item?.imageFit })}
         ${title ? `<h3 class="card-item-title text-${window.IndexUtils.escapeAttr(textAlign || "left")}">${window.IndexUtils.escapeHtml(title)}</h3>` : ""}
         ${text ? `<div class="section-text text-${window.IndexUtils.escapeAttr(textSize || "medium")} text-${window.IndexUtils.escapeAttr(textAlign || "left")}">${window.IndexUtils.escapeHtml(text)}</div>` : ""}
       `;
@@ -148,7 +178,7 @@
           <span class="card-benefit-badge" aria-hidden="true">${num}</span>
           <span class="card-benefit-icon" aria-hidden="true">${icon}</span>
         </div>
-        ${image ? `<img src="${window.IndexUtils.escapeAttr(image)}" alt="${window.IndexUtils.escapeAttr(title)}" ${buildImageAttrs("lazy")}>` : ""}
+        ${renderImageWrap(image, title, buildImageAttrs("lazy"), { fit: item?.imageFit })}
         ${title ? `<h3 class="card-item-title text-${window.IndexUtils.escapeAttr(textAlign || "left")}">${window.IndexUtils.escapeHtml(title)}</h3>` : ""}
         ${text ? `<div class="section-text text-${window.IndexUtils.escapeAttr(textSize || "medium")} text-${window.IndexUtils.escapeAttr(textAlign || "left")}">${window.IndexUtils.escapeHtml(text)}</div>` : ""}
       `;
@@ -168,7 +198,7 @@
         <div class="section-inner">
           <h2 class="section-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "left")}">${window.IndexUtils.escapeHtml(section.title || "")}</h2>
           ${renderSectionLeadText(section)}
-          <div class="card-grid-4">
+          <div class="card-grid-4 ${window.IndexUtils.getMobileCardGridClass(section)}">
             ${cardsHtml}
           </div>
           ${renderSectionBottomLinks(section)}
@@ -183,7 +213,7 @@
         <div class="section-inner">
           <h2 class="section-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "left")}">${window.IndexUtils.escapeHtml(section.title || "")}</h2>
           ${renderSectionLeadText(section)}
-          <div class="card-grid-3">
+          <div class="card-grid-3 ${window.IndexUtils.getMobileCardGridClass(section)}">
             ${renderCardItems(section.items || [], section.textSize || "medium", section.textAlign || "left")}
           </div>
           ${renderSectionBottomLinks(section)}
@@ -198,7 +228,7 @@
         <div class="section-inner">
           <h2 class="section-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "left")}">${window.IndexUtils.escapeHtml(section.title || "")}</h2>
           ${renderSectionLeadText(section)}
-          <div class="card-grid-2">
+          <div class="card-grid-2 ${window.IndexUtils.getMobileCardGridClass(section)}">
             ${renderCardItems(section.items || [], section.textSize || "medium", section.textAlign || "left")}
           </div>
           ${renderSectionBottomLinks(section)}
@@ -211,7 +241,15 @@
     const image = section.image
       ? window.IndexUtils.wrapLink(
           section.link || "#",
-          `<img src="${window.IndexUtils.escapeAttr(section.image)}" alt="${window.IndexUtils.escapeAttr(section.title || "")}" ${buildImageAttrs(section?.__imagePriority)}>`,
+          renderImageWrap(
+            section.image,
+            section.title || "",
+            buildImageAttrs(section?.__imagePriority),
+            {
+              wrapClass: "card-media",
+              fit: section.imageFit
+            }
+          ),
           ""
         )
       : "";
@@ -235,35 +273,35 @@
   function renderAccordion(section){
     const items = Array.isArray(section.items) ? section.items : [];
     const rows = items.map((it, i) => {
-      const t = nl2brSafe(it && it.title ? it.title : "");
-      const tx = nl2brSafe(it && it.text ? it.text : "");
+      const question = it && it.title ? it.title : "";
+      const answer = it && it.text ? it.text : "";
+      const t = nl2brSafe(question);
+      const tx = nl2brSafe(answer);
+      const itemId = it && it.faqId ? ` id="${window.IndexUtils.escapeAttr("faq-item-" + it.faqId)}"` : "";
 
       return `
-        <div class="accordion-item" style="margin:0 0 14px 0; background:#eef1f3; border-radius:10px; overflow:hidden; border:1px solid #e0e5e9;">
-          <button
-            type="button"
+        <details class="accordion-item"${itemId} itemscope itemprop="mainEntity" itemtype="https://schema.org/Question" style="margin:0 0 14px 0; background:#eef1f3; border-radius:10px; overflow:hidden; border:1px solid #e0e5e9;">
+          <summary
             class="accordion-header"
-            data-acc-index="${i}"
-            aria-expanded="false"
-            style="width:100%; border:none; background:#eef1f3; padding:18px 20px; display:flex; align-items:center; justify-content:space-between; gap:14px; cursor:pointer; text-align:left;"
-            onclick="(function(btn){var body=btn.nextElementSibling;var icon=btn.querySelector('.accordion-icon');var isOpen=btn.getAttribute('aria-expanded')==='true';if(isOpen){body.hidden=true;body.style.display='none';btn.setAttribute('aria-expanded','false');if(icon){icon.textContent='＋';}}else{body.hidden=false;body.style.display='block';btn.setAttribute('aria-expanded','true');if(icon){icon.textContent='×';}}})(this)">
+            style="width:100%; background:#eef1f3; padding:18px 20px; display:flex; align-items:center; justify-content:space-between; gap:14px; cursor:pointer; text-align:left; list-style:none;">
             <span style="display:flex; align-items:flex-start; gap:14px; min-width:0; flex:1;">
               <span style="flex:0 0 auto; font-size:18px; line-height:1; font-weight:700; color:#1f2a44;">Q</span>
-              <span class="accordion-title" style="min-width:0; font-size:clamp(18px,2.4vw,22px); line-height:1.45; font-weight:700; color:#0b8da6; white-space:normal; word-break:break-word;">${t}</span>
+              <h3 class="accordion-title" itemprop="name" style="margin:0; min-width:0; font-size:clamp(18px,2.4vw,22px); line-height:1.45; font-weight:700; color:#0b8da6; white-space:normal; word-break:break-word;">${t}</h3>
             </span>
-            <span class="accordion-icon" style="flex:0 0 auto; font-size:34px; line-height:1; color:#0b8da6; font-weight:400;">＋</span>
-          </button>
-          <div class="accordion-body" hidden style="display:none; padding:0 16px 16px 16px; background:#eef1f3;">
-            <div style="background:#ffffff; padding:16px 18px; border-radius:0; border:none;">
+            <span class="accordion-icon accordion-icon-closed" aria-hidden="true" style="flex:0 0 auto; font-size:34px; line-height:1; color:#0b8da6; font-weight:400;">＋</span>
+            <span class="accordion-icon accordion-icon-open" aria-hidden="true" style="flex:0 0 auto; font-size:34px; line-height:1; color:#0b8da6; font-weight:400;">×</span>
+          </summary>
+          <div class="accordion-body" style="padding:0 16px 16px 16px; background:#eef1f3;">
+            <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer" style="background:#ffffff; padding:16px 18px; border-radius:0; border:none;">
               <div style="display:flex; align-items:flex-start; gap:14px;">
                 <div style="flex:0 0 auto; font-size:18px; line-height:1; font-weight:700; color:#1f2a44; padding-top:2px;">A</div>
-                <div class="section-text text-${window.IndexUtils.escapeAttr(section.textSize || "medium")} text-${window.IndexUtils.escapeAttr(section.textAlign || "left")}" style="margin:0; white-space:normal; word-break:break-word; line-height:1.9;">
+                <div class="section-text text-${window.IndexUtils.escapeAttr(section.textSize || "medium")} text-${window.IndexUtils.escapeAttr(section.textAlign || "left")}" itemprop="text" style="margin:0; white-space:normal; word-break:break-word; line-height:1.9;">
                   ${tx}
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </details>
       `;
     }).join("");
 
@@ -271,7 +309,7 @@
       <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#ffffff")}">
         <div class="section-inner">
           <h2 class="section-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "left")}" style="margin-bottom:22px;">${window.IndexUtils.escapeHtml(section.title || "")}</h2>
-          <div class="accordion-list">
+          <div class="accordion-list" itemscope itemtype="https://schema.org/FAQPage">
             ${rows}
           </div>
           ${renderSectionBottomLinks(section)}

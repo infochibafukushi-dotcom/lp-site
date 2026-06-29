@@ -1,0 +1,57 @@
+[
+  {
+    "id": "first-view-chibakea-taxi",
+    "name": "01-slider",
+    "screenshot": "C:\\Users\\yamam\\OneDrive\\ドキュメント\\GitHub\\lp-site\\screenshots\\pc-image-unify-1280px\\01-slider.png",
+    "frame": {
+      "w": 1200,
+      "h": 675,
+      "aspectRatio": "16 / 9"
+    },
+    "gridClass": null
+  },
+  {
+    "id": "three-key-checks",
+    "name": "02-three-key-checks",
+    "screenshot": "C:\\Users\\yamam\\OneDrive\\ドキュメント\\GitHub\\lp-site\\screenshots\\pc-image-unify-1280px\\02-three-key-checks.png",
+    "frame": {
+      "w": 352,
+      "h": 264,
+      "aspectRatio": "4 / 3"
+    },
+    "gridClass": "card-grid-3 mobile-cols-icons"
+  },
+  {
+    "id": "shisetsu-byoin-kankeisha",
+    "name": "03-shisetsu-byoin-kankeisha",
+    "screenshot": "C:\\Users\\yamam\\OneDrive\\ドキュメント\\GitHub\\lp-site\\screenshots\\pc-image-unify-1280px\\03-shisetsu-byoin-kankeisha.png",
+    "frame": {
+      "w": 352,
+      "h": 264,
+      "aspectRatio": "4 / 3"
+    },
+    "gridClass": "card-grid-3 mobile-cols-1"
+  },
+  {
+    "id": "usage-scenarios",
+    "name": "04-usage-scenarios",
+    "screenshot": "C:\\Users\\yamam\\OneDrive\\ドキュメント\\GitHub\\lp-site\\screenshots\\pc-image-unify-1280px\\04-usage-scenarios.png",
+    "frame": {
+      "w": 556,
+      "h": 417,
+      "aspectRatio": "4 / 3"
+    },
+    "gridClass": "card-grid-4 mobile-cols-2"
+  },
+  {
+    "id": "hajimete-no-kata",
+    "name": "05-hajimete-no-kata",
+    "screenshot": "C:\\Users\\yamam\\OneDrive\\ドキュメント\\GitHub\\lp-site\\screenshots\\pc-image-unify-1280px\\05-hajimete-no-kata.png",
+    "frame": {
+      "w": 560,
+      "h": 420,
+      "aspectRatio": "4 / 3"
+    },
+    "gridClass": "card-grid-2 mobile-cols-1"
+  }
+]
