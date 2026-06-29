@@ -2004,6 +2004,12 @@ function normalizeAdminMobileCardColumns(section){
   return '';
 }
 
+function isLpFeaturedFaqSection(section){
+  if(!section || section.type !== 'accordion') return false;
+  if(section.faqSource === 'featured') return true;
+  return section.id === 'section-faq' || section.sectionId === 'faq-yokuaru';
+}
+
 function ensureSectionShape(section, index){
   if(!section || typeof section !== 'object'){
     return createDefaultSection('normal', '新しいノーマル');
@@ -3750,11 +3756,16 @@ function renderSectionsEditor(){
               ${renderCardItemsEditor(section, index)}
             </div>` : ''}
 
-            ${isAccordion ? `
-            <div class="row" style="grid-column:1 / -1;">
-              <label>質問編集</label>
-              ${renderAccordionItemsEditor(section, index)}
-            </div>` : ''}
+            ${isAccordion ? (
+              isLpFeaturedFaqSection(section)
+                ? `<div class="row" style="grid-column:1 / -1;">
+                    <p class="note">この「よくあるご質問」セクションのQ&amp;Aは <code>data/faq.json</code> で管理されます。セクション保存時に質問内容は消えません（ケアちゃんFAQとは別データです）。</p>
+                  </div>`
+                : `<div class="row" style="grid-column:1 / -1;">
+                    <label>質問編集</label>
+                    ${renderAccordionItemsEditor(section, index)}
+                  </div>`
+            ) : ''}
 
             ${isMenuList ? `
             <div class="row" style="grid-column:1 / -1;">
@@ -3919,6 +3930,11 @@ function normalizeSectionBeforeSave(section, index){
     title: normalized.menuBottomCard?.title || '',
     text: normalized.menuBottomCard?.text || ''
   };
+
+  if(isLpFeaturedFaqSection(normalized)){
+    normalized.faqSource = 'featured';
+    normalized.items = [];
+  }
 
   if(!Array.isArray(normalized.images)){
     normalized.images = [];

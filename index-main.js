@@ -223,6 +223,44 @@
     return config;
   }
 
+  async function loadFaqData(){
+    try{
+      return await fetchJsonWithFallback([
+        "./data/faq.json",
+        "data/faq.json"
+      ]);
+    }catch(error){
+      return null;
+    }
+  }
+
+  function injectFaqJsonLd(faqItems){
+    const old = document.getElementById("faq-jsonld");
+    if(old) old.remove();
+    if(!Array.isArray(faqItems) || faqItems.length === 0) return;
+
+    const script = document.createElement("script");
+    script.id = "faq-jsonld";
+    script.type = "application/ld+json";
+    script.textContent = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": faqItems.map(function(item){
+        return {
+          "@type": "Question",
+          "name": String(item.question || item.title || "").trim(),
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": String(item.answer || item.text || "").trim()
+          }
+        };
+      }).filter(function(entry){
+        return entry.name && entry.acceptedAnswer.text;
+      })
+    });
+    document.head.appendChild(script);
+  }
+
   async function loadSections(config){
     const container = document.getElementById("sectionsContainer");
     if(!container) return;
@@ -240,10 +278,20 @@
         return;
       }
 
+      const faqData = await loadFaqData();
+
       sections = sections.map((section, idx) => window.IndexUtils.ensureSectionShape(section, idx));
       sections = window.IndexUtils.ensureUniqueSectionIds(sections);
 
+      if(faqData && window.IndexUtils && typeof window.IndexUtils.hydrateFaqSections === "function"){
+        sections = window.IndexUtils.hydrateFaqSections(sections, faqData);
+      }
+
       container.innerHTML = sections.map((section, idx) => window.IndexRenderers.renderSection(section, idx, config)).join("");
+
+      if(faqData && window.IndexUtils && typeof window.IndexUtils.getFeaturedFaqItems === "function"){
+        injectFaqJsonLd(window.IndexUtils.getFeaturedFaqItems(faqData));
+      }
 
       if(window.IndexSlider && typeof window.IndexSlider.initSliders === "function"){
         window.IndexSlider.initSliders();

@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "id": "faq-same-day",
+      "order": 1,
+      "featured": true,
+      "enabled": true,
+      "question": "当日でも利用できますか？",
+      "answer": "空きがあれば当日でもご利用いただけます。通院・退院・転院など時間が決まっている場合は、できるだけ早めにご相談ください。お急ぎの場合はLINEやお電話でもお問い合わせいただけます。"
+    },
+    {
+      "id": "faq-wheelchair",
+      "order": 2,
+      "featured": true,
+      "enabled": true,
+      "question": "車いすのまま乗れますか？",
+      "answer": "はい、車いすのまま乗車できます。リフト付き福祉車両でお迎えします。ご自身の車いすをご利用の場合は、種類やサイズを予約時にお知らせください。"
+    },
+    {
+      "id": "faq-family",
+      "order": 3,
+      "featured": true,
+      "enabled": true,
+      "question": "家族も一緒に乗れますか？",
+      "answer": "はい、ご家族や付き添いの方も同乗できます。人数により車内スペースが変わるため、予約時に同乗者の人数をお知らせください。"
+    },
+    {
+      "id": "faq-hospital-escort",
+      "order": 4,
+      "featured": true,
+      "enabled": true,
+      "question": "病院の受付まで付き添ってもらえますか？",
+      "answer": "はい、ご相談可能です。受付、診察室前までの移動、会計、薬局などの院内付き添いに対応します。付き添いの内容や時間により、付き添い料がかかる場合があります。"
+    },
+    {
+      "id": "faq-stairs",
+      "order": 5,
+      "featured": true,
+      "enabled": true,
+      "question": "階段がある家でも利用できますか？",
+      "answer": "状況により対応できる場合があります。階数、段数、手すりの有無、介助人数の必要性を事前に確認します。安全のため、2名体制が必要な場合はご案内いたします。"
+    },
+    {
+      "id": "faq-stretcher",
+      "order": 6,
+      "featured": true,
+      "enabled": true,
+      "question": "ストレッチャーは使えますか？",
+      "answer": "はい、寝たままの移動が必要な方にも対応しています。退院・転院時の移送など、身体状態・搬送経路・目的地の状況を確認のうえご案内します。ご予約時にストレッチャー利用の有無をお知らせください。"
+    },
+    {
+      "id": "faq-price-estimate",
+      "order": 7,
+      "featured": true,
+      "enabled": true,
+      "question": "料金は事前にわかりますか？",
+      "answer": "はい。出発地・目的地・介助内容から料金目安をご案内できます。お見積りページでも概算をご確認いただけます。実際の料金は走行距離、所要時間、待機時間、介助内容により変わる場合があります。"
+    },
+    {
+      "id": "faq-caremanager",
+      "order": 8,
+      "featured": true,
+      "enabled": true,
+      "question": "ケアマネジャーから予約できますか？",
+      "answer": "はい、ケアマネジャー様・施設職員様からのご相談・予約にも対応しています。ご本人様・ご家族様の同意や必要情報を確認したうえでご案内します。"
+    },
+    {
+      "id": "faq-hospital-transfer",
+      "order": 9,
+      "featured": true,
+      "enabled": true,
+      "question": "退院の迎えもお願いできますか？",
+      "answer": "はい、病院からの退院送迎に対応しています。退院時間、病棟、荷物、車いす・ストレッチャーの有無などを確認し、スムーズな送迎をお手伝いします。"
+    },
+    {
+      "id": "faq-welfare-ticket",
+      "order": 10,
+      "featured": true,
+      "enabled": true,
+      "question": "福祉タクシー券は使えますか？",
+      "answer": "自治体や券種、登録状況により取扱いが異なります。ご利用予定の福祉タクシー券や障害者手帳をお持ちの場合は、予約時にお知らせください。"
+    },
+    {
+      "id": "faq-area",
+      "order": 11,
+      "featured": false,
+      "enabled": true,
+      "question": "対応エリアはどこですか？",
+      "answer": "千葉市を中心に、市原市・八街市・佐倉市・四街道市・八千代市・習志野市・船橋市など千葉市近隣エリアに対応しています。その他の千葉県内エリアや長距離移動も、予約状況によりご相談可能です。"
+    },
+    {
+      "id": "faq-care-insurance",
+      "order": 12,
+      "featured": false,
+      "enabled": true,
+      "question": "介護保険は使えますか？",
+      "answer": "当サービスは介護保険の適用外（自費）です。介護保険の認定を受けていない方もご利用いただけます。料金や支払い方法についてご不明点があれば、お気軽にご相談ください。"
+    }
+  ]
+}
