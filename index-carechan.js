@@ -10,6 +10,8 @@
   let modalView = "menu";
   let navStack = [];
   let answerPath = null;
+  let bubbleRotationTimer = null;
+  let lastBubbleText = null;
 
   function escapeHtml(text){
     return String(text ?? "")
@@ -191,14 +193,56 @@
     };
   }
 
-  function pickBubbleText(data){
+  function getBubbleItems(data){
+    const items = data?.speechBubbles?.items;
+    return items && items.length ? items : ["質問してね♪"];
+  }
+
+  function pickNextBubbleText(data, previousText){
     const bubbles = data.speechBubbles;
-    if(!bubbles.items.length) return "質問してね♪";
+    const items = getBubbleItems(data);
     if(bubbles.mode === "fixed"){
-      const idx = Math.min(bubbles.fixedIndex, bubbles.items.length - 1);
-      return bubbles.items[idx];
+      const idx = Math.min(bubbles.fixedIndex, items.length - 1);
+      return items[idx];
     }
-    return bubbles.items[Math.floor(Math.random() * bubbles.items.length)];
+    if(items.length === 1) return items[0];
+    if(items.length === 2 && previousText){
+      return items[0] === previousText ? items[1] : items[0];
+    }
+    let next;
+    let guard = 0;
+    do {
+      next = items[Math.floor(Math.random() * items.length)];
+      guard++;
+    } while(next === previousText && guard < 12);
+    return next;
+  }
+
+  function stopCarechanBubbleRotation(){
+    if(bubbleRotationTimer !== null){
+      clearInterval(bubbleRotationTimer);
+      bubbleRotationTimer = null;
+    }
+  }
+
+  function renderCarechanBubbleMessage(text){
+    const bubble = document.getElementById("carechanBubble");
+    if(!bubble) return;
+    bubble.textContent = String(text ?? "");
+  }
+
+  function startCarechanBubbleRotation(data){
+    stopCarechanBubbleRotation();
+    lastBubbleText = pickNextBubbleText(data, null);
+    renderCarechanBubbleMessage(lastBubbleText);
+
+    const items = getBubbleItems(data);
+    if(data.speechBubbles.mode === "fixed" || items.length <= 1) return;
+
+    bubbleRotationTimer = setInterval(function(){
+      lastBubbleText = pickNextBubbleText(data, lastBubbleText);
+      renderCarechanBubbleMessage(lastBubbleText);
+    }, 3000);
   }
 
   function applyWidgetPosition(widget, data){
@@ -451,16 +495,16 @@
     if(!root) return;
 
     if(!data.enabled){
+      stopCarechanBubbleRotation();
       root.innerHTML = "";
       root.setAttribute("aria-hidden", "true");
       return;
     }
 
-    const bubbleText = pickBubbleText(data);
     root.innerHTML =
       '<div class="carechan-widget" id="carechanWidget">' +
         '<div class="carechan-bubble-wrap">' +
-          '<div class="carechan-bubble" id="carechanBubble">' + escapeHtml(bubbleText) + '</div>' +
+          '<div class="carechan-bubble" id="carechanBubble"></div>' +
         '</div>' +
         '<button type="button" class="carechan-trigger" id="carechanTrigger" aria-label="ケアちゃん FAQ を開く">' +
           renderCharacterImage(data) +
@@ -484,6 +528,7 @@
     if(widget) applyWidgetPosition(widget, data);
     document.getElementById("carechanTrigger")?.addEventListener("click", openModal);
     bindModalEvents();
+    startCarechanBubbleRotation(data);
   }
 
   function bindResponsivePosition(){
