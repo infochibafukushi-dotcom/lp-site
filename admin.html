@@ -274,12 +274,66 @@ button.linklike{
   flex-wrap:wrap;
   margin-top:10px;
 }
+.slider-thumb-item{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  padding:4px;
+  border-radius:10px;
+  border:2px solid transparent;
+  background:transparent;
+  transition:border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+  cursor:grab;
+  touch-action:none;
+}
+.slider-thumb-item.slider-thumb-dragging{
+  opacity:0.55;
+  cursor:grabbing;
+}
+.slider-thumb-item.slider-thumb-drop-replace{
+  border:3px solid #1565c0;
+  background:#e3f2fd;
+  box-shadow:0 0 0 4px rgba(21,101,192,0.28);
+}
+.slider-thumb-item.slider-thumb-drop-reorder{
+  border:3px solid #2e7d32;
+  background:#e8f5e9;
+  box-shadow:0 0 0 4px rgba(46,125,50,0.22);
+}
+.slider-thumb-drop-hint{
+  display:none;
+  position:absolute;
+  left:4px;
+  right:4px;
+  top:4px;
+  bottom:34px;
+  border-radius:8px;
+  background:rgba(21,101,192,0.88);
+  color:#fff;
+  font-size:11px;
+  font-weight:bold;
+  line-height:1.35;
+  text-align:center;
+  align-items:center;
+  justify-content:center;
+  padding:6px;
+  pointer-events:none;
+  z-index:2;
+}
+.slider-thumb-item.slider-thumb-drop-replace .slider-thumb-drop-hint{
+  display:flex;
+}
 .slider-thumb{
   width:90px;
   height:70px;
   object-fit:cover;
   border-radius:8px;
   border:1px solid #ddd;
+  display:block;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-drag:none;
 }
 .card-item-editor{
   border:1px solid #ddd;
@@ -3232,6 +3286,253 @@ function removeSliderImage(sectionIndex, imageIndex){
   renderSectionsSortList();
 }
 
+let sliderThumbDragSource = null;
+const SLIDER_REORDER_MIME = 'application/x-slider-thumb-reorder';
+
+function dataTransferHasFiles(dataTransfer){
+  if(!dataTransfer) return false;
+  return Array.from(dataTransfer.types || []).includes('Files');
+}
+
+function dataTransferHasInternalReorder(dataTransfer){
+  if(!dataTransfer) return false;
+  return Array.from(dataTransfer.types || []).includes(SLIDER_REORDER_MIME);
+}
+
+function ensureGitHubTokenOrThrow(){
+  const token = document.getElementById('githubToken')?.value?.trim();
+  if(!token){
+    throw new Error('GitHubトークンが未設定です');
+  }
+  const owner = document.getElementById('githubOwner')?.value?.trim();
+  const repo = document.getElementById('githubRepo')?.value?.trim();
+  const branch = document.getElementById('githubBranch')?.value?.trim() || 'main';
+  if(!owner || !repo || !branch){
+    throw new Error('GitHub接続設定をすべて入力してください。');
+  }
+}
+
+function getSliderImageUrls(sectionIndex){
+  const images = sectionsData[sectionIndex]?.images;
+  return Array.isArray(images) ? images.slice() : [];
+}
+
+function applySliderImageUrls(sectionIndex, urls){
+  sectionsData[sectionIndex].images = urls;
+  const textarea = document.querySelector(`[data-slider-images-textarea="${sectionIndex}"]`);
+  if(textarea){
+    textarea.value = urls.join('\n');
+  }
+}
+
+function replaceSliderImageUrlAt(sectionIndex, imageIndex, url){
+  const images = getSliderImageUrls(sectionIndex);
+  if(imageIndex < 0 || imageIndex >= images.length){
+    throw new Error('差し替え対象の画像が見つかりません。');
+  }
+  images[imageIndex] = url;
+  applySliderImageUrls(sectionIndex, images);
+}
+
+function clearSliderThumbDropHighlights(){
+  document.querySelectorAll('.slider-thumb-item.slider-thumb-drop-replace, .slider-thumb-item.slider-thumb-drop-reorder').forEach((el) => {
+    el.classList.remove('slider-thumb-drop-replace', 'slider-thumb-drop-reorder');
+  });
+}
+
+function setSliderThumbDropHighlight(item, mode){
+  clearSliderThumbDropHighlights();
+  if(!item || !mode) return;
+  item.classList.add(mode === 'replace' ? 'slider-thumb-drop-replace' : 'slider-thumb-drop-reorder');
+}
+
+function isImageFile(file){
+  return Boolean(file && String(file.type || '').startsWith('image/'));
+}
+
+function reorderSliderImages(sectionIndex, fromIndex, toIndex){
+  if(fromIndex === toIndex) return;
+
+  captureSectionOpenStates();
+
+  const images = getSliderImageUrls(sectionIndex);
+  const [moved] = images.splice(fromIndex, 1);
+  images.splice(toIndex, 0, moved);
+  applySliderImageUrls(sectionIndex, images);
+
+  if(sectionsData[sectionIndex]?.id){
+    sectionOpenState[sectionsData[sectionIndex].id] = true;
+  }
+  renderSectionsEditor();
+  renderSectionsSortList();
+  setSectionsSaveResult('スライダー画像の順番を変更しました。最後に sections.json を保存してください。', 'success');
+}
+
+async function replaceSliderImageAt(sectionIndex, imageIndex, file){
+  if(!isImageFile(file)){
+    setSectionsSaveResult('画像ファイルのみドロップできます。', 'error');
+    return;
+  }
+
+  try{
+    ensureGitHubTokenOrThrow();
+    captureSectionOpenStates();
+
+    setSectionsSaveResult('画像をアップロード中...', 'warn');
+    const url = await uploadAssetFile(file, 'slider');
+    replaceSliderImageUrlAt(sectionIndex, imageIndex, url);
+
+    if(sectionsData[sectionIndex]?.id){
+      sectionOpenState[sectionsData[sectionIndex].id] = true;
+    }
+    renderSectionsEditor();
+    renderSectionsSortList();
+    setSectionsSaveResult('画像を差し替えました。最後に sections.json を保存してください。', 'success');
+  }catch(error){
+    setSectionsSaveResult(error.message || '画像アップロードに失敗しました。', 'error');
+  }
+}
+
+function bindSliderGlobalDropGuard(){
+  if(document.body.dataset.sliderGlobalDropBound === 'true') return;
+  document.body.dataset.sliderGlobalDropBound = 'true';
+
+  const preventFileNavigation = (event) => {
+    if(dataTransferHasFiles(event.dataTransfer)){
+      event.preventDefault();
+    }
+  };
+
+  document.addEventListener('dragenter', preventFileNavigation, true);
+  document.addEventListener('dragover', preventFileNavigation, true);
+  document.addEventListener('drop', (event) => {
+    if(!dataTransferHasFiles(event.dataTransfer)) return;
+    event.preventDefault();
+    if(!event.target.closest('.slider-thumb-item')){
+      event.stopPropagation();
+      setSectionsSaveResult('スライダー画像はサムネイル上にドロップしてください。', 'error');
+    }
+  }, true);
+}
+
+function bindSliderThumbDnD(){
+  const editor = document.getElementById('sectionsEditor');
+  if(!editor) return;
+
+  bindSliderGlobalDropGuard();
+
+  if(editor.dataset.sliderDnDBound === 'true') return;
+  editor.dataset.sliderDnDBound = 'true';
+
+  editor.addEventListener('dragover', (event) => {
+    event.preventDefault();
+  }, false);
+
+  editor.addEventListener('drop', (event) => {
+    if(!event.target.closest('.slider-thumb-item')){
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  }, false);
+
+  editor.addEventListener('dragstart', (event) => {
+    const item = event.target.closest('.slider-thumb-item');
+    if(!item) return;
+    if(event.target.closest('button')){
+      event.preventDefault();
+      return;
+    }
+
+    const sectionIndex = Number(item.dataset.sectionIndex);
+    const imageIndex = Number(item.dataset.imageIndex);
+    if(Number.isNaN(sectionIndex) || Number.isNaN(imageIndex)) return;
+
+    sliderThumbDragSource = { sectionIndex, imageIndex };
+    item.classList.add('slider-thumb-dragging');
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData(SLIDER_REORDER_MIME, `${sectionIndex}:${imageIndex}`);
+    event.dataTransfer.setData('text/plain', String(imageIndex));
+  });
+
+  editor.addEventListener('dragend', () => {
+    sliderThumbDragSource = null;
+    clearSliderThumbDropHighlights();
+    document.querySelectorAll('.slider-thumb-item.slider-thumb-dragging').forEach((el) => {
+      el.classList.remove('slider-thumb-dragging');
+    });
+  });
+
+  editor.addEventListener('dragover', (event) => {
+    const item = event.target.closest('.slider-thumb-item');
+    if(!item){
+      clearSliderThumbDropHighlights();
+      return;
+    }
+
+    const sectionIndex = Number(item.dataset.sectionIndex);
+    const hasFiles = dataTransferHasFiles(event.dataTransfer);
+    const hasInternalReorder = dataTransferHasInternalReorder(event.dataTransfer) || Boolean(sliderThumbDragSource);
+
+    if(hasFiles){
+      event.preventDefault();
+      event.stopPropagation();
+      event.dataTransfer.dropEffect = 'copy';
+      setSliderThumbDropHighlight(item, 'replace');
+      return;
+    }
+
+    if(hasInternalReorder && sliderThumbDragSource && sliderThumbDragSource.sectionIndex === sectionIndex){
+      event.preventDefault();
+      event.stopPropagation();
+      event.dataTransfer.dropEffect = 'move';
+      setSliderThumbDropHighlight(item, 'reorder');
+    }
+  });
+
+  editor.addEventListener('dragleave', (event) => {
+    const item = event.target.closest('.slider-thumb-item');
+    if(!item) return;
+    const related = event.relatedTarget;
+    if(related && item.contains(related)) return;
+    item.classList.remove('slider-thumb-drop-replace', 'slider-thumb-drop-reorder');
+  });
+
+  editor.addEventListener('drop', async (event) => {
+    const item = event.target.closest('.slider-thumb-item');
+    if(!item) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    clearSliderThumbDropHighlights();
+
+    const sectionIndex = Number(item.dataset.sectionIndex);
+    const targetImageIndex = Number(item.dataset.imageIndex);
+    if(Number.isNaN(sectionIndex) || Number.isNaN(targetImageIndex)) return;
+
+    const transferTypes = Array.from(event.dataTransfer?.types || []);
+    const isFileDrop = transferTypes.includes('Files');
+
+    if(isFileDrop){
+      const file = event.dataTransfer?.files?.[0];
+      if(!file){
+        setSectionsSaveResult('画像ファイルを取得できませんでした。', 'error');
+        return;
+      }
+      if(!isImageFile(file)){
+        setSectionsSaveResult('画像ファイルのみドロップできます。', 'error');
+        return;
+      }
+      sliderThumbDragSource = null;
+      await replaceSliderImageAt(sectionIndex, targetImageIndex, file);
+      return;
+    }
+
+    if(dataTransferHasInternalReorder(event.dataTransfer) && sliderThumbDragSource && sliderThumbDragSource.sectionIndex === sectionIndex){
+      reorderSliderImages(sectionIndex, sliderThumbDragSource.imageIndex, targetImageIndex);
+    }
+  });
+}
+
 async function uploadCardItemImage(sectionIndex, itemIndex, input){
   try{
     const file = input.files?.[0];
@@ -3262,12 +3563,17 @@ function renderSliderThumbs(section, index){
   }
 
   return `
-    <div class="slider-thumb-list">
+    <div class="slider-thumb-list" data-slider-thumb-list="${index}">
       ${images.map((src, imageIndex) => `
-        <div>
-          <img class="slider-thumb" src="${escapeAttr(src)}" alt="">
+        <div class="slider-thumb-item"
+             data-section-index="${index}"
+             data-image-index="${imageIndex}"
+             draggable="true"
+             title="ドラッグで並び替え / 画像をドロップで差し替え">
+          <span class="slider-thumb-drop-hint">ここにドロップで差し替え</span>
+          <img class="slider-thumb" src="${escapeAttr(src)}" alt="" draggable="false">
           <div class="actions" style="margin-top:6px;">
-            <button type="button" class="danger small-btn" onclick="removeSliderImage(${index}, ${imageIndex})">削除</button>
+            <button type="button" class="danger small-btn" draggable="false" onclick="removeSliderImage(${index}, ${imageIndex})">削除</button>
           </div>
         </div>
       `).join('')}
@@ -3741,11 +4047,11 @@ function renderSectionsEditor(){
             ${isSlider ? `
             <div class="row" style="grid-column:1 / -1;">
               <label>画像URL一覧（1行に1件）</label>
-              <textarea oninput="updateSliderImages(${index}, this.value)">${escapeHtml((section.images || []).join('\n'))}</textarea>
+              <textarea data-slider-images-textarea="${index}" oninput="updateSliderImages(${index}, this.value)">${escapeHtml((section.images || []).join('\n'))}</textarea>
               <div class="upload-box" style="margin-top:8px;">
                 <label>スライダー画像ファイル選択（複数可）</label>
                 <input type="file" accept="image/*" multiple onchange="uploadSliderImages(${index}, this)">
-                <div class="small">選択すると GitHub の assets/slider にアップロードされます。</div>
+                <div class="small">選択すると GitHub の assets/slider にアップロードされます。サムネイルへ画像をドロップすると差し替え、サムネイル同士のドラッグで並び替えができます。</div>
                 ${renderSliderThumbs(section, index)}
               </div>
             </div>` : ''}
@@ -4042,6 +4348,8 @@ async function init(){
     if(window.AdminCollapse && typeof window.AdminCollapse.bindWithin === 'function'){
       window.AdminCollapse.bindWithin(document);
     }
+
+    bindSliderThumbDnD();
 
     updateFloatingSaveStatus();
     setStatus('config.json / sections.json の読み込みに成功しました。', 'success');
