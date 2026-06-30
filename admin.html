@@ -286,6 +286,31 @@ button.linklike{
   border-radius:10px;
   background:#fff;
 }
+.carechan-character-dropzone{
+  margin-top:8px;
+  padding:12px;
+  border:1px dashed #bbb;
+  border-radius:10px;
+  background:#fff;
+  min-height:96px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  color:#777;
+  font-size:12px;
+  transition:border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+.carechan-character-dropzone.is-dragover{
+  border-color:#e87f00;
+  background:#fff8ef;
+  box-shadow:0 0 0 3px rgba(232,127,0,0.18);
+}
+.carechan-character-dropzone img{
+  max-width:80px;
+  max-height:80px;
+  display:block;
+}
 .slider-thumb-list{
   display:flex;
   gap:8px;
@@ -1338,8 +1363,10 @@ body{
           <label>キャラクター画像 URL</label>
           <input type="text" id="carechanCharacterImage">
           <input type="file" id="carechanCharacterUpload" accept="image/*,.svg">
-          <div class="small">選択すると GitHub の assets/carechan にアップロードされます。</div>
-          <div class="preview" id="carechanCharacterPreview">未設定</div>
+          <div class="small">ファイル選択または下の枠へドラッグ＆ドロップすると GitHub の assets/carechan にアップロードされます。</div>
+          <div class="carechan-character-dropzone" id="carechanCharacterDropZone">
+            <div class="preview" id="carechanCharacterPreview">未設定</div>
+          </div>
         </div>
         <div class="row">
           <label>キャラクター alt</label>
@@ -1758,8 +1785,11 @@ async function saveAllToGitHub(){
   const configOk = await saveConfigToGitHub(true);
   const sectionsOk = await saveSectionsToGitHub(true);
   const estimateOk = await saveEstimateConfigToGitHub(true);
+  const carechanOk = typeof saveCarechanToGitHub === 'function'
+    ? await saveCarechanToGitHub(true)
+    : true;
 
-  if(configOk && sectionsOk && estimateOk){
+  if(configOk && sectionsOk && estimateOk && carechanOk){
     updateFloatingSaveStatus('すべて保存しました。数十秒後にLPへ反映されます。', 'success');
     return true;
   }

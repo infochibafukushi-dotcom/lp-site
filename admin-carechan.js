@@ -2,6 +2,7 @@
   const CARECHAN_PATH = "data/carechan.json";
 
   let carechanDraft = null;
+  let carechanLoadedImage = null;
 
   function escapeHtml(text){
     return String(text ?? "")
@@ -109,6 +110,64 @@
     return String(name || "image").replace(/\s+/g, "-").replace(/[^a-zA-Z0-9._-]/g, "");
   }
 
+  function buildCarechanAssetPath(fileName){
+    return "./assets/carechan/" + Date.now() + "-" + sanitizeFileName(fileName);
+  }
+
+  function toStoredAssetPath(rawUrl){
+    const raw = String(rawUrl || "").trim();
+    if(!raw) return "./assets/carechan/carechan-default.svg";
+    if(raw.startsWith("data:")) return raw;
+    if(raw.startsWith("./") || raw.startsWith("/")) return raw;
+    try{
+      const { owner, repo, branch } = getGitHubSettings();
+      const rawPrefix = "https://raw.githubusercontent.com/" + owner + "/" + repo + "/" + branch + "/";
+      if(raw.startsWith(rawPrefix)){
+        return "./" + raw.slice(rawPrefix.length);
+      }
+    }catch(error){}
+    if(/^https?:\/\//i.test(raw)) return raw;
+    return "./" + raw.replace(/^\.\//, "");
+  }
+
+  function withPreviewCacheBuster(url){
+    const raw = String(url || "").trim();
+    if(!raw || raw.startsWith("data:") || raw.startsWith("blob:")) return raw;
+    const versionMatch = raw.match(/\/(\d{13})-/);
+    const version = versionMatch ? versionMatch[1] : String(Date.now());
+    return raw + (raw.includes("?") ? "&" : "?") + "v=" + encodeURIComponent(version);
+  }
+
+  function updateCarechanCharacterPreview(url){
+    const preview = document.getElementById("carechanCharacterPreview");
+    if(!preview) return;
+    const raw = String(url || "").trim();
+    if(!raw){
+      preview.innerHTML = "未設定";
+      return;
+    }
+    preview.innerHTML = '<img src="' + escapeHtml(withPreviewCacheBuster(raw)) + '" alt="preview" style="max-width:80px;max-height:80px;">';
+  }
+
+  function setCarechanCharacterImagePath(path){
+    if(!carechanDraft) carechanDraft = ensureCarechanDraft({});
+    const stored = toStoredAssetPath(path);
+    carechanDraft.character.image = stored;
+    const input = document.getElementById("carechanCharacterImage");
+    if(input) input.value = stored;
+    updateCarechanCharacterPreview(stored);
+  }
+
+  function getDroppedImageFile(event){
+    const files = event?.dataTransfer?.files;
+    if(!files || !files.length) return null;
+    for(let i = 0; i < files.length; i++){
+      const file = files[i];
+      if(file && String(file.type || "").startsWith("image/")) return file;
+    }
+    return null;
+  }
+
   async function fileToBase64(file){
     return new Promise(function(resolve, reject){
       const reader = new FileReader();
@@ -122,8 +181,9 @@
 
   async function uploadCarechanAsset(file){
     const { owner, repo, branch, token } = getGitHubSettings();
-    const path = "assets/carechan/" + Date.now() + "-" + sanitizeFileName(file.name);
-    const res = await fetch("https://api.github.com/repos/" + owner + "/" + repo + "/contents/" + path, {
+    const storedPath = buildCarechanAssetPath(file.name);
+    const githubPath = storedPath.replace(/^\.\//, "");
+    const res = await fetch("https://api.github.com/repos/" + owner + "/" + repo + "/contents/" + githubPath, {
       method: "PUT",
       headers: {
         Authorization: "token " + token,
@@ -131,14 +191,14 @@
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        message: "Upload " + path + " from admin panel (carechan)",
+        message: "Upload " + githubPath + " from admin panel (carechan)",
         content: await fileToBase64(file),
         branch: branch
       })
     });
     const result = await res.json();
     if(!res.ok) throw new Error(result?.message || "upload failed");
-    return "https://raw.githubusercontent.com/" + owner + "/" + repo + "/" + branch + "/" + path;
+    return storedPath;
   }
 
   function normalizeNode(node, idx, isRoot){
@@ -174,8 +234,9 @@
     data.enabled = data.enabled === true;
     data.version = data.version || 2;
     data.character = data.character || {};
-    data.character.image = data.character.image || "./assets/carechan/carechan-default.svg";
+    data.character.image = toStoredAssetPath(data.character.image || "./assets/carechan/carechan-default.svg");
     data.character.alt = data.character.alt || "ケアちゃん";
+    data.character.imageVersion = Number(data.character.imageVersion) || 0;
     data.speechBubbles = data.speechBubbles || {};
     data.speechBubbles.mode = data.speechBubbles.mode === "fixed" ? "fixed" : "random";
     data.speechBubbles.items = Array.isArray(data.speechBubbles.items) && data.speechBubbles.items.length
@@ -222,6 +283,7 @@
     const res = await fetch("./" + CARECHAN_PATH + "?" + Date.now());
     if(!res.ok) throw new Error("carechan.json 読込失敗");
     carechanDraft = ensureCarechanDraft(await res.json());
+    carechanLoadedImage = carechanDraft.character.image;
     try{
       await hydrateDefaultCtasFromConfig();
     }catch(error){
@@ -236,7 +298,10 @@
   function collectCarechanDraftFromForm(){
     if(!carechanDraft) carechanDraft = ensureCarechanDraft({});
     carechanDraft.enabled = document.getElementById("carechanEnabled")?.checked === true;
-    carechanDraft.character.image = document.getElementById("carechanCharacterImage")?.value.trim() || "./assets/carechan/carechan-default.svg";
+    const nextImage = toStoredAssetPath(
+      document.getElementById("carechanCharacterImage")?.value.trim() || "./assets/carechan/carechan-default.svg"
+    );
+    carechanDraft.character.image = nextImage;
     carechanDraft.character.alt = document.getElementById("carechanCharacterAlt")?.value.trim() || "ケアちゃん";
     carechanDraft.speechBubbles.mode = document.getElementById("carechanBubbleMode")?.value === "fixed" ? "fixed" : "random";
     carechanDraft.speechBubbles.fixedIndex = Number(document.getElementById("carechanBubbleFixedIndex")?.value) || 0;
@@ -444,6 +509,7 @@
     document.getElementById("carechanEnabled").checked = d.enabled === true;
     document.getElementById("carechanCharacterImage").value = d.character.image || "";
     document.getElementById("carechanCharacterAlt").value = d.character.alt || "";
+    updateCarechanCharacterPreview(d.character.image || "");
     document.getElementById("carechanBubbleMode").value = d.speechBubbles.mode || "random";
     document.getElementById("carechanBubbleFixedIndex").value = d.speechBubbles.fixedIndex || 0;
     document.getElementById("carechanBubbleItems").value = (d.speechBubbles.items || []).join("\n");
@@ -454,11 +520,6 @@
     document.getElementById("carechanMobileRight").value = d.position.mobile.right || 14;
     document.getElementById("carechanDesktopBottom").value = d.position.desktop.bottom || 24;
     document.getElementById("carechanDesktopRight").value = d.position.desktop.right || 24;
-    const preview = document.getElementById("carechanCharacterPreview");
-    if(preview){
-      const url = d.character.image || "";
-      preview.innerHTML = url ? '<img src="' + escapeHtml(url) + '" alt="preview" style="max-width:80px;max-height:80px;">' : "未設定";
-    }
     renderQuestionEditor();
     bindCarechanEditorEvents();
     if(window.AdminCollapse && typeof window.AdminCollapse.bindWithin === "function"){
@@ -518,20 +579,75 @@
     };
   }
 
+  async function applyCarechanCharacterFile(file){
+    if(!file) return;
+    const previousPath = carechanDraft?.character?.image || "./assets/carechan/carechan-default.svg";
+    let previewUrl = "";
+    try{
+      previewUrl = URL.createObjectURL(file);
+      updateCarechanCharacterPreview(previewUrl);
+      setCarechanStatus("キャラクター画像をアップロード中...", "warn");
+      const storedPath = await uploadCarechanAsset(file);
+      setCarechanCharacterImagePath(storedPath);
+      carechanDraft.character.imageVersion = Date.now();
+      setCarechanStatus("画像アップロード成功。carechan.json を保存してください。", "success");
+    }catch(error){
+      setCarechanCharacterImagePath(previousPath);
+      setCarechanStatus("画像アップロード失敗: " + error.message, "error");
+    }finally{
+      if(previewUrl) URL.revokeObjectURL(previewUrl);
+    }
+  }
+
   async function uploadCarechanCharacter(input){
     try{
       const file = input.files?.[0];
-      if(!file) return;
-      setCarechanStatus("キャラクター画像をアップロード中...", "warn");
-      document.getElementById("carechanCharacterImage").value = await uploadCarechanAsset(file);
-      collectCarechanDraftFromForm();
-      renderCarechanEditor();
-      setCarechanStatus("画像アップロード成功。carechan.json を保存してください。", "success");
-    }catch(error){
-      setCarechanStatus("画像アップロード失敗: " + error.message, "error");
+      await applyCarechanCharacterFile(file);
     }finally{
-      input.value = "";
+      if(input) input.value = "";
     }
+  }
+
+  function bindCarechanCharacterImageUi(){
+    const uploadInput = document.getElementById("carechanCharacterUpload");
+    const imageInput = document.getElementById("carechanCharacterImage");
+    const dropZone = document.getElementById("carechanCharacterDropZone");
+
+    uploadInput?.addEventListener("change", function(e){
+      uploadCarechanCharacter(e.target);
+    });
+
+    imageInput?.addEventListener("input", function(){
+      setCarechanCharacterImagePath(imageInput.value);
+    });
+
+    if(!dropZone || dropZone.dataset.carechanDropBound === "true") return;
+    dropZone.dataset.carechanDropBound = "true";
+
+    ["dragenter", "dragover"].forEach(function(type){
+      dropZone.addEventListener(type, function(event){
+        const file = getDroppedImageFile(event);
+        if(!file) return;
+        event.preventDefault();
+        event.stopPropagation();
+        dropZone.classList.add("is-dragover");
+      });
+    });
+
+    dropZone.addEventListener("dragleave", function(event){
+      const related = event.relatedTarget;
+      if(related && dropZone.contains(related)) return;
+      dropZone.classList.remove("is-dragover");
+    });
+
+    dropZone.addEventListener("drop", function(event){
+      const file = getDroppedImageFile(event);
+      if(!file) return;
+      event.preventDefault();
+      event.stopPropagation();
+      dropZone.classList.remove("is-dragover");
+      applyCarechanCharacterFile(file);
+    });
   }
 
   function addCarechanQuestion(){
@@ -551,17 +667,33 @@
     renderCarechanEditor();
   }
 
-  async function saveCarechanToGitHub(){
+  async function saveCarechanToGitHub(isSilent){
     try{
-      setCarechanStatus("保存中...", "warn");
+      if(!isSilent) setCarechanStatus("保存中...", "warn");
       collectCarechanDraftFromForm();
       syncQuestionsFromDom();
       await hydrateDefaultCtasFromConfig();
       normalizeQuestionTree(carechanDraft);
+      carechanDraft.character.image = toStoredAssetPath(carechanDraft.character.image);
+      if(String(carechanDraft.character.image || "").startsWith("blob:")){
+        throw new Error("画像アップロードが完了していません。ファイルを選び直してから保存してください。");
+      }
+      if(carechanDraft.character.image !== carechanLoadedImage){
+        carechanDraft.character.imageVersion = Date.now();
+      }
+      if(!Number(carechanDraft.character.imageVersion)){
+        carechanDraft.character.imageVersion = Date.now();
+      }
       await saveFileToGitHub(CARECHAN_PATH, JSON.stringify(carechanDraft, null, 2));
-      setCarechanStatus("carechan.json の保存が完了しました。", "success");
+      carechanLoadedImage = carechanDraft.character.image;
+      renderCarechanEditor();
+      if(!isSilent){
+        setCarechanStatus("carechan.json の保存が完了しました。", "success");
+      }
+      return true;
     }catch(error){
-      setCarechanStatus("保存失敗: " + error.message, "error");
+      if(!isSilent) setCarechanStatus("保存失敗: " + error.message, "error");
+      return false;
     }
   }
 
@@ -569,11 +701,11 @@
     document.getElementById("carechanReloadBtn")?.addEventListener("click", function(){
       loadCarechanDraft().catch(function(e){ setCarechanStatus(e.message, "error"); });
     });
-    document.getElementById("carechanSaveBtn")?.addEventListener("click", saveCarechanToGitHub);
-    document.getElementById("carechanAddQuestionBtn")?.addEventListener("click", addCarechanQuestion);
-    document.getElementById("carechanCharacterUpload")?.addEventListener("change", function(e){
-      uploadCarechanCharacter(e.target);
+    document.getElementById("carechanSaveBtn")?.addEventListener("click", function(){
+      saveCarechanToGitHub(false);
     });
+    document.getElementById("carechanAddQuestionBtn")?.addEventListener("click", addCarechanQuestion);
+    bindCarechanCharacterImageUi();
   }
 
   async function initCarechanAdmin(){

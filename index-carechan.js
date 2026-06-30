@@ -130,7 +130,8 @@
       version: data.version || 1,
       character: {
         image: String(data.character?.image || "./assets/carechan/carechan-default.svg"),
-        alt: String(data.character?.alt || "ケアちゃん")
+        alt: String(data.character?.alt || "ケアちゃん"),
+        imageVersion: Number(data.character?.imageVersion) || 0
       },
       speechBubbles: {
         mode: bubbles.mode === "fixed" ? "fixed" : "random",
@@ -257,16 +258,23 @@
     }
   }
 
-  function resolveImageUrl(url){
+  function resolveImageUrl(url, imageVersion){
     const raw = String(url || "").trim();
     if(!raw) return "./assets/carechan/carechan-default.svg";
-    if(/^https?:\/\//i.test(raw) || raw.startsWith("data:")) return raw;
-    if(raw.startsWith("./") || raw.startsWith("/")) return raw;
-    return "./" + raw.replace(/^\.\//, "");
+    let src;
+    if(/^https?:\/\//i.test(raw) || raw.startsWith("data:")) src = raw;
+    else if(raw.startsWith("./") || raw.startsWith("/")) src = raw;
+    else src = "./" + raw.replace(/^\.\//, "");
+
+    if(raw.startsWith("data:")) return src;
+    const versionMatch = raw.match(/\/(\d{13})-/);
+    const version = Number(imageVersion) || (versionMatch ? Number(versionMatch[1]) : 0);
+    if(!version) return src;
+    return src + (src.includes("?") ? "&" : "?") + "v=" + encodeURIComponent(String(version));
   }
 
   function renderCharacterImage(data){
-    const src = resolveImageUrl(data.character.image);
+    const src = resolveImageUrl(data.character.image, data.character.imageVersion);
     return '<img src="' + escapeAttr(src) + '" alt="' + escapeAttr(data.character.alt) + '" width="64" height="74" decoding="async">';
   }
 
