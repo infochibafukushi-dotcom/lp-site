@@ -63,7 +63,7 @@
       {
         "title": "予約する",
         "text": "通院・退院・施設送迎のご予約はこちら。",
-        "image": "./assets/cards/1782684888377-ChatGPT-Image-2026629-07_14_30.png",
+        "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1782794027921-ChatGPT-Image-2026630-13_33_44.png",
         "imageFit": "contain",
         "link": "https://infochibafukushi-dotcom.github.io/reservation-v4/"
       },
