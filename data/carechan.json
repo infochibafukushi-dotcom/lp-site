@@ -2,8 +2,9 @@
   "enabled": true,
   "version": 2,
   "character": {
-    "image": "./assets/carechan/carechan-default.svg",
-    "alt": "ケアちゃん"
+    "image": "./assets/carechan/1782858946025-carenyan_waving_transparent_4x.png",
+    "alt": "ケアちゃん",
+    "imageVersion": 1782858946025
   },
   "speechBubbles": {
     "mode": "random",
