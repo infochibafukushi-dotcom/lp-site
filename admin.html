@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<!-- admin-build-version: 810bab5-section-sort -->
 <title>管理画面</title>
 <style>
 *{box-sizing:border-box;}
@@ -168,8 +172,15 @@ button.linklike{
   background:#fcfcfc;
   overflow:hidden;
 }
+.section-head-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
 .section-item .section-card-toggle{
-  width:100%;
+  flex:1 1 auto;
+  min-width:0;
+  width:auto;
   border:none;
   background:#fcfcfc;
   color:#222;
@@ -181,6 +192,13 @@ button.linklike{
   gap:12px;
   cursor:pointer;
   border-radius:0;
+}
+.section-head-actions{
+  display:flex;
+  gap:6px;
+  flex:0 0 auto;
+  padding-right:12px;
+  flex-wrap:wrap;
 }
 .section-item .section-card-toggle:hover{
   background:#f4f4f4;
@@ -663,6 +681,14 @@ button.linklike{
   .sort-item{
     grid-template-columns:1fr;
   }
+  .section-head-row{
+    flex-wrap:wrap;
+  }
+  .section-head-actions{
+    width:100%;
+    padding:0 12px 12px;
+    justify-content:flex-end;
+  }
 }
 
 body{
@@ -779,7 +805,6 @@ body{
       <a class="jump-btn" href="#card-bottom-settings">下部設定</a>
       <a class="jump-btn" href="#card-popup-settings">POP設定</a>
       <a class="jump-btn" href="#card-section-add">セクション追加</a>
-      <a class="jump-btn" href="#card-sections-sort">並び替え</a>
       <a class="jump-btn" href="#card-sections-list">セクション編集</a>
       <a class="jump-btn" href="#card-preview">保存前プレビュー</a>
       <a class="jump-btn" href="#card-carechan-settings">ケアちゃん設定</a>
@@ -1260,23 +1285,6 @@ body{
     </div>
   </div>
 
-  <div class="card collapsible-card js-collapsible section-anchor" id="card-sections-sort" data-open="false">
-    <button type="button" class="card-toggle js-card-toggle">
-      <span class="toggle-left">
-        <span class="toggle-icon">▶</span>
-        <span class="toggle-title">セクション並び替え</span>
-      </span>
-      <span class="toggle-state">閉じています</span>
-    </button>
-    <div class="card-body js-card-body">
-      <p class="note">この一覧は並び替え専用です。タイトル順に確認しながら上下移動できます。</p>
-      <div id="sectionsSortEditor">読み込み中...</div>
-      <div class="actions" style="margin-top:14px;">
-        <button type="button" onclick="saveAllToGitHub()">すべて保存</button>
-      </div>
-    </div>
-  </div>
-
   <div class="card collapsible-card js-collapsible section-anchor" id="card-sections-list" data-open="false">
     <button type="button" class="card-toggle js-card-toggle">
       <span class="toggle-left">
@@ -1506,15 +1514,14 @@ body{
 </main>
 
 
-<script src="./admin-collapse.js"></script>
-<script src="./admin-sections-sort.js"></script>
-<script src="./carechan-cta-defaults.js"></script>
-<script src="./admin-carechan.js"></script>
-<script src="./shared/libs/qrcode.min.js"></script>
-<script src="./shared/estimate-qr.js"></script>
-<script src="./shared/estimate-defaults.js"></script>
-<script src="./shared/estimate-validate.js"></script>
-<script src="./admin-estimate.js"></script>
+<script src="./admin-collapse.js?v=810bab5-section-sort"></script>
+<script src="./carechan-cta-defaults.js?v=810bab5-section-sort"></script>
+<script src="./admin-carechan.js?v=810bab5-section-sort"></script>
+<script src="./shared/libs/qrcode.min.js?v=810bab5-section-sort"></script>
+<script src="./shared/estimate-qr.js?v=810bab5-section-sort"></script>
+<script src="./shared/estimate-defaults.js?v=810bab5-section-sort"></script>
+<script src="./shared/estimate-validate.js?v=810bab5-section-sort"></script>
+<script src="./admin-estimate.js?v=810bab5-section-sort"></script>
 <script src="./shared/pre-fixed-fare-report-data.js?v=39e326a1"></script>
 <script src="./shared/pre-fixed-fare-report-pdf.js?v=39e326a1"></script>
 <script src="./shared/pre-fixed-fare-approval-summary-data.js?v=39e326a1"></script>
@@ -1709,7 +1716,7 @@ function bindDirtyTrackers(){
       return;
     }
 
-    if(target.closest('#card-section-add') || target.closest('#card-sections-sort') || target.closest('#card-sections-list') || target.closest('#card-preview')){
+    if(target.closest('#card-section-add') || target.closest('#card-sections-list') || target.closest('#card-preview')){
       markSectionsDirty();
       return;
     }
@@ -1728,7 +1735,7 @@ function bindDirtyTrackers(){
       return;
     }
 
-    if(target.closest('#card-section-add') || target.closest('#card-sections-sort') || target.closest('#card-sections-list') || target.closest('#card-preview')){
+    if(target.closest('#card-section-add') || target.closest('#card-sections-list') || target.closest('#card-preview')){
       markSectionsDirty();
       return;
     }
@@ -2555,7 +2562,6 @@ async function loadSections(){
   sectionsData = sectionsData.map((section, index) => ensureSectionShape(section, index));
   sectionsData = ensureUniqueSectionAnchors(sectionsData);
   renderSectionsEditor();
-  renderSectionsSortList();
 }
 
 function createDefaultSection(type, title){
@@ -2727,7 +2733,6 @@ function duplicateSection(index){
   sectionOpenState[copy.id] = true;
 
   renderSectionsEditor();
-  renderSectionsSortList();
   setSectionsSaveResult('複製しました。最後に sections.json を保存してください。', 'success');
 }
 
@@ -2742,7 +2747,6 @@ function addSection(){
   sectionOpenState[section.id] = true;
 
   renderSectionsEditor();
-  renderSectionsSortList();
   document.getElementById('newSectionTitle').value = '';
   setSectionsSaveResult('追加しました。保存すると公開LPへ反映されます。', 'success');
 }
@@ -2757,7 +2761,6 @@ function removeSection(index){
 
   sectionsData.splice(index, 1);
   renderSectionsEditor();
-  renderSectionsSortList();
 }
 function moveSectionUp(index){
   if(index <= 0) return;
@@ -2767,8 +2770,8 @@ function moveSectionUp(index){
   const temp = sectionsData[index - 1];
   sectionsData[index - 1] = sectionsData[index];
   sectionsData[index] = temp;
+  markSectionsDirty();
   renderSectionsEditor();
-  renderSectionsSortList();
 }
 function moveSectionDown(index){
   if(index >= sectionsData.length - 1) return;
@@ -2778,8 +2781,8 @@ function moveSectionDown(index){
   const temp = sectionsData[index + 1];
   sectionsData[index + 1] = sectionsData[index];
   sectionsData[index] = temp;
+  markSectionsDirty();
   renderSectionsEditor();
-  renderSectionsSortList();
 }
 function updateSectionField(index, field, value){
   sectionsData[index][field] = value;
@@ -2811,7 +2814,6 @@ function addAccordionItem(sectionIndex){
     sectionOpenState[sectionsData[sectionIndex].id] = true;
   }
   renderSectionsEditor();
-  renderSectionsSortList();
   setSectionsSaveResult('質問を追加しました。最後に sections.json を保存してください。', 'success');
 }
 function removeAccordionItem(sectionIndex, itemIndex){
@@ -2824,7 +2826,6 @@ function removeAccordionItem(sectionIndex, itemIndex){
     sectionOpenState[sectionsData[sectionIndex].id] = true;
   }
   renderSectionsEditor();
-  renderSectionsSortList();
   setSectionsSaveResult('質問を削除しました。最後に sections.json を保存してください。', 'success');
 }
 function moveAccordionItemUp(sectionIndex, itemIndex){
@@ -2841,7 +2842,6 @@ function moveAccordionItemUp(sectionIndex, itemIndex){
     sectionOpenState[sectionsData[sectionIndex].id] = true;
   }
   renderSectionsEditor();
-  renderSectionsSortList();
 }
 function moveAccordionItemDown(sectionIndex, itemIndex){
   const items = sectionsData[sectionIndex].items;
@@ -2857,7 +2857,6 @@ function moveAccordionItemDown(sectionIndex, itemIndex){
     sectionOpenState[sectionsData[sectionIndex].id] = true;
   }
   renderSectionsEditor();
-  renderSectionsSortList();
 }
 function updateSectionLinkField(sectionIndex, linkIndex, field, value){
   ensureSectionLinks(sectionsData[sectionIndex]);
@@ -2882,7 +2881,6 @@ function autoGenerateSectionAnchor(index){
   }
 
   renderSectionsEditor();
-  renderSectionsSortList();
   setSectionsSaveResult('アンカーURLを自動作成しました。最後に保存してください。', 'success');
 }
 
@@ -2900,7 +2898,6 @@ function setSectionBgColor(index, value){
   }
 
   renderSectionsEditor();
-  renderSectionsSortList();
 }
 
 function renderColorField(index, currentValue){
@@ -3235,7 +3232,6 @@ async function uploadSingleImage(index, input){
       sectionOpenState[sectionsData[index].id] = true;
     }
     renderSectionsEditor();
-    renderSectionsSortList();
     setSectionsSaveResult('画像アップロードに成功しました。最後に sections.json を保存してください。', 'success');
   }catch(error){
     setSectionsSaveResult('画像アップロード失敗: ' + error.message, 'error');
@@ -3266,7 +3262,6 @@ async function uploadSliderImages(index, input){
       sectionOpenState[sectionsData[index].id] = true;
     }
     renderSectionsEditor();
-    renderSectionsSortList();
     setSectionsSaveResult('スライダー画像アップロードに成功しました。最後に sections.json を保存してください。', 'success');
   }catch(error){
     setSectionsSaveResult('画像アップロード失敗: ' + error.message, 'error');
@@ -3283,7 +3278,6 @@ function removeSliderImage(sectionIndex, imageIndex){
     sectionOpenState[sectionsData[sectionIndex].id] = true;
   }
   renderSectionsEditor();
-  renderSectionsSortList();
 }
 
 let sliderThumbDragSource = null;
@@ -3364,7 +3358,6 @@ function reorderSliderImages(sectionIndex, fromIndex, toIndex){
     sectionOpenState[sectionsData[sectionIndex].id] = true;
   }
   renderSectionsEditor();
-  renderSectionsSortList();
   setSectionsSaveResult('スライダー画像の順番を変更しました。最後に sections.json を保存してください。', 'success');
 }
 
@@ -3386,7 +3379,6 @@ async function replaceSliderImageAt(sectionIndex, imageIndex, file){
       sectionOpenState[sectionsData[sectionIndex].id] = true;
     }
     renderSectionsEditor();
-    renderSectionsSortList();
     setSectionsSaveResult('画像を差し替えました。最後に sections.json を保存してください。', 'success');
   }catch(error){
     setSectionsSaveResult(error.message || '画像アップロードに失敗しました。', 'error');
@@ -3547,7 +3539,6 @@ async function uploadCardItemImage(sectionIndex, itemIndex, input){
       sectionOpenState[sectionsData[sectionIndex].id] = true;
     }
     renderSectionsEditor();
-    renderSectionsSortList();
     setSectionsSaveResult('カード画像アップロードに成功しました。最後に sections.json を保存してください。', 'success');
   }catch(error){
     setSectionsSaveResult('画像アップロード失敗: ' + error.message, 'error');
@@ -3704,7 +3695,6 @@ function addMenuGroup(sectionIndex){
     menuGroupOpenState[getMenuGroupStateKey(section, section.menuGroups.length - 1)] = true;
   }
   renderSectionsEditor();
-  renderSectionsSortList();
 }
 
 function removeMenuGroup(sectionIndex, groupIndex){
@@ -3714,7 +3704,6 @@ function removeMenuGroup(sectionIndex, groupIndex){
   section.menuGroups.splice(groupIndex, 1);
   if(section.id) sectionOpenState[section.id] = true;
   renderSectionsEditor();
-  renderSectionsSortList();
 }
 
 function moveMenuGroupUp(sectionIndex, groupIndex){
@@ -3727,7 +3716,6 @@ function moveMenuGroupUp(sectionIndex, groupIndex){
   section.menuGroups[groupIndex] = temp;
   if(section.id) sectionOpenState[section.id] = true;
   renderSectionsEditor();
-  renderSectionsSortList();
 }
 
 function moveMenuGroupDown(sectionIndex, groupIndex){
@@ -3739,7 +3727,6 @@ function moveMenuGroupDown(sectionIndex, groupIndex){
   section.menuGroups[groupIndex] = temp;
   if(section.id) sectionOpenState[section.id] = true;
   renderSectionsEditor();
-  renderSectionsSortList();
 }
 
 function updateMenuListItemField(sectionIndex, groupIndex, itemIndex, field, value){
@@ -3771,7 +3758,6 @@ function addMenuListItem(sectionIndex, groupIndex){
     menuGroupOpenState[getMenuGroupStateKey(section, groupIndex)] = true;
   }
   renderSectionsEditor();
-  renderSectionsSortList();
 }
 
 function removeMenuListItem(sectionIndex, groupIndex, itemIndex){
@@ -3786,7 +3772,6 @@ function removeMenuListItem(sectionIndex, groupIndex, itemIndex){
     menuGroupOpenState[getMenuGroupStateKey(section, groupIndex)] = true;
   }
   renderSectionsEditor();
-  renderSectionsSortList();
 }
 
 function moveMenuListItemUp(sectionIndex, groupIndex, itemIndex){
@@ -3804,7 +3789,6 @@ function moveMenuListItemUp(sectionIndex, groupIndex, itemIndex){
     menuGroupOpenState[getMenuGroupStateKey(section, groupIndex)] = true;
   }
   renderSectionsEditor();
-  renderSectionsSortList();
 }
 
 function moveMenuListItemDown(sectionIndex, groupIndex, itemIndex){
@@ -3821,7 +3805,6 @@ function moveMenuListItemDown(sectionIndex, groupIndex, itemIndex){
     menuGroupOpenState[getMenuGroupStateKey(section, groupIndex)] = true;
   }
   renderSectionsEditor();
-  renderSectionsSortList();
 }
 
 function updateMenuBottomCardField(sectionIndex, field, value){
@@ -3927,22 +3910,26 @@ function renderSectionsEditor(){
 
     return `
       <div class="section-item js-collapsible" data-open="${sectionOpenState[section.id] ? 'true' : 'false'}" data-section-id="${escapeAttr(section.id)}">
-        <button type="button" class="section-card-toggle js-card-toggle">
-          <div class="section-head-left">
-            <span class="toggle-icon">▶</span>
-            <span class="section-index-badge">${index + 1}</span>
-            <div class="section-meta">
-              <div class="section-meta-title">${escapeHtml(section.title || '(タイトル未設定)')}</div>
-              <div class="section-meta-sub">${escapeHtml(section.type)} / #${escapeHtml(section.sectionId || '')}</div>
+        <div class="section-head-row">
+          <button type="button" class="section-card-toggle js-card-toggle">
+            <div class="section-head-left">
+              <span class="toggle-icon">▶</span>
+              <span class="section-index-badge">${index + 1}</span>
+              <div class="section-meta">
+                <div class="section-meta-title">${escapeHtml(section.title || '(タイトル未設定)')}</div>
+                <div class="section-meta-sub">${escapeHtml(section.type)} / #${escapeHtml(section.sectionId || '')}</div>
+              </div>
             </div>
+            <span class="toggle-state">閉じています</span>
+          </button>
+          <div class="section-head-actions">
+            <button type="button" class="secondary small-btn" ${index <= 0 ? 'disabled' : ''} onclick="event.stopPropagation(); moveSectionUp(${index})">↑ 上へ</button>
+            <button type="button" class="secondary small-btn" ${index >= sectionsData.length - 1 ? 'disabled' : ''} onclick="event.stopPropagation(); moveSectionDown(${index})">↓ 下へ</button>
           </div>
-          <span class="toggle-state">閉じています</span>
-        </button>
+        </div>
 
         <div class="section-body js-card-body">
           <div class="actions" style="margin-bottom:12px;">
-            <button type="button" class="secondary" onclick="moveSectionUp(${index})">↑ 上へ</button>
-            <button type="button" class="secondary" onclick="moveSectionDown(${index})">↓ 下へ</button>
             <button type="button" class="secondary" onclick="duplicateSection(${index})">複製</button>
             <button type="button" class="danger" onclick="removeSection(${index})">削除</button>
           </div>
@@ -4096,12 +4083,6 @@ function renderSectionsEditor(){
 
   if(window.AdminCollapse && typeof window.AdminCollapse.bindWithin === 'function'){
     window.AdminCollapse.bindWithin(box);
-  }
-}
-
-function renderSectionsSortList(){
-  if(typeof window.renderSectionSortList === 'function'){
-    window.renderSectionSortList(sectionsData);
   }
 }
 
@@ -4321,7 +4302,6 @@ async function saveSectionsToGitHub(isSilent = false){
     sectionsData = ensureUniqueSectionAnchors(prepared);
     await saveFileToGitHub(SECTIONS_PATH, JSON.stringify(sectionsData, null, 2));
     renderSectionsEditor();
-    renderSectionsSortList();
     setSectionsSaveResult('sections.json の保存に成功しました。数十秒後にLPへ反映されます。', 'success');
     clearSectionsDirty();
     if(!isSilent){
