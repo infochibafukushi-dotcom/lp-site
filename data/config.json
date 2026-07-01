@@ -6,13 +6,13 @@
   "footerBgColor": "#ffffff",
   "buttons": [
     {
-      "text": "概算見積",
-      "link": "./estimate/",
+      "text": "かんたん見積",
+      "link": "#estimate",
       "visible": true
     },
     {
       "text": "料金表",
-      "link": "#ryokin-meyasu",
+      "link": "#pricing",
       "visible": true
     },
     {
@@ -23,13 +23,13 @@
   ],
   "buttonsPc": [
     {
-      "text": "概算見積",
-      "link": "./estimate/",
+      "text": "かんたん見積",
+      "link": "#estimate",
       "visible": true
     },
     {
       "text": "料金表",
-      "link": "#ryokin-meyasu",
+      "link": "#pricing",
       "visible": true
     },
     {
@@ -40,19 +40,19 @@
   ],
   "footer": [
     {
-      "text": "予約電話",
+      "text": "電話",
       "link": "tel:09063314289",
       "visible": true,
       "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/footer/1773052792726-cube-icon_pink039.png"
     },
     {
-      "text": "公式LINE",
+      "text": "LINE",
       "link": "https://lin.ee/XA05KN5",
       "visible": true,
       "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/footer/1773052797121-image-1.png"
     },
     {
-      "text": "ネット予約",
+      "text": "予約カレンダー",
       "link": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
       "visible": true,
       "image": "https://infochibafukushi-dotcom.github.io/lp-site/assets/footer/1773052808077-messageImage_1770430107621.jpg"

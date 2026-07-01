@@ -108,22 +108,24 @@
     const text = String(slideItem?.text || "").trim();
     const ctaText = String(slideItem?.ctaText || "").trim();
     const ctaLink = String(slideItem?.link || "").trim();
+    const ctaText2 = String(slideItem?.ctaText2 || "").trim();
+    const ctaLink2 = String(slideItem?.link2 || "").trim();
 
-    if(!title && !text && !ctaText){
+    if(!title && !text && !ctaText && !ctaText2){
       return "";
     }
 
     const headingTag = slideIndex === 0 ? "h1" : "h2";
-    const ctaHtml = ctaText
-      ? `<div class="slider-slide-cta-wrap">${window.IndexUtils.wrapLink(ctaLink || "#", `<span class="slider-slide-cta">${window.IndexUtils.escapeHtml(ctaText)}</span>`, "slider-slide-cta-link")}</div>`
+    const primaryCta = ctaText
+      ? `<div class="slider-slide-cta-wrap">${window.IndexUtils.wrapLink(ctaLink || "#", `<span class="slider-slide-cta">${window.IndexUtils.escapeHtml(ctaText)}</span>`, "slider-slide-cta-link")}${ctaText2 ? window.IndexUtils.wrapLink(ctaLink2 || "#", `<span class="slider-slide-cta is-secondary">${window.IndexUtils.escapeHtml(ctaText2)}</span>`, "slider-slide-cta-link") : ""}</div>`
       : "";
 
     return `
       <div class="slider-slide-overlay">
-        <div class="slider-slide-overlay-inner">
+        <div class="slider-slide-overlay-inner hero-slide-copy">
           ${title ? `<${headingTag} class="slider-slide-title">${window.IndexUtils.escapeHtml(title)}</${headingTag}>` : ""}
           ${text ? `<p class="slider-slide-text">${window.IndexUtils.escapeHtml(text)}</p>` : ""}
-          ${ctaHtml}
+          ${primaryCta}
         </div>
       </div>
     `;
@@ -142,7 +144,7 @@
           const src = images[imageIndex] || "";
           const slideItem = slideItems[imageIndex] || {};
           const attrs = imageIndex === 0 ? imageAttrs : buildImageAttrs("lazy");
-          const alt = String(slideItem.title || section.title || "").trim();
+          const alt = String(slideItem.imageAlt || slideItem.title || section.title || "").trim();
           const image = src
             ? `<div class="slider-image-wrap"><img src="${window.IndexUtils.escapeAttr(src)}" alt="${window.IndexUtils.escapeAttr(alt)}" ${attrs}></div>`
             : `<div class="slider-image-wrap slider-image-wrap--empty"></div>`;
@@ -259,16 +261,34 @@
     `;
   }
 
+  function renderEstimateSteps(section){
+    const items = Array.isArray(section.items) ? section.items : [];
+    return `
+      <div class="estimate-steps">
+        ${items.map((item, index) => `
+          <div class="estimate-step-card">
+            <div class="estimate-step-num">STEP ${index + 1}</div>
+            ${item?.title ? `<h3 class="card-item-title">${window.IndexUtils.escapeHtml(item.title)}</h3>` : ""}
+            ${item?.text ? `<div class="section-text">${window.IndexUtils.escapeHtml(item.text)}</div>` : ""}
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
   function renderCard3(section, config){
     const isPriceExamples = section?.sectionId === "price-examples";
+    const isEstimateSteps = section?.sectionId === "estimate";
     return `
-      <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#ffffff")}">
+      <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section${isEstimateSteps ? " section-estimate-steps" : ""}" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#ffffff")}">
         <div class="section-inner">
           <h2 class="section-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "left")}">${window.IndexUtils.escapeHtml(section.title || "")}</h2>
           ${renderSectionLeadText(section)}
-          <div class="card-grid-3 ${window.IndexUtils.getMobileCardGridClass(section)}">
+          ${isEstimateSteps
+            ? renderEstimateSteps(section)
+            : `<div class="card-grid-3 ${window.IndexUtils.getMobileCardGridClass(section)}">
             ${renderCardItems(section.items || [], section.textSize || "medium", section.textAlign || "left", { useCardCta: isPriceExamples })}
-          </div>
+          </div>`}
           ${isPriceExamples && section.menuBottomCard?.visible ? `
             <p class="section-disclaimer text-${window.IndexUtils.escapeAttr(section.textAlign || "left")}">${window.IndexUtils.escapeHtml(section.menuBottomCard.text || "")}</p>
           ` : ""}
@@ -404,7 +424,6 @@
 
   function renderMenuList(section, config){
     const isAreaSection = section?.sectionId === "taiou-area";
-    const isEstimateGuide = section?.sectionId === "kantan-mitsumori";
     const groups = Array.isArray(section.menuGroups) ? section.menuGroups : [];
     const bottomCard = section.menuBottomCard || { visible:false, title:'', text:'', buttonText:'', buttonUrl:'#' };
     const showPrices = menuListHasAnyPrice(groups);
@@ -457,28 +476,11 @@
     ` : '';
 
     const areaTagsHtml = isAreaSection ? renderAreaTags(section) : '';
-    const estimateChecklistHtml = isEstimateGuide ? `
-      <div class="estimate-checklist">
-        ${groups.length ? groups.map((group) => {
-          const items = Array.isArray(group.items) ? group.items.filter((item) => item && item.visible !== false) : [];
-          return items.map((item) => `
-            <div class="estimate-checklist-item">
-              <span class="estimate-checklist-label">${window.IndexUtils.escapeHtml(item.name || '')}</span>
-              <span class="estimate-checklist-example">${window.IndexUtils.escapeHtml(item.description || '')}</span>
-            </div>
-          `).join("");
-        }).join("") : ''}
-      </div>
-    ` : '';
 
-    const mainContentHtml = isAreaSection
-      ? `${areaTagsHtml}${bottomCard.visible ? '' : ''}`
-      : isEstimateGuide
-        ? estimateChecklistHtml
-        : cardsHtml;
+    const mainContentHtml = isAreaSection ? areaTagsHtml : cardsHtml;
 
     return `
-      <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section${isAreaSection ? ' section-area-tags' : ''}${isEstimateGuide ? ' section-estimate-guide' : ''}" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#f7f5f0")};padding-left:20px;padding-right:20px;">
+      <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section${isAreaSection ? ' section-area-tags' : ''}" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#f7f5f0")};padding-left:20px;padding-right:20px;">
         <div class="section-inner" style="max-width:720px;">
           <h2 class="section-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "left")}">${window.IndexUtils.escapeHtml(section.title || "")}</h2>
           ${leadHtml}

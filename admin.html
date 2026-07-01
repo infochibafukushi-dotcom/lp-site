@@ -1541,7 +1541,7 @@ body{
 </main>
 
 
-<script src="./admin-collapse.js?v=lp-section-simplify-20260702"></script>
+<script src="./admin-collapse.js?v=lp-cta-seo-estimate-20260702"></script>
 <script src="./carechan-cta-defaults.js?v=810bab5-section-sort"></script>
 <script src="./admin-carechan.js?v=810bab5-section-sort"></script>
 <script src="./shared/libs/qrcode.min.js?v=810bab5-section-sort"></script>
@@ -2132,7 +2132,10 @@ function ensureSectionShape(section, index){
       image: item?.image || '',
       imageFit: item?.imageFit === 'contain' || item?.imageFit === 'cover' ? item.imageFit : '',
       link: item?.link || '#',
-      ctaText: item?.ctaText || ''
+      ctaText: item?.ctaText || '',
+      imageAlt: item?.imageAlt || '',
+      ctaText2: item?.ctaText2 || '',
+      link2: item?.link2 || '#'
     }));
   }
 
@@ -3669,6 +3672,18 @@ function renderSliderSlidesEditor(section, sectionIndex){
           <div class="row">
             <label>CTAリンク</label>
             <input type="text" value="${escapeAttr(item.link || '#')}" oninput="updateCardItemField(${sectionIndex}, ${slideIndex}, 'link', this.value)">
+          </div>
+          <div class="row">
+            <label>副CTA文言</label>
+            <input type="text" value="${escapeAttr(item.ctaText2 || '')}" oninput="updateCardItemField(${sectionIndex}, ${slideIndex}, 'ctaText2', this.value)">
+          </div>
+          <div class="row">
+            <label>副CTAリンク</label>
+            <input type="text" value="${escapeAttr(item.link2 || '#')}" oninput="updateCardItemField(${sectionIndex}, ${slideIndex}, 'link2', this.value)">
+          </div>
+          <div class="row" style="grid-column:1 / -1;">
+            <label>画像alt</label>
+            <input type="text" value="${escapeAttr(item.imageAlt || '')}" oninput="updateCardItemField(${sectionIndex}, ${slideIndex}, 'imageAlt', this.value)">
           </div>
         </div>
       </div>

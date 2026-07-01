@@ -397,7 +397,10 @@
         imageFit: item?.imageFit === "contain" || item?.imageFit === "cover" ? item.imageFit : "",
         link: item?.link || "#",
         faqId: item?.faqId || "",
-        ctaText: item?.ctaText || ""
+        ctaText: item?.ctaText || "",
+        imageAlt: item?.imageAlt || "",
+        ctaText2: item?.ctaText2 || "",
+        link2: item?.link2 || "#"
       }));
     }
 

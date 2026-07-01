@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="千葉市を中心に近隣エリアの通院・退院・転院・施設送迎に対応する介護タクシーです。車いすのまま乗車可能。ご家族・ケアマネジャー様からの予約、概算見積、空き状況確認に対応します。">
-<title>千葉市近隣の介護タクシー｜車いす・通院・退院・転院送迎｜ちばケアタクシー</title>
+<meta name="description" content="千葉市を中心に車いす対応の介護タクシー・福祉タクシーを提供。通院、転院、施設送迎、お出かけ、ストレッチャー搬送のご相談に対応。料金の目安確認、かんたん見積、電話・LINE・予約カレンダーから相談できます。">
+<title>千葉市の介護タクシー・福祉タクシー｜ちばケアタクシー</title>
 <meta property="og:type" content="website">
-<meta property="og:title" content="千葉市近隣の介護タクシー｜車いす・通院・退院・転院送迎｜ちばケアタクシー">
-<meta property="og:description" content="千葉市を中心に近隣エリアの通院・退院・転院・施設送迎に対応する介護タクシーです。車いすのまま乗車可能。ご家族・ケアマネジャー様からの予約、概算見積、空き状況確認に対応します。">
+<meta property="og:title" content="千葉市の介護タクシー・福祉タクシー｜ちばケアタクシー">
+<meta property="og:description" content="千葉市を中心に車いす対応の介護タクシー・福祉タクシーを提供。通院、転院、施設送迎、お出かけ、ストレッチャー搬送のご相談に対応。料金の目安確認、かんたん見積、電話・LINE・予約カレンダーから相談できます。">
 <meta property="og:url" content="https://infochibafukushi-dotcom.github.io/lp-site/">
 <meta property="og:image" content="https://infochibafukushi-dotcom.github.io/lp-site/assets/logo/1773058066605-image-1.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -18,8 +18,30 @@
   "@type": "LocalBusiness",
   "name": "ちばケアタクシー",
   "url": "https://infochibafukushi-dotcom.github.io/lp-site/",
-  "areaServed": ["千葉市", "四街道市", "市原市"],
-  "serviceType": "介護タクシー"
+  "telephone": "090-6331-4289",
+  "description": "千葉市を中心に、車いす対応の介護タクシー・福祉タクシーとして、通院、転院、施設送迎、お出かけをサポートします。",
+  "areaServed": [
+    "千葉市",
+    "四街道市",
+    "佐倉市",
+    "八千代市",
+    "船橋市",
+    "市川市"
+  ],
+  "address": {
+    "@type": "PostalAddress",
+    "addressRegion": "千葉県",
+    "addressLocality": "千葉市"
+  },
+  "serviceType": [
+    "介護タクシー",
+    "福祉タクシー",
+    "車いす対応タクシー",
+    "通院送迎",
+    "転院搬送",
+    "施設送迎",
+    "ストレッチャー搬送"
+  ]
 }
 </script>
 
@@ -290,34 +312,43 @@ main{
 }
 .slider-slide-overlay{
   position:absolute;
-  inset:0;
-  display:flex;
-  align-items:flex-end;
-  justify-content:center;
-  padding:16px;
-  background:linear-gradient(to top, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.78) 42%, rgba(255,255,255,0.2) 100%);
+  left:16px;
+  right:16px;
+  bottom:18px;
+  top:auto;
+  inset:auto;
+  display:block;
+  padding:0;
+  background:transparent;
   pointer-events:none;
 }
 .slider-slide-overlay-inner{
   width:100%;
-  max-width:640px;
+  max-width:560px;
   pointer-events:auto;
+  padding:14px 16px;
+  border-radius:18px;
+  background:rgba(255,255,255,0.88);
+  box-shadow:0 8px 24px rgba(0,0,0,0.10);
 }
 .slider-slide-title{
   margin:0 0 8px;
   font-size:clamp(20px, 5.2vw, 28px);
   line-height:1.4;
   font-weight:800;
-  color:#1f2937;
+  color:#102033;
 }
 .slider-slide-text{
   margin:0 0 12px;
   font-size:clamp(14px, 3.8vw, 16px);
-  line-height:1.7;
-  color:#374151;
+  line-height:1.55;
+  color:#102033;
 }
 .slider-slide-cta-wrap{
   margin-top:4px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
 }
 .slider-slide-cta-link{
   display:inline-flex;
@@ -334,6 +365,11 @@ main{
   font-size:15px;
   font-weight:700;
   line-height:1.2;
+}
+.slider-slide-cta.is-secondary{
+  background:#ffffff;
+  color:#0057b8;
+  border:2px solid #0057b8;
 }
 .slider-has-slide-content .section-inner{
   padding-left:0;
@@ -396,6 +432,69 @@ main{
   font-size:13px;
   line-height:1.6;
   color:#5f5b55;
+}
+
+.estimate-steps{
+  display:grid;
+  gap:12px;
+  margin:10px 0 4px;
+  grid-template-columns:1fr;
+}
+.estimate-step-card{
+  background:#ffffff;
+  border:1px solid #d8e8f5;
+  border-radius:16px;
+  padding:16px 16px 18px;
+  box-shadow:0 2px 10px rgba(0,80,140,0.06);
+}
+.estimate-step-num{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:72px;
+  padding:6px 10px;
+  border-radius:999px;
+  background:#e8f3ff;
+  color:#0057b8;
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:0.04em;
+  margin-bottom:10px;
+}
+.estimate-step-card .card-item-title{
+  font-size:17px;
+  margin:0 0 8px;
+  color:#102033;
+}
+.estimate-step-card .section-text{
+  font-size:14px;
+  line-height:1.7;
+  color:#374151;
+}
+
+.site-company-info{
+  background:#f0ede8;
+  border-top:1px solid #e2ddd4;
+  padding:18px 16px 20px;
+  text-align:center;
+}
+.site-company-info p{
+  margin:0;
+  font-size:13px;
+  line-height:1.75;
+  color:#4b5563;
+}
+.site-company-info p + p{
+  margin-top:6px;
+}
+
+@media (min-width: 769px){
+  .estimate-steps{
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+  }
+  .estimate-step-card:last-child{
+    grid-column:1 / -1;
+  }
 }
 
 .card-item-cta-wrap{
@@ -1266,15 +1365,32 @@ footer{
   }
 
   #first-view-chibakea-taxi .slider-slide-overlay{
-    padding:14px 16px 18px;
+    left:14px;
+    right:14px;
+    bottom:14px;
+  }
+
+  #first-view-chibakea-taxi .slider-slide-overlay-inner{
+    padding:12px 14px;
+    border-radius:16px;
   }
 
   #first-view-chibakea-taxi .slider-slide-title{
-    font-size:clamp(19px, 5vw, 24px);
+    font-size:clamp(18px, 4.8vw, 22px);
   }
 
   #first-view-chibakea-taxi .slider-slide-text{
+    font-size:13px;
+    margin-bottom:10px;
+  }
+
+  #first-view-chibakea-taxi .slider-slide-cta{
     font-size:14px;
+    padding:9px 14px;
+  }
+
+  #estimate .estimate-steps{
+    grid-template-columns:1fr;
   }
 
   #taiou-area .area-tags{
@@ -1295,7 +1411,8 @@ footer{
     grid-column:1 / -1;
   }
 
-  #kantan-mitsumori .section-config-footer-ctas{
+  #kantan-mitsumori .section-config-footer-ctas,
+  #estimate .section-config-footer-ctas{
     margin-top:18px;
   }
 
@@ -1370,7 +1487,7 @@ footer{
     text-align:center;
   }
 
-  #ryokin-meyasu .section-bottom-links{
+  #pricing .section-bottom-links{
     margin-top:20px;
     margin-bottom:12px;
   }
@@ -1573,6 +1690,11 @@ footer{
   <div class="empty-box">読み込み中...</div>
 </main>
 
+<div class="site-company-info" aria-label="会社情報">
+  <p>株式会社 千葉福祉サポート｜ちばケアタクシー</p>
+  <p>千葉市を中心に、四街道市・佐倉市・八千代市・船橋市・市川市ほか近隣エリアの介護タクシー・福祉タクシーに対応</p>
+</div>
+
 <footer id="footerMenu">
   <a class="footerbtn" id="f1" href="#">
     <img id="f1img" class="hidden" alt="" loading="lazy" decoding="async">
@@ -1590,11 +1712,11 @@ footer{
 
 <div id="carechanRoot" aria-hidden="true"></div>
 
-<script src="./index-utils.js?v=lp-section-simplify-20260702" defer></script>
-<script src="./index-sections-buttons.js?v=lp-section-simplify-20260702" defer></script>
-<script src="./index-renderers.js?v=lp-section-simplify-20260702" defer></script>
-<script src="./index-slider.js?v=lp-section-simplify-20260702" defer></script>
-<script src="./index-main.js?v=lp-section-simplify-20260702" defer></script>
+<script src="./index-utils.js?v=lp-cta-seo-estimate-20260702" defer></script>
+<script src="./index-sections-buttons.js?v=lp-cta-seo-estimate-20260702" defer></script>
+<script src="./index-renderers.js?v=lp-cta-seo-estimate-20260702" defer></script>
+<script src="./index-slider.js?v=lp-cta-seo-estimate-20260702" defer></script>
+<script src="./index-main.js?v=lp-cta-seo-estimate-20260702" defer></script>
 <script src="./carechan-cta-defaults.js" defer></script>
 <script src="./index-carechan.js?v=carechan-bubble-rotate-20260701" defer></script>
 
