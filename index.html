@@ -464,21 +464,12 @@ main{
   display:flex;
   flex-direction:column;
   min-height:100%;
-  padding:0;
+  padding:18px 18px 16px;
   overflow:hidden;
   border:1px solid #d9e2ec;
   border-radius:16px;
   background:#fff;
   box-shadow:0 4px 16px rgba(30,75,122,0.08);
-}
-#payment-info-cards .card-link{
-  display:flex;
-  flex-direction:column;
-  flex:1;
-  height:100%;
-  padding:18px 18px 16px;
-  text-decoration:none;
-  color:inherit;
 }
 #payment-info-cards .card-item-title{
   display:flex;
@@ -509,15 +500,6 @@ main{
   font-size:15px;
   line-height:1.75;
   color:#374151;
-}
-#payment-info-cards .card-link::after{
-  content:"詳しく見る →";
-  display:inline-block;
-  margin-top:auto;
-  padding-top:14px;
-  font-size:14px;
-  font-weight:700;
-  color:#1e4b7a;
 }
 #payment-info-cards > .section-inner > .section-text{
   margin-bottom:4px;
@@ -691,6 +673,26 @@ footer{
 }
 
 @media (min-width: 769px){
+  #first-view-chibakea-taxi .slider-shell{
+    max-width:1120px;
+    margin-left:auto;
+    margin-right:auto;
+  }
+
+  #first-view-chibakea-taxi .slider-image-wrap{
+    aspect-ratio:auto;
+    height:clamp(320px, 42vh, 500px);
+    background:#ffffff;
+  }
+
+  #first-view-chibakea-taxi .slider-image-wrap img{
+    width:100%;
+    height:clamp(320px, 42vh, 500px);
+    object-fit:contain;
+    object-position:center;
+    display:block;
+  }
+
   #seven-benefits-chibakea .card-grid-4{
     grid-template-columns:repeat(4, minmax(0, 1fr));
     gap:16px;
@@ -1237,7 +1239,7 @@ footer{
     gap:12px;
   }
 
-  #payment-info-cards .card-link{
+  #payment-info-cards .card-item{
     padding:16px 14px 14px;
   }
 

@@ -139,10 +139,12 @@
 
   const BENEFIT_CARD_ICONS = ["♿", "🏥", "👨‍👩‍👧", "🧮", "💗", "📍", "🕒"];
 
-  function renderCardItems(items, textSize, textAlign){
+  function renderCardItems(items, textSize, textAlign, options = {}){
     if(!Array.isArray(items) || items.length === 0){
       return `<div class="card-item">カードデータがありません</div>`;
     }
+
+    const linkless = options.linkless === true;
 
     return items.map((item) => {
       const title = item?.title || "";
@@ -156,7 +158,8 @@
         ${text ? `<div class="section-text text-${window.IndexUtils.escapeAttr(textSize || "medium")} text-${window.IndexUtils.escapeAttr(textAlign || "left")}">${window.IndexUtils.escapeHtml(text)}</div>` : ""}
       `;
 
-      return `<div class="card-item">${window.IndexUtils.wrapLink(link, inner, "card-link")}</div>`;
+      const content = linkless ? inner : window.IndexUtils.wrapLink(link, inner, "card-link");
+      return `<div class="card-item">${content}</div>`;
     }).join("");
   }
 
@@ -223,13 +226,14 @@
   }
 
   function renderCard2(section){
+    const isPaymentInfo = section?.sectionId === "payment-info-cards";
     return `
       <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#ffffff")}">
         <div class="section-inner">
           <h2 class="section-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "left")}">${window.IndexUtils.escapeHtml(section.title || "")}</h2>
           ${renderSectionLeadText(section)}
           <div class="card-grid-2 ${window.IndexUtils.getMobileCardGridClass(section)}">
-            ${renderCardItems(section.items || [], section.textSize || "medium", section.textAlign || "left")}
+            ${renderCardItems(section.items || [], section.textSize || "medium", section.textAlign || "left", { linkless: isPaymentInfo })}
           </div>
           ${renderSectionBottomLinks(section)}
         </div>
