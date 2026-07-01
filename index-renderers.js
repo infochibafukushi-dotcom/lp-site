@@ -95,7 +95,7 @@
         <div class="section-inner">
           <h2 class="section-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "left")}">${window.IndexUtils.escapeHtml(section.title || "")}</h2>
           <div class="normal-image-wrap">${linkedImage}</div>
-          <p class="section-text text-${window.IndexUtils.escapeAttr(section.textSize || "medium")} text-${window.IndexUtils.escapeAttr(section.textAlign || "left")}">${window.IndexUtils.escapeHtml(section.text || "")}</p>
+          <p class="section-text text-${window.IndexUtils.escapeAttr(section.textSize || "medium")} text-${window.IndexUtils.escapeAttr(section.textAlign || "left")}">${nl2brSafe(section.text || "")}</p>
           ${renderSectionBottomLinks(section)}
           ${renderConfigFooterCtas(section, config)}
         </div>
@@ -103,25 +103,67 @@
     `;
   }
 
-  function renderSlider(section, idx){
-    const imageAttrs = buildImageAttrs(section?.__imagePriority);
-    const images = Array.isArray(section.images) ? section.images : [];
-    const slides = images.length
-      ? images.map((src, imageIndex) => {
-          const attrs = imageIndex === 0 ? imageAttrs : buildImageAttrs("lazy");
-          const image = `<div class="slider-image-wrap"><img src="${window.IndexUtils.escapeAttr(src)}" alt="${window.IndexUtils.escapeAttr(section.title || "")}" ${attrs}></div>`;
-          return `<div class="slider-slide">${window.IndexUtils.wrapLink(section.link || "#", image, "")}</div>`;
-        }).join("")
-      : `<div class="slider-empty">画像がまだありません</div>`;
+  function renderSliderSlideOverlay(slideItem, slideIndex){
+    const title = String(slideItem?.title || "").trim();
+    const text = String(slideItem?.text || "").trim();
+    const ctaText = String(slideItem?.ctaText || "").trim();
+    const ctaLink = String(slideItem?.link || "").trim();
 
-    const dots = images.length > 1
-      ? `<div class="slider-dots" id="slider-dots-${idx}"></div>`
+    if(!title && !text && !ctaText){
+      return "";
+    }
+
+    const headingTag = slideIndex === 0 ? "h1" : "h2";
+    const ctaHtml = ctaText
+      ? `<div class="slider-slide-cta-wrap">${window.IndexUtils.wrapLink(ctaLink || "#", `<span class="slider-slide-cta">${window.IndexUtils.escapeHtml(ctaText)}</span>`, "slider-slide-cta-link")}</div>`
       : "";
 
     return `
-      <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section align-${window.IndexUtils.escapeAttr(section.alignY || "middle")}" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#f8f9fa")}">
+      <div class="slider-slide-overlay">
+        <div class="slider-slide-overlay-inner">
+          ${title ? `<${headingTag} class="slider-slide-title">${window.IndexUtils.escapeHtml(title)}</${headingTag}>` : ""}
+          ${text ? `<p class="slider-slide-text">${window.IndexUtils.escapeHtml(text)}</p>` : ""}
+          ${ctaHtml}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderSlider(section, idx){
+    const imageAttrs = buildImageAttrs(section?.__imagePriority);
+    const images = Array.isArray(section.images) ? section.images : [];
+    const slideItems = Array.isArray(section.items) ? section.items : [];
+    const hasSlideContent = slideItems.some((item) => {
+      return String(item?.title || "").trim() || String(item?.text || "").trim() || String(item?.ctaText || "").trim();
+    });
+    const slideCount = Math.max(images.length, slideItems.length);
+    const slides = slideCount > 0
+      ? Array.from({ length: slideCount }, (_, imageIndex) => {
+          const src = images[imageIndex] || "";
+          const slideItem = slideItems[imageIndex] || {};
+          const attrs = imageIndex === 0 ? imageAttrs : buildImageAttrs("lazy");
+          const alt = String(slideItem.title || section.title || "").trim();
+          const image = src
+            ? `<div class="slider-image-wrap"><img src="${window.IndexUtils.escapeAttr(src)}" alt="${window.IndexUtils.escapeAttr(alt)}" ${attrs}></div>`
+            : `<div class="slider-image-wrap slider-image-wrap--empty"></div>`;
+          const overlay = hasSlideContent ? renderSliderSlideOverlay(slideItem, imageIndex) : "";
+          return `<div class="slider-slide${hasSlideContent ? " has-overlay" : ""}">${image}${overlay}</div>`;
+        }).join("")
+      : `<div class="slider-empty">画像がまだありません</div>`;
+
+    const dots = slideCount > 1
+      ? `<div class="slider-dots" id="slider-dots-${idx}"></div>`
+      : "";
+
+    const sectionTitle = String(section.title || "").trim();
+    const sectionText = String(section.text || "").trim();
+    const showSectionTitle = !hasSlideContent && sectionTitle;
+    const showSectionText = !hasSlideContent && sectionText;
+
+    return `
+      <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section align-${window.IndexUtils.escapeAttr(section.alignY || "middle")}${hasSlideContent ? " slider-has-slide-content" : ""}" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#f8f9fa")}">
         <div class="section-inner">
-          <h2 class="section-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "left")}">${window.IndexUtils.escapeHtml(section.title || "")}</h2>
+          ${showSectionTitle ? `<h2 class="section-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "left")}">${window.IndexUtils.escapeHtml(sectionTitle)}</h2>` : ""}
           <div class="slider-shell" data-slider-index="${idx}">
             <div class="slider-window">
               <div class="slider-track" id="slider-track-${idx}">
@@ -130,7 +172,7 @@
             </div>
             ${dots}
           </div>
-          <p class="section-text text-${window.IndexUtils.escapeAttr(section.textSize || "medium")} text-${window.IndexUtils.escapeAttr(section.textAlign || "left")}">${window.IndexUtils.escapeHtml(section.text || "")}</p>
+          ${showSectionText ? `<p class="section-text text-${window.IndexUtils.escapeAttr(section.textSize || "medium")} text-${window.IndexUtils.escapeAttr(section.textAlign || "left")}">${window.IndexUtils.escapeHtml(sectionText)}</p>` : ""}
           ${renderSectionBottomLinks(section)}
         </div>
       </section>
@@ -145,20 +187,27 @@
     }
 
     const linkless = options.linkless === true;
+    const useCardCta = options.useCardCta === true;
 
     return items.map((item) => {
       const title = item?.title || "";
       const text = item?.text || "";
       const image = item?.image || "";
       const link = item?.link || "#";
+      const ctaText = String(item?.ctaText || "").trim();
+
+      const ctaHtml = useCardCta && ctaText
+        ? `<div class="card-item-cta-wrap">${window.IndexUtils.wrapLink(link, `<span class="card-item-cta">${window.IndexUtils.escapeHtml(ctaText)}</span>`, "card-item-cta-link")}</div>`
+        : "";
 
       const inner = `
         ${renderImageWrap(image, title, buildImageAttrs("lazy"), { fit: item?.imageFit })}
         ${title ? `<h3 class="card-item-title text-${window.IndexUtils.escapeAttr(textAlign || "left")}">${window.IndexUtils.escapeHtml(title)}</h3>` : ""}
-        ${text ? `<div class="section-text text-${window.IndexUtils.escapeAttr(textSize || "medium")} text-${window.IndexUtils.escapeAttr(textAlign || "left")}">${window.IndexUtils.escapeHtml(text)}</div>` : ""}
+        ${text ? `<div class="section-text text-${window.IndexUtils.escapeAttr(textSize || "medium")} text-${window.IndexUtils.escapeAttr(textAlign || "left")}">${nl2brSafe(text)}</div>` : ""}
+        ${ctaHtml}
       `;
 
-      const content = linkless ? inner : window.IndexUtils.wrapLink(link, inner, "card-link");
+      const content = (linkless || useCardCta) ? inner : window.IndexUtils.wrapLink(link, inner, "card-link");
       return `<div class="card-item">${content}</div>`;
     }).join("");
   }
@@ -210,16 +259,21 @@
     `;
   }
 
-  function renderCard3(section){
+  function renderCard3(section, config){
+    const isPriceExamples = section?.sectionId === "price-examples";
     return `
       <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#ffffff")}">
         <div class="section-inner">
           <h2 class="section-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "left")}">${window.IndexUtils.escapeHtml(section.title || "")}</h2>
           ${renderSectionLeadText(section)}
           <div class="card-grid-3 ${window.IndexUtils.getMobileCardGridClass(section)}">
-            ${renderCardItems(section.items || [], section.textSize || "medium", section.textAlign || "left")}
+            ${renderCardItems(section.items || [], section.textSize || "medium", section.textAlign || "left", { useCardCta: isPriceExamples })}
           </div>
+          ${isPriceExamples && section.menuBottomCard?.visible ? `
+            <p class="section-disclaimer text-${window.IndexUtils.escapeAttr(section.textAlign || "left")}">${window.IndexUtils.escapeHtml(section.menuBottomCard.text || "")}</p>
+          ` : ""}
           ${renderSectionBottomLinks(section)}
+          ${renderConfigFooterCtas(section, config)}
         </div>
       </section>
     `;
@@ -316,6 +370,7 @@
           <div class="accordion-list" itemscope itemtype="https://schema.org/FAQPage">
             ${rows}
           </div>
+          ${renderSectionLeadText(section)}
           ${renderSectionBottomLinks(section)}
         </div>
       </section>
@@ -323,7 +378,33 @@
   }
 
 
-  function renderMenuList(section){
+  function renderAreaTags(section){
+    const groups = Array.isArray(section.menuGroups) ? section.menuGroups : [];
+    const tags = [];
+    groups.forEach((group) => {
+      const items = Array.isArray(group.items) ? group.items.filter((item) => item && item.visible !== false) : [];
+      items.forEach((item) => {
+        const name = String(item.name || "").trim();
+        if(name){
+          tags.push(name);
+        }
+      });
+    });
+
+    if(tags.length === 0){
+      return "";
+    }
+
+    return `
+      <div class="area-tags" role="list">
+        ${tags.map((tag) => `<span class="area-tag" role="listitem">${window.IndexUtils.escapeHtml(tag)}</span>`).join("")}
+      </div>
+    `;
+  }
+
+  function renderMenuList(section, config){
+    const isAreaSection = section?.sectionId === "taiou-area";
+    const isEstimateGuide = section?.sectionId === "kantan-mitsumori";
     const groups = Array.isArray(section.menuGroups) ? section.menuGroups : [];
     const bottomCard = section.menuBottomCard || { visible:false, title:'', text:'', buttonText:'', buttonUrl:'#' };
     const showPrices = menuListHasAnyPrice(groups);
@@ -371,20 +452,42 @@
     const bottomCardHtml = bottomCard.visible ? `
       <div style="margin:6px 0 0 0;background:#ffffff;border:1px solid #e7dfd4;border-radius:16px;padding:18px 18px 20px 18px;box-shadow:0 2px 8px rgba(0,0,0,.03);">
         ${bottomCard.title ? `<div style="font-size:clamp(18px, 2vw, 22px);font-weight:800;line-height:1.45;color:#2d2a26;">${window.IndexUtils.escapeHtml(bottomCard.title || '')}</div>` : ''}
-        ${bottomCard.text ? `<div style="margin-top:8px;font-size:14px;line-height:1.9;color:#5f5b55;white-space:pre-line;word-break:break-word;">${window.IndexUtils.escapeHtml(bottomCard.text || '')}</div>` : ''}
+        ${bottomCard.text ? `<div class="section-disclaimer" style="margin-top:8px;font-size:14px;line-height:1.9;color:#5f5b55;white-space:pre-line;word-break:break-word;">${window.IndexUtils.escapeHtml(bottomCard.text || '')}</div>` : ''}
       </div>
     ` : '';
 
+    const areaTagsHtml = isAreaSection ? renderAreaTags(section) : '';
+    const estimateChecklistHtml = isEstimateGuide ? `
+      <div class="estimate-checklist">
+        ${groups.length ? groups.map((group) => {
+          const items = Array.isArray(group.items) ? group.items.filter((item) => item && item.visible !== false) : [];
+          return items.map((item) => `
+            <div class="estimate-checklist-item">
+              <span class="estimate-checklist-label">${window.IndexUtils.escapeHtml(item.name || '')}</span>
+              <span class="estimate-checklist-example">${window.IndexUtils.escapeHtml(item.description || '')}</span>
+            </div>
+          `).join("");
+        }).join("") : ''}
+      </div>
+    ` : '';
+
+    const mainContentHtml = isAreaSection
+      ? `${areaTagsHtml}${bottomCard.visible ? '' : ''}`
+      : isEstimateGuide
+        ? estimateChecklistHtml
+        : cardsHtml;
+
     return `
-      <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#f7f5f0")};padding-left:20px;padding-right:20px;">
+      <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section${isAreaSection ? ' section-area-tags' : ''}${isEstimateGuide ? ' section-estimate-guide' : ''}" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#f7f5f0")};padding-left:20px;padding-right:20px;">
         <div class="section-inner" style="max-width:720px;">
           <h2 class="section-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "left")}">${window.IndexUtils.escapeHtml(section.title || "")}</h2>
           ${leadHtml}
         </div>
         <div class="section-inner" style="max-width:720px;padding-top:8px;">
-          ${cardsHtml}
+          ${mainContentHtml}
           ${bottomCardHtml}
           ${renderSectionBottomLinks(section)}
+          ${renderConfigFooterCtas(section, config)}
         </div>
       </section>
     `;
@@ -406,7 +509,7 @@
       case "card4":
         return renderCard4(section);
       case "card3":
-        return renderCard3(section);
+        return renderCard3(section, config);
       case "card2":
         return renderCard2(section);
       case "card1-right":
@@ -416,7 +519,7 @@
       case "accordion":
         return renderAccordion(section);
       case "menu-list":
-        return renderMenuList(section);
+        return renderMenuList(section, config);
       default:
         return `
           <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section" style="background:#fff3cd">

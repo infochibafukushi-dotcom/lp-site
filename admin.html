@@ -1541,7 +1541,7 @@ body{
 </main>
 
 
-<script src="./admin-collapse.js?v=810bab5-section-sort"></script>
+<script src="./admin-collapse.js?v=lp-section-simplify-20260702"></script>
 <script src="./carechan-cta-defaults.js?v=810bab5-section-sort"></script>
 <script src="./admin-carechan.js?v=810bab5-section-sort"></script>
 <script src="./shared/libs/qrcode.min.js?v=810bab5-section-sort"></script>
@@ -2131,7 +2131,8 @@ function ensureSectionShape(section, index){
       text: item?.text || '',
       image: item?.image || '',
       imageFit: item?.imageFit === 'contain' || item?.imageFit === 'cover' ? item.imageFit : '',
-      link: item?.link || '#'
+      link: item?.link || '#',
+      ctaText: item?.ctaText || ''
     }));
   }
 
@@ -2824,8 +2825,27 @@ function updateSliderImages(index, value){
   const list = value.split('\n').map(v => v.trim()).filter(v => v);
   sectionsData[index].images = list;
 }
+function syncSliderSlideItems(sectionIndex){
+  const section = sectionsData[sectionIndex];
+  if(!section || section.type !== 'slider') return;
+  const imageCount = Array.isArray(section.images) ? section.images.length : 0;
+  if(!Array.isArray(section.items)) section.items = [];
+  while(section.items.length < imageCount){
+    section.items.push({ title:'', text:'', image:'', link:'#', ctaText:'' });
+  }
+}
+
 function updateCardItemField(sectionIndex, itemIndex, field, value){
-  sectionsData[sectionIndex].items[itemIndex][field] = value;
+  const section = sectionsData[sectionIndex];
+  if(!section) return;
+  if(section.type === 'slider'){
+    syncSliderSlideItems(sectionIndex);
+  }
+  if(!Array.isArray(section.items)) section.items = [];
+  while(section.items.length <= itemIndex){
+    section.items.push({ title:'', text:'', image:'', link:'#', ctaText:'' });
+  }
+  section.items[itemIndex][field] = value;
 }
 function addAccordionItem(sectionIndex){
   captureSectionOpenStates();
@@ -3343,6 +3363,7 @@ function getSliderImageUrls(sectionIndex){
 
 function applySliderImageUrls(sectionIndex, urls){
   sectionsData[sectionIndex].images = urls;
+  syncSliderSlideItems(sectionIndex);
   const textarea = document.querySelector(`[data-slider-images-textarea="${sectionIndex}"]`);
   if(textarea){
     textarea.value = urls.join('\n');
@@ -3618,6 +3639,43 @@ function renderSingleImageBlock(section, index){
   `;
 }
 
+function renderSliderSlidesEditor(section, sectionIndex){
+  const images = Array.isArray(section.images) ? section.images : [];
+  const items = Array.isArray(section.items) ? section.items : [];
+  const count = Math.max(images.length, items.length, 4);
+
+  if(count === 0){
+    return '<div class="small">スライド文言は画像追加後に編集できます。</div>';
+  }
+
+  return Array.from({ length: count }, (_, slideIndex) => {
+    const item = items[slideIndex] || {};
+    return `
+      <div class="card-item-editor">
+        <h4>スライド ${slideIndex + 1}${images[slideIndex] ? '' : '（画像未設定）'}</h4>
+        <div class="grid2">
+          <div class="row" style="grid-column:1 / -1;">
+            <label>見出し</label>
+            <textarea class="title-textarea" oninput="updateCardItemField(${sectionIndex}, ${slideIndex}, 'title', this.value)">${escapeHtml(item.title || '')}</textarea>
+          </div>
+          <div class="row" style="grid-column:1 / -1;">
+            <label>本文</label>
+            <textarea oninput="updateCardItemField(${sectionIndex}, ${slideIndex}, 'text', this.value)">${escapeHtml(item.text || '')}</textarea>
+          </div>
+          <div class="row">
+            <label>CTA文言</label>
+            <input type="text" value="${escapeAttr(item.ctaText || '')}" oninput="updateCardItemField(${sectionIndex}, ${slideIndex}, 'ctaText', this.value)">
+          </div>
+          <div class="row">
+            <label>CTAリンク</label>
+            <input type="text" value="${escapeAttr(item.link || '#')}" oninput="updateCardItemField(${sectionIndex}, ${slideIndex}, 'link', this.value)">
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
 function renderCardItemsEditor(section, sectionIndex){
   const items = Array.isArray(section.items) ? section.items : [];
   if(items.length === 0){
@@ -3636,6 +3694,11 @@ function renderCardItemsEditor(section, sectionIndex){
         <div class="row">
           <label>リンク</label>
           <input type="text" value="${escapeAttr(item.link || '#')}" oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'link', this.value)">
+        </div>
+
+        <div class="row">
+          <label>CTA文言（カード下部ボタン）</label>
+          <input type="text" value="${escapeAttr(item.ctaText || '')}" oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'ctaText', this.value)">
         </div>
 
         <div class="row" style="grid-column:1 / -1;">
@@ -4071,6 +4134,10 @@ function renderSectionsEditor(){
                 <div class="small">選択すると GitHub の assets/slider にアップロードされます。サムネイルへ画像をドロップすると差し替え、サムネイル同士のドラッグで並び替えができます。</div>
                 ${renderSliderThumbs(section, index)}
               </div>
+            </div>
+            <div class="row" style="grid-column:1 / -1;">
+              <label>スライド文言（見出し・本文・CTA）</label>
+              ${renderSliderSlidesEditor(section, index)}
             </div>` : ''}
 
             ${isCards ? `
