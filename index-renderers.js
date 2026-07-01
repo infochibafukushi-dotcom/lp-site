@@ -103,29 +103,51 @@
     `;
   }
 
-  function renderSliderSlideOverlay(slideItem, slideIndex){
-    const title = String(slideItem?.title || "").trim();
-    const text = String(slideItem?.text || "").trim();
+  function renderSliderSlideActions(slideItem){
     const ctaText = String(slideItem?.ctaText || "").trim();
     const ctaLink = String(slideItem?.link || "").trim();
     const ctaText2 = String(slideItem?.ctaText2 || "").trim();
     const ctaLink2 = String(slideItem?.link2 || "").trim();
+    const buttons = [];
 
-    if(!title && !text && !ctaText && !ctaText2){
+    if(ctaText){
+      buttons.push(window.IndexUtils.wrapLink(
+        ctaLink || "#",
+        `<span class="slider-slide-cta">${window.IndexUtils.escapeHtml(ctaText)}</span>`,
+        "slider-slide-cta-link"
+      ));
+    }
+    if(ctaText2){
+      buttons.push(window.IndexUtils.wrapLink(
+        ctaLink2 || "#",
+        `<span class="slider-slide-cta is-secondary">${window.IndexUtils.escapeHtml(ctaText2)}</span>`,
+        "slider-slide-cta-link"
+      ));
+    }
+
+    if(buttons.length === 0){
       return "";
     }
 
+    return `<div class="hero-slide-actions slider-slide-cta-wrap">${buttons.join("")}</div>`;
+  }
+
+  function renderHeroSlideContent(slideItem, slideIndex, imageHtml){
+    const title = String(slideItem?.title || "").trim();
+    const text = String(slideItem?.text || "").trim();
     const headingTag = slideIndex === 0 ? "h1" : "h2";
-    const primaryCta = ctaText
-      ? `<div class="slider-slide-cta-wrap">${window.IndexUtils.wrapLink(ctaLink || "#", `<span class="slider-slide-cta">${window.IndexUtils.escapeHtml(ctaText)}</span>`, "slider-slide-cta-link")}${ctaText2 ? window.IndexUtils.wrapLink(ctaLink2 || "#", `<span class="slider-slide-cta is-secondary">${window.IndexUtils.escapeHtml(ctaText2)}</span>`, "slider-slide-cta-link") : ""}</div>`
-      : "";
+
+    if(!title && !text && !imageHtml){
+      return "";
+    }
 
     return `
-      <div class="slider-slide-overlay">
-        <div class="slider-slide-overlay-inner hero-slide-copy">
-          ${title ? `<${headingTag} class="slider-slide-title">${window.IndexUtils.escapeHtml(title)}</${headingTag}>` : ""}
-          ${text ? `<p class="slider-slide-text">${window.IndexUtils.escapeHtml(text)}</p>` : ""}
-          ${primaryCta}
+      <div class="hero-slide">
+        ${title ? `<div class="hero-slide-heading"><${headingTag} class="hero-slide-title slider-slide-title">${window.IndexUtils.escapeHtml(title)}</${headingTag}></div>` : ""}
+        <div class="hero-slide-image-wrap slider-image-wrap">${imageHtml}</div>
+        <div class="hero-slide-body">
+          ${text ? `<p class="hero-slide-text slider-slide-text">${window.IndexUtils.escapeHtml(text)}</p>` : ""}
+          ${renderSliderSlideActions(slideItem)}
         </div>
       </div>
     `;
@@ -145,11 +167,13 @@
           const slideItem = slideItems[imageIndex] || {};
           const attrs = imageIndex === 0 ? imageAttrs : buildImageAttrs("lazy");
           const alt = String(slideItem.imageAlt || slideItem.title || section.title || "").trim();
-          const image = src
-            ? `<div class="slider-image-wrap"><img src="${window.IndexUtils.escapeAttr(src)}" alt="${window.IndexUtils.escapeAttr(alt)}" ${attrs}></div>`
-            : `<div class="slider-image-wrap slider-image-wrap--empty"></div>`;
-          const overlay = hasSlideContent ? renderSliderSlideOverlay(slideItem, imageIndex) : "";
-          return `<div class="slider-slide${hasSlideContent ? " has-overlay" : ""}">${image}${overlay}</div>`;
+          const imageInner = src
+            ? `<img src="${window.IndexUtils.escapeAttr(src)}" alt="${window.IndexUtils.escapeAttr(alt)}" ${attrs}>`
+            : "";
+          const slideBody = hasSlideContent
+            ? renderHeroSlideContent(slideItem, imageIndex, imageInner)
+            : (imageInner ? `<div class="slider-image-wrap">${imageInner}</div>` : `<div class="slider-image-wrap slider-image-wrap--empty"></div>`);
+          return `<div class="slider-slide hero-slide-stack${hasSlideContent ? " has-stacked-content" : ""}">${slideBody}</div>`;
         }).join("")
       : `<div class="slider-empty">画像がまだありません</div>`;
 
@@ -163,7 +187,7 @@
     const showSectionText = !hasSlideContent && sectionText;
 
     return `
-      <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section align-${window.IndexUtils.escapeAttr(section.alignY || "middle")}${hasSlideContent ? " slider-has-slide-content" : ""}" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#f8f9fa")}">
+      <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section align-${window.IndexUtils.escapeAttr(section.alignY || "middle")}${hasSlideContent ? " slider-has-slide-content slider-has-stacked-slides" : ""}" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#f8f9fa")}">
         <div class="section-inner">
           ${showSectionTitle ? `<h2 class="section-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "left")}">${window.IndexUtils.escapeHtml(sectionTitle)}</h2>` : ""}
           <div class="slider-shell" data-slider-index="${idx}">
@@ -276,18 +300,58 @@
     `;
   }
 
+  function renderPriceExampleItems(items, textSize, textAlign){
+    if(!Array.isArray(items) || items.length === 0){
+      return `<div class="card-item">カードデータがありません</div>`;
+    }
+
+    return items.map((item) => {
+      const title = item?.title || "";
+      const text = item?.text || "";
+      const estimatePrice = String(item?.estimatePrice || "").trim();
+      const ctaText = String(item?.ctaText || "この内容で見積する").trim();
+      const link = item?.link || "#estimate";
+      const breakdownItems = Array.isArray(item?.breakdownItems) ? item.breakdownItems : [];
+      const breakdownRows = breakdownItems.map((row) => `
+        <tr>
+          <th scope="row">${window.IndexUtils.escapeHtml(row?.name || "")}</th>
+          <td>${window.IndexUtils.escapeHtml(row?.price || "")}</td>
+        </tr>
+      `).join("");
+
+      return `
+        <div class="card-item price-example-card">
+          ${title ? `<h3 class="card-item-title text-${window.IndexUtils.escapeAttr(textAlign || "left")}">${window.IndexUtils.escapeHtml(title)}</h3>` : ""}
+          ${estimatePrice ? `<p class="price-example-estimate">${window.IndexUtils.escapeHtml(estimatePrice)}</p>` : ""}
+          ${text ? `<div class="section-text text-${window.IndexUtils.escapeAttr(textSize || "medium")} text-${window.IndexUtils.escapeAttr(textAlign || "left")}">${nl2brSafe(text)}</div>` : ""}
+          ${breakdownRows ? `
+            <details class="price-breakdown-details">
+              <summary>料金内訳を見る</summary>
+              <table class="price-breakdown-table">
+                <tbody>${breakdownRows}</tbody>
+              </table>
+            </details>
+          ` : ""}
+          ${ctaText ? `<div class="card-item-cta-wrap">${window.IndexUtils.wrapLink(link, `<span class="card-item-cta">${window.IndexUtils.escapeHtml(ctaText)}</span>`, "card-item-cta-link")}</div>` : ""}
+        </div>
+      `;
+    }).join("");
+  }
+
   function renderCard3(section, config){
     const isPriceExamples = section?.sectionId === "price-examples";
     const isEstimateSteps = section?.sectionId === "estimate";
     return `
-      <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section${isEstimateSteps ? " section-estimate-steps" : ""}" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#ffffff")}">
+      <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section${isEstimateSteps ? " section-estimate-steps" : ""}${isPriceExamples ? " section-price-examples" : ""}" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#ffffff")}">
         <div class="section-inner">
           <h2 class="section-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "left")}">${window.IndexUtils.escapeHtml(section.title || "")}</h2>
           ${renderSectionLeadText(section)}
           ${isEstimateSteps
             ? renderEstimateSteps(section)
             : `<div class="card-grid-3 ${window.IndexUtils.getMobileCardGridClass(section)}">
-            ${renderCardItems(section.items || [], section.textSize || "medium", section.textAlign || "left", { useCardCta: isPriceExamples })}
+            ${isPriceExamples
+              ? renderPriceExampleItems(section.items || [], section.textSize || "medium", section.textAlign || "left")
+              : renderCardItems(section.items || [], section.textSize || "medium", section.textAlign || "left", { useCardCta: isPriceExamples })}
           </div>`}
           ${isPriceExamples && section.menuBottomCard?.visible ? `
             <p class="section-disclaimer text-${window.IndexUtils.escapeAttr(section.textAlign || "left")}">${window.IndexUtils.escapeHtml(section.menuBottomCard.text || "")}</p>
@@ -415,10 +479,20 @@
       return "";
     }
 
+    const visibleTags = tags.slice(0, 6);
+    const detailSummary = String(section.areaDetailSummary || "千葉市近隣の対応エリアを詳しく見る").trim();
+    const detailText = String(section.areaDetailText || "").trim();
+
     return `
       <div class="area-tags" role="list">
-        ${tags.map((tag) => `<span class="area-tag" role="listitem">${window.IndexUtils.escapeHtml(tag)}</span>`).join("")}
+        ${visibleTags.map((tag) => `<span class="area-tag" role="listitem">${window.IndexUtils.escapeHtml(tag)}</span>`).join("")}
       </div>
+      ${detailText ? `
+        <details class="area-details-card">
+          <summary>${window.IndexUtils.escapeHtml(detailSummary)}</summary>
+          <div class="area-details-body">${nl2brSafe(detailText)}</div>
+        </details>
+      ` : ""}
     `;
   }
 

@@ -34,6 +34,12 @@
     const clone = slides[0].cloneNode(true);
     clone.classList.add("slider-slide-clone");
     clone.setAttribute("aria-hidden", "true");
+    clone.querySelectorAll("h1").forEach((heading) => {
+      const replacement = document.createElement("div");
+      replacement.className = heading.className;
+      replacement.textContent = heading.textContent;
+      heading.replaceWith(replacement);
+    });
     track.appendChild(clone);
     return realTotal;
   }

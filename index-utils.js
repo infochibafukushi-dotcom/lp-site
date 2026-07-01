@@ -400,7 +400,12 @@
         ctaText: item?.ctaText || "",
         imageAlt: item?.imageAlt || "",
         ctaText2: item?.ctaText2 || "",
-        link2: item?.link2 || "#"
+        link2: item?.link2 || "#",
+        estimatePrice: item?.estimatePrice || "",
+        breakdownItems: Array.isArray(item?.breakdownItems) ? item.breakdownItems.map((row) => ({
+          name: row?.name || "",
+          price: row?.price || ""
+        })) : []
       }));
     }
 
@@ -418,6 +423,9 @@
     }
 
     ensureSectionLinks(section);
+
+    section.areaDetailSummary = section.areaDetailSummary || "";
+    section.areaDetailText = section.areaDetailText || "";
 
     section.configFooterCtas = {
       visible: section.configFooterCtas?.visible === true,

@@ -1541,7 +1541,7 @@ body{
 </main>
 
 
-<script src="./admin-collapse.js?v=lp-cta-seo-estimate-20260702"></script>
+<script src="./admin-collapse.js?v=lp-area-slider-price-20260702"></script>
 <script src="./carechan-cta-defaults.js?v=810bab5-section-sort"></script>
 <script src="./admin-carechan.js?v=810bab5-section-sort"></script>
 <script src="./shared/libs/qrcode.min.js?v=810bab5-section-sort"></script>
@@ -2135,9 +2135,17 @@ function ensureSectionShape(section, index){
       ctaText: item?.ctaText || '',
       imageAlt: item?.imageAlt || '',
       ctaText2: item?.ctaText2 || '',
-      link2: item?.link2 || '#'
+      link2: item?.link2 || '#',
+      estimatePrice: item?.estimatePrice || '',
+      breakdownItems: Array.isArray(item?.breakdownItems) ? item.breakdownItems.map((row) => ({
+        name: row?.name || '',
+        price: row?.price || ''
+      })) : []
     }));
   }
+
+  section.areaDetailSummary = section.areaDetailSummary || '';
+  section.areaDetailText = section.areaDetailText || '';
 
   if(Array.isArray(section.menuGroups)){
     section.menuGroups = section.menuGroups.map((group, groupIndex) => ({
@@ -2849,6 +2857,25 @@ function updateCardItemField(sectionIndex, itemIndex, field, value){
     section.items.push({ title:'', text:'', image:'', link:'#', ctaText:'' });
   }
   section.items[itemIndex][field] = value;
+}
+function updateCardItemBreakdown(sectionIndex, itemIndex, rawValue){
+  const section = sectionsData[sectionIndex];
+  if(!section) return;
+  if(!Array.isArray(section.items)) section.items = [];
+  while(section.items.length <= itemIndex){
+    section.items.push({ title:'', text:'', image:'', link:'#', ctaText:'' });
+  }
+  try{
+    const parsed = JSON.parse(rawValue || '[]');
+    section.items[itemIndex].breakdownItems = Array.isArray(parsed)
+      ? parsed.map((row) => ({
+          name: row?.name || '',
+          price: row?.price || ''
+        }))
+      : [];
+  }catch(_error){
+    // Keep previous value until JSON is valid.
+  }
 }
 function addAccordionItem(sectionIndex){
   captureSectionOpenStates();
@@ -3716,6 +3743,17 @@ function renderCardItemsEditor(section, sectionIndex){
           <input type="text" value="${escapeAttr(item.ctaText || '')}" oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'ctaText', this.value)">
         </div>
 
+        ${section?.sectionId === 'price-examples' ? `
+        <div class="row">
+          <label>目安料金</label>
+          <input type="text" value="${escapeAttr(item.estimatePrice || '')}" oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'estimatePrice', this.value)">
+        </div>
+        <div class="row" style="grid-column:1 / -1;">
+          <label>料金内訳（JSON配列: name, price）</label>
+          <textarea oninput="updateCardItemBreakdown(${sectionIndex}, ${itemIndex}, this.value)">${escapeHtml(JSON.stringify(item.breakdownItems || [], null, 2))}</textarea>
+        </div>
+        ` : ''}
+
         <div class="row" style="grid-column:1 / -1;">
           <label>説明文</label>
           <textarea oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'text', this.value)">${escapeHtml(item.text || '')}</textarea>
@@ -4173,6 +4211,22 @@ function renderSectionsEditor(){
             ) : ''}
 
             ${isMenuList ? `
+            <div class="row" style="grid-column:1 / -1;">
+              <label>説明文</label>
+              <textarea oninput="updateSectionField(${index}, 'text', this.value)">${escapeHtml(section.text || '')}</textarea>
+              <div class="small">改行したままLPに反映されます。</div>
+            </div>
+            ${section.sectionId === 'taiou-area' ? `
+            <div class="row" style="grid-column:1 / -1;">
+              <label>詳細エリア開閉ボタン文言</label>
+              <input type="text" value="${escapeAttr(section.areaDetailSummary || '')}" oninput="updateSectionField(${index}, 'areaDetailSummary', this.value)">
+            </div>
+            <div class="row" style="grid-column:1 / -1;">
+              <label>詳細エリア本文</label>
+              <textarea oninput="updateSectionField(${index}, 'areaDetailText', this.value)">${escapeHtml(section.areaDetailText || '')}</textarea>
+              <div class="small">開閉カード内に表示されます。SEOのためHTML上に出力されます。</div>
+            </div>
+            ` : ''}
             <div class="row" style="grid-column:1 / -1;">
               <label>カテゴリ・メニュー編集</label>
               ${renderMenuListGroupsEditor(section, index)}

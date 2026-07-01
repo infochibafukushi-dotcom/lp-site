@@ -26,7 +26,11 @@
     "佐倉市",
     "八千代市",
     "船橋市",
-    "市川市"
+    "市川市",
+    "習志野市",
+    "八街市",
+    "市原市",
+    "浦安市"
   ],
   "address": {
     "@type": "PostalAddress",
@@ -307,48 +311,63 @@ main{
   background:#5c6673;
 }
 
-.slider-slide.has-overlay{
-  position:relative;
-}
-.slider-slide-overlay{
-  position:absolute;
-  left:16px;
-  right:16px;
-  bottom:18px;
-  top:auto;
-  inset:auto;
+.slider-slide.has-stacked-content,
+.slider-slide.hero-slide-stack{
   display:block;
-  padding:0;
-  background:transparent;
-  pointer-events:none;
+  align-items:stretch;
 }
-.slider-slide-overlay-inner{
+.hero-slide{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
   width:100%;
-  max-width:560px;
-  pointer-events:auto;
-  padding:14px 16px;
-  border-radius:18px;
-  background:rgba(255,255,255,0.88);
-  box-shadow:0 8px 24px rgba(0,0,0,0.10);
+  max-width:720px;
+  margin:0 auto;
+  padding:12px 16px 4px;
 }
+.hero-slide-heading{
+  text-align:center;
+}
+.hero-slide-title,
 .slider-slide-title{
-  margin:0 0 8px;
-  font-size:clamp(20px, 5.2vw, 28px);
-  line-height:1.4;
+  margin:0;
+  font-size:clamp(18px, 4.8vw, 26px);
+  line-height:1.45;
   font-weight:800;
   color:#102033;
 }
+.hero-slide-image-wrap{
+  width:100%;
+  overflow:hidden;
+  border-radius:12px;
+  background:#ffffff;
+}
+.hero-slide-image-wrap img{
+  width:100%;
+  height:auto;
+  max-width:100%;
+  object-fit:contain;
+  object-position:center center;
+  display:block;
+}
+.hero-slide-body{
+  text-align:center;
+  padding-bottom:4px;
+}
+.hero-slide-text,
 .slider-slide-text{
   margin:0 0 12px;
   font-size:clamp(14px, 3.8vw, 16px);
   line-height:1.55;
-  color:#102033;
+  color:#374151;
 }
+.hero-slide-actions,
 .slider-slide-cta-wrap{
-  margin-top:4px;
+  margin-top:0;
   display:flex;
   flex-wrap:wrap;
   gap:8px;
+  justify-content:center;
 }
 .slider-slide-cta-link{
   display:inline-flex;
@@ -371,16 +390,19 @@ main{
   color:#0057b8;
   border:2px solid #0057b8;
 }
-.slider-has-slide-content .section-inner{
+.slider-has-stacked-slides .section-inner{
   padding-left:0;
   padding-right:0;
 }
-.slider-has-slide-content .slider-shell{
+.slider-has-stacked-slides .slider-shell{
   margin-top:0;
 }
-.slider-has-slide-content .slider-window,
-.slider-has-slide-content .slider-image-wrap{
+.slider-has-stacked-slides .slider-window{
   border-radius:0;
+}
+.slider-has-stacked-slides .slider-dots{
+  margin-top:16px;
+  margin-bottom:4px;
 }
 
 .area-tags{
@@ -401,6 +423,81 @@ main{
   font-size:15px;
   font-weight:700;
   line-height:1.2;
+}
+.area-details-card{
+  margin-top:14px;
+  background:#ffffff;
+  border:1px solid #e7dfd4;
+  border-radius:14px;
+  overflow:hidden;
+}
+.area-details-card summary{
+  cursor:pointer;
+  padding:14px 16px;
+  font-size:15px;
+  font-weight:700;
+  color:#0057b8;
+  list-style:none;
+}
+.area-details-card summary::-webkit-details-marker{
+  display:none;
+}
+.area-details-body{
+  padding:0 16px 16px;
+  font-size:14px;
+  line-height:1.8;
+  color:#374151;
+  white-space:pre-line;
+}
+
+.price-example-estimate{
+  margin:0 0 10px;
+  font-size:clamp(20px, 5vw, 24px);
+  font-weight:800;
+  line-height:1.3;
+  color:#9a6b16;
+}
+.price-breakdown-details{
+  margin:12px 0 0;
+  border:1px solid #e7dfd4;
+  border-radius:12px;
+  background:#fafafa;
+  overflow:hidden;
+}
+.price-breakdown-details summary{
+  cursor:pointer;
+  padding:12px 14px;
+  font-size:14px;
+  font-weight:700;
+  color:#0057b8;
+  list-style:none;
+}
+.price-breakdown-details summary::-webkit-details-marker{
+  display:none;
+}
+.price-breakdown-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+}
+.price-breakdown-table th,
+.price-breakdown-table td{
+  padding:10px 14px;
+  border-top:1px solid #ece7df;
+  text-align:left;
+}
+.price-breakdown-table th{
+  font-weight:700;
+  color:#2d2a26;
+  width:58%;
+}
+.price-breakdown-table td{
+  color:#9a6b16;
+  font-weight:700;
+  white-space:nowrap;
+}
+.price-example-card .card-item-cta-wrap{
+  margin-top:14px;
 }
 
 .section-disclaimer{
@@ -1359,27 +1456,21 @@ footer{
     text-align:center;
   }
 
-  #first-view-chibakea-taxi.slider-has-slide-content .section-title,
-  #first-view-chibakea-taxi.slider-has-slide-content .section-text{
+  #first-view-chibakea-taxi.slider-has-stacked-slides .section-title,
+  #first-view-chibakea-taxi.slider-has-stacked-slides .section-text{
     display:none;
   }
 
-  #first-view-chibakea-taxi .slider-slide-overlay{
-    left:14px;
-    right:14px;
-    bottom:14px;
+  #first-view-chibakea-taxi .hero-slide{
+    padding:10px 14px 2px;
+    gap:10px;
   }
 
-  #first-view-chibakea-taxi .slider-slide-overlay-inner{
-    padding:12px 14px;
-    border-radius:16px;
+  #first-view-chibakea-taxi .hero-slide-title{
+    font-size:clamp(17px, 4.6vw, 21px);
   }
 
-  #first-view-chibakea-taxi .slider-slide-title{
-    font-size:clamp(18px, 4.8vw, 22px);
-  }
-
-  #first-view-chibakea-taxi .slider-slide-text{
+  #first-view-chibakea-taxi .hero-slide-text{
     font-size:13px;
     margin-bottom:10px;
   }
@@ -1387,6 +1478,10 @@ footer{
   #first-view-chibakea-taxi .slider-slide-cta{
     font-size:14px;
     padding:9px 14px;
+  }
+
+  #first-view-chibakea-taxi .slider-dots{
+    margin-top:14px;
   }
 
   #estimate .estimate-steps{
@@ -1407,8 +1502,9 @@ footer{
     text-align:center;
   }
 
-  #taiou-area .area-tag:last-child{
-    grid-column:1 / -1;
+  #taiou-area .area-details-card summary{
+    font-size:14px;
+    padding:12px 14px;
   }
 
   #kantan-mitsumori .section-config-footer-ctas,
@@ -1712,11 +1808,11 @@ footer{
 
 <div id="carechanRoot" aria-hidden="true"></div>
 
-<script src="./index-utils.js?v=lp-cta-seo-estimate-20260702" defer></script>
-<script src="./index-sections-buttons.js?v=lp-cta-seo-estimate-20260702" defer></script>
-<script src="./index-renderers.js?v=lp-cta-seo-estimate-20260702" defer></script>
-<script src="./index-slider.js?v=lp-cta-seo-estimate-20260702" defer></script>
-<script src="./index-main.js?v=lp-cta-seo-estimate-20260702" defer></script>
+<script src="./index-utils.js?v=lp-area-slider-price-20260702" defer></script>
+<script src="./index-sections-buttons.js?v=lp-area-slider-price-20260702" defer></script>
+<script src="./index-renderers.js?v=lp-area-slider-price-20260702" defer></script>
+<script src="./index-slider.js?v=lp-area-slider-price-20260702" defer></script>
+<script src="./index-main.js?v=lp-area-slider-price-20260702" defer></script>
 <script src="./carechan-cta-defaults.js" defer></script>
 <script src="./index-carechan.js?v=carechan-bubble-rotate-20260701" defer></script>
 
