@@ -217,8 +217,8 @@
     "sectionId": "estimate",
     "type": "card3",
     "enabled": true,
-    "title": "かんたん見積の使い方",
-    "text": "出発地・目的地・車いすや介助内容を選ぶだけで、目安料金の確認や予約相談がしやすくなります。",
+    "title": "3分で料金目安を確認できます",
+    "text": "出発地・目的地・介助内容を入力すると、通院・転院・お出かけの料金目安を確認できます。内容を確認したうえで、予約空き確認や相談へ進めます。",
     "textSize": "medium",
     "bgColor": "#ffffff",
     "alignY": "middle",
@@ -227,43 +227,43 @@
     "mobileCardColumns": "1",
     "items": [
       {
-        "title": "移動手段を選択",
-        "text": "車いす、ストレッチャー、歩行介助など、ご利用時の状態を選びます。",
+        "title": "利用内容を選ぶ",
+        "text": "通院・転院・お出かけなど、利用シーンを選びます。",
         "image": "",
         "imageFit": "",
         "link": "#"
       },
       {
-        "title": "介助内容を選択",
-        "text": "乗降介助、室内介助、病院内付き添い、待機の有無を確認します。",
+        "title": "車いす・ストレッチャーを選ぶ",
+        "text": "車いす、ストレッチャー、歩行介助の有無を選びます。",
         "image": "",
         "imageFit": "",
         "link": "#"
       },
       {
-        "title": "出発地と目的地を入力",
-        "text": "ご自宅、病院、施設、式場など、出発地と目的地を入力します。",
+        "title": "介助内容を選ぶ",
+        "text": "乗降介助、室内介助、院内付き添いなどを選びます。",
         "image": "",
         "imageFit": "",
         "link": "#"
       },
       {
-        "title": "片道・往復・待機を選択",
-        "text": "片道利用、往復利用、病院待機など、利用内容を選びます。",
+        "title": "出発地・目的地を入力",
+        "text": "ご自宅、病院、施設、式場などを入力します。",
         "image": "",
         "imageFit": "",
         "link": "#"
       },
       {
-        "title": "日時を選択",
-        "text": "希望日と時間を選びます。お急ぎの場合は電話でご相談ください。",
+        "title": "日時を選ぶ",
+        "text": "希望日と時間を選びます。急ぎの場合は電話相談も可能です。",
         "image": "",
         "imageFit": "",
         "link": "#"
       },
       {
-        "title": "LINE・電話・予約カレンダーへ進む",
-        "text": "内容を確認し、LINE相談・電話相談・予約カレンダーから次へ進めます。",
+        "title": "見積・空き確認へ進む",
+        "text": "料金目安を確認し、予約空き確認または相談へ進みます。",
         "image": "",
         "imageFit": "",
         "link": "#"
@@ -273,9 +273,9 @@
     "link": "#",
     "images": [],
     "links": [
-      { "text": "かんたん見積を始める", "url": "./estimate/", "visible": true },
-      { "text": "予約カレンダーを見る", "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/", "visible": true },
-      { "text": "LINEで相談する", "url": "https://lin.ee/XA05KN5", "visible": true }
+      { "text": "かんたん見積", "url": "./estimate/", "visible": true },
+      { "text": "予約空き確認", "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/", "visible": true },
+      { "text": "", "url": "#", "visible": false }
     ],
     "menuGroups": [],
     "menuBottomCard": {
@@ -313,8 +313,10 @@
           { "name": "特殊車両使用料", "price": "1,000円〜" },
           { "name": "合計目安", "price": "3,420円〜" }
         ],
-        "ctaText": "この内容で見積する",
-        "link": "#estimate",
+        "ctaText": "かんたん見積",
+        "link": "./estimate/",
+        "ctaText2": "予約空き確認",
+        "link2": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
         "image": "",
         "imageFit": ""
       },
@@ -329,8 +331,10 @@
           { "name": "特殊車両使用料", "price": "1,000円〜" },
           { "name": "合計目安", "price": "19,620円〜" }
         ],
-        "ctaText": "この内容で見積する",
-        "link": "#estimate",
+        "ctaText": "かんたん見積",
+        "link": "./estimate/",
+        "ctaText2": "予約空き確認",
+        "link2": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
         "image": "",
         "imageFit": ""
       },

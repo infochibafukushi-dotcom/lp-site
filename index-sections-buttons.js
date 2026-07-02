@@ -73,10 +73,11 @@
     const pulseClass = (window.IndexUtils && typeof window.IndexUtils.isEstimatePulseText === "function" && window.IndexUtils.isEstimatePulseText(label))
       ? " estimate-pulse-button"
       : "";
+    const availabilityClass = label === "予約空き確認" ? " topbtn-availability" : "";
     const phoneClass = (window.IndexUtils && typeof window.IndexUtils.isPhoneCtaText === "function" && window.IndexUtils.isPhoneCtaText(label, href))
       ? " is-phone-cta"
       : "";
-    const className = `section-bottom-link${pulseClass}${phoneClass}`;
+    const className = `section-bottom-link${pulseClass}${availabilityClass}${phoneClass}`;
 
     return `<a class="${className}" href="${escapeAttr(href)}"${extra}${attrs}>${escapeHtml(label)}</a>`;
   }

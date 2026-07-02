@@ -598,7 +598,7 @@ main{
 
 .estimate-steps{
   display:grid;
-  gap:12px;
+  gap:16px;
   margin:10px 0 4px;
   grid-template-columns:1fr;
 }
@@ -606,7 +606,8 @@ main{
   background:#ffffff;
   border:1px solid #d8e8f5;
   border-radius:16px;
-  padding:16px 16px 18px;
+  padding:20px;
+  min-height:132px;
   box-shadow:0 2px 10px rgba(0,80,140,0.06);
 }
 .estimate-step-num{
@@ -695,9 +696,6 @@ main{
   }
   .estimate-steps{
     grid-template-columns:repeat(3, minmax(0, 1fr));
-  }
-  .estimate-step-card:last-child{
-    grid-column:1 / -1;
   }
 }
 
@@ -1063,6 +1061,23 @@ main{
 .section-bottom-link:hover{
   opacity:0.92;
 }
+a.section-bottom-link.topbtn-availability,
+.section-bottom-link.topbtn-availability{
+  background:#0d7a6f;
+  color:#fff !important;
+  border:none;
+  box-shadow:0 6px 18px rgba(13, 122, 111, 0.24);
+  font-weight:800;
+  border-radius:12px;
+}
+#estimate .section-bottom-links{
+  margin-top:28px;
+}
+#estimate .section-bottom-links.count-2 .section-bottom-link{
+  width:100%;
+  min-height:48px;
+  border-radius:12px;
+}
 .section-config-footer-ctas{
   margin-top:28px;
   padding-top:24px;
@@ -1409,6 +1424,12 @@ footer{
   .footerbtn img{
     width:46px;
     height:46px;
+  }
+}
+
+@media (max-width: 900px){
+  .estimate-steps{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
   }
 }
 
