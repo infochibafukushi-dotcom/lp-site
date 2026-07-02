@@ -457,7 +457,7 @@
 
   function isEstimatePulseText(text){
     const value = String(text || "").trim();
-    return /かんたん見積|簡単見積/.test(value);
+    return /かんたん見積/.test(value);
   }
 
   function isPhoneCtaText(text, url){

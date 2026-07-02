@@ -23,7 +23,7 @@
   ],
   "buttonsPc": [
     {
-      "text": "簡単見積",
+      "text": "かんたん見積",
       "link": "./estimate/",
       "visible": true
     },
