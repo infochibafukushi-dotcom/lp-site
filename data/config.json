@@ -23,6 +23,11 @@
   ],
   "buttonsPc": [
     {
+      "text": "予約する",
+      "link": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+      "visible": true
+    },
+    {
       "text": "かんたん見積",
       "link": "#estimate",
       "visible": true
@@ -31,11 +36,6 @@
       "text": "料金表",
       "link": "#pricing",
       "visible": true
-    },
-    {
-      "text": "ボタン3",
-      "link": "#",
-      "visible": false
     }
   ],
   "footer": [

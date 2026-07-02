@@ -442,15 +442,38 @@
     return ` id="${escapeAttr(id)}"`;
   }
 
+  function isEstimatePulseText(text){
+    const value = String(text || "").trim();
+    return /かんたん見積/.test(value);
+  }
+
+  function syncTopButtonClass(el, text){
+    if(!el) return;
+    el.classList.remove("topbtn-reserve-primary", "estimate-pulse-button", "topbtn-plain");
+    const label = String(text || "").trim();
+    if(label === "予約する"){
+      el.classList.add("topbtn-reserve-primary");
+    }else if(isEstimatePulseText(label)){
+      el.classList.add("estimate-pulse-button");
+    }else if(label === "料金表"){
+      el.classList.add("topbtn-plain");
+    }
+  }
+
   function applyTopButton(el, data, fallbackText){
     if(!el) return;
-    el.innerText = data?.text || fallbackText;
+    const text = data?.text || fallbackText;
+    el.innerText = text;
     el.href = sanitizeUrl(data?.link, "#");
     if(data?.visible === false){
       el.classList.add("hidden");
     }else{
       el.classList.remove("hidden");
     }
+    if(!el.classList.contains("topbtn")){
+      el.classList.add("topbtn");
+    }
+    syncTopButtonClass(el, text);
   }
 
   function applyFooterButton(anchorEl, imgEl, textEl, data, fallbackText){
@@ -564,6 +587,7 @@
     normalizeMobileCardColumns: normalizeMobileCardColumns,
     getSectionAnchorAttr: getSectionAnchorAttr,
     applyTopButton: applyTopButton,
+    isEstimatePulseText: isEstimatePulseText,
     applyFooterButton: applyFooterButton,
     wrapLink: wrapLink,
     getFeaturedFaqItems: getFeaturedFaqItems,

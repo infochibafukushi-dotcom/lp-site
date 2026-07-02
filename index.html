@@ -26,7 +26,6 @@
     "佐倉市",
     "八千代市",
     "船橋市",
-    "市川市",
     "習志野市",
     "八街市",
     "市原市",
@@ -126,6 +125,66 @@ header{
   overflow:hidden;
   text-overflow:ellipsis;
   font-size:14px;
+  font-weight:700;
+  border:2px solid transparent;
+}
+.topbtn.topbtn-plain{
+  background:#ffffff;
+  color:#0057b8;
+  border-color:#0057b8;
+  box-shadow:none;
+}
+.topbtn.topbtn-reserve-primary{
+  background:#d64500;
+  color:#fff;
+  font-weight:800;
+  box-shadow:0 6px 18px rgba(214, 69, 0, 0.28);
+}
+
+.estimate-pulse-button,
+a.estimate-pulse-button.section-bottom-link,
+.slider-slide-cta.estimate-pulse-button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:56px;
+  padding:0 28px;
+  border-radius:14px;
+  background:#005bbb;
+  color:#fff !important;
+  font-weight:800;
+  font-size:1.05rem;
+  text-decoration:none;
+  border:none;
+  box-shadow:0 8px 22px rgba(0, 91, 187, 0.28);
+  animation:estimatePulse 2.8s ease-in-out infinite;
+}
+@keyframes estimatePulse{
+  0%, 100%{
+    transform:scale(1);
+    box-shadow:0 8px 22px rgba(0, 91, 187, 0.28);
+    filter:brightness(1);
+  }
+  50%{
+    transform:scale(1.025);
+    box-shadow:0 12px 32px rgba(0, 91, 187, 0.45);
+    filter:brightness(1.12);
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  .estimate-pulse-button{
+    animation:none;
+  }
+}
+#pricing .section-bottom-links.count-1{
+  justify-content:center;
+}
+#pricing .section-bottom-links.count-1 .estimate-pulse-button,
+.hero-slide-actions .estimate-pulse-button,
+.slider-slide-cta-wrap .estimate-pulse-button{
+  width:100%;
+  max-width:420px;
+  margin:0 auto;
 }
 
 .pc-phone-inline{
@@ -586,6 +645,40 @@ main{
 }
 
 @media (min-width: 769px){
+  header{
+    justify-content:flex-start;
+    gap:14px;
+    padding:12px 20px;
+  }
+  .top-buttons{
+    display:flex;
+    flex-wrap:nowrap;
+    grid-template-columns:unset;
+    max-width:none;
+    flex:0 0 auto;
+    margin-left:auto;
+    gap:10px;
+  }
+  .topbtn{
+    padding:10px 18px;
+    font-size:15px;
+    border-radius:10px;
+    min-height:44px;
+  }
+  .topbtn.topbtn-reserve-primary{
+    min-height:48px;
+    padding:10px 22px;
+    font-size:16px;
+  }
+  .topbtn.estimate-pulse-button{
+    min-height:48px;
+    padding:10px 22px;
+    font-size:15px;
+    border-radius:12px;
+  }
+  .topbtn.topbtn-plain{
+    min-height:44px;
+  }
   .estimate-steps{
     grid-template-columns:repeat(3, minmax(0, 1fr));
   }
@@ -1184,6 +1277,12 @@ footer{
   }
   .topbtn{
     padding:10px 8px;
+    font-size:13px;
+    border-radius:8px;
+  }
+  .topbtn.estimate-pulse-button{
+    min-height:40px;
+    padding:8px 10px;
     font-size:13px;
     border-radius:8px;
   }
@@ -1788,7 +1887,7 @@ footer{
 
 <div class="site-company-info" aria-label="会社情報">
   <p>株式会社 千葉福祉サポート｜ちばケアタクシー</p>
-  <p>千葉市を中心に、四街道市・佐倉市・八千代市・船橋市・市川市ほか近隣エリアの介護タクシー・福祉タクシーに対応</p>
+  <p>千葉市を中心に、四街道市・佐倉市・八千代市・船橋市・習志野市ほか近隣エリアの介護タクシー・福祉タクシーに対応</p>
 </div>
 
 <footer id="footerMenu">
@@ -1808,11 +1907,11 @@ footer{
 
 <div id="carechanRoot" aria-hidden="true"></div>
 
-<script src="./index-utils.js?v=lp-area-slider-price-20260702" defer></script>
-<script src="./index-sections-buttons.js?v=lp-area-slider-price-20260702" defer></script>
-<script src="./index-renderers.js?v=lp-area-slider-price-20260702" defer></script>
-<script src="./index-slider.js?v=lp-area-slider-price-20260702" defer></script>
-<script src="./index-main.js?v=lp-area-slider-price-20260702" defer></script>
+<script src="./index-utils.js?v=lp-area-fare-cta-20260702" defer></script>
+<script src="./index-sections-buttons.js?v=lp-area-fare-cta-20260702" defer></script>
+<script src="./index-renderers.js?v=lp-area-fare-cta-20260702" defer></script>
+<script src="./index-slider.js?v=lp-area-fare-cta-20260702" defer></script>
+<script src="./index-main.js?v=lp-area-fare-cta-20260702" defer></script>
 <script src="./carechan-cta-defaults.js" defer></script>
 <script src="./index-carechan.js?v=carechan-bubble-rotate-20260701" defer></script>
 

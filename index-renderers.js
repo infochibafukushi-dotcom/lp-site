@@ -111,9 +111,10 @@
     const buttons = [];
 
     if(ctaText){
+      const pulseClass = window.IndexUtils.isEstimatePulseText(ctaText) ? " estimate-pulse-button" : "";
       buttons.push(window.IndexUtils.wrapLink(
         ctaLink || "#",
-        `<span class="slider-slide-cta">${window.IndexUtils.escapeHtml(ctaText)}</span>`,
+        `<span class="slider-slide-cta${pulseClass}">${window.IndexUtils.escapeHtml(ctaText)}</span>`,
         "slider-slide-cta-link"
       ));
     }

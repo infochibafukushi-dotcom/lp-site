@@ -61,6 +61,7 @@
 
   function buildAnchor(url, text, escapeAttr, escapeHtml, extraAttrs){
     const href = String(url || "#").trim() || "#";
+    const label = String(text || "").trim();
 
     const isExternal =
       /^https?:\/\//i.test(href) ||
@@ -69,8 +70,12 @@
 
     const extra = isExternal ? ' target="_blank" rel="noopener noreferrer"' : "";
     const attrs = extraAttrs ? " " + extraAttrs : "";
+    const pulseClass = (window.IndexUtils && typeof window.IndexUtils.isEstimatePulseText === "function" && window.IndexUtils.isEstimatePulseText(label))
+      ? " estimate-pulse-button"
+      : "";
+    const className = `section-bottom-link${pulseClass}`;
 
-    return `<a class="section-bottom-link" href="${escapeAttr(href)}"${extra}${attrs}>${escapeHtml(text)}</a>`;
+    return `<a class="${className}" href="${escapeAttr(href)}"${extra}${attrs}>${escapeHtml(label)}</a>`;
   }
 
   function render(section, escapeAttr, escapeHtml){
