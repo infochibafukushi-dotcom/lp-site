@@ -336,19 +336,28 @@
     return result;
   }
 
+  function getDefaultCharterTimeBlockParams(){
+    const fc = global.FareConstants;
+    if(fc && typeof fc.getCharterTimeBlockParams === "function"){
+      return fc.getCharterTimeBlockParams();
+    }
+    return {
+      baseMinutes: 30,
+      baseAmount: 4180,
+      perBlockMinutes: 30,
+      perBlockAmount: 4180
+    };
+  }
+
   function getDefaultFareComponents(config){
+    const charterTimeParams = getDefaultCharterTimeBlockParams();
     return {
       time: [
         {
           key: "timeBaseFare",
           label: "時間制運賃",
           calculator: "time_block",
-          params: {
-            baseMinutes: 30,
-            baseAmount: 5000,
-            perBlockMinutes: 15,
-            perBlockAmount: 1200
-          }
+          params: charterTimeParams
         },
         pickupFeeComponent(config),
         specialVehicleFeeComponent(config)
@@ -554,7 +563,12 @@
   }
 
   function buildFareBasisNotices(fareMode, preFixedFareMeta){
-    const notices = ["表示は見積時点の運賃設定に基づく計算根拠です。"];
+    const notices = [];
+    const fc = global.FareConstants;
+    if(fc && fc.FARE_LABEL_WITH_NOTICE){
+      notices.push("適用運賃：" + fc.FARE_LABEL_WITH_NOTICE);
+    }
+    notices.push("表示は見積時点の運賃設定に基づく計算根拠です。");
     if(fareMode === "distance_time" || fareMode === "pre_fixed_fare"){
       notices.push("時間加算はルート予定時間に基づく概算です。実走行では認可メーター（低速走行時の時間距離併用）が適用されます。");
       notices.push("待機時間は運賃計算に含まれません。");

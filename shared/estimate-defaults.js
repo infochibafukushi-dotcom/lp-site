@@ -70,7 +70,39 @@
     };
   }
 
+  function getFareConstants(){
+    return global.FareConstants || null;
+  }
+
+  function getDefaultDistancePricingPatternA(){
+    const fc = getFareConstants();
+    if(fc && typeof fc.getDistancePricingPatternA === "function"){
+      return fc.getDistancePricingPatternA();
+    }
+    return {
+      initialDistanceKm: 1.06,
+      initialFare: 520,
+      incrementDistanceKm: 0.212,
+      incrementFare: 100
+    };
+  }
+
+  function getDefaultCharterTimeBlockParams(){
+    const fc = getFareConstants();
+    if(fc && typeof fc.getCharterTimeBlockParams === "function"){
+      return fc.getCharterTimeBlockParams();
+    }
+    return {
+      baseMinutes: 30,
+      baseAmount: 4180,
+      perBlockMinutes: 30,
+      perBlockAmount: 4180
+    };
+  }
+
   function createDefaultEstimateConfig(){
+    const distancePatternA = getDefaultDistancePricingPatternA();
+    const charterTimeParams = getDefaultCharterTimeBlockParams();
     return {
       enabled: true,
       version: 1,
@@ -98,12 +130,7 @@
       },
       distancePricing: {
         mode: "patternA",
-        patternA: {
-          initialDistanceKm: 1.06,
-          initialFare: 500,
-          incrementDistanceKm: 0.221,
-          incrementFare: 100
-        },
+        patternA: distancePatternA,
         patternB: {
           perKmRate: 450
         }
@@ -125,12 +152,7 @@
             key: "timeBaseFare",
             label: "時間制運賃",
             calculator: "time_block",
-            params: {
-              baseMinutes: 30,
-              baseAmount: 5000,
-              perBlockMinutes: 15,
-              perBlockAmount: 1200
-            }
+            params: charterTimeParams
           },
           { key: "pickupFee", label: "迎車料金", calculator: "fixed_fee_ref", feeRef: "pickupFee" },
           { key: "specialVehicleFee", label: "特殊車両使用料", calculator: "fixed_fee_ref", feeRef: "specialVehicleFee" }

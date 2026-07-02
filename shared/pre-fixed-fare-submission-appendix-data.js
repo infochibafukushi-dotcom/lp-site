@@ -93,18 +93,21 @@
   }
 
   function distanceFareFields(meta){
+    const fc = global.FareConstants || {};
+    const fareLabel = fc.FARE_LABEL_WITH_NOTICE || "令和8年2月13日付け 関自旅二第4314号 千葉地区 大型車B運賃";
     return [
       ["事業者名", meta.companyName],
       ["屋号", meta.tradeName],
       ["営業区域", meta.operatingArea],
       ["適用交通圏", meta.trafficZone],
-      ["運賃種別", "距離制運賃"],
-      ["初乗運賃", FILL_IN_PLACEHOLDER],
-      ["初乗距離", FILL_IN_PLACEHOLDER],
-      ["加算運賃", FILL_IN_PLACEHOLDER],
-      ["加算距離", FILL_IN_PLACEHOLDER],
-      ["時間距離併用制の有無", FILL_IN_PLACEHOLDER],
-      ["時間距離併用運賃", FILL_IN_PLACEHOLDER],
+      ["運賃種別", fareLabel],
+      ["初乗運賃", (fc.INITIAL_FARE_YEN || 520) + "円"],
+      ["初乗距離", (fc.INITIAL_DISTANCE_KM || 1.06) + "km"],
+      ["加算運賃", (fc.ADDITIONAL_FARE_YEN || 100) + "円"],
+      ["加算距離", (fc.ADDITIONAL_DISTANCE_M || 212) + "m"],
+      ["時間距離併用制の有無", "有"],
+      ["時間距離併用運賃", "1分20秒ごとに " + (fc.TIME_DISTANCE_FARE_YEN || 100) + "円"],
+      ["時間制運賃", (fc.CHARTER_UNIT_MINUTES || 30) + "分ごとに " + (fc.CHARTER_UNIT_FARE_YEN || 4180) + "円"],
       ["深夜早朝割増", FILL_IN_PLACEHOLDER],
       ["障害者割引", FILL_IN_PLACEHOLDER],
       ["端数処理", FILL_IN_PLACEHOLDER],
