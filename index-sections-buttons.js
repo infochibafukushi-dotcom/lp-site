@@ -73,7 +73,10 @@
     const pulseClass = (window.IndexUtils && typeof window.IndexUtils.isEstimatePulseText === "function" && window.IndexUtils.isEstimatePulseText(label))
       ? " estimate-pulse-button"
       : "";
-    const className = `section-bottom-link${pulseClass}`;
+    const phoneClass = (window.IndexUtils && typeof window.IndexUtils.isPhoneCtaText === "function" && window.IndexUtils.isPhoneCtaText(label, href))
+      ? " is-phone-cta"
+      : "";
+    const className = `section-bottom-link${pulseClass}${phoneClass}`;
 
     return `<a class="${className}" href="${escapeAttr(href)}"${extra}${attrs}>${escapeHtml(label)}</a>`;
   }

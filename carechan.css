@@ -128,9 +128,29 @@
   85%{ transform:rotate(6deg); }
 }
 @media (min-width:769px){
+  .carechan-widget{
+    gap:8px;
+  }
+  .carechan-bubble{
+    max-width:200px;
+    padding:10px 14px;
+    font-size:14px;
+    border-radius:16px;
+  }
+  .carechan-bubble::after{
+    right:28px;
+    bottom:-9px;
+    border-left-width:9px;
+    border-right-width:9px;
+    border-top-width:9px;
+  }
   .carechan-trigger img,
   .carechan-trigger svg{
-    width:72px;
+    width:108px;
+  }
+  .carechan-trigger{
+    min-width:108px;
+    min-height:108px;
   }
 }
 .carechan-overlay{

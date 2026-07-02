@@ -301,6 +301,44 @@
     `;
   }
 
+  function renderPriceExampleCtaBlock(item){
+    const ctaText = String(item?.ctaText || "").trim();
+    const ctaText2 = String(item?.ctaText2 || "").trim();
+    const link = item?.link || "#estimate";
+    const link2 = item?.link2 || "#";
+
+    if(!ctaText && !ctaText2){
+      return "";
+    }
+
+    if(ctaText2){
+      const buttons = [];
+      if(ctaText){
+        buttons.push(window.IndexUtils.wrapLink(
+          link,
+          `<span class="${window.IndexUtils.getCardCtaClass(ctaText)}">${window.IndexUtils.escapeHtml(ctaText)}</span>`,
+          "card-item-cta-link"
+        ));
+      }
+      buttons.push(window.IndexUtils.wrapLink(
+        link2,
+        `<span class="${window.IndexUtils.getCardCtaClass(ctaText2)}">${window.IndexUtils.escapeHtml(ctaText2)}</span>`,
+        "card-item-cta-link"
+      ));
+      return `<div class="card-item-cta-wrap card-item-cta-wrap--dual">${buttons.join("")}</div>`;
+    }
+
+    if(!ctaText){
+      return "";
+    }
+
+    return `<div class="card-item-cta-wrap">${window.IndexUtils.wrapLink(
+      link,
+      `<span class="${window.IndexUtils.getCardCtaClass(ctaText)}">${window.IndexUtils.escapeHtml(ctaText)}</span>`,
+      "card-item-cta-link"
+    )}</div>`;
+  }
+
   function renderPriceExampleItems(items, textSize, textAlign){
     if(!Array.isArray(items) || items.length === 0){
       return `<div class="card-item">カードデータがありません</div>`;
@@ -310,8 +348,6 @@
       const title = item?.title || "";
       const text = item?.text || "";
       const estimatePrice = String(item?.estimatePrice || "").trim();
-      const ctaText = String(item?.ctaText || "この内容で見積する").trim();
-      const link = item?.link || "#estimate";
       const breakdownItems = Array.isArray(item?.breakdownItems) ? item.breakdownItems : [];
       const breakdownRows = breakdownItems.map((row) => `
         <tr>
@@ -333,7 +369,7 @@
               </table>
             </details>
           ` : ""}
-          ${ctaText ? `<div class="card-item-cta-wrap">${window.IndexUtils.wrapLink(link, `<span class="card-item-cta">${window.IndexUtils.escapeHtml(ctaText)}</span>`, "card-item-cta-link")}</div>` : ""}
+          ${renderPriceExampleCtaBlock(item)}
         </div>
       `;
     }).join("");

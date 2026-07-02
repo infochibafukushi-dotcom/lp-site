@@ -180,6 +180,11 @@
     window.IndexUtils.applyTopButton(document.getElementById("btn1"), topButtons[0], "ボタン1");
     window.IndexUtils.applyTopButton(document.getElementById("btn2"), topButtons[1], "ボタン2");
     window.IndexUtils.applyTopButton(document.getElementById("btn3"), topButtons[2], "ボタン3");
+    window.IndexUtils.applyTopButton(
+      document.getElementById("btn4"),
+      isPc ? topButtons[3] : { text: "", link: "#", visible: false },
+      "ボタン4"
+    );
 
     window.IndexUtils.applyFooterButton(
       document.getElementById("f1"),

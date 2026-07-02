@@ -23,13 +23,18 @@
   ],
   "buttonsPc": [
     {
-      "text": "予約する",
+      "text": "簡単見積",
+      "link": "./estimate/",
+      "visible": true
+    },
+    {
+      "text": "予約空き確認",
       "link": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
       "visible": true
     },
     {
-      "text": "かんたん見積",
-      "link": "#estimate",
+      "text": "予約する",
+      "link": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
       "visible": true
     },
     {
@@ -79,7 +84,7 @@
     }
   ],
   "pcTopPhone": {
-    "enabled": true,
+    "enabled": false,
     "label": "📞 電話予約",
     "number": "090-6331-4289",
     "link": "tel:09063314289"

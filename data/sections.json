@@ -346,8 +346,10 @@
           { "name": "特殊車両使用料", "price": "1,000円〜" },
           { "name": "合計目安", "price": "9,320円〜" }
         ],
-        "ctaText": "この内容で見積する",
-        "link": "#estimate",
+        "ctaText": "簡単見積",
+        "link": "./estimate/",
+        "ctaText2": "予約空き確認",
+        "link2": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
         "image": "",
         "imageFit": ""
       }

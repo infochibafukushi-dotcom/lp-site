@@ -119,6 +119,18 @@
     }));
   }
 
+  function ensurePcTopButtons(list, defaults){
+    const items = Array.isArray(list) ? list.slice(0, 4) : [];
+    while(items.length < 4){
+      items.push({ text:"", link:"#", visible:true });
+    }
+    return items.map((item, index) => ({
+      text: item?.text || defaults[index] || `ボタン${index + 1}`,
+      link: item?.link || "#",
+      visible: item?.visible !== false
+    }));
+  }
+
   function ensureFooterButtons(list, defaults){
     const items = Array.isArray(list) ? list.slice(0, 3) : [];
     while(items.length < 3){
@@ -212,10 +224,11 @@
 
   function ensureConfigShape(config){
     const topDefaults = ["ボタン1", "ボタン2", "ボタン3"];
+    const pcTopDefaults = ["ボタン1", "ボタン2", "ボタン3", "ボタン4"];
     const footerDefaults = ["電話", "LINE", "予約"];
 
     config.buttons = ensureTopButtons(config.buttons, topDefaults);
-    config.buttonsPc = ensureTopButtons(config.buttonsPc || config.buttons, topDefaults);
+    config.buttonsPc = ensurePcTopButtons(config.buttonsPc || config.buttons, pcTopDefaults);
     config.footer = ensureFooterButtons(config.footer, footerDefaults);
     config.footerPc = ensureFooterButtons(config.footerPc || config.footer, footerDefaults);
     config.pcTopPhone = ensurePcTopPhoneShape(config);
@@ -444,17 +457,36 @@
 
   function isEstimatePulseText(text){
     const value = String(text || "").trim();
-    return /かんたん見積/.test(value);
+    return /かんたん見積|簡単見積/.test(value);
+  }
+
+  function isPhoneCtaText(text, url){
+    const label = String(text || "").trim();
+    const href = String(url || "").trim();
+    return label === "電話する" || /^tel:/i.test(href);
+  }
+
+  function getCardCtaClass(text){
+    const label = String(text || "").trim();
+    if(isEstimatePulseText(label)){
+      return "card-item-cta estimate-pulse-button";
+    }
+    if(label === "予約空き確認"){
+      return "card-item-cta card-item-cta--availability";
+    }
+    return "card-item-cta";
   }
 
   function syncTopButtonClass(el, text){
     if(!el) return;
-    el.classList.remove("topbtn-reserve-primary", "estimate-pulse-button", "topbtn-plain");
+    el.classList.remove("topbtn-reserve-primary", "estimate-pulse-button", "topbtn-plain", "topbtn-availability");
     const label = String(text || "").trim();
-    if(label === "予約する"){
-      el.classList.add("topbtn-reserve-primary");
-    }else if(isEstimatePulseText(label)){
+    if(isEstimatePulseText(label)){
       el.classList.add("estimate-pulse-button");
+    }else if(label === "予約空き確認"){
+      el.classList.add("topbtn-availability");
+    }else if(label === "予約する"){
+      el.classList.add("topbtn-reserve-primary");
     }else if(label === "料金表"){
       el.classList.add("topbtn-plain");
     }
@@ -588,6 +620,8 @@
     getSectionAnchorAttr: getSectionAnchorAttr,
     applyTopButton: applyTopButton,
     isEstimatePulseText: isEstimatePulseText,
+    isPhoneCtaText: isPhoneCtaText,
+    getCardCtaClass: getCardCtaClass,
     applyFooterButton: applyFooterButton,
     wrapLink: wrapLink,
     getFeaturedFaqItems: getFeaturedFaqItems,

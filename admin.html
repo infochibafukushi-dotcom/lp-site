@@ -1003,6 +1003,19 @@ body{
                 <label>ボタン3 表示</label>
                 <label class="checkline"><input type="checkbox" id="btnPc3Visible"> 表示する</label>
               </div>
+
+              <div class="row">
+                <label>ボタン4 名称</label>
+                <input type="text" id="btnPc4Text">
+              </div>
+              <div class="row">
+                <label>ボタン4 リンク</label>
+                <input type="text" id="btnPc4Link">
+              </div>
+              <div class="row">
+                <label>ボタン4 表示</label>
+                <label class="checkline"><input type="checkbox" id="btnPc4Visible"> 表示する</label>
+              </div>
             </div>
           </div>
 
@@ -1855,6 +1868,18 @@ function ensureTopButtons(list, defaults){
   }));
 }
 
+function ensurePcTopButtons(list, defaults){
+  const items = Array.isArray(list) ? list.slice(0, 4) : [];
+  while(items.length < 4){
+    items.push({ text:'', link:'#', visible:true });
+  }
+  return items.map((item, index) => ({
+    text: item?.text || defaults[index] || `ボタン${index + 1}`,
+    link: item?.link || '#',
+    visible: item?.visible !== false
+  }));
+}
+
 function ensureFooterButtons(list, defaults){
   const items = Array.isArray(list) ? list.slice(0, 3) : [];
   while(items.length < 3){
@@ -1946,7 +1971,7 @@ function ensureConfigShape(config){
   const footerDefaults = ['電話', 'LINE', '予約'];
 
   config.buttons = ensureTopButtons(config.buttons, topDefaults);
-  config.buttonsPc = ensureTopButtons(config.buttonsPc || config.buttons, topDefaults);
+  config.buttonsPc = ensurePcTopButtons(config.buttonsPc || config.buttons, ['ボタン1', 'ボタン2', 'ボタン3', 'ボタン4']);
   config.footer = ensureFooterButtons(config.footer, footerDefaults);
   config.footerPc = ensureFooterButtons(config.footerPc || config.footer, footerDefaults);
   config.pcTopPhone = ensurePcTopPhoneShape(config);
@@ -2263,6 +2288,11 @@ function buildConfigDraft(){
         text: getText('btnPc3Text'),
         link: getTrimmed('btnPc3Link'),
         visible: getChecked('btnPc3Visible')
+      },
+      {
+        text: getText('btnPc4Text'),
+        link: getTrimmed('btnPc4Link'),
+        visible: getChecked('btnPc4Visible')
       }
     ],
     footer: [
@@ -2552,6 +2582,10 @@ async function loadConfig(){
   document.getElementById('btnPc3Text').value = config.buttonsPc[2].text || '';
   document.getElementById('btnPc3Link').value = config.buttonsPc[2].link || '#';
   document.getElementById('btnPc3Visible').checked = config.buttonsPc[2].visible !== false;
+
+  document.getElementById('btnPc4Text').value = config.buttonsPc[3]?.text || '';
+  document.getElementById('btnPc4Link').value = config.buttonsPc[3]?.link || '#';
+  document.getElementById('btnPc4Visible').checked = config.buttonsPc[3]?.visible !== false;
 
   document.getElementById('pcTopPhoneEnabled').checked = config.pcTopPhone.enabled === true;
   document.getElementById('pcTopPhoneLabel').value = config.pcTopPhone.label || '📞 電話予約';
@@ -3743,6 +3777,17 @@ function renderCardItemsEditor(section, sectionIndex){
           <label>CTA文言（カード下部ボタン）</label>
           <input type="text" value="${escapeAttr(item.ctaText || '')}" oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'ctaText', this.value)">
         </div>
+
+        ${section?.sectionId === 'price-examples' ? `
+        <div class="row">
+          <label>CTA文言2（2つ目のボタン）</label>
+          <input type="text" value="${escapeAttr(item.ctaText2 || '')}" oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'ctaText2', this.value)">
+        </div>
+        <div class="row">
+          <label>CTAリンク2</label>
+          <input type="text" value="${escapeAttr(item.link2 || '')}" oninput="updateCardItemField(${sectionIndex}, ${itemIndex}, 'link2', this.value)">
+        </div>
+        ` : ''}
 
         ${section?.sectionId === 'price-examples' ? `
         <div class="row">
