@@ -27,7 +27,8 @@
     selectionFingerprint: "",
     lastActiveStepId: "",
     quoteRegisterStatus: "",
-    quoteRegisterMessage: ""
+    quoteRegisterMessage: "",
+    lpFareCategory: "estimate"
   };
 
   let delegatedBound = false;
@@ -1027,8 +1028,67 @@
     return String(roadType || "") === "toll" ? "有料道路利用" : "一般道利用";
   }
 
+  function getLpFareCategory(){
+    return state.lpFareCategory === "pre_fixed_fare" ? "pre_fixed_fare" : "estimate";
+  }
+
+  function getEstimateConfig(){
+    if(!state.config){
+      return null;
+    }
+    const fareMode = window.EstimateFareDisplay
+      ? window.EstimateFareDisplay.resolveInternalFareMode(getLpFareCategory())
+      : (getLpFareCategory() === "pre_fixed_fare" ? "pre_fixed_fare" : "distance_time");
+    return Object.assign({}, state.config, { fareMode: fareMode });
+  }
+
+  function getLpFareModeLeadText(){
+    if(window.EstimateFareDisplay){
+      return window.EstimateFareDisplay.getLpFareModeLead(getLpFareCategory());
+    }
+    return state.config?.page?.description || "";
+  }
+
+  function renderLpFareModeBar(){
+    const options = window.EstimateFareDisplay
+      ? window.EstimateFareDisplay.getLpFareModeOptions()
+      : [
+        { id: "estimate", label: "概算見積（距離＋所要時間）" },
+        { id: "pre_fixed_fare", label: "事前確定運賃（出発前に運賃確定）" }
+      ];
+    const current = getLpFareCategory();
+    const optionsHtml = options.map(function(option){
+      const selected = option.id === current ? " selected" : "";
+      return '<option value="' + escapeAttr(option.id) + '"' + selected + ">" + escapeHtml(option.label) + "</option>";
+    }).join("");
+    return (
+      '<div class="estimate-fare-mode-bar">' +
+      '<label class="estimate-fare-mode-label" for="estimateLpFareMode">運賃方式</label>' +
+      '<select id="estimateLpFareMode" class="estimate-select estimate-fare-mode-select" aria-describedby="estimateLeadText">' +
+      optionsHtml +
+      "</select>" +
+      "</div>"
+    );
+  }
+
+  function clearRouteStateForFareModeChange(){
+    state.routePlan = null;
+    state.routeCalcResult = null;
+    state.routeCalcError = "";
+    state.routeCalcLoading = false;
+    state.distanceRouteReviewed = false;
+    state.distanceKm = 0;
+    state.distanceInputText = "";
+    state.estimateNumber = "";
+    state.estimateCreatedAt = "";
+    state.selectionFingerprint = "";
+    state.lastActiveStepId = "";
+    state.quoteRegisterStatus = "";
+    state.quoteRegisterMessage = "";
+  }
+
   function isPreFixedFareMode(){
-    return String(state.config?.fareMode || "") === "pre_fixed_fare";
+    return getLpFareCategory() === "pre_fixed_fare";
   }
 
   function isRouteUiDebugEnabled(){
@@ -1046,7 +1106,7 @@
   }
 
   function logRouteUiState(result){
-    const fareMode = String(state.config?.fareMode || result?.quoteSnapshot?.fareMode || "");
+    const fareMode = String(getEstimateConfig()?.fareMode || result?.quoteSnapshot?.fareMode || "");
     const routeCandidates = getRouteCandidatesFromPlan(state.routePlan);
     const snapshot = result?.quoteSnapshot || {};
     const distinctRouteCount = Number(state.routePlan?.distinctRouteCount ?? routeCandidates.length);
@@ -1358,7 +1418,7 @@
         ? applyRouteToLegPlan(state.routePlan.returnRoutePlan, route)
         : state.routePlan.returnRoutePlan;
       const routePlan = rebuildRoutePlanFromLegs(outboundLeg, returnLeg);
-      return window.EstimateCalc.computeEstimate(state.config, Object.assign({}, state, {
+      return window.EstimateCalc.computeEstimate(getEstimateConfig(), Object.assign({}, state, {
         routePlan: routePlan,
         distanceKm: window.EstimateCalc.getEffectiveBilledDistanceKm(state.config, Object.assign({}, state, { routePlan: routePlan })),
         routeCalcResult: {
@@ -1392,7 +1452,7 @@
         intermediateWaypoint: route.intermediateWaypoint || null
       })
     });
-    return window.EstimateCalc.computeEstimate(state.config, tempState);
+    return window.EstimateCalc.computeEstimate(getEstimateConfig(), tempState);
   }
 
   function getCompactRoadTypeLabel(roadType){
@@ -1755,7 +1815,7 @@
     if(!state.routePlan || !isPreFixedFareMode()){
       return "";
     }
-    return renderRouteSelectionSection(window.EstimateCalc.computeEstimate(state.config, state), { compact: true })
+    return renderRouteSelectionSection(window.EstimateCalc.computeEstimate(getEstimateConfig(), state), { compact: true })
       + renderDistanceRouteReviewActions();
   }
 
@@ -2328,8 +2388,7 @@
   }
 
   function getResultNotes(){
-    const fareMode = state.config.fareMode || "";
-    if(fareMode === "pre_fixed_fare"){
+    if(isPreFixedFareMode()){
       const notice = String(state.config.page?.preFixedFareNotice || "").trim();
       const serviceNote = "※迎車料金・介助料・待機料・有料道路代等は、事前確定運賃とは別枠でご精算となる場合があります。";
       return notice ? (notice + "\n\n" + serviceNote) : serviceNote;
@@ -2356,7 +2415,9 @@
 
   function renderUsageSummary(result){
     const title = state.config.resultLabels?.usageSummary || "ご利用内容";
-    const items = Array.isArray(result.usageSummary) ? result.usageSummary : [];
+    const items = window.EstimateFareDisplay
+      ? window.EstimateFareDisplay.mapUsageSummaryForLp(result.usageSummary, getLpFareCategory())
+      : (Array.isArray(result.usageSummary) ? result.usageSummary : []);
     if(!items.length){
       return "";
     }
@@ -2555,6 +2616,9 @@
       return "";
     }
     const title = state.config.resultLabels?.fareBasisSection || "運賃計算根拠";
+    const displayModeLabel = window.EstimateFareDisplay
+      ? window.EstimateFareDisplay.getLpFareModeLabel(getLpFareCategory())
+      : (basis.fareModeLabel || "");
     const sectionsHtml = basis.sections.map(function(section){
       const rules = Array.isArray(section.rules)
         ? section.rules.map(function(rule){
@@ -2584,7 +2648,7 @@
       <div class="estimate-fare-basis">
         <div class="estimate-fare-basis-head">
           <div class="estimate-fare-basis-title">${escapeHtml(title)}</div>
-          <div class="estimate-fare-basis-mode">${escapeHtml(basis.fareModeLabel || "")}</div>
+          <div class="estimate-fare-basis-mode">${escapeHtml(displayModeLabel)}</div>
         </div>
         <div class="estimate-fare-basis-blocks">
           ${sectionsHtml}
@@ -2864,7 +2928,7 @@
 
     const { flow, activeIndex } = getFlowState();
     const allComplete = activeIndex >= flow.length;
-    const result = window.EstimateCalc.computeEstimate(state.config, state);
+    const result = window.EstimateCalc.computeEstimate(getEstimateConfig(), state);
 
     let stepsHtml = "";
     flow.forEach(function(step, index){
@@ -2882,7 +2946,8 @@
           <h1 class="estimate-title">${escapeHtml(state.config.page?.title || "かんたん料金確認")}</h1>
           <button type="button" class="estimate-reset-btn" id="estimateResetBtn">最初からやり直す</button>
         </div>
-        <p class="estimate-lead">${escapeHtml(state.config.page?.description || "")}</p>
+        ${renderLpFareModeBar()}
+        <p class="estimate-lead" id="estimateLeadText">${escapeHtml(getLpFareModeLeadText())}</p>
         ${stepsHtml}
         ${allComplete ? renderResult(result) : ""}
       </div>
@@ -2990,7 +3055,7 @@
     if(feedback) feedback.textContent = "PDF を作成しています...";
 
     try{
-      const result = window.EstimateCalc.computeEstimate(state.config, state);
+      const result = window.EstimateCalc.computeEstimate(getEstimateConfig(), state);
       await ensureEstimateNumber(result);
       await persistHandoff(result);
       if(!window.EstimatePdf){
@@ -3112,6 +3177,19 @@
   }
 
   function bindEvents(){
+    const fareModeSelect = document.getElementById("estimateLpFareMode");
+    if(fareModeSelect){
+      fareModeSelect.addEventListener("change", function(){
+        const nextCategory = fareModeSelect.value === "pre_fixed_fare" ? "pre_fixed_fare" : "estimate";
+        if(nextCategory === getLpFareCategory()){
+          return;
+        }
+        state.lpFareCategory = nextCategory;
+        clearRouteStateForFareModeChange();
+        renderPage();
+      });
+    }
+
     bindChoiceGroup("mobilityChoice", function(value){
       state.mobilityId = value;
       clearStepsAfter("mobility");
@@ -3244,9 +3322,12 @@
 
       const urlState = window.EstimateUrl?.parseUrlState?.() || {};
       state.config = await window.EstimateConfigLoader.loadEstimateConfig();
+      state.lpFareCategory = window.EstimateFareDisplay
+        ? window.EstimateFareDisplay.resolveLpFareCategoryFromAdminFareMode(state.config?.fareMode)
+        : (String(state.config?.fareMode || "") === "pre_fixed_fare" ? "pre_fixed_fare" : "estimate");
       logGoogleMapsConfig("init:config-loaded");
-      console.info("[route-ui] loaded fareMode", String(state.config?.fareMode || ""));
-      if(String(state.config?.fareMode || "") !== "pre_fixed_fare"){
+      console.info("[route-ui] loaded fareMode", String(getEstimateConfig()?.fareMode || ""));
+      if(!isPreFixedFareMode()){
         console.info("[route-ui] 現在は概算見積モードのため、事前確定運賃のルート選択UIは非表示");
       }
 

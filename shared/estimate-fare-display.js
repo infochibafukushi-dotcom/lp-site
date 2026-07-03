@@ -1,6 +1,63 @@
 (function(global){
+  const LP_FARE_CATEGORY_ESTIMATE = "estimate";
+  const LP_FARE_CATEGORY_PRE_FIXED = "pre_fixed_fare";
+  const LP_INTERNAL_ESTIMATE_FARE_MODE = "distance_time";
+
+  const LP_FARE_MODE_OPTIONS = [
+    { id: LP_FARE_CATEGORY_ESTIMATE, label: "概算見積（距離＋所要時間）" },
+    { id: LP_FARE_CATEGORY_PRE_FIXED, label: "事前確定運賃（出発前に運賃確定）" }
+  ];
+
+  const LP_FARE_MODE_LEADS = {
+    estimate: "ご利用内容と移動距離・所要時間の目安から、料金の概算をご確認いただけます。\n実際の料金は、当日の運行ルート・道路状況・介助内容などにより変動する場合があります。",
+    pre_fixed_fare: "出発地・目的地が決まっている場合は、出発前に運賃を確定できます。\n介助・待機・付き添いなどの内容により、運賃以外の料金が加算される場合があります。"
+  };
+
   function formatYen(amount){
     return (Number(amount) || 0).toLocaleString("ja-JP") + "円";
+  }
+
+  function resolveLpFareCategoryFromAdminFareMode(fareMode){
+    return String(fareMode || "") === LP_FARE_CATEGORY_PRE_FIXED
+      ? LP_FARE_CATEGORY_PRE_FIXED
+      : LP_FARE_CATEGORY_ESTIMATE;
+  }
+
+  function resolveInternalFareMode(lpFareCategory){
+    return lpFareCategory === LP_FARE_CATEGORY_PRE_FIXED
+      ? LP_FARE_CATEGORY_PRE_FIXED
+      : LP_INTERNAL_ESTIMATE_FARE_MODE;
+  }
+
+  function getLpFareModeOptions(){
+    return LP_FARE_MODE_OPTIONS.slice();
+  }
+
+  function getLpFareModeLabel(lpFareCategory){
+    const category = lpFareCategory === LP_FARE_CATEGORY_PRE_FIXED
+      ? LP_FARE_CATEGORY_PRE_FIXED
+      : LP_FARE_CATEGORY_ESTIMATE;
+    const option = LP_FARE_MODE_OPTIONS.find(function(item){
+      return item.id === category;
+    });
+    return option ? option.label : LP_FARE_MODE_OPTIONS[0].label;
+  }
+
+  function getLpFareModeLead(lpFareCategory){
+    const category = lpFareCategory === LP_FARE_CATEGORY_PRE_FIXED
+      ? LP_FARE_CATEGORY_PRE_FIXED
+      : LP_FARE_CATEGORY_ESTIMATE;
+    return LP_FARE_MODE_LEADS[category] || LP_FARE_MODE_LEADS.estimate;
+  }
+
+  function mapUsageSummaryForLp(items, lpFareCategory){
+    const label = getLpFareModeLabel(lpFareCategory);
+    return (Array.isArray(items) ? items : []).map(function(line){
+      if(line?.label === "運賃方式"){
+        return Object.assign({}, line, { value: label });
+      }
+      return line;
+    });
   }
 
   function getPrimaryRoute(routePlan){
@@ -175,6 +232,14 @@
     getFixedFareSectionTitle: getFixedFareSectionTitle,
     buildTrafficZoneCalculationLines: buildTrafficZoneCalculationLines,
     buildFareCalculationLines: buildFareCalculationLines,
-    buildFareCalculationEmailText: buildFareCalculationEmailText
+    buildFareCalculationEmailText: buildFareCalculationEmailText,
+    LP_FARE_CATEGORY_ESTIMATE: LP_FARE_CATEGORY_ESTIMATE,
+    LP_FARE_CATEGORY_PRE_FIXED: LP_FARE_CATEGORY_PRE_FIXED,
+    resolveLpFareCategoryFromAdminFareMode: resolveLpFareCategoryFromAdminFareMode,
+    resolveInternalFareMode: resolveInternalFareMode,
+    getLpFareModeOptions: getLpFareModeOptions,
+    getLpFareModeLabel: getLpFareModeLabel,
+    getLpFareModeLead: getLpFareModeLead,
+    mapUsageSummaryForLp: mapUsageSummaryForLp
   };
 })(typeof window !== "undefined" ? window : globalThis);

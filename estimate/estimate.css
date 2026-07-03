@@ -54,6 +54,20 @@
   white-space:pre-line;
   margin:0 0 24px;
 }
+.estimate-fare-mode-bar{
+  margin:0 0 16px;
+}
+.estimate-fare-mode-label{
+  display:block;
+  font-size:15px;
+  font-weight:700;
+  color:#2d2a26;
+  margin:0 0 8px;
+}
+.estimate-fare-mode-select{
+  width:100%;
+  min-height:48px;
+}
 .estimate-step{
   background:#fff;
   border:1px solid #e7dfd4;
