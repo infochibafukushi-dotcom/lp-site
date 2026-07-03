@@ -136,7 +136,7 @@
     "type": "menu-list",
     "enabled": true,
     "title": "料金表",
-    "text": "ご利用内容により料金は変わります。距離・時間・介助内容をもとに、令和8年2月13日付け 関自旅二第4314号 千葉地区 大型車B運賃に基づき、事前に料金目安をご案内します。介護タクシー・福祉タクシーの料金目安はこちらでご確認ください。\n\n【千葉地区 大型車B運賃】初乗1.06kmまで520円／加算212mごと100円／時間距離併用1分20秒ごと100円／時間制30分4,180円（以後30分ごと4,180円）",
+    "text": "",
     "textSize": "medium",
     "bgColor": "#f7f5f0",
     "alignY": "middle",
@@ -150,7 +150,7 @@
           {
             "name": "基本運賃",
             "price": "520円〜",
-            "description": "千葉地区 大型車B運賃に基づく、距離または時間に応じた運賃です。",
+            "description": "初乗1.06kmまで520円／加算212mごと100円／時間距離併用1分20秒ごと100円。\nまた時間制でのご案内も可能です。時間制30分4,180円（以後30分ごと4,180円）。",
             "visible": true
           },
           {
@@ -363,11 +363,15 @@
     "images": [],
     "links": [
       {
-        "text": "LINEで相談する",
-        "url": "https://lin.ee/XA05KN5",
+        "text": "かんたん見積",
+        "url": "./estimate/",
         "visible": true
       },
-      { "text": "", "url": "#", "visible": false },
+      {
+        "text": "予約にすすむ",
+        "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+        "visible": true
+      },
       { "text": "", "url": "#", "visible": false }
     ],
     "menuGroups": [],
