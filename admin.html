@@ -229,6 +229,33 @@ button.linklike{
   word-break:break-word;
   white-space:pre-line;
 }
+.section-title-line{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:4px 8px;
+}
+.section-visibility-badge{
+  display:inline-flex;
+  align-items:center;
+  margin-left:0;
+  padding:2px 8px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  line-height:1.4;
+  white-space:nowrap;
+}
+.section-visibility-badge.is-visible{
+  background:#e8f5ee;
+  color:#157347;
+  border:1px solid #b7e4c7;
+}
+.section-visibility-badge.is-hidden{
+  background:#f1f3f5;
+  color:#6c757d;
+  border:1px solid #d6d8db;
+}
 .section-meta-sub{
   font-size:12px;
   color:#777;
@@ -3034,7 +3061,9 @@ function updateSectionField(index, field, value){
   sectionsData[index][field] = value;
 }
 function updateSectionEnabled(index, checked){
+  captureSectionOpenStates();
   sectionsData[index].enabled = checked;
+  renderSectionsEditor();
 }
 function updateSliderImages(index, value){
   const list = value.split('\n').map(v => v.trim()).filter(v => v);
@@ -4261,6 +4290,15 @@ function renderMenuListGroupsEditor(section, sectionIndex){
   `;
 }
 
+function buildSectionVisibilityBadgeHtml(section){
+  const isHidden = section.enabled === false;
+  return `
+    <span class="section-visibility-badge ${isHidden ? 'is-hidden' : 'is-visible'}">
+      ${isHidden ? '非表示中' : '表示中'}
+    </span>
+  `;
+}
+
 function renderSectionsEditor(){
   const box = document.getElementById('sectionsEditor');
 
@@ -4288,7 +4326,10 @@ function renderSectionsEditor(){
               <span class="toggle-icon">▶</span>
               <span class="section-index-badge">${index + 1}</span>
               <div class="section-meta">
-                <div class="section-meta-title">${escapeHtml(section.title || '(タイトル未設定)')}</div>
+                <div class="section-meta-title section-title-line">
+                  <span>${escapeHtml(section.title || '(タイトル未設定)')}</span>
+                  ${buildSectionVisibilityBadgeHtml(section)}
+                </div>
                 <div class="section-meta-sub">${escapeHtml(section.type)} / #${escapeHtml(section.sectionId || '')}</div>
               </div>
             </div>
