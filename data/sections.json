@@ -23,60 +23,82 @@
       {
         "title": "",
         "text": "",
-        "ctaText": "",
+        "image": "",
+        "imageFit": "",
         "link": "#",
-        "ctaText2": "",
-        "link2": "#",
+        "ctaText": "",
         "imageAlt": "ちばケアタクシー 車いす・ストレッチャー対応",
-        "image": "",
-        "imageFit": ""
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
       },
       {
         "title": "",
         "text": "",
-        "ctaText": "",
+        "image": "",
+        "imageFit": "",
         "link": "#",
-        "ctaText2": "",
-        "link2": "#",
+        "ctaText": "",
         "imageAlt": "通院・退院・転院・外出などに対応",
-        "image": "",
-        "imageFit": ""
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
       },
       {
         "title": "",
         "text": "",
-        "ctaText": "",
+        "image": "",
+        "imageFit": "",
         "link": "#",
-        "ctaText2": "",
-        "link2": "#",
+        "ctaText": "",
         "imageAlt": "はじめてでも安心の7つの理由",
-        "image": "",
-        "imageFit": ""
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
       },
       {
         "title": "",
         "text": "",
-        "ctaText": "",
+        "image": "",
+        "imageFit": "",
         "link": "#",
+        "ctaText": "",
+        "imageAlt": "千葉市近隣市対応エリアとご利用案内",
         "ctaText2": "",
         "link2": "#",
-        "imageAlt": "千葉市近隣市対応エリアとご利用案内",
-        "image": "",
-        "imageFit": ""
+        "estimatePrice": "",
+        "breakdownItems": []
       }
     ],
     "links": [
-      { "text": "", "url": "#", "visible": false },
-      { "text": "", "url": "#", "visible": false },
-      { "text": "", "url": "#", "visible": false }
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
     ],
     "menuGroups": [],
     "menuBottomCard": {
       "visible": false,
-      "title": "",
-      "text": ""
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
     },
-    "mobileCardColumns": ""
+    "mobileCardColumns": "",
+    "areaDetailSummary": "",
+    "areaDetailText": ""
   },
   {
     "id": "section-taiou-area",
@@ -97,12 +119,42 @@
         "title": "対応エリア",
         "open": true,
         "items": [
-          { "name": "千葉市", "price": "", "description": "", "visible": true },
-          { "name": "四街道市", "price": "", "description": "", "visible": true },
-          { "name": "佐倉市", "price": "", "description": "", "visible": true },
-          { "name": "八千代市", "price": "", "description": "", "visible": true },
-          { "name": "船橋市", "price": "", "description": "", "visible": true },
-          { "name": "習志野市", "price": "", "description": "", "visible": true }
+          {
+            "name": "千葉市",
+            "price": "",
+            "description": "",
+            "visible": true
+          },
+          {
+            "name": "四街道市",
+            "price": "",
+            "description": "",
+            "visible": true
+          },
+          {
+            "name": "佐倉市",
+            "price": "",
+            "description": "",
+            "visible": true
+          },
+          {
+            "name": "八千代市",
+            "price": "",
+            "description": "",
+            "visible": true
+          },
+          {
+            "name": "船橋市",
+            "price": "",
+            "description": "",
+            "visible": true
+          },
+          {
+            "name": "習志野市",
+            "price": "",
+            "description": "",
+            "visible": true
+          }
         ]
       }
     ],
@@ -121,11 +173,15 @@
         "url": "tel:09063314289",
         "visible": true
       },
-      { "text": "", "url": "#", "visible": false }
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
     ],
     "menuBottomCard": {
       "visible": true,
-      "title": "",
+      "title": "ご予約・ご相談はこちら",
       "text": "対応可否は、距離・日時・介助内容・車両状況により異なります。まずはLINEまたはお電話でご相談ください。"
     },
     "mobileCardColumns": ""
@@ -202,15 +258,25 @@
         "url": "./estimate/",
         "visible": true
       },
-      { "text": "", "url": "#", "visible": false },
-      { "text": "", "url": "#", "visible": false }
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
     ],
     "menuBottomCard": {
       "visible": true,
-      "title": "",
+      "title": "ご予約・ご相談はこちら",
       "text": "表示料金は目安です。実際の料金は距離・時間・介助内容・待機時間・車両状況により変動します。正式な料金はご予約時または事前見積もり時にご案内します。"
     },
-    "mobileCardColumns": ""
+    "mobileCardColumns": "",
+    "areaDetailSummary": "",
+    "areaDetailText": ""
   },
   {
     "id": "section-kantan-mitsumori",
@@ -231,62 +297,112 @@
         "text": "無料車いす・ご自身の車いす・リクライニング車いす・ストレッチャー・杖歩行など、移動方法を選びます。",
         "image": "",
         "imageFit": "",
-        "link": "#"
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
       },
       {
         "title": "介助内容を選ぶ",
         "text": "乗降介助・身体介助など、必要な介助内容を選びます。",
         "image": "",
         "imageFit": "",
-        "link": "#"
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
       },
       {
         "title": "階段介助を選ぶ",
         "text": "階段介助なし・見守り介助・2階以上の階段移動など、階段の有無に合わせて選びます。",
         "image": "",
         "imageFit": "",
-        "link": "#"
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
       },
       {
         "title": "送迎方法を選ぶ",
         "text": "片道または往復を選びます。",
         "image": "",
         "imageFit": "",
-        "link": "#"
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
       },
       {
         "title": "待機・付き添いを選ぶ",
         "text": "往復の場合のみ表示されます。目的地での待機や、受付・施設内移動などの付き添いを選びます。",
         "image": "",
         "imageFit": "",
-        "link": "#"
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
       },
       {
         "title": "走行ルートを設定する",
         "text": "出発地・目的地を入力し、ルートと距離・所要時間の目安を計算します。",
         "image": "",
         "imageFit": "",
-        "link": "#"
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
       }
     ],
     "image": "",
     "link": "#",
     "images": [],
     "links": [
-      { "text": "かんたん見積", "url": "./estimate/", "visible": true },
-      { "text": "予約空き確認", "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/", "visible": true },
-      { "text": "", "url": "#", "visible": false }
+      {
+        "text": "かんたん見積",
+        "url": "./estimate/",
+        "visible": true
+      },
+      {
+        "text": "予約空き確認",
+        "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+        "visible": true
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
     ],
     "menuGroups": [],
     "menuBottomCard": {
       "visible": false,
-      "title": "",
-      "text": ""
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
     },
     "configFooterCtas": {
       "visible": false,
       "text": ""
-    }
+    },
+    "areaDetailSummary": "",
+    "areaDetailText": ""
   },
   {
     "id": "section-price-examples",
@@ -305,45 +421,108 @@
       {
         "title": "病院・施設への片道送迎",
         "text": "通院・退院・施設入退所など、片道の移動に対応します。\n近距離・片道利用の目安です。介助内容や待機の有無により料金は変わります。",
+        "image": "./assets/cards/price-example-hospital-oneway.png",
+        "imageFit": "",
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
         "estimatePrice": "目安：3,420円〜",
         "breakdownItems": [
-          { "name": "基本運賃", "price": "520円〜" },
-          { "name": "迎車料金", "price": "800円〜" },
-          { "name": "介助料金", "price": "1,100円〜" },
-          { "name": "特殊車両使用料", "price": "1,000円〜" },
-          { "name": "合計目安", "price": "3,420円〜" }
-        ],
-        "image": "./assets/cards/price-example-hospital-oneway.png",
-        "imageFit": ""
+          {
+            "name": "基本運賃",
+            "price": "520円〜"
+          },
+          {
+            "name": "迎車料金",
+            "price": "800円〜"
+          },
+          {
+            "name": "介助料金",
+            "price": "1,100円〜"
+          },
+          {
+            "name": "特殊車両使用料",
+            "price": "1,000円〜"
+          },
+          {
+            "name": "合計目安",
+            "price": "3,420円〜"
+          }
+        ]
       },
       {
         "title": "遠方移動・冠婚葬祭・お出かけ",
         "text": "長距離移動や待機があるご利用では、時間制の方がわかりやすく安心な場合があります。冠婚葬祭や病院以外のお出かけにも対応します。目安は2時間利用の場合です。",
+        "image": "./assets/cards/price-example-long-distance.png",
+        "imageFit": "",
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
         "estimatePrice": "2時間利用の目安：19,620円〜",
         "breakdownItems": [
-          { "name": "時間制運賃", "price": "16,720円〜" },
-          { "name": "迎車料金", "price": "800円〜" },
-          { "name": "介助料金", "price": "1,100円〜" },
-          { "name": "特殊車両使用料", "price": "1,000円〜" },
-          { "name": "合計目安", "price": "19,620円〜" }
-        ],
-        "image": "./assets/cards/price-example-long-distance.png",
-        "imageFit": ""
+          {
+            "name": "時間制運賃",
+            "price": "16,720円〜"
+          },
+          {
+            "name": "迎車料金",
+            "price": "800円〜"
+          },
+          {
+            "name": "介助料金",
+            "price": "1,100円〜"
+          },
+          {
+            "name": "特殊車両使用料",
+            "price": "1,000円〜"
+          },
+          {
+            "name": "合計目安",
+            "price": "19,620円〜"
+          }
+        ]
       },
       {
         "title": "転院・ストレッチャー搬送",
         "text": "転院や退院時など、ストレッチャーが必要な移動にも対応します。病院・施設・ご家族と連携しながら、安全な移動をサポートします。\n\nストレッチャー利用、介助人数、搬送条件により料金が変わります。事前確認が必要です。\n\n※2名体制介助・搬送状況により料金が変動いたします。",
+        "image": "./assets/cards/price-example-stretcher-transfer.png",
+        "imageFit": "",
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
         "estimatePrice": "目安：9,320円〜",
         "breakdownItems": [
-          { "name": "基本運賃", "price": "520円〜" },
-          { "name": "迎車料金", "price": "800円〜" },
-          { "name": "介助料金", "price": "3,000円〜" },
-          { "name": "ストレッチャー対応", "price": "4,000円〜" },
-          { "name": "特殊車両使用料", "price": "1,000円〜" },
-          { "name": "合計目安", "price": "9,320円〜" }
-        ],
-        "image": "./assets/cards/price-example-stretcher-transfer.png",
-        "imageFit": ""
+          {
+            "name": "基本運賃",
+            "price": "520円〜"
+          },
+          {
+            "name": "迎車料金",
+            "price": "800円〜"
+          },
+          {
+            "name": "介助料金",
+            "price": "3,000円〜"
+          },
+          {
+            "name": "ストレッチャー対応",
+            "price": "4,000円〜"
+          },
+          {
+            "name": "特殊車両使用料",
+            "price": "1,000円〜"
+          },
+          {
+            "name": "合計目安",
+            "price": "9,320円〜"
+          }
+        ]
       }
     ],
     "image": "",
@@ -360,14 +539,20 @@
         "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
         "visible": true
       },
-      { "text": "", "url": "#", "visible": false }
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
     ],
     "menuGroups": [],
     "menuBottomCard": {
       "visible": true,
-      "title": "",
+      "title": "ご予約・ご相談はこちら",
       "text": "記載料金は目安です。実際の料金は距離・時間・介助内容・待機時間・車両状況により変動します。正式な料金は事前見積もりでご案内します。"
-    }
+    },
+    "areaDetailSummary": "",
+    "areaDetailText": ""
   },
   {
     "id": "section-payment-info",
@@ -386,13 +571,27 @@
         "title": "福祉タクシー券・タクシー利用券について",
         "text": "福祉タクシー券・タクシー利用券は、自治体ごとに利用条件や対応状況が異なります。対応状況は順次更新予定です。ご利用前にお問い合わせください。\n\n【対応予定・申請準備中】\n千葉市、四街道市、佐倉市、八千代市、船橋市、市川市、市原市\n\n各市区町村の制度内容により、利用条件・助成内容が異なります。",
         "image": "",
-        "imageFit": ""
+        "imageFit": "",
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
       },
       {
         "title": "介護保険のご利用について",
         "text": "ちばケアタクシーは、介護保険適用の訪問介護サービスとは異なります。移動に関する運賃・介助料金は、原則として自費でのご利用となります。介護保険サービスとの併用や利用可否については、担当ケアマネジャー様にもご確認ください。",
         "image": "",
-        "imageFit": ""
+        "imageFit": "",
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
       }
     ],
     "image": "",
@@ -409,15 +608,21 @@
         "url": "tel:09063314289",
         "visible": true
       },
-      { "text": "", "url": "#", "visible": false }
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
     ],
     "menuGroups": [],
     "menuBottomCard": {
       "visible": false,
-      "title": "",
-      "text": ""
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
     },
-    "mobileCardColumns": "1"
+    "mobileCardColumns": "1",
+    "areaDetailSummary": "",
+    "areaDetailText": ""
   },
   {
     "id": "section-faq",
@@ -447,15 +652,21 @@
         "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
         "visible": true
       },
-      { "text": "", "url": "#", "visible": false }
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
     ],
     "menuGroups": [],
     "menuBottomCard": {
       "visible": false,
-      "title": "",
-      "text": ""
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
     },
-    "mobileCardColumns": ""
+    "mobileCardColumns": "",
+    "areaDetailSummary": "",
+    "areaDetailText": ""
   },
   {
     "id": "section-about-us",
@@ -479,16 +690,26 @@
         "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
         "visible": true
       },
-      { "text": "", "url": "#", "visible": false },
-      { "text": "", "url": "#", "visible": false }
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
     ],
     "menuGroups": [],
     "menuBottomCard": {
       "visible": false,
-      "title": "",
-      "text": ""
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
     },
-    "mobileCardColumns": ""
+    "mobileCardColumns": "",
+    "areaDetailSummary": "",
+    "areaDetailText": ""
   },
   {
     "id": "section-three-key-checks",
@@ -506,21 +727,39 @@
         "text": "通院・退院・施設送迎のご予約はこちら。",
         "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1782794364486-ChatGPT-Image-2026630-13_33_44.png",
         "imageFit": "contain",
-        "link": "https://infochibafukushi-dotcom.github.io/reservation-v4/"
+        "link": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
       },
       {
         "title": "お見積り",
         "text": "出発地・目的地から料金目安を確認できます。",
         "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1782794372779-ChatGPT-Image-2026630-13_39_08.png",
         "imageFit": "contain",
-        "link": "./estimate/"
+        "link": "./estimate/",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
       },
       {
         "title": "空き状況",
         "text": "希望日時の空き状況を確認できます。",
         "image": "https://raw.githubusercontent.com/infochibafukushi-dotcom/lp-site/main/assets/cards/1782794407930-ChatGPT-Image-2026630-13_39_59.png",
         "imageFit": "contain",
-        "link": "https://infochibafukushi-dotcom.github.io/reservation-v4/"
+        "link": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
       }
     ],
     "image": "",
@@ -530,16 +769,30 @@
     "textAlign": "left",
     "images": [],
     "links": [
-      { "text": "", "url": "#", "visible": false },
-      { "text": "", "url": "#", "visible": false },
-      { "text": "", "url": "#", "visible": false }
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
     ],
     "menuGroups": [],
     "menuBottomCard": {
       "visible": false,
       "title": "ご予約・ご相談はこちら",
       "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
-    }
+    },
+    "areaDetailSummary": "",
+    "areaDetailText": ""
   },
   {
     "id": "section-seven-benefits",
@@ -557,22 +810,124 @@
     "textAlign": "left",
     "images": [],
     "items": [
-      { "title": "車いすのまま乗車可能", "text": "標準車いす対応。ご自身の車いす利用もご相談ください。", "image": "", "imageFit": "", "link": "#" },
-      { "title": "通院・退院・転院に対応", "text": "病院受診、退院、転院、施設送迎に対応します。", "image": "", "imageFit": "", "link": "#" },
-      { "title": "ご家族・ケアマネ様から予約可能", "text": "ご本人様以外の代理相談・予約にも対応します。", "image": "", "imageFit": "", "link": "#" },
-      { "title": "料金目安を事前に確認", "text": "概算見積で、事前に料金の目安を確認できます。", "image": "", "imageFit": "", "link": "./estimate/" },
-      { "title": "待機・院内付き添いも相談可能", "text": "受付、会計、薬局、施設内移動もご相談ください。", "image": "", "imageFit": "", "link": "#" },
-      { "title": "千葉市近隣エリアに対応", "text": "千葉市を中心に、近隣市・千葉県内もご相談可能です。", "image": "", "imageFit": "", "link": "#" },
-      { "title": "24時間Web予約受付", "text": "Web予約・LINE相談で、時間外も受付できます。", "image": "", "imageFit": "", "link": "#" }
+      {
+        "title": "車いすのまま乗車可能",
+        "text": "標準車いす対応。ご自身の車いす利用もご相談ください。",
+        "image": "",
+        "imageFit": "",
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
+      },
+      {
+        "title": "通院・退院・転院に対応",
+        "text": "病院受診、退院、転院、施設送迎に対応します。",
+        "image": "",
+        "imageFit": "",
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
+      },
+      {
+        "title": "ご家族・ケアマネ様から予約可能",
+        "text": "ご本人様以外の代理相談・予約にも対応します。",
+        "image": "",
+        "imageFit": "",
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
+      },
+      {
+        "title": "料金目安を事前に確認",
+        "text": "概算見積で、事前に料金の目安を確認できます。",
+        "image": "",
+        "imageFit": "",
+        "link": "./estimate/",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
+      },
+      {
+        "title": "待機・院内付き添いも相談可能",
+        "text": "受付、会計、薬局、施設内移動もご相談ください。",
+        "image": "",
+        "imageFit": "",
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
+      },
+      {
+        "title": "千葉市近隣エリアに対応",
+        "text": "千葉市を中心に、近隣市・千葉県内もご相談可能です。",
+        "image": "",
+        "imageFit": "",
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
+      },
+      {
+        "title": "24時間Web予約受付",
+        "text": "Web予約・LINE相談で、時間外も受付できます。",
+        "image": "",
+        "imageFit": "",
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
+      }
     ],
     "links": [
-      { "text": "", "url": "#", "visible": false },
-      { "text": "", "url": "#", "visible": false },
-      { "text": "", "url": "#", "visible": false }
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
     ],
     "menuGroups": [],
-    "menuBottomCard": { "visible": false, "title": "ご予約・ご相談はこちら", "text": "料金の詳細やご不明点はお気軽にお問い合わせください。" },
-    "mobileCardColumns": "2"
+    "menuBottomCard": {
+      "visible": false,
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
+    },
+    "mobileCardColumns": "2",
+    "areaDetailSummary": "",
+    "areaDetailText": ""
   },
   {
     "id": "section-usage-scenarios",
@@ -584,10 +939,58 @@
     "textSize": "medium",
     "bgColor": "#f7f5f0",
     "items": [
-      { "title": "通院・受診", "text": "病院受診・検査・リハビリ通院に。", "image": "./assets/cards/1782669854804-ChatGPT-Image-2026629-02_59_44.png", "imageFit": "", "link": "#" },
-      { "title": "退院・転院", "text": "病院からご自宅・施設・別病院へ。", "image": "./assets/cards/card4-discharge-transfer.png", "imageFit": "", "link": "#" },
-      { "title": "施設送迎", "text": "入退所・ショートステイ・施設受診に。", "image": "./assets/cards/1782669871972-ChatGPT-Image-2026629-02_59_26.png", "imageFit": "", "link": "#" },
-      { "title": "外出", "text": "買い物・理美容室・冠婚葬祭に。", "image": "./assets/cards/1782669879643-ChatGPT-Image-2026629-02_59_20.png", "imageFit": "", "link": "#" }
+      {
+        "title": "通院・受診",
+        "text": "病院受診・検査・リハビリ通院に。",
+        "image": "./assets/cards/1782669854804-ChatGPT-Image-2026629-02_59_44.png",
+        "imageFit": "",
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
+      },
+      {
+        "title": "退院・転院",
+        "text": "病院からご自宅・施設・別病院へ。",
+        "image": "./assets/cards/card4-discharge-transfer.png",
+        "imageFit": "",
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
+      },
+      {
+        "title": "施設送迎",
+        "text": "入退所・ショートステイ・施設受診に。",
+        "image": "./assets/cards/1782669871972-ChatGPT-Image-2026629-02_59_26.png",
+        "imageFit": "",
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
+      },
+      {
+        "title": "外出",
+        "text": "買い物・理美容室・冠婚葬祭に。",
+        "image": "./assets/cards/1782669879643-ChatGPT-Image-2026629-02_59_20.png",
+        "imageFit": "",
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
+      }
     ],
     "image": "",
     "link": "#",
@@ -596,13 +999,31 @@
     "textAlign": "left",
     "images": [],
     "links": [
-      { "text": "", "url": "#", "visible": false },
-      { "text": "", "url": "#", "visible": false },
-      { "text": "", "url": "#", "visible": false }
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
     ],
     "menuGroups": [],
-    "menuBottomCard": { "visible": false, "title": "ご予約・ご相談はこちら", "text": "料金の詳細やご不明点はお気軽にお問い合わせください。" },
-    "mobileCardColumns": "2"
+    "menuBottomCard": {
+      "visible": false,
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
+    },
+    "mobileCardColumns": "2",
+    "areaDetailSummary": "",
+    "areaDetailText": ""
   },
   {
     "id": "section-taiou-service",
@@ -621,7 +1042,12 @@
         "title": "対応サービス・介助内容",
         "open": true,
         "items": [
-          { "name": "車いす乗車", "price": "", "description": "車いすのまま乗車できます。", "visible": true }
+          {
+            "name": "車いす乗車",
+            "price": "",
+            "description": "車いすのまま乗車できます。",
+            "visible": true
+          }
         ]
       }
     ],
@@ -630,12 +1056,30 @@
     "images": [],
     "items": [],
     "links": [
-      { "text": "", "url": "#", "visible": false },
-      { "text": "", "url": "#", "visible": false },
-      { "text": "", "url": "#", "visible": false }
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
     ],
-    "menuBottomCard": { "visible": false, "title": "ご予約・ご相談はこちら", "text": "料金の詳細やご不明点はお気軽にお問い合わせください。" },
-    "mobileCardColumns": ""
+    "menuBottomCard": {
+      "visible": false,
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
+    },
+    "mobileCardColumns": "",
+    "areaDetailSummary": "",
+    "areaDetailText": ""
   },
   {
     "id": "section-vehicle-equipment",
@@ -654,13 +1098,31 @@
     "images": [],
     "items": [],
     "links": [
-      { "text": "", "url": "#", "visible": false },
-      { "text": "", "url": "#", "visible": false },
-      { "text": "", "url": "#", "visible": false }
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
     ],
     "menuGroups": [],
-    "menuBottomCard": { "visible": false, "title": "ご予約・ご相談はこちら", "text": "料金の詳細やご不明点はお気軽にお問い合わせください。" },
-    "mobileCardColumns": ""
+    "menuBottomCard": {
+      "visible": false,
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
+    },
+    "mobileCardColumns": "",
+    "areaDetailSummary": "",
+    "areaDetailText": ""
   },
   {
     "id": "section-aki-yoyaku",
@@ -679,13 +1141,31 @@
     "images": [],
     "items": [],
     "links": [
-      { "text": "空き状況を確認する", "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/", "visible": true },
-      { "text": "LINEで相談する", "url": "https://lin.ee/XA05KN5", "visible": true },
-      { "text": "電話する", "url": "tel:09063314289", "visible": true }
+      {
+        "text": "空き状況を確認する",
+        "url": "https://infochibafukushi-dotcom.github.io/reservation-v4/",
+        "visible": true
+      },
+      {
+        "text": "LINEで相談する",
+        "url": "https://lin.ee/XA05KN5",
+        "visible": true
+      },
+      {
+        "text": "電話する",
+        "url": "tel:09063314289",
+        "visible": true
+      }
     ],
     "menuGroups": [],
-    "menuBottomCard": { "visible": false, "title": "ご予約・ご相談はこちら", "text": "料金の詳細やご不明点はお気軽にお問い合わせください。" },
-    "mobileCardColumns": ""
+    "menuBottomCard": {
+      "visible": false,
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
+    },
+    "mobileCardColumns": "",
+    "areaDetailSummary": "",
+    "areaDetailText": ""
   },
   {
     "id": "section-hajimete",
@@ -697,8 +1177,32 @@
     "textSize": "medium",
     "bgColor": "#f7f5f0",
     "items": [
-      { "title": "ご家族の方へ", "text": "ご相談ください。", "image": "", "imageFit": "contain", "link": "#" },
-      { "title": "ご本人様へ", "text": "ご相談ください。", "image": "", "imageFit": "contain", "link": "#" }
+      {
+        "title": "ご家族の方へ",
+        "text": "ご相談ください。",
+        "image": "",
+        "imageFit": "contain",
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
+      },
+      {
+        "title": "ご本人様へ",
+        "text": "ご相談ください。",
+        "image": "",
+        "imageFit": "contain",
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
+      }
     ],
     "image": "",
     "link": "#",
@@ -707,13 +1211,31 @@
     "textAlign": "left",
     "images": [],
     "links": [
-      { "text": "", "url": "#", "visible": false },
-      { "text": "", "url": "#", "visible": false },
-      { "text": "", "url": "#", "visible": false }
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
     ],
     "menuGroups": [],
-    "menuBottomCard": { "visible": false, "title": "ご予約・ご相談はこちら", "text": "料金の詳細やご不明点はお気軽にお問い合わせください。" },
-    "mobileCardColumns": "1"
+    "menuBottomCard": {
+      "visible": false,
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
+    },
+    "mobileCardColumns": "1",
+    "areaDetailSummary": "",
+    "areaDetailText": ""
   },
   {
     "id": "section-caremanager",
@@ -732,13 +1254,31 @@
     "images": [],
     "items": [],
     "links": [
-      { "text": "ケアマネ・相談員として問い合わせる", "url": "https://docs.google.com/forms/d/e/1FAIpQLSc2FZoU0Mz4IxiUQadXuc4rdiaqZn1iWmLhvc4jmj1uk2wF4g/viewform?usp=header", "visible": true },
-      { "text": "", "url": "#", "visible": false },
-      { "text": "", "url": "#", "visible": false }
+      {
+        "text": "ケアマネ・相談員として問い合わせる",
+        "url": "https://docs.google.com/forms/d/e/1FAIpQLSc2FZoU0Mz4IxiUQadXuc4rdiaqZn1iWmLhvc4jmj1uk2wF4g/viewform?usp=header",
+        "visible": true
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
     ],
     "menuGroups": [],
-    "menuBottomCard": { "visible": false, "title": "ご予約・ご相談はこちら", "text": "料金の詳細やご不明点はお気軽にお問い合わせください。" },
-    "mobileCardColumns": ""
+    "menuBottomCard": {
+      "visible": false,
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
+    },
+    "mobileCardColumns": "",
+    "areaDetailSummary": "",
+    "areaDetailText": ""
   },
   {
     "id": "section-shisetsu-byoin",
@@ -751,9 +1291,45 @@
     "textSize": "medium",
     "bgColor": "#f7f5f0",
     "items": [
-      { "title": "退院時のご自宅送迎", "text": "病院からご自宅までの退院送迎に対応します。", "image": "", "imageFit": "contain", "link": "#" },
-      { "title": "転院・施設入退所", "text": "病院から病院、病院から施設への移動に対応します。", "image": "", "imageFit": "contain", "link": "#" },
-      { "title": "施設からの受診送迎", "text": "施設入居者様の通院、検査、受診送迎に対応します。", "image": "", "imageFit": "contain", "link": "#" }
+      {
+        "title": "退院時のご自宅送迎",
+        "text": "病院からご自宅までの退院送迎に対応します。",
+        "image": "",
+        "imageFit": "contain",
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
+      },
+      {
+        "title": "転院・施設入退所",
+        "text": "病院から病院、病院から施設への移動に対応します。",
+        "image": "",
+        "imageFit": "contain",
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
+      },
+      {
+        "title": "施設からの受診送迎",
+        "text": "施設入居者様の通院、検査、受診送迎に対応します。",
+        "image": "",
+        "imageFit": "contain",
+        "link": "#",
+        "ctaText": "",
+        "imageAlt": "",
+        "ctaText2": "",
+        "link2": "#",
+        "estimatePrice": "",
+        "breakdownItems": []
+      }
     ],
     "image": "",
     "link": "#",
@@ -762,11 +1338,29 @@
     "textAlign": "left",
     "images": [],
     "links": [
-      { "text": "", "url": "#", "visible": false },
-      { "text": "", "url": "#", "visible": false },
-      { "text": "", "url": "#", "visible": false }
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
     ],
     "menuGroups": [],
-    "menuBottomCard": { "visible": false, "title": "ご予約・ご相談はこちら", "text": "料金の詳細やご不明点はお気軽にお問い合わせください。" }
+    "menuBottomCard": {
+      "visible": false,
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
+    },
+    "areaDetailSummary": "",
+    "areaDetailText": ""
   }
 ]
