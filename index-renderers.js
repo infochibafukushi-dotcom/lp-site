@@ -301,44 +301,6 @@
     `;
   }
 
-  function renderPriceExampleCtaBlock(item){
-    const ctaText = String(item?.ctaText || "").trim();
-    const ctaText2 = String(item?.ctaText2 || "").trim();
-    const link = item?.link || "#estimate";
-    const link2 = item?.link2 || "#";
-
-    if(!ctaText && !ctaText2){
-      return "";
-    }
-
-    if(ctaText2){
-      const buttons = [];
-      if(ctaText){
-        buttons.push(window.IndexUtils.wrapLink(
-          link,
-          `<span class="${window.IndexUtils.getCardCtaClass(ctaText)}">${window.IndexUtils.escapeHtml(ctaText)}</span>`,
-          "card-item-cta-link"
-        ));
-      }
-      buttons.push(window.IndexUtils.wrapLink(
-        link2,
-        `<span class="${window.IndexUtils.getCardCtaClass(ctaText2)}">${window.IndexUtils.escapeHtml(ctaText2)}</span>`,
-        "card-item-cta-link"
-      ));
-      return `<div class="card-item-cta-wrap card-item-cta-wrap--dual">${buttons.join("")}</div>`;
-    }
-
-    if(!ctaText){
-      return "";
-    }
-
-    return `<div class="card-item-cta-wrap">${window.IndexUtils.wrapLink(
-      link,
-      `<span class="${window.IndexUtils.getCardCtaClass(ctaText)}">${window.IndexUtils.escapeHtml(ctaText)}</span>`,
-      "card-item-cta-link"
-    )}</div>`;
-  }
-
   function renderPriceExampleItems(items, textSize, textAlign){
     if(!Array.isArray(items) || items.length === 0){
       return `<div class="card-item">カードデータがありません</div>`;
@@ -348,28 +310,12 @@
       const title = item?.title || "";
       const text = item?.text || "";
       const estimatePrice = String(item?.estimatePrice || "").trim();
-      const breakdownItems = Array.isArray(item?.breakdownItems) ? item.breakdownItems : [];
-      const breakdownRows = breakdownItems.map((row) => `
-        <tr>
-          <th scope="row">${window.IndexUtils.escapeHtml(row?.name || "")}</th>
-          <td>${window.IndexUtils.escapeHtml(row?.price || "")}</td>
-        </tr>
-      `).join("");
 
       return `
         <div class="card-item price-example-card">
           ${title ? `<h3 class="card-item-title text-${window.IndexUtils.escapeAttr(textAlign || "left")}">${window.IndexUtils.escapeHtml(title)}</h3>` : ""}
           ${estimatePrice ? `<p class="price-example-estimate">${window.IndexUtils.escapeHtml(estimatePrice)}</p>` : ""}
           ${text ? `<div class="section-text text-${window.IndexUtils.escapeAttr(textSize || "medium")} text-${window.IndexUtils.escapeAttr(textAlign || "left")}">${nl2brSafe(text)}</div>` : ""}
-          ${breakdownRows ? `
-            <details class="price-breakdown-details">
-              <summary>料金内訳を見る</summary>
-              <table class="price-breakdown-table">
-                <tbody>${breakdownRows}</tbody>
-              </table>
-            </details>
-          ` : ""}
-          ${renderPriceExampleCtaBlock(item)}
         </div>
       `;
     }).join("");
