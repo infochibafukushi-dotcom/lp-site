@@ -366,6 +366,35 @@
     const fareModeDescription = FARE_MODE_DESCRIPTIONS[fareMode] || FARE_MODE_DESCRIPTIONS.time;
 
     root.innerHTML = `
+      <div class="admin-field admin-fare-mode-top">
+        <label for="estimateFareMode">運賃方式</label>
+        <select id="estimateFareMode">
+          <option value="distance" ${fareMode === "distance" ? "selected" : ""}>距離定額</option>
+          <option value="time" ${fareMode === "time" ? "selected" : ""}>時間定額</option>
+          <option value="distance_time" ${fareMode === "distance_time" ? "selected" : ""}>距離＋予定時間加算（概算）</option>
+          <option value="pre_fixed_fare" ${fareMode === "pre_fixed_fare" ? "selected" : ""}>事前確定運賃</option>
+        </select>
+        <p class="note admin-help" id="estimateFareModeDescription">${escapeHtml(fareModeDescription)}</p>
+      </div>
+
+      <div id="estimateFareDistancePanel">
+        <h4 id="estimateFareDistanceHeading">${fareMode === "distance_time" || fareMode === "pre_fixed_fare" ? "距離部分" : "距離定額設定"}</h4>
+        ${renderDistancePatternAFields()}
+      </div>
+
+      <div id="estimateFareModeTimeSection">
+        <h4>時間定額設定</h4>
+        ${renderTimeBlockFields("estimateTime", timeParams)}
+      </div>
+
+      <div id="estimateFareDtTimeSection">
+        <h4>予定時間加算（概算）</h4>
+        <p class="note">ルート予定時間に基づく概算加算です。実走行時の認可メーター（低速走行時 1分20秒/100円）とは別の計算です。</p>
+        ${renderTimeBlockFields("estimateDtTime", distanceTimeParams)}
+      </div>
+
+      <hr class="admin-section-divider">
+
       <div class="row"><label><input type="checkbox" id="estimateEnabledToggle" ${estimateDraft.enabled !== false ? "checked" : ""}> 概算見積ページを公開する</label></div>
 
       <h3>ページ設定</h3>
@@ -395,34 +424,6 @@
       <p class="note">運輸局公示の平準化係数です。事前確定運賃モードの距離運賃にのみ適用されます。</p>
       ${renderTrafficZoneItems()}
       ${renderPreFixedFareSettings()}
-
-      <h3>運賃方式</h3>
-      <div class="row">
-        <label for="estimateFareMode">運賃方式</label>
-        <select id="estimateFareMode">
-          <option value="distance" ${fareMode === "distance" ? "selected" : ""}>距離定額</option>
-          <option value="time" ${fareMode === "time" ? "selected" : ""}>時間定額</option>
-          <option value="distance_time" ${fareMode === "distance_time" ? "selected" : ""}>距離＋予定時間加算（概算）</option>
-          <option value="pre_fixed_fare" ${fareMode === "pre_fixed_fare" ? "selected" : ""}>事前確定運賃</option>
-        </select>
-      </div>
-      <p class="note" id="estimateFareModeDescription">${escapeHtml(fareModeDescription)}</p>
-
-      <div id="estimateFareDistancePanel">
-        <h4 id="estimateFareDistanceHeading">${fareMode === "distance_time" || fareMode === "pre_fixed_fare" ? "距離部分" : "距離定額設定"}</h4>
-        ${renderDistancePatternAFields()}
-      </div>
-
-      <div id="estimateFareModeTimeSection">
-        <h4>時間定額設定</h4>
-        ${renderTimeBlockFields("estimateTime", timeParams)}
-      </div>
-
-      <div id="estimateFareDtTimeSection">
-        <h4>予定時間加算（概算）</h4>
-        <p class="note">ルート予定時間に基づく概算加算です。実走行時の認可メーター（低速走行時 1分20秒/100円）とは別の計算です。</p>
-        ${renderTimeBlockFields("estimateDtTime", distanceTimeParams)}
-      </div>
 
       <h3>車いす料金（移動方法）</h3>
       <div id="estimateMobilityItems">${renderCategoryItems("mobility")}</div>
