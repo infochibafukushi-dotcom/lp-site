@@ -27,6 +27,14 @@
     return LP_FARE_MODE_LEADS[key] || LP_FARE_MODE_LEADS.estimate;
   }
 
+  function getLpFareModeTitleFromFareMode(fareMode){
+    const key = resolveLpFareDisplayKey(fareMode);
+    if(key === "pre_fixed_fare"){
+      return "かんたん料金確認（事前確定運賃）";
+    }
+    return "かんたん料金確認（距離・時間の概算見積）";
+  }
+
   function mapUsageSummaryForLp(items, fareMode){
     const label = getLpFareModeLabelFromFareMode(fareMode);
     return (Array.isArray(items) ? items : []).map(function(line){
@@ -212,6 +220,7 @@
     buildFareCalculationEmailText: buildFareCalculationEmailText,
     getLpFareModeLabelFromFareMode: getLpFareModeLabelFromFareMode,
     getLpFareModeLeadFromFareMode: getLpFareModeLeadFromFareMode,
+    getLpFareModeTitleFromFareMode: getLpFareModeTitleFromFareMode,
     mapUsageSummaryForLp: mapUsageSummaryForLp
   };
 })(typeof window !== "undefined" ? window : globalThis);

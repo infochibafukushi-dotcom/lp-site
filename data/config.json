@@ -7,7 +7,7 @@
   "buttons": [
     {
       "text": "かんたん見積",
-      "link": "#estimate",
+      "link": "./estimate/",
       "visible": true
     },
     {

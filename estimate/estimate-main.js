@@ -1039,6 +1039,14 @@
     return state.config?.page?.description || "";
   }
 
+  function getLpFareModeTitleText(){
+    const fareMode = getConfigFareMode();
+    if(window.EstimateFareDisplay){
+      return window.EstimateFareDisplay.getLpFareModeTitleFromFareMode(fareMode);
+    }
+    return state.config?.page?.title || "かんたん料金確認";
+  }
+
   function isPreFixedFareMode(){
     return getConfigFareMode() === "pre_fixed_fare";
   }
@@ -2897,7 +2905,7 @@
     root.innerHTML = `
       <div class="estimate-wrap">
         <div class="estimate-header">
-          <h1 class="estimate-title">${escapeHtml(state.config.page?.title || "かんたん料金確認")}</h1>
+          <h1 class="estimate-title">${escapeHtml(getLpFareModeTitleText())}</h1>
           <button type="button" class="estimate-reset-btn" id="estimateResetBtn">最初からやり直す</button>
         </div>
         <p class="estimate-lead" id="estimateLeadText">${escapeHtml(getLpFareModeLeadText())}</p>
