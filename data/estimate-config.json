@@ -1,7 +1,7 @@
 {
   "enabled": true,
   "version": 1,
-  "updatedAt": "2026-07-03T09:36:44.235Z",
+  "updatedAt": "2026-07-03T09:49:36.598Z",
   "page": {
     "title": "かんたん料金確認",
     "description": "ご利用内容を選択すると料金の目安をご確認いただけます。\n実際の料金は運行ルートや介助内容等により変動する場合があります。",
@@ -194,7 +194,7 @@
   "preFixedFare": {
     "trafficZoneId": "keiyo"
   },
-  "fareMode": "distance_time",
+  "fareMode": "pre_fixed_fare",
   "fareModeOptions": [
     {
       "id": "time",
