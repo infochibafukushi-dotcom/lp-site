@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<!-- admin-build-version: 810bab5-section-sort -->
+<!-- admin-build-version: admin-save-fix-20260703 -->
 <title>管理画面</title>
 <style>
 *{box-sizing:border-box;}
@@ -1546,7 +1546,7 @@ body{
     <div class="floating-save-inner">
       <div class="floating-save-status" id="floatingSaveStatus">未保存の変更はありません。</div>
       <div class="floating-save-actions">
-        <button type="button" onclick="saveAllToGitHub()">すべて保存</button>
+        <button type="button" id="saveAllButton">すべて保存</button>
       </div>
     </div>
   </div>
@@ -1554,15 +1554,15 @@ body{
 </main>
 
 
-<script src="./admin-collapse.js?v=lp-area-slider-price-20260702"></script>
-<script src="./carechan-cta-defaults.js?v=810bab5-section-sort"></script>
-<script src="./admin-carechan.js?v=810bab5-section-sort"></script>
-<script src="./shared/libs/qrcode.min.js?v=810bab5-section-sort"></script>
-<script src="./shared/estimate-qr.js?v=810bab5-section-sort"></script>
-<script src="./shared/fare-constants.js"></script>
-<script src="./shared/estimate-defaults.js?v=810bab5-section-sort"></script>
-<script src="./shared/estimate-validate.js?v=810bab5-section-sort"></script>
-<script src="./admin-estimate.js?v=810bab5-section-sort"></script>
+<script src="./admin-collapse.js?v=admin-save-fix-20260703"></script>
+<script src="./carechan-cta-defaults.js?v=admin-save-fix-20260703"></script>
+<script src="./admin-carechan.js?v=admin-save-fix-20260703"></script>
+<script src="./shared/libs/qrcode.min.js?v=admin-save-fix-20260703"></script>
+<script src="./shared/estimate-qr.js?v=admin-save-fix-20260703"></script>
+<script src="./shared/fare-constants.js?v=admin-save-fix-20260703"></script>
+<script src="./shared/estimate-defaults.js?v=admin-save-fix-20260703"></script>
+<script src="./shared/estimate-validate.js?v=admin-save-fix-20260703"></script>
+<script src="./admin-estimate.js?v=admin-save-fix-20260703"></script>
 <script src="./shared/pre-fixed-fare-report-data.js?v=39e326a1"></script>
 <script src="./shared/pre-fixed-fare-report-pdf.js?v=39e326a1"></script>
 <script src="./shared/pre-fixed-fare-approval-summary-data.js?v=39e326a1"></script>
@@ -1794,22 +1794,42 @@ function bindDirtyTrackers(){
 }
 
 async function saveAllToGitHub(){
-  updateFloatingSaveStatus('すべて保存しています...', 'saving');
+  updateFloatingSaveStatus('保存しています...', 'saving');
+  const failures = [];
 
-  const configOk = await saveConfigToGitHub(true);
-  const sectionsOk = await saveSectionsToGitHub(true);
-  const estimateOk = await saveEstimateConfigToGitHub(true);
-  const carechanOk = typeof saveCarechanToGitHub === 'function'
-    ? await saveCarechanToGitHub(true)
-    : true;
+  if(!(await saveConfigToGitHub(true))){
+    failures.push('config.json');
+  }
+  if(!(await saveSectionsToGitHub(true))){
+    failures.push('sections.json');
+  }
+  if(!(await saveEstimateConfigToGitHub(true))){
+    failures.push('estimate-config.json');
+  }
+  if(typeof window.saveCarechanToGitHub === 'function'){
+    if(!(await window.saveCarechanToGitHub(true))){
+      failures.push('carechan.json');
+    }
+  }
 
-  if(configOk && sectionsOk && estimateOk && carechanOk){
-    updateFloatingSaveStatus('すべて保存しました。数十秒後にLPへ反映されます。', 'success');
+  if(failures.length === 0){
+    updateFloatingSaveStatus('保存しました。数十秒後にLPへ反映されます。', 'success');
     return true;
   }
 
-  updateFloatingSaveStatus('一部または全部の保存に失敗しました。', 'error');
+  const message = '保存に失敗しました。Consoleを確認してください。（' + failures.join(' / ') + '）';
+  console.error('[admin] saveAllToGitHub failed:', failures);
+  updateFloatingSaveStatus(message, 'error');
   return false;
+}
+
+function bindSaveButtons(){
+  const saveButton = document.getElementById('saveAllButton');
+  if(saveButton){
+    saveButton.addEventListener('click', function(){
+      saveAllToGitHub();
+    });
+  }
 }
 
 function setStatus(message, type = ''){
@@ -4367,7 +4387,9 @@ async function saveFileToGitHub(path, contentString){
   }
 
   if(!res.ok){
-    throw new Error(extractGitHubErrorMessage(result, res));
+    const err = new Error('GitHub保存失敗: ' + extractGitHubErrorMessage(result, res));
+    console.error('[admin] saveFileToGitHub failed:', path, res.status, result);
+    throw err;
   }
   return result;
 }
@@ -4405,7 +4427,16 @@ function normalizeSectionBeforeSave(section, index){
       text: item?.text || '',
       image: item?.image || '',
       imageFit: item?.imageFit === 'contain' || item?.imageFit === 'cover' ? item.imageFit : '',
-      link: item?.link || '#'
+      link: item?.link || '#',
+      ctaText: item?.ctaText || '',
+      imageAlt: item?.imageAlt || '',
+      ctaText2: item?.ctaText2 || '',
+      link2: item?.link2 || '#',
+      estimatePrice: item?.estimatePrice || '',
+      breakdownItems: Array.isArray(item?.breakdownItems) ? item.breakdownItems.map((row) => ({
+        name: row?.name || '',
+        price: row?.price || ''
+      })) : []
     }));
   }
 
@@ -4457,6 +4488,7 @@ async function saveConfigToGitHub(isSilent = false){
     }
     return true;
   }catch(error){
+    console.error('[admin] saveConfigToGitHub failed:', error);
     setConfigSaveResult('保存失敗: ' + error.message, 'error');
     if(!isSilent){
       updateFloatingSaveStatus('上部・下部設定の保存に失敗しました。', 'error');
@@ -4490,6 +4522,7 @@ async function saveEstimateConfigToGitHub(isSilent = false){
     }
     return true;
   }catch(error){
+    console.error('[admin] saveEstimateConfigToGitHub failed:', error);
     if(!isSilent){
       const box = document.getElementById('estimateSaveResult');
       if(box){
@@ -4521,6 +4554,7 @@ async function saveSectionsToGitHub(isSilent = false){
     }
     return true;
   }catch(error){
+    console.error('[admin] saveSectionsToGitHub failed:', error);
     setSectionsSaveResult('保存失敗: ' + error.message, 'error');
     if(!isSilent){
       updateFloatingSaveStatus('セクションの保存に失敗しました。', 'error');
@@ -4533,6 +4567,7 @@ async function init(){
   try{
     loadGitHubSettings();
     bindDirtyTrackers();
+    bindSaveButtons();
     updateFloatingSaveStatus();
     await loadConfig();
     await loadSections();
@@ -4548,8 +4583,13 @@ async function init(){
   }catch(error){
     updateFloatingSaveStatus('読み込みに失敗しました。', 'error');
     setStatus('読み込み失敗: ' + error.message, 'error');
+    console.error('[admin] init failed:', error);
   }
 }
+
+window.saveAllToGitHub = saveAllToGitHub;
+window.saveConfigToGitHub = saveConfigToGitHub;
+window.saveSectionsToGitHub = saveSectionsToGitHub;
 
 init();
 </script>

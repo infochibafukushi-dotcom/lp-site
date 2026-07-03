@@ -692,6 +692,7 @@
       }
       return true;
     }catch(error){
+      console.error('[admin] saveCarechanToGitHub failed:', error);
       if(!isSilent) setCarechanStatus("保存失敗: " + error.message, "error");
       return false;
     }
