@@ -293,8 +293,8 @@
     "sectionId": "price-examples",
     "type": "card3",
     "enabled": true,
-    "title": "具体例・料金イメージ",
-    "text": "よくあるご利用シーンごとに、料金の考え方をわかりやすくまとめました。",
+    "title": "ご利用例の一部を紹介します",
+    "text": "よくある移動シーンをもとに、サービス内容と料金の目安をまとめました。\n実際の料金は距離・時間・介助内容・車両状況により変動します。",
     "textSize": "medium",
     "bgColor": "#f7f5f0",
     "alignY": "middle",
@@ -313,7 +313,7 @@
           { "name": "特殊車両使用料", "price": "1,000円〜" },
           { "name": "合計目安", "price": "3,420円〜" }
         ],
-        "image": "",
+        "image": "./assets/cards/price-example-hospital-oneway.png",
         "imageFit": ""
       },
       {
@@ -327,7 +327,7 @@
           { "name": "特殊車両使用料", "price": "1,000円〜" },
           { "name": "合計目安", "price": "19,620円〜" }
         ],
-        "image": "",
+        "image": "./assets/cards/price-example-long-distance.png",
         "imageFit": ""
       },
       {
@@ -342,7 +342,7 @@
           { "name": "特殊車両使用料", "price": "1,000円〜" },
           { "name": "合計目安", "price": "9,320円〜" }
         ],
-        "image": "",
+        "image": "./assets/cards/price-example-stretcher-transfer.png",
         "imageFit": ""
       }
     ],

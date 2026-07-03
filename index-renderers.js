@@ -310,26 +310,23 @@
       const title = item?.title || "";
       const text = item?.text || "";
       const estimatePrice = String(item?.estimatePrice || "").trim();
-      const breakdownItems = Array.isArray(item?.breakdownItems) ? item.breakdownItems : [];
-      const breakdownRows = breakdownItems.map((row) => `
-        <tr>
-          <th scope="row">${window.IndexUtils.escapeHtml(row?.name || "")}</th>
-          <td>${window.IndexUtils.escapeHtml(row?.price || "")}</td>
-        </tr>
-      `).join("");
+      const imageUrl = String(item?.image || "").trim();
+      const imageAlt = title ? `${title}の流れと料金内訳` : "料金内訳イメージ";
 
       return `
         <div class="card-item price-example-card">
           ${title ? `<h3 class="card-item-title text-${window.IndexUtils.escapeAttr(textAlign || "left")}">${window.IndexUtils.escapeHtml(title)}</h3>` : ""}
           ${estimatePrice ? `<p class="price-example-estimate">${window.IndexUtils.escapeHtml(estimatePrice)}</p>` : ""}
           ${text ? `<div class="section-text text-${window.IndexUtils.escapeAttr(textSize || "medium")} text-${window.IndexUtils.escapeAttr(textAlign || "left")}">${nl2brSafe(text)}</div>` : ""}
-          ${breakdownRows ? `
-            <details class="price-breakdown-details">
-              <summary>料金内訳を見る</summary>
-              <table class="price-breakdown-table">
-                <tbody>${breakdownRows}</tbody>
-              </table>
-            </details>
+          ${imageUrl ? `
+            <div class="example-image-wrap">
+              <img
+                src="${window.IndexUtils.escapeAttr(imageUrl)}"
+                alt="${window.IndexUtils.escapeAttr(imageAlt)}"
+                class="example-image"
+                loading="lazy"
+              />
+            </div>
           ` : ""}
         </div>
       `;
