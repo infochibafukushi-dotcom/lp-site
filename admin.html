@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<!-- admin-build-version: admin-save-fix-20260703 -->
+<!-- admin-build-version: admin-github-settings-20260703 -->
 <title>管理画面</title>
 <style>
 *{box-sizing:border-box;}
@@ -1581,6 +1581,14 @@ body{
 const CONFIG_PATH = 'data/config.json';
 const SECTIONS_PATH = 'data/sections.json';
 const ESTIMATE_CONFIG_PATH = 'data/estimate-config.json';
+const GITHUB_SETTINGS_KEY = 'lpAdminGithubSettings';
+const LEGACY_GITHUB_JSON_KEYS = ['lpGithubSettings'];
+const LEGACY_GITHUB_FIELD_KEYS = {
+  owner: ['githubOwner', 'lpGithubOwner', 'adminGithubOwner'],
+  repo: ['githubRepo', 'lpGithubRepo', 'adminGithubRepo'],
+  branch: ['githubBranch', 'lpGithubBranch', 'adminGithubBranch'],
+  token: ['githubToken', 'lpGithubToken', 'adminGithubToken']
+};
 const COLOR_PRESETS = [
   '#ffffff','#f8f9fa','#f1f3f5','#e9ecef','#dee2e6',
   '#000000','#343a40','#495057','#6c757d','#adb5bd',
@@ -1848,31 +1856,172 @@ function setSectionsSaveResult(message, type = ''){
   box.innerText = message;
 }
 
+function normalizeGithubSettings(raw){
+  if(!raw || typeof raw !== 'object'){
+    return null;
+  }
+
+  const settings = {
+    owner: String(raw.owner || '').trim(),
+    repo: String(raw.repo || '').trim(),
+    branch: String(raw.branch || 'main').trim() || 'main',
+    token: String(raw.token || '').trim()
+  };
+
+  if(!settings.owner && !settings.repo && !settings.token){
+    return null;
+  }
+
+  return settings;
+}
+
+function readStoredGithubSettings(){
+  try{
+    const raw = localStorage.getItem(GITHUB_SETTINGS_KEY);
+    if(!raw){
+      return null;
+    }
+    return normalizeGithubSettings(JSON.parse(raw));
+  }catch(error){
+    console.error('[admin] GitHub settings read failed:', error);
+    return null;
+  }
+}
+
+function readLegacyGithubSettings(){
+  for(const key of LEGACY_GITHUB_JSON_KEYS){
+    try{
+      const raw = localStorage.getItem(key);
+      if(!raw){
+        continue;
+      }
+      const settings = normalizeGithubSettings(JSON.parse(raw));
+      if(settings){
+        return settings;
+      }
+    }catch(error){
+      console.warn('[admin] legacy GitHub JSON settings ignored:', key, error);
+    }
+  }
+
+  const settings = {
+    owner: '',
+    repo: '',
+    branch: 'main',
+    token: ''
+  };
+
+  Object.keys(LEGACY_GITHUB_FIELD_KEYS).forEach(function(field){
+    LEGACY_GITHUB_FIELD_KEYS[field].forEach(function(key){
+      if(settings[field]){
+        return;
+      }
+      const value = String(localStorage.getItem(key) || '').trim();
+      if(value){
+        settings[field] = value;
+      }
+    });
+  });
+
+  return normalizeGithubSettings(settings);
+}
+
+function migrateLegacyGithubSettings(){
+  const current = readStoredGithubSettings();
+  if(current && current.owner && current.repo && current.token){
+    return current;
+  }
+
+  const legacy = readLegacyGithubSettings();
+  if(!legacy){
+    return current;
+  }
+
+  const merged = {
+    owner: current?.owner || legacy.owner || '',
+    repo: current?.repo || legacy.repo || '',
+    branch: current?.branch || legacy.branch || 'main',
+    token: current?.token || legacy.token || ''
+  };
+
+  if(merged.owner && merged.repo && merged.branch && merged.token){
+    localStorage.setItem(GITHUB_SETTINGS_KEY, JSON.stringify(merged));
+    console.log('[admin] GitHub settings migrated to', GITHUB_SETTINGS_KEY, {
+      owner: merged.owner,
+      repo: merged.repo,
+      branch: merged.branch,
+      hasToken: Boolean(merged.token)
+    });
+  }
+
+  return normalizeGithubSettings(merged);
+}
+
+function applyGithubSettingsToForm(settings){
+  if(!settings){
+    return;
+  }
+
+  const ownerInput = document.getElementById('githubOwner');
+  const repoInput = document.getElementById('githubRepo');
+  const branchInput = document.getElementById('githubBranch');
+  const tokenInput = document.getElementById('githubToken');
+
+  if(ownerInput) ownerInput.value = settings.owner || '';
+  if(repoInput) repoInput.value = settings.repo || '';
+  if(branchInput) branchInput.value = settings.branch || 'main';
+  if(tokenInput) tokenInput.value = settings.token || '';
+}
+
+function logGithubSettingsState(label, settings){
+  if(!settings){
+    console.log('[admin]', label, ':', null);
+    return;
+  }
+
+  console.log('[admin]', label, ':', {
+    owner: settings.owner || '',
+    repo: settings.repo || '',
+    branch: settings.branch || 'main',
+    hasToken: Boolean(settings.token)
+  });
+}
+
 function saveGitHubSettings(){
   const settings = {
-    owner: document.getElementById('githubOwner').value.trim(),
-    repo: document.getElementById('githubRepo').value.trim(),
-    branch: document.getElementById('githubBranch').value.trim(),
-    token: document.getElementById('githubToken').value.trim()
+    owner: document.getElementById('githubOwner')?.value.trim() || '',
+    repo: document.getElementById('githubRepo')?.value.trim() || '',
+    branch: document.getElementById('githubBranch')?.value.trim() || 'main',
+    token: document.getElementById('githubToken')?.value.trim() || ''
   };
-  localStorage.setItem('lpGithubSettings', JSON.stringify(settings));
+
+  if(!settings.owner || !settings.repo || !settings.branch || !settings.token){
+    setStatus('GitHub接続設定をすべて入力してください。', 'error');
+    return false;
+  }
+
+  localStorage.setItem(GITHUB_SETTINGS_KEY, JSON.stringify(settings));
   setStatus('GitHub接続設定を保存しました。', 'success');
+  logGithubSettingsState('GitHub settings saved', settings);
+  return true;
 }
 
 function loadGitHubSettings(){
   try{
-    const raw = localStorage.getItem('lpGithubSettings');
-    if(!raw){
+    const settings = migrateLegacyGithubSettings();
+    if(!settings || !settings.owner || !settings.repo || !settings.token){
       setStatus('GitHub接続設定はまだ保存されていません。', 'warn');
-      return;
+      return null;
     }
-    const settings = JSON.parse(raw);
-    document.getElementById('githubOwner').value = settings.owner || '';
-    document.getElementById('githubRepo').value = settings.repo || '';
-    document.getElementById('githubBranch').value = settings.branch || 'main';
-    document.getElementById('githubToken').value = settings.token || '';
+
+    applyGithubSettingsToForm(settings);
+    setStatus('GitHub接続設定を読み込みました。', 'success');
+    logGithubSettingsState('GitHub settings loaded', settings);
+    return settings;
   }catch(error){
+    console.error('[admin] GitHub settings load failed:', error);
     setStatus('GitHub接続設定の読み込み失敗: ' + error.message, 'error');
+    return null;
   }
 }
 
@@ -3184,10 +3333,21 @@ function sanitizeFileName(name){
     .replace(/[^a-zA-Z0-9._-]/g, '');
 }
 function getGitHubSettings(){
-  const owner = document.getElementById('githubOwner').value.trim();
-  const repo = document.getElementById('githubRepo').value.trim();
-  const branch = document.getElementById('githubBranch').value.trim() || 'main';
-  const token = document.getElementById('githubToken').value.trim();
+  let owner = document.getElementById('githubOwner')?.value.trim() || '';
+  let repo = document.getElementById('githubRepo')?.value.trim() || '';
+  let branch = document.getElementById('githubBranch')?.value.trim() || 'main';
+  let token = document.getElementById('githubToken')?.value.trim() || '';
+
+  if(!owner || !repo || !token){
+    const stored = readStoredGithubSettings() || migrateLegacyGithubSettings();
+    if(stored){
+      owner = owner || stored.owner || '';
+      repo = repo || stored.repo || '';
+      branch = branch || stored.branch || 'main';
+      token = token || stored.token || '';
+      applyGithubSettingsToForm({ owner, repo, branch, token });
+    }
+  }
 
   if(!owner || !repo || !branch || !token){
     throw new Error('GitHub接続設定をすべて入力してください。');
@@ -4590,6 +4750,8 @@ async function init(){
 window.saveAllToGitHub = saveAllToGitHub;
 window.saveConfigToGitHub = saveConfigToGitHub;
 window.saveSectionsToGitHub = saveSectionsToGitHub;
+window.saveGitHubSettings = saveGitHubSettings;
+window.loadGitHubSettings = loadGitHubSettings;
 
 init();
 </script>
