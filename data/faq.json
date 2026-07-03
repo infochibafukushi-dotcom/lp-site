@@ -7,7 +7,9 @@
       "featured": true,
       "enabled": true,
       "question": "当日予約はできますか？",
-      "answer": "空き状況により対応できる場合があります。お急ぎの場合はお電話でご相談ください。"
+      "answer": "空き状況により対応できる場合があります。お急ぎの場合はお電話でご相談ください。",
+      "ctaText": "空き状況を確認する",
+      "ctaLink": "https://infochibafukushi-dotcom.github.io/reservation-v4/"
     },
     {
       "id": "faq-wheelchair",
@@ -31,7 +33,7 @@
       "featured": true,
       "enabled": true,
       "question": "家族も同乗できますか？",
-      "answer": "はい。同乗可能です。人数や荷物の量により事前に確認させていただく場合があります。"
+      "answer": "はい。同乗可能です。人数や荷物の量により、事前に確認させていただく場合があります。\n\n車いす4台＋ご家族・介助者4名、または車いす2台＋ご家族・介助者5名など、状況に応じてシートアレンジが可能です。"
     },
     {
       "id": "faq-outside-hospital",
@@ -47,7 +49,9 @@
       "featured": true,
       "enabled": true,
       "question": "料金はいくらくらいですか？",
-      "answer": "距離・時間・介助内容・待機時間により変わります。出発地と目的地を教えていただければ、目安料金をご案内します。"
+      "answer": "距離・時間・介助内容・待機時間により変わります。出発地と目的地を教えていただければ、目安料金をご案内します。",
+      "ctaText": "かんたん見積",
+      "ctaLink": "./estimate/"
     },
     {
       "id": "faq-ticket-insurance",

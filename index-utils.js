@@ -553,7 +553,9 @@
       text: String(item.answer || item.text || "").trim(),
       image: "",
       link: "#",
-      faqId: item.id || ""
+      faqId: item.id || "",
+      ctaText: String(item.ctaText || "").trim(),
+      ctaLink: String(item.ctaLink || "").trim()
     };
   }
 

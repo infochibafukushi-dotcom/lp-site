@@ -410,6 +410,25 @@
     `;
   }
 
+  function renderFaqAccordionCta(item){
+    const ctaText = String(item?.ctaText || "").trim();
+    const ctaLink = String(item?.ctaLink || "").trim();
+    if(!ctaText || !ctaLink || ctaLink === "#"){
+      return "";
+    }
+
+    if(window.SectionBottomButtons && typeof window.SectionBottomButtons.buildAnchor === "function"){
+      return `<div class="faq-accordion-cta">${window.SectionBottomButtons.buildAnchor(
+        ctaLink,
+        ctaText,
+        window.IndexUtils.escapeAttr,
+        window.IndexUtils.escapeHtml
+      )}</div>`;
+    }
+
+    return "";
+  }
+
   function renderAccordion(section){
     const items = Array.isArray(section.items) ? section.items : [];
     const rows = items.map((it, i) => {
@@ -418,6 +437,7 @@
       const t = nl2brSafe(question);
       const tx = nl2brSafe(answer);
       const itemId = it && it.faqId ? ` id="${window.IndexUtils.escapeAttr("faq-item-" + it.faqId)}"` : "";
+      const ctaHtml = renderFaqAccordionCta(it);
 
       return `
         <details class="accordion-item"${itemId} itemscope itemprop="mainEntity" itemtype="https://schema.org/Question" style="margin:0 0 14px 0; background:#eef1f3; border-radius:10px; overflow:hidden; border:1px solid #e0e5e9;">
@@ -439,6 +459,7 @@
                   ${tx}
                 </div>
               </div>
+              ${ctaHtml}
             </div>
           </div>
         </details>

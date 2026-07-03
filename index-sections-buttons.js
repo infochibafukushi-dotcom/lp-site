@@ -73,7 +73,7 @@
     const pulseClass = (window.IndexUtils && typeof window.IndexUtils.isEstimatePulseText === "function" && window.IndexUtils.isEstimatePulseText(label))
       ? " estimate-pulse-button"
       : "";
-    const availabilityClass = label === "予約空き確認" || label === "予約にすすむ" ? " topbtn-availability" : "";
+    const availabilityClass = label === "予約空き確認" || label === "予約にすすむ" || label === "空き状況を確認する" ? " topbtn-availability" : "";
     const phoneClass = (window.IndexUtils && typeof window.IndexUtils.isPhoneCtaText === "function" && window.IndexUtils.isPhoneCtaText(label, href))
       ? " is-phone-cta"
       : "";
@@ -153,7 +153,8 @@
   window.SectionBottomButtons = {
     render: render,
     renderConfigFooterCtas: renderConfigFooterCtas,
-    hydrateConfigFooterCtas: hydrateConfigFooterCtas
+    hydrateConfigFooterCtas: hydrateConfigFooterCtas,
+    buildAnchor: buildAnchor
   };
 
 })();
