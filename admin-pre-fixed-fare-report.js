@@ -37,6 +37,13 @@
     box.textContent = message || "";
   }
 
+  function setQaStatus(message, type){
+    const box = document.getElementById("preFixedFareQaStatus");
+    if(!box) return;
+    box.className = "preview" + (type ? " " + type : "");
+    box.textContent = message || "";
+  }
+
   async function fetchJson(path){
     const response = await fetch(path + "?" + Date.now(), { cache: "no-store" });
     if(!response.ok){
@@ -67,6 +74,19 @@
     setOnePageSummaryStatus("PDFを作成しています...", "warn");
     await generatePreFixedFareOnePageSummaryPdf();
     setOnePageSummaryStatus("PDFを保存しました。", "success");
+  }
+
+  async function generatePreFixedFareQaPdf(){
+    if(!global.PreFixedFareQaPdf){
+      throw new Error("事前確定運賃 認可説明Q&A PDFモジュールの読み込みに失敗しました。");
+    }
+    await global.PreFixedFareQaPdf.exportPdf();
+  }
+
+  async function exportQaPdf(){
+    setQaStatus("PDFを作成しています...", "warn");
+    await generatePreFixedFareQaPdf();
+    setQaStatus("PDFを保存しました。", "success");
   }
 
   async function exportRegulatoryReportPdf(){
@@ -220,6 +240,33 @@
     });
   }
 
+  function bindQaButton(){
+    const button = document.getElementById("preFixedFareQaExportBtn");
+    if(!button) return;
+    button.addEventListener("click", async function(){
+      button.disabled = true;
+      try{
+        await exportQaPdf();
+      }catch(error){
+        console.error(error);
+        const reason = String(error?.message || "");
+        if(
+          reason.includes("生成対象HTMLが空")
+          || reason.includes("組み立てに失敗")
+          || reason.includes("読み込みに失敗")
+          || reason.includes("認可ルート")
+          || reason.includes("14問")
+        ){
+          setQaStatus(reason, "error");
+        }else{
+          setQaStatus("PDF作成に失敗しました。", "error");
+        }
+      }finally{
+        button.disabled = false;
+      }
+    });
+  }
+
   function bindApprovalSummaryButton(){
     const button = document.getElementById("preFixedFareApprovalSummaryExportBtn");
     if(!button) return;
@@ -323,6 +370,7 @@
   function bind(){
     bindRegulatoryButton();
     bindOnePageSummaryButton();
+    bindQaButton();
     bindApprovalSummaryButton();
     bindOperationsSummaryButton();
     bindIntegratedSummaryButton();

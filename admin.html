@@ -1561,7 +1561,7 @@ body{
       <span class="toggle-state">閉じています</span>
     </button>
     <div class="card-body js-card-body">
-      <p class="note">本カードから認可説明用PDFと提出用別紙を出力できます。①は公示要件対応表・算定式・係数など制度説明寄り、①の直下の1枚資料は運用フロー要約、②は Phase 2 / Phase 3-B の実装内容・ルート候補選択・証跡保存の説明寄り、③は事前確定Mの本番運用・監査説明寄り、④は①②③を1冊にまとめた運輸局提出用の統合資料です。</p>
+      <p class="note">本カードから、事前確定運賃の認可説明に使用する資料を出力できます。①は公示要件対応表・算定式・係数など制度説明寄り、①-補足は運輸局説明時に全体像を1枚で示す要約資料、①-補足2は、認可申請時に質問されやすいルート変更、割引精算、1ルート時の扱い、監査証跡などをQ&A形式で整理した補足資料です。②は Phase 2 / Phase 3-B の実装内容・ルート候補選択・証跡保存の説明寄り、③は事前確定Mの本番運用・監査説明寄り、④は①②③を1冊にまとめた運輸局提出用の統合資料です。</p>
       <div style="margin-top:16px;">
         <p class="note" style="margin-bottom:8px;"><strong>① 事前確定運賃システム概要書 兼 関東運輸局公示要件対応表</strong><br>関東運輸局の事前確定運賃公示要件に対するシステム対応、算定式、係数、ルート算定、同意証跡、保存設計をまとめた説明資料です。</p>
         <div class="actions">
@@ -1570,11 +1570,18 @@ body{
         <div class="preview" id="preFixedFareReportResult">まだ出力していません。</div>
       </div>
       <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e5e5e5;">
-        <p class="note" style="margin-bottom:8px;"><strong>事前確定運賃システム 運用フロー説明資料（1枚）</strong><br>走行予定ルート提示、旅客同意、確定ルート保存、運転者確認、ナビと確定ルートの分離、ルート変更時の取扱い、精算・領収書・保存記録の流れをA4横1枚にまとめた認可説明用資料です。</p>
+        <p class="note" style="margin-bottom:8px;"><strong>①-補足 事前確定運賃システム 運用フロー説明資料（1枚）</strong><br>走行予定ルートの提示、旅客同意、確定ルート保存、運転者確認、ルート変更時の取扱い、精算・領収書記録までをA4横1枚で整理した、運輸局説明用の要約資料です。</p>
         <div class="actions">
           <button type="button" id="preFixedFareOnePageSummaryExportBtn">事前確定運賃 認可説明1枚資料PDFを出力</button>
         </div>
         <div class="preview" id="preFixedFareOnePageSummaryStatus">まだ出力していません。</div>
+      </div>
+      <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e5e5e5;">
+        <p class="note" style="margin-bottom:8px;"><strong>①-補足2 事前確定運賃システム 認可説明Q&A</strong><br>旅客都合によるルート変更・途中終了、福祉タクシー券や割引の処理、ルート候補が1件のみの場合の扱い、交通事情による迂回、有料道路料金、迎車料金・介助料・実費の区分、同意証跡・保存記録の確認方法など、認可申請時に質問されやすい項目をQ&A形式で整理した補足資料です。</p>
+        <div class="actions">
+          <button type="button" id="preFixedFareQaExportBtn">事前確定運賃 認可説明Q&A PDFを出力</button>
+        </div>
+        <div class="preview" id="preFixedFareQaStatus">まだ出力していません。</div>
       </div>
       <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e5e5e5;">
         <p class="note" style="margin-bottom:8px;"><strong>② 事前確定運賃システム説明資料</strong><br>Phase 2 / Phase 3-B の実装内容、走行予定ルート候補、選択証跡、PDF・quoteSnapshot・handoff の保存内容をまとめた説明資料を出力します。</p>
@@ -1637,8 +1644,10 @@ body{
 <script src="./admin-estimate.js?v=admin-save-fix-20260703"></script>
 <script src="./shared/pre-fixed-fare-report-data.js?v=39e326a1"></script>
 <script src="./shared/pre-fixed-fare-report-pdf.js?v=39e326a1"></script>
-<script src="./shared/pre-fixed-fare-one-page-summary-data.js?v=onepage01"></script>
-<script src="./shared/pre-fixed-fare-one-page-summary-pdf.js?v=onepage01"></script>
+<script src="./shared/pre-fixed-fare-one-page-summary-data.js?v=onepage06"></script>
+<script src="./shared/pre-fixed-fare-one-page-summary-pdf.js?v=onepage06"></script>
+<script src="./shared/pre-fixed-fare-qa-data.js?v=qa01"></script>
+<script src="./shared/pre-fixed-fare-qa-pdf.js?v=qa01"></script>
 <script src="./shared/pre-fixed-fare-approval-summary-data.js?v=39e326a1"></script>
 <script src="./shared/pre-fixed-fare-approval-summary-pdf.js?v=39e326a1"></script>
 <script src="./shared/pre-fixed-fare-operations-summary-data.js?v=39e326a1"></script>
@@ -1650,7 +1659,7 @@ body{
 <script src="./shared/pre-fixed-fare-submission-appendix-word.js?v=appendix02"></script>
 <script src="./shared/pre-fixed-fare-submission-appendix-pdf.js?v=appendix02"></script>
 <script src="./admin-pre-fixed-fare-submission-appendix.js?v=appendix02"></script>
-<script src="./admin-pre-fixed-fare-report.js?v=onepage01"></script>
+<script src="./admin-pre-fixed-fare-report.js?v=qa01"></script>
 <script>
 const CONFIG_PATH = 'data/config.json';
 const SECTIONS_PATH = 'data/sections.json';
