@@ -1713,32 +1713,13 @@
     );
   }
 
-  function areRouteMetricsNearlyIdentical(left, right){
-    if(!left || !right){
-      return false;
-    }
-    const leftDistance = formatRouteDistanceMeters(left.distanceMeters);
-    const rightDistance = formatRouteDistanceMeters(right.distanceMeters);
-    const leftDuration = formatRouteDurationSeconds(left.durationSeconds);
-    const rightDuration = formatRouteDurationSeconds(right.durationSeconds);
-    if(!leftDistance || !rightDistance || !leftDuration || !rightDuration){
-      return false;
-    }
-    return leftDistance === rightDistance && leftDuration === rightDuration;
-  }
-
-  function buildSimilarAbRoutesNotice(metricsList){
-    if(!Array.isArray(metricsList) || metricsList.length < 2){
-      return "";
-    }
-    const baseline = metricsList[0];
-    const allSimilar = metricsList.every(function(item){
-      return areRouteMetricsNearlyIdentical(baseline, item);
-    });
-    if(!allSimilar){
-      return "";
-    }
-    return '<p class="estimate-route-selection-similar-note">近距離のため、A/Bともほぼ同じルートです。地図上ではA赤線・B青点線で表示しています。</p>';
+  function buildResponsiveNote(pcText, mobileText){
+    return (
+      '<p class="estimate-route-selection-note">' +
+        '<span class="estimate-note-pc">' + escapeHtml(pcText) + "</span>" +
+        '<span class="estimate-note-mobile">' + escapeHtml(mobileText) + "</span>" +
+      "</p>"
+    );
   }
 
   function getRouteSelectButtonLabel(isSelected, options){
@@ -1972,13 +1953,10 @@
     const selectedStrategy = getSelectedRoundTripPairStrategy(routePlan);
     const compact = options?.compact === true;
     const stepReviewPending = compact && isPreFixedFareMode() && !state.distanceRouteReviewed;
-    const notice = '<p class="estimate-route-selection-note">往復の走行予定ルートを1つ選択してください。選択した往復ルートの合計距離で事前確定運賃を算定します。</p>';
-    const similarNotice = buildSimilarAbRoutesNotice(pairs.map(function(pair){
-      return {
-        distanceMeters: pair.totalDistanceMeters,
-        durationSeconds: pair.totalDurationSeconds
-      };
-    }));
+    const notice = buildResponsiveNote(
+      "往復の走行予定ルートを1つ選択してください。選択した往復ルートの合計距離で事前確定運賃を算定します。",
+      "往復ルートを選択してください。"
+    );
     const useAbLayout = pairs.length === 2 && pairs.every(function(pair){
       return Boolean(getRouteAbInfo(pair.strategy, { roundTrip: true }));
     });
@@ -2037,7 +2015,6 @@
       '<section class="estimate-route-selection estimate-roundtrip-pair-selection' + (useAbLayout ? " estimate-route-selection--ab" : "") + '" aria-label="往復ルートの選択">' +
         '<h4 class="estimate-route-selection-title">往復ルートの選択</h4>' +
         notice +
-        similarNotice +
         '<div class="estimate-route-card-list' + (useAbLayout ? " estimate-route-card-list--ab" : "") + '">' + cards + "</div>" +
         (useAbLayout ? renderSharedTollNote(hasTollNote) : "") +
       "</section>"
@@ -2105,20 +2082,15 @@
     const singleCandidateNotice = window.PreFixedFareStatus?.getSingleCandidateNotice?.()
       || "ルート候補が1件のみのため、事前確定運賃としては確定せず、予約後に確認対応となります。";
     const notice = confirmable
-      ? '<p class="estimate-route-selection-note">2件以上の走行予定ルートから1つを選択してください。選択したルートの距離で事前確定運賃を算定します。</p>'
+      ? buildResponsiveNote(
+        "2件以上の走行予定ルートから1つを選択してください。選択したルートの距離で事前確定運賃を算定します。",
+        "ルートを選択してください。"
+      )
       : '<p class="estimate-route-selection-warning">' + escapeHtml(singleCandidateNotice) + "</p>";
     const abRoutes = routes.filter(function(route){
       return Boolean(getRouteAbInfo(route));
     });
     const useAbLayout = abRoutes.length >= 2;
-    const similarNotice = useAbLayout
-      ? buildSimilarAbRoutesNotice(abRoutes.map(function(route){
-        return {
-          distanceMeters: route.distanceMeters,
-          durationSeconds: route.durationSeconds
-        };
-      }))
-      : "";
     const hasTollNote = routes.some(function(route){
       return route.usesToll === true || route.routeStrategy === "toll_allowed" || route.routeStrategy === "time_priority";
     });
@@ -2199,7 +2171,6 @@
       '<section class="estimate-route-selection' + (confirmable ? "" : " estimate-route-selection--fallback") + (useAbLayout ? " estimate-route-selection--ab" : "") + '" aria-label="' + escapeAttr(sectionTitle) + '">' +
         '<h4 class="estimate-route-selection-title">' + escapeHtml(sectionTitle) + "</h4>" +
         notice +
-        similarNotice +
         '<div class="estimate-route-card-list' + (useAbLayout ? " estimate-route-card-list--ab" : "") + '">' + cards + "</div>" +
         (useAbLayout ? renderSharedTollNote(hasTollNote) : "") +
       "</section>"
@@ -2286,10 +2257,10 @@
       return "";
     }
     if(anyLegRequiresRouteSelection(state.routePlan)){
-      return '<p class="estimate-route-selection-note">ルート候補を選択すると見積結果へ進みます。</p>';
+      return '<p class="estimate-route-selection-note estimate-note-pc-only">ルート候補を選択すると見積結果へ進みます。</p>';
     }
     if(requiresOverallRouteSelection(state.routePlan) && !hasOverallRouteSelected(state.routePlan)){
-      return '<p class="estimate-route-selection-note">全体走行予定ルートを選択すると見積結果へ進みます。</p>';
+      return '<p class="estimate-route-selection-note estimate-note-pc-only">全体走行予定ルートを選択すると見積結果へ進みます。</p>';
     }
     const reviewNotice = getReservationReviewNotice();
     return (
@@ -2851,7 +2822,7 @@
     `;
 
     const addressPanel = `
-      <div class="estimate-address-calc" id="estimateAddressCalcPanel">
+      <div class="estimate-address-calc${state.routePlan ? " estimate-address-calc--has-route" : ""}" id="estimateAddressCalcPanel">
         <label for="originAddressInput" class="estimate-distance-label">出発地（住所・施設名）</label>
         <input type="text" class="estimate-input" id="originAddressInput" autocomplete="street-address" placeholder="例: 千葉市中央区○○町1-2-3" value="${escapeAttr(state.originAddress)}">
         <label for="destinationAddressInput" class="estimate-distance-label estimate-distance-label--spaced">目的地（住所・施設名）</label>
@@ -2897,15 +2868,16 @@
                 </div>
               </section>
               ${renderStepRouteSelection()}
+              <p class="estimate-route-mobile-summary-note">距離・時間は目安です。実際の運行状況により変わる場合があります。</p>
             </div>
           ` : ""}
         ` : ""}
-        <p class="estimate-address-disclaimer">${escapeHtml(addressDisclaimer)}</p>
+        <p class="estimate-address-disclaimer estimate-note-pc-only">${escapeHtml(addressDisclaimer)}</p>
       </div>
     `;
 
     return `
-      <section class="estimate-step estimate-step--active" data-step-id="${escapeAttr(step.id)}">
+      <section class="estimate-step estimate-step--active${state.routePlan ? " estimate-step--has-route" : ""}" data-step-id="${escapeAttr(step.id)}">
         <div class="estimate-step-head">
           <div>
             <div class="estimate-step-label">STEP${stepNum}</div>
@@ -2916,7 +2888,7 @@
         ${roadTypeRadios}
         ${!hideRoadTypeRadios && state.roadType === "toll" ? `<p class="estimate-road-type-note">${escapeHtml(tollRoadNote)}</p>` : ""}
         ${addressPanel}
-        <p class="estimate-step-note">${escapeHtml(note)}</p>
+        <p class="estimate-step-note estimate-note-pc-only">${escapeHtml(note)}</p>
       </section>
     `;
   }
