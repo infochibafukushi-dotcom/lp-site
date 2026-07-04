@@ -52,8 +52,9 @@
     if(!imageAvailable){
       return buildMissingImageBlock(screen.imageFile);
     }
+    const receiptClass = screen.pageId === "receipt-detail" ? " screen-evidence-shot--receipt" : "";
     return (
-      "<div class='screen-evidence-shot'>" +
+      "<div class='screen-evidence-shot" + receiptClass + "'>" +
       "<img src='" + escapeHtml(screen.imageSrc) + "' alt='" + escapeHtml(screen.pageTitle) + "' loading='eager'>" +
       "</div>"
     );
@@ -164,6 +165,8 @@
       ".pre-fixed-fare-screen-evidence .verification-note{margin:10px 0 0;padding:8px;background:#eef5fb;border-left:4px solid #2f6fad;font-size:9.5px;line-height:1.5;}" +
       ".pre-fixed-fare-screen-evidence .verification-note--compact{margin-top:8px;font-size:9px;}" +
       ".pre-fixed-fare-screen-evidence .screen-evidence-shot{margin:0 0 8px;}" +
+      ".pre-fixed-fare-screen-evidence .screen-evidence-shot--receipt{display:flex;justify-content:center;align-items:flex-start;margin:0 auto 8px;}" +
+      ".pre-fixed-fare-screen-evidence .screen-evidence-shot--receipt img{width:72%;max-width:72%;margin:0 auto;max-height:180mm;object-fit:contain;object-position:top center;}" +
       ".pre-fixed-fare-screen-evidence .screen-evidence-shot img{display:block;width:100%;max-height:210mm;object-fit:contain;object-position:top center;}" +
       ".pre-fixed-fare-screen-evidence .screen-evidence-shot--missing{border:2px dashed #94a3b8;background:#f8fafc;min-height:120mm;padding:24px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;}" +
       ".pre-fixed-fare-screen-evidence .screen-evidence-shot-missing-label{font-size:14px;font-weight:700;color:#475569;margin:0 0 8px;}" +
