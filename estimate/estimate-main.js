@@ -1590,11 +1590,8 @@
     return state.hasRouteCalculatedOnce ? "再計算する" : "ルート計算をする";
   }
 
-  function shouldShowMobileReservationBar(result){
+  function isStickyReserveReady(result){
     if(!result || !(Number(result.total) > 0)){
-      return false;
-    }
-    if(!isFlowComplete()){
       return false;
     }
     if(!state.routePlan){
@@ -1606,20 +1603,27 @@
     return true;
   }
 
-  function renderMobileReservationBar(result){
-    if(!shouldShowMobileReservationBar(result)){
-      return "";
+  function renderStickyReserveBar(result, options){
+    const showReserve = options?.showReserve === true && isStickyReserveReady(result);
+    if(showReserve){
+      return (
+        '<div class="estimate-sticky-reserve-bar estimate-sticky-reserve-bar--ready estimate-mobile-reserve-bar" id="estimateMobileReserveBar">' +
+          '<div class="estimate-sticky-reserve-bar-inner estimate-mobile-reserve-bar-inner">' +
+            '<div class="estimate-sticky-reserve-bar-amount estimate-mobile-reserve-bar-amount">' +
+              '<span class="estimate-sticky-reserve-bar-label estimate-mobile-reserve-bar-label">事前確定運賃</span>' +
+              '<span class="estimate-sticky-reserve-bar-value estimate-mobile-reserve-bar-value">' + escapeHtml(formatResultTotalAmount(result.total)) + "</span>" +
+            "</div>" +
+            '<a class="estimate-sticky-reserve-bar-btn estimate-mobile-reserve-bar-btn" id="estimateMobileReserveBarBtn" href="' + escapeAttr(getReservationUrl()) + '" rel="noopener noreferrer">' +
+              escapeHtml(getReservationCtaLabel()) +
+            "</a>" +
+          "</div>" +
+        "</div>"
+      );
     }
     return (
-      '<div class="estimate-mobile-reserve-bar" id="estimateMobileReserveBar" hidden>' +
-        '<div class="estimate-mobile-reserve-bar-inner">' +
-          '<div class="estimate-mobile-reserve-bar-amount">' +
-            '<span class="estimate-mobile-reserve-bar-label">事前確定運賃</span>' +
-            '<span class="estimate-mobile-reserve-bar-value">' + escapeHtml(formatResultTotalAmount(result.total)) + "</span>" +
-          "</div>" +
-          '<a class="estimate-mobile-reserve-bar-btn" id="estimateMobileReserveBarBtn" href="' + escapeAttr(getReservationUrl()) + '" rel="noopener noreferrer">' +
-            escapeHtml(getReservationCtaLabel()) +
-          "</a>" +
+      '<div class="estimate-sticky-reserve-bar estimate-sticky-reserve-bar--guide estimate-mobile-reserve-bar" id="estimateMobileReserveBar">' +
+        '<div class="estimate-sticky-reserve-bar-inner estimate-mobile-reserve-bar-inner">' +
+          '<p class="estimate-sticky-reserve-bar-guide">次の画面で合計金額を確認し、その内容で予約へ進めます。</p>' +
         "</div>" +
       "</div>"
     );
@@ -1637,38 +1641,29 @@
     const page = document.querySelector(".estimate-page") || document.body;
     if(!bar){
       page.classList.remove("estimate-has-mobile-reserve-bar");
+      page.classList.remove("estimate-has-sticky-reserve-bar");
       return;
     }
     if(visible){
       bar.hidden = false;
       page.classList.add("estimate-has-mobile-reserve-bar");
+      page.classList.add("estimate-has-sticky-reserve-bar");
     }else{
       bar.hidden = true;
       page.classList.remove("estimate-has-mobile-reserve-bar");
+      page.classList.remove("estimate-has-sticky-reserve-bar");
     }
   }
 
   function bindMobileReserveBarVisibility(){
     disconnectMobileReserveBarObserver();
-    if(!mobileReserveBarResizeBound){
-      mobileReserveBarResizeBound = true;
-      window.addEventListener("resize", function(){
-        if(mobileReserveBarResizeTimer){
-          clearTimeout(mobileReserveBarResizeTimer);
-        }
-        mobileReserveBarResizeTimer = setTimeout(function(){
-          bindMobileReserveBarVisibility();
-        }, 150);
-      });
-    }
     const bar = document.getElementById("estimateMobileReserveBar");
     if(!bar){
       setMobileReserveBarVisible(false);
       return;
     }
-    const isMobile = window.matchMedia && window.matchMedia("(max-width: 767px)").matches;
-    // 見積結果表示中はスクロール位置に関係なく常時表示する
-    setMobileReserveBarVisible(isMobile);
+    // 見積ページでは常時表示（案内 or 予約CTA）
+    setMobileReserveBarVisible(true);
   }
 
   function getDistanceRouteProceedLabel(){
@@ -1810,12 +1805,12 @@
   }
 
   function getRouteSelectButtonLabel(isSelected){
-    return isSelected ? "このルートで料金確認中" : "このルートで料金確認";
+    return isSelected ? "合計金額を確認中" : "合計金額を確認";
   }
 
   function renderRouteSelectButtonLabel(isSelected){
     const fullLabel = getRouteSelectButtonLabel(isSelected);
-    const shortLabel = isSelected ? "確認中" : "料金確認";
+    const shortLabel = isSelected ? "確認中" : "合計確認";
     return (
       '<span class="estimate-route-select-btn-label-full">' + escapeHtml(fullLabel) + "</span>" +
       '<span class="estimate-route-select-btn-label-short">' + escapeHtml(shortLabel) + "</span>"
@@ -1823,18 +1818,22 @@
   }
 
   function renderRouteCardFareLine(routeResult){
-    const preFixedAmount = Number(routeResult?.quoteSnapshot?.adjustedDistanceFareAmount) || 0;
-    const totalAmount = Number(routeResult?.total) || 0;
-    if(preFixedAmount > 0){
-      return '<div class="estimate-route-card-fare-line">見積金額：' + escapeHtml(formatYen(preFixedAmount)) + "</div>";
+    if(!routeResult){
+      return "";
     }
-    if(totalAmount > 0){
-      return '<div class="estimate-route-card-fare-line">見積金額：' + escapeHtml(formatYen(totalAmount)) + "</div>";
-    }
-    if(routeResult){
-      return '<div class="estimate-route-card-fare-line">見積金額：算定中</div>';
-    }
-    return "";
+    const snapshot = routeResult.quoteSnapshot || {};
+    // 運賃目安: ルート運賃部分（介助料等を含まない）
+    const routeFare = Number(snapshot.adjustedDistanceFareAmount) || Number(snapshot.fixedFareTotal) || 0;
+    // 概算合計: そのルート選択時の見積総額（有料道路実費は含まない）
+    const estimateTotal = Number(routeResult.total) || 0;
+    const routeFareText = routeFare > 0 ? formatYen(routeFare) : "算定中";
+    const totalText = estimateTotal > 0 ? formatYen(estimateTotal) : "算定中";
+    return (
+      '<div class="estimate-route-card-fare-block">' +
+        '<div class="estimate-route-card-fare-line estimate-route-card-fare-line--route">運賃目安：' + escapeHtml(routeFareText) + "</div>" +
+        '<div class="estimate-route-card-fare-line estimate-route-card-fare-line--total">概算合計：' + escapeHtml(totalText) + "</div>" +
+      "</div>"
+    );
   }
 
   function renderSharedTollNote(hasTollNote){
@@ -3098,8 +3097,10 @@
   function renderEstimateTopBar(){
     return (
       '<header class="estimate-top-bar">' +
-        '<button type="button" class="estimate-top-bar-btn estimate-top-bar-reset" id="estimateResetBtn">最初からやり直す</button>' +
-        '<a class="estimate-top-bar-btn estimate-top-bar-home" href="../index.html">ホーム</a>' +
+        '<div class="estimate-top-bar-inner">' +
+          '<button type="button" class="estimate-top-bar-btn estimate-top-bar-reset" id="estimateResetBtn">最初からやり直す</button>' +
+          '<a class="estimate-top-bar-btn estimate-top-bar-home" href="../index.html">ホームに戻る</a>' +
+        "</div>" +
       "</header>"
     );
   }
@@ -3649,6 +3650,7 @@
     disconnectMobileReserveBarObserver();
     const page = document.querySelector(".estimate-page") || document.body;
     page.classList.remove("estimate-has-mobile-reserve-bar");
+    page.classList.remove("estimate-has-sticky-reserve-bar");
 
     root.innerHTML = `
       ${renderEstimateTopBar()}
@@ -3660,7 +3662,7 @@
         ${stepsHtml}
         ${allComplete ? renderResult(result) : ""}
       </div>
-      ${allComplete ? renderMobileReservationBar(result) : ""}
+      ${renderStickyReserveBar(result, { showReserve: allComplete })}
     `;
 
     bindEvents();
@@ -3845,7 +3847,7 @@
     }
 
     const oldMobileBar = document.getElementById("estimateMobileReserveBar");
-    const mobileBarHtml = renderMobileReservationBar(result);
+    const mobileBarHtml = renderStickyReserveBar(result, { showReserve: true });
     if(mobileBarHtml){
       const barTemp = document.createElement("div");
       barTemp.innerHTML = mobileBarHtml;
