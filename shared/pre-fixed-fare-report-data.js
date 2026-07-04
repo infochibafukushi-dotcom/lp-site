@@ -75,24 +75,26 @@
         { item: "複数ルート取得", status: "LP側実装済み", basis: "estimate/estimate-distance-api.js（4系統候補生成＋重複排除）" },
         { item: "旅客によるルート選択", status: "2件以上取得時は実装済み", basis: "estimate/estimate-main.js（preFixedFareConfirmable=true時のみ選択UI）" },
         { item: "ルート候補生成", status: "LP側実装済み", basis: "おすすめ・距離優先・幹線道路・有料道路利用の4系統（shared/pre-fixed-fare-route-waypoints.js）" },
-        { item: "選択ルート保存", status: "LP側実装済み / API側未確認", basis: "estimate/estimate-calc.js quoteSnapshot（routeCandidates / selectedRoute*）" },
+        { item: "選択ルート保存", status: "実装済み", basis: "estimate/estimate-calc.js quoteSnapshot（routeCandidates / selectedRoute*）→ shared/estimate-quote-register.js registerQuoteFromHandoff() → reservation-v4/worker.js registerQuote() → D1 quotes" },
         { item: "候補1件時の扱い", status: "通常見積または確認対応", basis: "estimate/estimate-main.js（警告表示・予約URLにfareConfirm=review）" },
         { item: "往復時の往路・復路別算定", status: "LP側実装済み", basis: "estimate/estimate-main.js, estimate/estimate-distance-api.js（片道×2を廃止）" },
         { item: "往復・帰り未定時の復路扱い", status: "復路は確認対応", basis: "estimate/estimate-calc.js（preFixedFareScope=outbound_only）" },
-        { item: "予約API/DB保存", status: "未確認", basis: "shared/estimate-quote-register.js 経由、API/DB側要確認" },
-        { item: "運転者への同一ルート表示", status: "未確認", basis: "reservation-v4 / driver画面（ワークスペース外）" }
+        { item: "予約API/DB保存", status: "実装済み", basis: "reservation-v4/worker.js registerQuote(), handleCreateReservation(), createReservationFixedFare(), insertQuoteConsent() → D1 quotes / reservations / quote_consents" },
+        { item: "運転者への同一ルート表示", status: "実装済み", basis: "care-taxi-meter/src/pages/ReservationDetailPage.tsx, CasePage.tsx, components/case/PreFixedFareConfirmedRouteDialog.tsx, services/preFixedFareRoute.ts" }
       ],
       toll: [
         { item: "旅客の有料道路利用有無選択", status: "実装済み", basis: "estimate/estimate-main.js（roadType ラジオ）" },
         { item: "選択結果をルート算定へ反映", status: "実装済み", basis: "estimate/estimate-distance-api.js（routeModifiers）" },
         { item: "有料道路代の運賃区分管理", status: "実装済み", basis: "estimate/estimate-calc.js（expensesへ別枠）" },
-        { item: "予約API/DBへの保存", status: "未確認", basis: "API/DB実装（ワークスペース外）" }
+        { item: "予約API/DBへの保存", status: "実装済み", basis: "reservation-v4/worker.js registerQuote(), createReservationFixedFare() → D1 quotes.use_toll / reservations.use_toll" }
       ],
       mapRoute: [
         { item: "API名", status: "実装済み", basis: "Google Routes API（estimate/estimate-distance-api.js）" },
         { item: "保存項目", status: "実装済み", basis: "distanceMeters, durationSeconds, encodedPolyline, routeToken, tollInfo" },
         { item: "routePlan項目", status: "実装済み", basis: "estimate/estimate-main.js（provider, roadType, selectedRouteId, routes等）" },
-        { item: "予約API/DB永続化", status: "未確認", basis: "shared/estimate-quote-register.js 経由、保存先はAPI/DB側要確認" }
+        { item: "予約API/DB永続化", status: "実装済み", basis: "shared/estimate-quote-register.js → reservation-v4/worker.js registerQuote(), createReservationFixedFare() → D1 quotes / reservations" },
+        { item: "snapshotHash生成・保存・照合", status: "実装済み", basis: "reservation-v4/snapshot-hash.js hashSnapshot(), driver-reservations.js buildReservationIntegrity(), startFixedFareRun()" },
+        { item: "メーター運行開始・完了", status: "実装済み", basis: "reservation-v4/driver-reservations.js startFixedFareRun(), completeFixedFareRun(), care-taxi-meter/src/services/reservationApi.ts → D1 meter_fixed_fare_runs, Firestore caseRecords" }
       ],
       snapshot: {
         confirmed: [
@@ -100,13 +102,16 @@
           "選択内容（usageSummary）",
           "ルート情報（routePlan）",
           "交通圏係数（selectedTrafficZoneId / trafficZoneCoefficient）",
-          "計算結果（fixedFareBreakdown / fixedFareTotal）"
+          "計算結果（fixedFareBreakdown / fixedFareTotal）",
+          "同意情報（同意日時、同意文面、同意文面バージョン）— reservation-v4/estimate-consent.js, insertQuoteConsent() → D1 quote_consents / reservations.estimate_consent",
+          "snapshotHash（SHA-256生成・保存・照合）— reservation-v4/snapshot-hash.js, driver-reservations.js buildReservationIntegrity()",
+          "見積状態管理（active / consumed / 有効期限チェック）— quotes.status, expires_at, getQuoteRowForConsume()",
+          "メーター運行開始・完了記録 — meter_fixed_fare_runs, Firestore caseRecords"
         ],
         unconfirmed: [
-          "同意情報（同意日時、同意文面、同意文面バージョン）",
-          "snapshotHash",
-          "サーバー署名（HMAC等）",
-          "status（active / consumed / expired / canceled）のDB管理"
+          "サーバー署名（HMAC等）— 将来対応",
+          "監査提出用PDF/CSV一括出力 — 一部実装（予約CSV・管理画面閲覧あり）。監査提出用一括出力は運用開始前整備",
+          "3年保存の自動制御 — 規程対応。システム制御は運用開始前整備"
         ]
       },
       requirements: [
@@ -115,9 +120,11 @@
         { requirement: "2以上のルートから旅客が選択", policy: "4系統候補を生成し2件以上取得時のみ選択可", current: "本システムでは、電子地図APIにより、おすすめルート、取得候補内の距離短めルート、主要道路経由ルート、有料道路利用可ルートを生成し、実質的に異なる2件以上のルートが取得できた場合に、旅客が1つを選択して事前確定運賃を算定する。候補1件時は通常見積または確認対応とする。往復時は往路・復路を別算定し、それぞれで選択ルートを保存する。", evidence: "estimate/estimate-distance-api.js, shared/pre-fixed-fare-route-waypoints.js, estimate/estimate-main.js" },
         { requirement: "往復時の往路・復路別算定", policy: "片道距離×2を用いず往路・復路を個別にAPI算定", current: "実装済み", evidence: "routePlan.outboundRoutePlan / returnRoutePlan" },
         { requirement: "有料道路利用有無を選択", policy: "roadTypeを保存しルート算定へ反映", current: "実装済み", evidence: "roadType" },
-        { requirement: "運賃額と割引前後を提示", policy: "表示UIとsnapshotに保存", current: "未確認", evidence: "fareBeforeDiscount" },
-        { requirement: "注意事項を提示し同意取得", policy: "consentAt等を保存", current: "未確認", evidence: "consentAt" },
-        { requirement: "各種料金は運賃と区分", policy: "serviceFees / expensesとして別表示", current: "実装済み", evidence: "serviceFees" }
+        { requirement: "運賃額と割引前後を提示", policy: "見積・同意時点では割引適用前の運賃本体を提示し、障害者割引等は精算時に記録", current: "一部実装：見積・同意時点では割引適用前の運賃本体（事前確定運賃額）を提示。障害者割引等は精算時に割引対象運賃・割引額・精算後金額を記録。見積・予約時の割引前後表示と snapshot 保存は運用開始前又は将来の改善対象", evidence: "lp-site/data/estimate-config.json disclaimer、care-taxi-meter/services/fare.ts buildFixedFareBreakdown()、caseRecords" },
+        { requirement: "注意事項を提示し同意取得", policy: "consentAt等を保存", current: "実装済み", evidence: "reservation-v4/estimate-consent.js, quote_consents.consent_at" },
+        { requirement: "各種料金は運賃と区分", policy: "serviceFees / expensesとして別表示", current: "実装済み", evidence: "serviceFees" },
+        { requirement: "snapshotHash生成・保存・照合", policy: "SHA-256で生成し運行開始時に検証", current: "実装済み", evidence: "reservation-v4/snapshot-hash.js, driver-reservations.js buildReservationIntegrity()" },
+        { requirement: "メーター運行開始・完了", policy: "Driver APIで運行状態を記録", current: "実装済み", evidence: "driver-reservations.js startFixedFareRun()/completeFixedFareRun(), meter_fixed_fare_runs, caseRecords" }
       ]
     };
   }
@@ -145,7 +152,7 @@
       purpose: [
         "本資料は、一般乗用旅客自動車運送事業の事前確定運賃について、関東運輸局の公示要件に対するシステム対応を説明するための資料である。",
         "利用者向け見積書ではなく、運輸局説明用のシステム概要書である。",
-        "実装済み項目と未確認項目を分けて記載する。"
+        "実装済み項目と未整備項目を分けて記載する。"
       ],
       notices: {
         basis: [
@@ -162,7 +169,7 @@
           "時間距離併用制運賃は除く",
           "関東運輸局長が定めた係数を乗じる",
           "1円単位を四捨五入する",
-          "割増・割引を適用する場合は割引前後を表示する",
+          "割増・割引を適用する場合は、精算時に割引対象運賃・割引額・精算後金額を記録する（見積・同意時点での割引前後表示は運用開始前又は将来の改善対象）",
           "各種料金は事前確定運賃とは区分して適用する"
         ],
         formulaText: "事前確定運賃 ＝ 距離制運賃 × 平準化係数（1円単位四捨五入）"
@@ -193,8 +200,8 @@
       tollRows: impl.toll,
       userNoticeItems: [
         "走行予定ルートまたは主要経由地点を提示する",
-        "事前確定運賃額を提示する",
-        "割引を適用する場合は割引前後の運賃額を提示する",
+        "事前確定運賃額（割引適用前の運賃本体）を提示する",
+        "障害者割引・福祉タクシー券は見積額に反映せず、注意書きでその旨を表示する",
         "注意事項を提示する",
         "旅客の了承を得る",
         "同意日時、同意文面、同意文面バージョン、見積番号、snapshotHashを保存する"
@@ -214,7 +221,7 @@
           "予約IDとの紐付け",
           "consumed日時"
         ],
-        note: "現状確認できないものは API/DB側の追加確認が必要"
+        note: "active / consumed / 有効期限チェックは実装済み（quotes.status, expires_at）。expired / canceled の自動遷移は運用開始前整備"
       },
       fixedAfterReservation: [
         "予約後はquoteSnapshotを単一ソースとして扱う",
@@ -224,23 +231,18 @@
       ],
       requirementRows: impl.requirements,
       unimplementedOrUnconfirmed: [
-        "予約API/DBへの選択ルート保存",
-        "利用者同意日時の保存",
-        "同意文面バージョン保存",
-        "snapshotHashのサーバー検証",
-        "active / consumed / expired 状態管理",
-        "予約側でのquoteSnapshot固定表示",
-        "メール・管理画面・PDFの単一ソース化",
-        "運転者画面への同一ルート表示"
+        "監査提出用PDF/CSV一括出力（予約CSV・管理画面閲覧は一部実装済み。監査提出用一括出力は運用開始前整備）",
+        "見積・予約時点での割引前後表示と snapshot 保存（精算時の割引記録は care-taxi-meter で一部対応済み）",
+        "見積 expired / canceled 状態の自動遷移",
+        "サーバー署名（HMAC等）— 将来対応",
+        "3年保存の自動制御 — 規程対応。システム制御は運用開始前整備"
       ],
       priorities: [
-        "有料道路利用有無選択の保存強化",
-        "利用者同意日時・同意文面保存",
-        "snapshotHash / HMAC署名検証",
-        "active / consumed / expired 状態管理",
-        "予約側quoteSnapshot固定表示",
-        "メール・PDF・管理画面の単一ソース化",
-        "運転者画面への同一ルート表示"
+        "監査提出用PDF/CSV一括出力の整備",
+        "見積・予約時点での割引前後表示と snapshot 保存",
+        "見積 expired / canceled 状態の自動遷移",
+        "HMAC署名（将来対応）",
+        "3年保存のシステム制御整備"
       ],
       appendices: {
         configuredTrafficZones: trafficZones.map(function(zone){

@@ -71,8 +71,8 @@
       patchRequirementRow(
         regulatory.requirementRows,
         "運賃額と割引前後を提示",
-        "運賃額・明細区分はコード上確認済み",
-        "estimate-main.js 見積結果画面、fixedFareBreakdown / serviceFees（割引適用時の前後表示は運用開始前確認項目）"
+        "一部実装：見積・同意時点では割引適用前の運賃本体を提示。障害者割引等は精算時に記録",
+        "lp-site/data/estimate-config.json disclaimer、care-taxi-meter/services/fare.ts buildFixedFareBreakdown()、caseRecords"
       ),
       "注意事項を提示し同意取得",
       "同意導線・保存はコード・API・DB上確認済み",
@@ -196,7 +196,7 @@
         "運転者画面における同一ルートまたは主要経由地点の目視確認",
         "通常メーター新規運行導線の目視確認",
         "事前確定運賃M以外の通常メーターモード基本動作確認",
-        "割引適用時の運賃前後表示の目視確認（福祉施策等を適用する場合）"
+        "精算時の障害者割引・福祉タクシー券処理の目視確認（割引対象運賃・割引額・充当額の記録）"
       ],
       appendix: global.PreFixedFareApprovalAppendixData
         ? global.PreFixedFareApprovalAppendixData.buildReportData()
