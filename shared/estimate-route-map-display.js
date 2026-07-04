@@ -21,14 +21,16 @@
       abLabel: "A",
       oneWayLabel: "A 時間優先ルート",
       roundTripLabel: "A 時間優先の往復ルート",
-      color: ROUTE_COLORS.routeA
+      color: ROUTE_COLORS.routeA,
+      lineStyle: "solid"
     },
     general_road_priority: {
       key: "routeB",
       abLabel: "B",
       oneWayLabel: "B 一般道優先ルート",
       roundTripLabel: "B 一般道優先の往復ルート",
-      color: ROUTE_COLORS.routeB
+      color: ROUTE_COLORS.routeB,
+      lineStyle: "dashed"
     }
   };
 
@@ -131,6 +133,7 @@
       key: meta.key,
       abLabel: meta.abLabel,
       color: meta.color,
+      lineStyle: meta.lineStyle || "solid",
       path: path,
       label: isRoundTrip ? meta.roundTripLabel : meta.oneWayLabel,
       isAbRoute: true
@@ -490,15 +493,15 @@
         lineItems.push(
           '<div class="estimate-route-map-legend-item">' +
             '<span class="estimate-route-map-legend-swatch estimate-route-map-legend-swatch--route-a" aria-hidden="true"></span>' +
-            "<span>" + (abLabels.routeA || "A 時間優先ルート") + "</span>" +
+            "<span>" + (abLabels.routeA || "A 時間優先ルート") + "（実線）</span>" +
           "</div>"
         );
       }
       if(keys.has("routeB")){
         lineItems.push(
           '<div class="estimate-route-map-legend-item">' +
-            '<span class="estimate-route-map-legend-swatch estimate-route-map-legend-swatch--route-b" aria-hidden="true"></span>' +
-            "<span>" + (abLabels.routeB || "B 一般道優先ルート") + "</span>" +
+            '<span class="estimate-route-map-legend-swatch estimate-route-map-legend-swatch--route-b estimate-route-map-legend-swatch--dashed" aria-hidden="true"></span>' +
+            "<span>" + (abLabels.routeB || "B 一般道優先ルート") + "（破線）</span>" +
           "</div>"
         );
       }

@@ -2376,12 +2376,13 @@
           fullscreenControl: false
         });
 
+        // A(実線)を先に、B(破線)を後に描画し、重なり時も破線で区別できるようにする
         const orderedSegments = useAbSegments
           ? segments.slice().sort(function(left, right){
             if(left.key === right.key){
               return 0;
             }
-            return left.key === "routeB" ? -1 : 1;
+            return left.key === "routeA" ? -1 : 1;
           })
           : segments;
 
@@ -2389,13 +2390,33 @@
           if(!segment.path || segment.path.length < 2){
             return;
           }
-          const routeLine = new window.google.maps.Polyline({
-            path: segment.path,
-            geodesic: true,
-            strokeColor: segment.color,
-            strokeOpacity: useAbSegments ? 0.88 : 0.95,
-            strokeWeight: 5
-          });
+          const isDashedAbRoute = useAbSegments && (segment.lineStyle === "dashed" || segment.key === "routeB");
+          const routeLine = isDashedAbRoute
+            ? new window.google.maps.Polyline({
+              path: segment.path,
+              geodesic: true,
+              strokeColor: segment.color,
+              strokeOpacity: 0,
+              strokeWeight: 5,
+              icons: [{
+                icon: {
+                  path: "M 0,-1 0,1",
+                  strokeOpacity: 0.95,
+                  strokeColor: segment.color,
+                  scale: 4,
+                  strokeWeight: 2
+                },
+                offset: "0",
+                repeat: "12px"
+              }]
+            })
+            : new window.google.maps.Polyline({
+              path: segment.path,
+              geodesic: true,
+              strokeColor: segment.color,
+              strokeOpacity: useAbSegments ? 0.82 : 0.95,
+              strokeWeight: useAbSegments ? 6 : 5
+            });
           routeLine.setMap(map);
         });
 

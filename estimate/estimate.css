@@ -651,7 +651,16 @@
   background:#C62828;
 }
 .estimate-route-map-legend-swatch--route-b{
-  background:#1565C0;
+  background:repeating-linear-gradient(
+    90deg,
+    #1565C0 0,
+    #1565C0 4px,
+    transparent 4px,
+    transparent 7px
+  );
+}
+.estimate-route-map-legend-swatch--dashed{
+  height:4px;
 }
 .estimate-route-map-error{
   margin:0;
