@@ -22,6 +22,7 @@
     routeCalcError: "",
     routeCalcLoading: false,
     hasRouteCalculatedOnce: false,
+    focusedStepId: "",
     distanceRouteReviewed: false,
     estimateNumber: "",
     estimateCreatedAt: "",
@@ -468,15 +469,96 @@
     }
   }
 
-  function getFlowState(){
-    const flow = getStepFlow();
+  function getNaturalActiveIndex(flow){
     let activeIndex = flow.findIndex(function(step){
       return !isStepComplete(step.id);
     });
     if(activeIndex < 0){
       activeIndex = flow.length;
     }
-    return { flow: flow, activeIndex: activeIndex };
+    return activeIndex;
+  }
+
+  function getFlowState(){
+    const flow = getStepFlow();
+    if(state.focusedStepId){
+      const focusedIndex = flow.findIndex(function(step){
+        return step.id === state.focusedStepId;
+      });
+      if(focusedIndex >= 0){
+        return { flow: flow, activeIndex: focusedIndex };
+      }
+      state.focusedStepId = "";
+    }
+    return { flow: flow, activeIndex: getNaturalActiveIndex(flow) };
+  }
+
+  function getStepValue(stepId){
+    switch(stepId){
+      case "mobility":
+        return state.mobilityId;
+      case "assistance":
+        return state.assistanceId;
+      case "stair":
+        return state.stairId;
+      case "trip":
+        return state.tripTypeId;
+      case "addon":
+        return state.roundTripAddonId;
+      default:
+        return "";
+    }
+  }
+
+  function goBackToPreviousStep(){
+    const flow = getStepFlow();
+    if(!flow.length){
+      return;
+    }
+    let currentIndex = state.focusedStepId
+      ? flow.findIndex(function(step){
+        return step.id === state.focusedStepId;
+      })
+      : getNaturalActiveIndex(flow);
+    if(currentIndex < 0){
+      currentIndex = flow.length;
+    }
+    if(currentIndex <= 0){
+      return;
+    }
+    state.focusedStepId = flow[currentIndex - 1].id;
+    state.lastActiveStepId = "";
+    renderPage();
+  }
+
+  function renderStepBackButton(stepNum){
+    if(stepNum <= 1){
+      return "";
+    }
+    return (
+      '<button type="button" class="estimate-step-back-btn" data-step-back="1" aria-label="前のステップに戻る">' +
+        "← 戻る" +
+      "</button>"
+    );
+  }
+
+  function applyStepChoice(stepId, nextValue, options){
+    const opts = options || {};
+    const previousValue = getStepValue(stepId);
+    const changed = String(previousValue || "") !== String(nextValue || "");
+    state.focusedStepId = "";
+    if(typeof opts.assign === "function"){
+      opts.assign(nextValue);
+    }
+    if(changed){
+      if(typeof opts.onChanged === "function"){
+        opts.onChanged(nextValue);
+      }
+    }else if(typeof opts.onUnchanged === "function"){
+      opts.onUnchanged(nextValue);
+    }
+    state.lastActiveStepId = "";
+    renderPage();
   }
 
   function getStepSummaryText(step){
@@ -600,6 +682,7 @@
     if(stepId === "distance"){
       state.routeCalcLoading = false;
     }
+    state.focusedStepId = "";
     state.estimateNumber = "";
     state.estimateCreatedAt = "";
     state.selectionFingerprint = "";
@@ -633,6 +716,7 @@
     state.routeCalcError = "";
     state.routeCalcLoading = false;
     state.hasRouteCalculatedOnce = false;
+    state.focusedStepId = "";
     state.distanceRouteReviewed = false;
     state.estimateNumber = "";
     state.estimateCreatedAt = "";
@@ -719,6 +803,7 @@
 
     return `
       <section class="estimate-step estimate-step--active" data-step-id="${escapeAttr(step.id)}">
+        ${renderStepBackButton(stepNum)}
         <div class="estimate-step-head">
           <div>
             <div class="estimate-step-label">STEP${stepNum}</div>
@@ -747,6 +832,7 @@
 
     return `
       <section class="estimate-step estimate-step--active" data-step-id="${escapeAttr(step.id)}">
+        ${renderStepBackButton(stepNum)}
         <div class="estimate-step-head">
           <div>
             <div class="estimate-step-label">STEP${stepNum}</div>
@@ -772,6 +858,7 @@
 
     return `
       <section class="estimate-step estimate-step--active" data-step-id="${escapeAttr(step.id)}">
+        ${renderStepBackButton(stepNum)}
         <div class="estimate-step-head">
           <div>
             <div class="estimate-step-label">STEP${stepNum}</div>
@@ -806,6 +893,7 @@
 
     return `
       <section class="estimate-step estimate-step--active" data-step-id="${escapeAttr(step.id)}">
+        ${renderStepBackButton(stepNum)}
         <div class="estimate-step-head">
           <div>
             <div class="estimate-step-label">STEP${stepNum}</div>
@@ -1677,6 +1765,24 @@
         colorClass: "b"
       };
     }
+    if(strategy === "shorter_distance"){
+      return {
+        abLabel: "C",
+        strategy: strategy,
+        fullLabel: isRoundTrip ? "距離優先の往復ルート" : "距離優先ルート",
+        shortLabel: "距離優先",
+        colorClass: "c"
+      };
+    }
+    if(strategy === "toll_allowed"){
+      return {
+        abLabel: "D",
+        strategy: strategy,
+        fullLabel: isRoundTrip ? "高速道路の往復ルート" : "高速道路ルート",
+        shortLabel: "高速道路",
+        colorClass: "d"
+      };
+    }
     return null;
   }
 
@@ -2475,13 +2581,18 @@
           fullscreenControl: false
         });
 
-        // A(実線)を先に、B(破線)を後に描画し、重なり時も破線と矢印で区別できるようにする
+        // A/C/D(実線)のあと B(破線)を描画し、重なり時も破線と矢印で区別できるようにする
         const orderedSegments = useAbSegments
           ? segments.slice().sort(function(left, right){
-            if(left.key === right.key){
-              return 0;
-            }
-            return left.key === "routeA" ? -1 : 1;
+            const leftOrder = Number(left.drawOrder);
+            const rightOrder = Number(right.drawOrder);
+            const leftValue = Number.isFinite(leftOrder)
+              ? leftOrder
+              : (left.key === "routeA" ? 0 : left.key === "routeC" ? 1 : left.key === "routeD" ? 2 : left.key === "routeB" ? 3 : 9);
+            const rightValue = Number.isFinite(rightOrder)
+              ? rightOrder
+              : (right.key === "routeA" ? 0 : right.key === "routeC" ? 1 : right.key === "routeD" ? 2 : right.key === "routeB" ? 3 : 9);
+            return leftValue - rightValue;
           })
           : segments;
 
@@ -2704,6 +2815,7 @@
 
       syncStateFromRoutePlan(routePlan);
       state.hasRouteCalculatedOnce = true;
+      state.focusedStepId = "";
       state.routeCalcError = "";
       state.distanceRouteReviewed = shouldAutoAcknowledgeRouteReview(state.routePlan);
       invalidateEstimateNumberIfChanged();
@@ -2881,6 +2993,7 @@
 
     return `
       <section class="estimate-step estimate-step--active${state.routePlan ? " estimate-step--has-route" : ""}" data-step-id="${escapeAttr(step.id)}">
+        ${renderStepBackButton(stepNum)}
         <div class="estimate-step-head">
           <div>
             <div class="estimate-step-label">STEP${stepNum}</div>
@@ -3563,6 +3676,13 @@
         if(stepId) openStepForEdit(stepId);
         return;
       }
+      const stepBackBtn = event.target.closest("[data-step-back]");
+      if(stepBackBtn){
+        event.preventDefault();
+        event.stopPropagation();
+        goBackToPreviousStep();
+        return;
+      }
       const resetBtn = event.target.closest("#estimateResetBtn, #estimateResetBtnBottom");
       if(resetBtn){
         event.preventDefault();
@@ -3785,44 +3905,70 @@
 
   function bindEvents(){
     bindChoiceGroup("mobilityChoice", function(value){
-      state.mobilityId = value;
-      clearStepsAfter("mobility");
-      syncAssistanceForMobility();
-      state.lastActiveStepId = "";
-      renderPage();
+      applyStepChoice("mobility", value, {
+        assign: function(nextValue){
+          state.mobilityId = nextValue;
+        },
+        onChanged: function(){
+          clearStepsAfter("mobility");
+          syncAssistanceForMobility();
+        },
+        onUnchanged: function(){
+          syncAssistanceForMobility();
+        }
+      });
     });
 
     bindChoiceGroup("assistanceChoice", function(value){
-      state.assistanceId = value;
-      clearStepsAfter("assistance");
-      state.lastActiveStepId = "";
-      renderPage();
+      applyStepChoice("assistance", value, {
+        assign: function(nextValue){
+          state.assistanceId = nextValue;
+        },
+        onChanged: function(){
+          clearStepsAfter("assistance");
+        }
+      });
     });
 
     bindChoiceGroup("stairChoice", function(value){
-      state.stairId = value;
-      clearStepsAfter("stair");
-      state.lastActiveStepId = "";
-      renderPage();
+      applyStepChoice("stair", value, {
+        assign: function(nextValue){
+          state.stairId = nextValue;
+        },
+        onChanged: function(){
+          clearStepsAfter("stair");
+        }
+      });
     });
 
     bindChoiceGroup("tripChoice", function(value){
-      state.tripTypeId = value;
-      state.roundTripAddonId = "";
-      if(value !== "round-trip"){
-        clearReturnPlanInputs();
-      }
-      clearStepsAfter("trip");
-      syncRoundTripAddon();
-      state.lastActiveStepId = "";
-      renderPage();
+      applyStepChoice("trip", value, {
+        assign: function(nextValue){
+          state.tripTypeId = nextValue;
+        },
+        onChanged: function(nextValue){
+          state.roundTripAddonId = "";
+          if(nextValue !== "round-trip"){
+            clearReturnPlanInputs();
+          }
+          clearStepsAfter("trip");
+          syncRoundTripAddon();
+        },
+        onUnchanged: function(){
+          syncRoundTripAddon();
+        }
+      });
     });
 
     bindChoiceGroup("addonChoice", function(value){
-      state.roundTripAddonId = value;
-      clearStepsAfter("addon");
-      state.lastActiveStepId = "";
-      renderPage();
+      applyStepChoice("addon", value, {
+        assign: function(nextValue){
+          state.roundTripAddonId = nextValue;
+        },
+        onChanged: function(){
+          clearStepsAfter("addon");
+        }
+      });
     });
 
     bindChoiceGroup("returnPlanType", function(value){

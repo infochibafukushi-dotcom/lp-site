@@ -4,7 +4,9 @@
     stop: "#2E7D32",
     return: "#C62828",
     routeA: "#C62828",
-    routeB: "#1565C0"
+    routeB: "#1565C0",
+    routeC: "#F9A825",
+    routeD: "#212121"
   };
 
   const ROUTE_COLOR_HEX = {
@@ -12,27 +14,63 @@
     stop: "0x2E7D32FF",
     return: "0xC62828FF",
     routeA: "0xC62828FF",
-    routeB: "0x1565C0FF"
+    routeB: "0x1565C0FF",
+    routeC: "0xF9A825FF",
+    routeD: "0x212121FF"
   };
 
-  const AB_ROUTE_META = {
+  const CANDIDATE_ROUTE_META = {
     time_priority: {
       key: "routeA",
       abLabel: "A",
       oneWayLabel: "A 時間優先ルート",
       roundTripLabel: "A 時間優先の往復ルート",
+      legendLabel: "A 赤線：時間優先ルート",
       color: ROUTE_COLORS.routeA,
-      lineStyle: "solid"
+      lineStyle: "solid",
+      drawOrder: 0
     },
     general_road_priority: {
       key: "routeB",
       abLabel: "B",
       oneWayLabel: "B 一般道優先ルート",
       roundTripLabel: "B 一般道優先の往復ルート",
+      legendLabel: "B 青点線：一般道優先ルート",
       color: ROUTE_COLORS.routeB,
-      lineStyle: "dashed"
+      lineStyle: "dashed",
+      drawOrder: 3
+    },
+    shorter_distance: {
+      key: "routeC",
+      abLabel: "C",
+      oneWayLabel: "C 距離優先ルート",
+      roundTripLabel: "C 距離優先の往復ルート",
+      legendLabel: "C 黄線：距離優先ルート",
+      color: ROUTE_COLORS.routeC,
+      lineStyle: "solid",
+      drawOrder: 1
+    },
+    toll_allowed: {
+      key: "routeD",
+      abLabel: "D",
+      oneWayLabel: "D 高速道路ルート",
+      roundTripLabel: "D 高速道路の往復ルート",
+      legendLabel: "D 黒線：高速道路ルート",
+      color: ROUTE_COLORS.routeD,
+      lineStyle: "solid",
+      drawOrder: 2
     }
   };
+
+  const CANDIDATE_STRATEGY_ORDER = [
+    "time_priority",
+    "general_road_priority",
+    "shorter_distance",
+    "toll_allowed"
+  ];
+
+  // 後方互換
+  const AB_ROUTE_META = CANDIDATE_ROUTE_META;
 
   function decodePolyline(encoded){
     const poly = String(encoded || "");
@@ -128,18 +166,63 @@
     const opts = options || {};
     const path = pathFromRoute(route);
     if(path.length < 2){
-      return;
+      return false;
     }
     segments.push({
       key: meta.key,
       abLabel: meta.abLabel,
       color: meta.color,
       lineStyle: meta.lineStyle || "solid",
+      drawOrder: Number(meta.drawOrder) || 0,
+      legendLabel: meta.legendLabel || meta.oneWayLabel,
       path: path,
       label: opts.isRoundTrip ? meta.roundTripLabel : meta.oneWayLabel,
       isAbRoute: true,
       legRole: opts.legRole || "outbound"
     });
+    return true;
+  }
+
+  function appendCandidateSegmentsForLegPair(segments, outboundLeg, returnLeg, isRoundTrip){
+    let hasA = false;
+    let hasB = false;
+    CANDIDATE_STRATEGY_ORDER.forEach(function(strategy){
+      const meta = CANDIDATE_ROUTE_META[strategy];
+      if(!meta){
+        return;
+      }
+      if(isRoundTrip){
+        const outboundRoute = findCandidateByStrategy(outboundLeg, strategy);
+        const returnRoute = findCandidateByStrategy(returnLeg, strategy);
+        if(!outboundRoute || !returnRoute){
+          return;
+        }
+        const outboundOk = pushAbSegment(segments, meta, outboundRoute, { isRoundTrip: true, legRole: "outbound" });
+        const returnOk = pushAbSegment(segments, meta, returnRoute, { isRoundTrip: true, legRole: "return" });
+        if(outboundOk && returnOk){
+          if(strategy === "time_priority"){
+            hasA = true;
+          }
+          if(strategy === "general_road_priority"){
+            hasB = true;
+          }
+        }
+        return;
+      }
+      const route = findCandidateByStrategy(outboundLeg, strategy);
+      if(!route){
+        return;
+      }
+      if(pushAbSegment(segments, meta, route, { isRoundTrip: false, legRole: "outbound" })){
+        if(strategy === "time_priority"){
+          hasA = true;
+        }
+        if(strategy === "general_road_priority"){
+          hasB = true;
+        }
+      }
+    });
+    return hasA && hasB;
   }
 
   function buildAbRouteMapSegments(routePlan){
@@ -148,33 +231,21 @@
       return segments;
     }
 
-    const metaA = AB_ROUTE_META.time_priority;
-    const metaB = AB_ROUTE_META.general_road_priority;
     const outboundLeg = routePlan.outboundRoutePlan;
     const returnLeg = routePlan.returnRoutePlan;
 
     if(outboundLeg && returnLeg){
-      const outboundA = findCandidateByStrategy(outboundLeg, "time_priority");
-      const outboundB = findCandidateByStrategy(outboundLeg, "general_road_priority");
-      const returnA = findCandidateByStrategy(returnLeg, "time_priority");
-      const returnB = findCandidateByStrategy(returnLeg, "general_road_priority");
-      if(outboundA && returnA && outboundB && returnB){
-        pushAbSegment(segments, metaA, outboundA, { isRoundTrip: true, legRole: "outbound" });
-        pushAbSegment(segments, metaA, returnA, { isRoundTrip: true, legRole: "return" });
-        pushAbSegment(segments, metaB, outboundB, { isRoundTrip: true, legRole: "outbound" });
-        pushAbSegment(segments, metaB, returnB, { isRoundTrip: true, legRole: "return" });
+      if(appendCandidateSegmentsForLegPair(segments, outboundLeg, returnLeg, true)){
         return segments;
       }
+      segments.length = 0;
     }
 
     const candidateSource = outboundLeg || routePlan;
-    const routeA = findCandidateByStrategy(candidateSource, "time_priority");
-    const routeB = findCandidateByStrategy(candidateSource, "general_road_priority");
-    if(routeA && routeB){
-      pushAbSegment(segments, metaA, routeA, { isRoundTrip: false, legRole: "outbound" });
-      pushAbSegment(segments, metaB, routeB, { isRoundTrip: false, legRole: "outbound" });
+    if(appendCandidateSegmentsForLegPair(segments, candidateSource, null, false)){
+      return segments;
     }
-    return segments;
+    return [];
   }
 
   function hasAbRouteMapSegments(routePlan){
@@ -485,22 +556,37 @@
     const lineItems = [];
     const isAbLegend = keys.has("routeA") || keys.has("routeB");
     if(isAbLegend){
-      if(keys.has("routeA")){
+      const legendOrder = ["routeA", "routeB", "routeC", "routeD"];
+      const legendByKey = {};
+      (segments || []).forEach(function(segment){
+        if(!segment?.key || legendByKey[segment.key]){
+          return;
+        }
+        legendByKey[segment.key] = segment;
+      });
+      legendOrder.forEach(function(key){
+        if(!keys.has(key)){
+          return;
+        }
+        const segment = legendByKey[key];
+        const meta = Object.keys(CANDIDATE_ROUTE_META).map(function(strategy){
+          return CANDIDATE_ROUTE_META[strategy];
+        }).find(function(item){
+          return item.key === key;
+        });
+        const swatchClass = "estimate-route-map-legend-swatch estimate-route-map-legend-swatch--" +
+          (key === "routeA" ? "route-a"
+            : key === "routeB" ? "route-b estimate-route-map-legend-swatch--dashed"
+            : key === "routeC" ? "route-c"
+            : "route-d");
+        const label = segment?.legendLabel || meta?.legendLabel || segment?.label || key;
         lineItems.push(
           '<div class="estimate-route-map-legend-item">' +
-            '<span class="estimate-route-map-legend-swatch estimate-route-map-legend-swatch--route-a" aria-hidden="true"></span>' +
-            "<span>A 赤線：時間優先ルート</span>" +
+            '<span class="' + swatchClass + '" aria-hidden="true"></span>' +
+            "<span>" + label + "</span>" +
           "</div>"
         );
-      }
-      if(keys.has("routeB")){
-        lineItems.push(
-          '<div class="estimate-route-map-legend-item">' +
-            '<span class="estimate-route-map-legend-swatch estimate-route-map-legend-swatch--route-b estimate-route-map-legend-swatch--dashed" aria-hidden="true"></span>' +
-            "<span>B 青点線：一般道優先ルート</span>" +
-          "</div>"
-        );
-      }
+      });
     }
     if(keys.has("outbound")){
       lineItems.push(
@@ -708,6 +794,7 @@
     ROUTE_COLORS: ROUTE_COLORS,
     ROUTE_COLOR_HEX: ROUTE_COLOR_HEX,
     AB_ROUTE_META: AB_ROUTE_META,
+    CANDIDATE_ROUTE_META: CANDIDATE_ROUTE_META,
     decodePolyline: decodePolyline,
     getLegPrimaryRoute: getLegPrimaryRoute,
     getLegPath: getLegPath,
