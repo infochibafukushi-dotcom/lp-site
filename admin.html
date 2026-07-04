@@ -1570,16 +1570,16 @@ body{
         <div class="preview" id="preFixedFareReportResult">まだ出力していません。</div>
       </div>
       <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e5e5e5;">
-        <p class="note" style="margin-bottom:8px;"><strong>①-補足 事前確定運賃システム 運用フロー説明資料（印刷用）</strong><br>走行予定ルート提示、旅客同意、確定ルート保存、運転者確認、ナビと確定ルートの分離、ルート変更時の取扱い、精算・領収書・保存記録の流れを印刷用資料として整理した認可説明用資料です。</p>
+        <p class="note" style="margin-bottom:8px;"><strong>①-補足 事前確定運賃システム 運用フロー説明資料（印刷用）</strong><br>走行予定ルート提示、旅客同意、確定ルート保存、運転者確認、ナビと確定ルートの分離、ルート変更時の取扱い、精算・領収書・保存記録の流れを印刷用資料として整理した認可説明用資料です。印刷用ページを開き、ブラウザの印刷画面からPDF保存できます。</p>
         <div class="actions">
-          <button type="button" id="preFixedFareOnePageSummaryExportBtn">事前確定運賃 運用フロー説明資料PDFを出力</button>
+          <button type="button" id="preFixedFareOnePageSummaryExportBtn">事前確定運賃 運用フロー説明資料 印刷用ページを開く</button>
         </div>
         <div class="preview" id="preFixedFareOnePageSummaryStatus">まだ出力していません。</div>
       </div>
       <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e5e5e5;">
-        <p class="note" style="margin-bottom:8px;"><strong>①-補足2 事前確定運賃システム 認可説明Q&A</strong><br>旅客都合によるルート変更・途中終了、福祉タクシー券や割引の処理、ルート候補が1件のみの場合の扱い、交通事情による迂回、有料道路料金、迎車料金・介助料・実費の区分、同意証跡・保存記録の確認方法など、認可申請時に質問されやすい項目をQ&A形式で整理した補足資料です。</p>
+        <p class="note" style="margin-bottom:8px;"><strong>①-補足2 事前確定運賃システム 認可説明Q&A</strong><br>旅客都合によるルート変更・途中終了、福祉タクシー券や割引の処理、ルート候補が1件のみの場合の扱い、交通事情による迂回、有料道路料金、迎車料金・介助料・実費の区分、同意証跡・保存記録の確認方法など、認可申請時に質問されやすい項目をQ&A形式で整理した補足資料です。印刷用ページを開き、ブラウザの印刷画面からPDF保存できます。</p>
         <div class="actions">
-          <button type="button" id="preFixedFareQaExportBtn">事前確定運賃 認可説明Q&A PDFを出力</button>
+          <button type="button" id="preFixedFareQaExportBtn">事前確定運賃 認可説明Q&A 印刷用ページを開く</button>
         </div>
         <div class="preview" id="preFixedFareQaStatus">まだ出力していません。</div>
       </div>
@@ -1644,10 +1644,10 @@ body{
 <script src="./admin-estimate.js?v=admin-save-fix-20260703"></script>
 <script src="./shared/pre-fixed-fare-report-data.js?v=39e326a1"></script>
 <script src="./shared/pre-fixed-fare-report-pdf.js?v=39e326a1"></script>
-<script src="./shared/pre-fixed-fare-one-page-summary-data.js?v=onepage07"></script>
-<script src="./shared/pre-fixed-fare-one-page-summary-pdf.js?v=onepage07"></script>
-<script src="./shared/pre-fixed-fare-qa-data.js?v=qa02"></script>
-<script src="./shared/pre-fixed-fare-qa-pdf.js?v=qa02"></script>
+<script src="./shared/pre-fixed-fare-one-page-summary-data.js?v=print01"></script>
+<script src="./shared/pre-fixed-fare-one-page-summary-pdf.js?v=print01"></script>
+<script src="./shared/pre-fixed-fare-qa-data.js?v=print01"></script>
+<script src="./shared/pre-fixed-fare-qa-pdf.js?v=print01"></script>
 <script src="./shared/pre-fixed-fare-approval-summary-data.js?v=39e326a1"></script>
 <script src="./shared/pre-fixed-fare-approval-summary-pdf.js?v=39e326a1"></script>
 <script src="./shared/pre-fixed-fare-operations-summary-data.js?v=39e326a1"></script>
@@ -1659,7 +1659,7 @@ body{
 <script src="./shared/pre-fixed-fare-submission-appendix-word.js?v=appendix02"></script>
 <script src="./shared/pre-fixed-fare-submission-appendix-pdf.js?v=appendix02"></script>
 <script src="./admin-pre-fixed-fare-submission-appendix.js?v=appendix02"></script>
-<script src="./admin-pre-fixed-fare-report.js?v=qa01"></script>
+<script src="./admin-pre-fixed-fare-report.js?v=print01"></script>
 <script>
 const CONFIG_PATH = 'data/config.json';
 const SECTIONS_PATH = 'data/sections.json';

@@ -65,28 +65,28 @@
 
   async function generatePreFixedFareOnePageSummaryPdf(){
     if(!global.PreFixedFareOnePageSummaryPdf){
-      throw new Error("事前確定運賃 認可説明1枚資料PDFモジュールの読み込みに失敗しました。");
+      throw new Error("事前確定運賃 運用フロー説明資料モジュールの読み込みに失敗しました。");
     }
     await global.PreFixedFareOnePageSummaryPdf.generatePreFixedFareOnePageSummaryPdf();
   }
 
   async function exportOnePageSummaryPdf(){
-    setOnePageSummaryStatus("PDFを作成しています...", "warn");
+    setOnePageSummaryStatus("印刷用ページを開いています...", "warn");
     await generatePreFixedFareOnePageSummaryPdf();
-    setOnePageSummaryStatus("PDFを保存しました。", "success");
+    setOnePageSummaryStatus("印刷用ページを開きました。印刷画面で「PDFに保存」を選択してください。", "success");
   }
 
   async function generatePreFixedFareQaPdf(){
     if(!global.PreFixedFareQaPdf){
-      throw new Error("事前確定運賃 認可説明Q&A PDFモジュールの読み込みに失敗しました。");
+      throw new Error("事前確定運賃 認可説明Q&Aモジュールの読み込みに失敗しました。");
     }
     await global.PreFixedFareQaPdf.exportPdf();
   }
 
   async function exportQaPdf(){
-    setQaStatus("PDFを作成しています...", "warn");
+    setQaStatus("印刷用ページを開いています...", "warn");
     await generatePreFixedFareQaPdf();
-    setQaStatus("PDFを保存しました。", "success");
+    setQaStatus("印刷用ページを開きました。印刷画面で「PDFに保存」を選択してください。", "success");
   }
 
   async function exportRegulatoryReportPdf(){
@@ -232,7 +232,7 @@
         ){
           setOnePageSummaryStatus(reason, "error");
         }else{
-          setOnePageSummaryStatus("PDF作成に失敗しました。", "error");
+          setOnePageSummaryStatus("印刷用ページを開けませんでした。", "error");
         }
       }finally{
         button.disabled = false;
@@ -259,7 +259,7 @@
         ){
           setQaStatus(reason, "error");
         }else{
-          setQaStatus("PDF作成に失敗しました。", "error");
+          setQaStatus("印刷用ページを開けませんでした。", "error");
         }
       }finally{
         button.disabled = false;
