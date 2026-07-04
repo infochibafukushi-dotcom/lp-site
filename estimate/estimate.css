@@ -166,6 +166,10 @@
   flex:1 1 auto;
   min-width:0;
 }
+.estimate-step--active{
+  scroll-margin-top:64px;
+  scroll-margin-bottom:100px;
+}
 .estimate-step-label{
   font-size:14px;
   font-weight:700;
@@ -1731,6 +1735,11 @@ body.estimate-has-mobile-reserve-bar .estimate-wrap{
     line-height:1.3;
     white-space:normal;
     word-break:break-word;
+  }
+
+  .estimate-step--active{
+    scroll-margin-top:72px;
+    scroll-margin-bottom:110px;
   }
 
   .estimate-step-back-btn{

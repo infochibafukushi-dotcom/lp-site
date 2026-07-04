@@ -55,6 +55,36 @@
     }
   }
 
+  function getStickyChromeOffset(){
+    const topBar = document.querySelector(".estimate-top-bar");
+    const topBarHeight = topBar ? topBar.getBoundingClientRect().height : 56;
+    return Math.ceil(topBarHeight + 8);
+  }
+
+  function findStepCardElement(stepId){
+    const id = String(stepId || "");
+    if(!id){
+      return null;
+    }
+    return document.querySelector('[data-estimate-step="' + id + '"]')
+      || document.querySelector('[data-step-id="' + id + '"]');
+  }
+
+  function scrollStepCardIntoView(stepId, options){
+    const el = findStepCardElement(stepId);
+    if(!el){
+      return;
+    }
+    const behavior = options?.behavior || "auto";
+    const offset = getStickyChromeOffset();
+    const absoluteTop = el.getBoundingClientRect().top + (window.pageYOffset || window.scrollY || 0);
+    const top = Math.max(0, absoluteTop - offset);
+    window.scrollTo({
+      top: top,
+      behavior: behavior
+    });
+  }
+
   scrollPageToTop();
 
   function escapeHtml(text){
@@ -703,10 +733,9 @@
     state.quoteRegisterMessage = "";
     renderPage();
     requestAnimationFrame(function(){
-      const el = document.querySelector('[data-step-id="' + stepId + '"]');
-      if(el){
-        el.scrollIntoView({ behavior: "auto", block: "start" });
-      }
+      requestAnimationFrame(function(){
+        scrollStepCardIntoView(stepId, { behavior: "auto" });
+      });
     });
   }
 
@@ -814,7 +843,7 @@
     }).join("");
 
     return `
-      <section class="estimate-step estimate-step--active" data-step-id="${escapeAttr(step.id)}">
+      <section class="estimate-step estimate-step--active" data-step-id="${escapeAttr(step.id)}" data-estimate-step="${escapeAttr(step.id)}">
         ${renderActiveStepHead(stepNum, title)}
         <div class="estimate-choice-group">${tripChoices}</div>
       </section>
@@ -837,7 +866,7 @@
     }).join("");
 
     return `
-      <section class="estimate-step estimate-step--active" data-step-id="${escapeAttr(step.id)}">
+      <section class="estimate-step estimate-step--active" data-step-id="${escapeAttr(step.id)}" data-estimate-step="${escapeAttr(step.id)}">
         ${renderActiveStepHead(stepNum, title)}
         <div class="estimate-choice-group">${addonChoices}</div>
         <p class="estimate-step-note">待機または付き添いのいずれかを選択してください。</p>
@@ -857,7 +886,7 @@
     }).join("");
 
     return `
-      <section class="estimate-step estimate-step--active" data-step-id="${escapeAttr(step.id)}">
+      <section class="estimate-step estimate-step--active" data-step-id="${escapeAttr(step.id)}" data-estimate-step="${escapeAttr(step.id)}">
         ${renderActiveStepHead(stepNum, title)}
         <div class="estimate-choice-group">${choices}</div>
       </section>
@@ -886,7 +915,7 @@
         : `<p class="estimate-step-note">必要に応じて選択してください。</p>`);
 
     return `
-      <section class="estimate-step estimate-step--active" data-step-id="${escapeAttr(step.id)}">
+      <section class="estimate-step estimate-step--active" data-step-id="${escapeAttr(step.id)}" data-estimate-step="${escapeAttr(step.id)}">
         ${renderActiveStepHead(stepNum, title)}
         <div class="estimate-choice-group">${choices}</div>
         ${note}
@@ -2965,7 +2994,7 @@
       : "";
 
     return `
-      <section class="estimate-step estimate-step--active${state.routePlan ? " estimate-step--has-route" : ""}" data-step-id="${escapeAttr(step.id)}">
+      <section class="estimate-step estimate-step--active${state.routePlan ? " estimate-step--has-route" : ""}" data-step-id="${escapeAttr(step.id)}" data-estimate-step="${escapeAttr(step.id)}">
         ${renderActiveStepHead(stepNum, label)}
         ${renderReturnPlanSection()}
         ${roadTypeRadios}
@@ -2996,7 +3025,7 @@
   function renderStepSummary(step, stepNum){
     const summary = getStepSummaryText(step);
     return `
-      <section class="estimate-step estimate-step--done" data-step-id="${escapeAttr(step.id)}">
+      <section class="estimate-step estimate-step--done" data-step-id="${escapeAttr(step.id)}" data-estimate-step="${escapeAttr(step.id)}">
         <div class="estimate-step-head">
           <div>
             <div class="estimate-step-label">STEP${stepNum}</div>
@@ -3599,11 +3628,14 @@
       });
       return;
     }
+    // DOM描画後に、固定ヘッダー分を差し引いてSTEPカード上部へスクロール
     requestAnimationFrame(function(){
-      const el = document.querySelector('[data-step-id="' + activeStep.id + '"]');
-      if(el){
-        el.scrollIntoView({ behavior: "auto", block: "start" });
-      }
+      requestAnimationFrame(function(){
+        const isMobile = window.matchMedia && window.matchMedia("(max-width: 767px)").matches;
+        scrollStepCardIntoView(activeStep.id, {
+          behavior: isMobile ? "smooth" : "auto"
+        });
+      });
     });
   }
 
