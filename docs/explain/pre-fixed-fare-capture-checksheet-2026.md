@@ -25,6 +25,15 @@
 
 **画像保存先:** `screenshots/pre-fixed-fare-approval-20260705/`（提出前メモ: 同フォルダ `NOTES.md`）
 
+**画面証跡PDF用画像保存先:** `assets/evidence/pre-fixed-fare-20260705/`（管理画面「認可・運賃資料」→ **画面証跡資料PDF** から出力）
+
+| No | ファイル |
+|---|---|
+| 1 | `assets/evidence/pre-fixed-fare-20260705/01_route_selection_EST-20260705-3755.png` |
+| 2 | `assets/evidence/pre-fixed-fare-20260705/02_consent_confirm_EST-20260705-3755.png` |
+| 3 | `assets/evidence/pre-fixed-fare-20260705/03_confirmed_route_202607050600.png` |
+| 4 | `assets/evidence/pre-fixed-fare-20260705/04_receipt_detail_202607050600.png` |
+
 ---
 
 ## 2. 4画面キャプチャ記録

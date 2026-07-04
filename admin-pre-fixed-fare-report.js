@@ -37,6 +37,13 @@
     box.textContent = message || "";
   }
 
+  function setScreenEvidenceStatus(message, type){
+    const box = document.getElementById("preFixedFareScreenEvidenceStatus");
+    if(!box) return;
+    box.className = "preview" + (type ? " " + type : "");
+    box.textContent = message || "";
+  }
+
   function setOnePageSummaryStatus(message, type){
     const box = document.getElementById("preFixedFareOnePageSummaryStatus");
     if(!box) return;
@@ -408,6 +415,40 @@
     });
   }
 
+  async function exportScreenEvidencePdf(){
+    if(!global.PreFixedFareScreenEvidencePdf){
+      throw new Error("画面証跡資料PDFモジュールの読み込みに失敗しました。");
+    }
+    setScreenEvidenceStatus("PDFを作成しています...", "warn");
+    await global.PreFixedFareScreenEvidencePdf.generatePreFixedFareScreenEvidencePdf();
+    setScreenEvidenceStatus("PDFを保存しました。", "success");
+  }
+
+  function bindScreenEvidenceButton(){
+    const button = document.getElementById("preFixedFareScreenEvidenceExportBtn");
+    if(!button) return;
+    button.addEventListener("click", async function(){
+      button.disabled = true;
+      try{
+        await exportScreenEvidencePdf();
+      }catch(error){
+        console.error(error);
+        const reason = String(error?.message || "");
+        if(
+          reason.includes("生成対象HTMLが空")
+          || reason.includes("組み立てに失敗")
+          || reason.includes("読み込みに失敗")
+        ){
+          setScreenEvidenceStatus(reason, "error");
+        }else{
+          setScreenEvidenceStatus("PDF作成に失敗しました。", "error");
+        }
+      }finally{
+        button.disabled = false;
+      }
+    });
+  }
+
   function bind(){
     bindRegulatoryButton();
     bindOnePageSummaryButton();
@@ -416,6 +457,7 @@
     bindOperationsSummaryButton();
     bindIntegratedSummaryButton();
     bindApprovalAppendixButton();
+    bindScreenEvidenceButton();
   }
 
   function bindOnce(){
