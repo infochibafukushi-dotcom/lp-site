@@ -1664,7 +1664,7 @@
         abLabel: "A",
         strategy: strategy,
         fullLabel: isRoundTrip ? "時間優先の往復ルート" : "時間優先ルート",
-        shortLabel: isRoundTrip ? "時間優先の往復" : "時間優先",
+        shortLabel: "時間優先",
         colorClass: "a"
       };
     }
@@ -1673,7 +1673,7 @@
         abLabel: "B",
         strategy: strategy,
         fullLabel: isRoundTrip ? "一般道優先の往復ルート" : "一般道優先ルート",
-        shortLabel: isRoundTrip ? "一般道優先の往復" : "一般道優先",
+        shortLabel: "一般道優先",
         colorClass: "b"
       };
     }
@@ -1738,7 +1738,7 @@
     if(!allSimilar){
       return "";
     }
-    return '<p class="estimate-route-selection-similar-note">近距離のため、A/Bともほぼ同じルートです。地図上の矢印で進行方向を確認できます。</p>';
+    return '<p class="estimate-route-selection-similar-note">近距離のため、A/Bともほぼ同じルートです。地図上ではA赤線・B青点線で表示しています。</p>';
   }
 
   function getRouteSelectButtonLabel(isSelected, options){
@@ -1747,6 +1747,22 @@
       return roundTrip ? "この往復ルートを選択中" : "このルートを選択中";
     }
     return roundTrip ? "この往復ルートを選択" : "このルートを選択";
+  }
+
+  function renderRouteSelectButtonLabel(isSelected, options){
+    const fullLabel = getRouteSelectButtonLabel(isSelected, options);
+    const shortLabel = isSelected ? "選択中" : "選択";
+    return (
+      '<span class="estimate-route-select-btn-label-full">' + escapeHtml(fullLabel) + "</span>" +
+      '<span class="estimate-route-select-btn-label-short">' + escapeHtml(shortLabel) + "</span>"
+    );
+  }
+
+  function renderSharedTollNote(hasTollNote){
+    if(!hasTollNote){
+      return "";
+    }
+    return '<p class="estimate-route-selection-toll-note">有料道路料金は見積料金に含まれず、別途必要です。</p>';
   }
 
   function scrollToRouteResultArea(){
@@ -1966,6 +1982,9 @@
     const useAbLayout = pairs.length === 2 && pairs.every(function(pair){
       return Boolean(getRouteAbInfo(pair.strategy, { roundTrip: true }));
     });
+    const hasTollNote = pairs.some(function(pair){
+      return pair.usesToll === true;
+    });
     const cards = pairs.map(function(pair){
       const isSelected = pair.strategy === selectedStrategy;
       const abInfo = getRouteAbInfo(pair.strategy, { roundTrip: true });
@@ -1980,18 +1999,15 @@
       const fareLabel = preFixedAmount > 0
         ? formatYen(preFixedAmount)
         : (pairResult ? formatYen(pairResult.total) : "-");
-      const tollNote = pair.usesToll
-        ? "有料道路料金は見積料金に含まれず、別途必要です。"
-        : "";
       const showAsSelected = !stepReviewPending && isSelected;
-      const selectLabel = getRouteSelectButtonLabel(showAsSelected, { roundTrip: true });
       const selectDisabled = showAsSelected;
       const titleHtml = renderRouteCardTitle(abInfo, pair.label);
+      const buttonLabelHtml = renderRouteSelectButtonLabel(showAsSelected, { roundTrip: true });
       const metaHtml = (
         '<div class="estimate-roundtrip-pair-meta">' +
-          "<div>行き：" + escapeHtml(outboundDistanceLabel || "-") + "　" + escapeHtml(outboundDurationLabel || "-") + "</div>" +
-          "<div>帰り：" + escapeHtml(returnDistanceLabel || "-") + "　" + escapeHtml(returnDurationLabel || "-") + "</div>" +
-          "<div class=\"estimate-roundtrip-pair-total\">合計：" + escapeHtml(totalDistanceLabel || "-") + "　" + escapeHtml(totalDurationLabel || "-") + "</div>" +
+          "<div>行き " + escapeHtml(outboundDistanceLabel || "-") + " " + escapeHtml(outboundDurationLabel || "-") + "</div>" +
+          "<div>帰り " + escapeHtml(returnDistanceLabel || "-") + " " + escapeHtml(returnDurationLabel || "-") + "</div>" +
+          "<div class=\"estimate-roundtrip-pair-total\">合計 " + escapeHtml(totalDistanceLabel || "-") + " " + escapeHtml(totalDurationLabel || "-") + "</div>" +
         "</div>"
       );
 
@@ -2000,10 +2016,7 @@
           '<article class="estimate-route-card estimate-route-card--compact estimate-roundtrip-pair-card' + (isSelected ? " is-selected" : "") + (abInfo ? " estimate-route-card--ab-" + abInfo.colorClass : "") + '">' +
             titleHtml +
             metaHtml +
-            (tollNote
-              ? '<p class="estimate-route-card-toll-note">' + escapeHtml(tollNote) + "</p>"
-              : "") +
-            '<button type="button" class="estimate-route-select-btn' + (showAsSelected ? " is-selected" : "") + '" data-select-roundtrip-pair="' + escapeAttr(pair.strategy) + '"' + (selectDisabled ? " disabled" : "") + ">" + escapeHtml(selectLabel) + "</button>" +
+            '<button type="button" class="estimate-route-select-btn' + (showAsSelected ? " is-selected" : "") + '" data-select-roundtrip-pair="' + escapeAttr(pair.strategy) + '"' + (selectDisabled ? " disabled" : "") + ">" + buttonLabelHtml + "</button>" +
           "</article>"
         );
       }
@@ -2011,24 +2024,22 @@
       return (
         '<article class="estimate-route-card estimate-roundtrip-pair-card' + (isSelected ? " is-selected" : "") + (abInfo ? " estimate-route-card--ab-" + abInfo.colorClass : "") + '">' +
           titleHtml +
-          (tollNote
-            ? '<p class="estimate-route-card-toll-note">' + escapeHtml(tollNote) + "</p>"
-            : "") +
           metaHtml +
           '<dl class="estimate-route-card-meta estimate-route-card-meta--fare-only">' +
             '<div><dt>事前確定運賃</dt><dd class="estimate-route-card-fare">' + escapeHtml(fareLabel) + "</dd></div>" +
           "</dl>" +
-          '<button type="button" class="estimate-route-select-btn' + (isSelected ? " is-selected" : "") + '" data-select-roundtrip-pair="' + escapeAttr(pair.strategy) + '"' + (isSelected ? " disabled" : "") + ">" + escapeHtml(getRouteSelectButtonLabel(isSelected, { roundTrip: true })) + "</button>" +
+          '<button type="button" class="estimate-route-select-btn' + (isSelected ? " is-selected" : "") + '" data-select-roundtrip-pair="' + escapeAttr(pair.strategy) + '"' + (isSelected ? " disabled" : "") + ">" + renderRouteSelectButtonLabel(isSelected, { roundTrip: true }) + "</button>" +
         "</article>"
       );
     }).join("");
 
     return (
-      '<section class="estimate-route-selection estimate-roundtrip-pair-selection" aria-label="往復ルートの選択">' +
+      '<section class="estimate-route-selection estimate-roundtrip-pair-selection' + (useAbLayout ? " estimate-route-selection--ab" : "") + '" aria-label="往復ルートの選択">' +
         '<h4 class="estimate-route-selection-title">往復ルートの選択</h4>' +
         notice +
         similarNotice +
         '<div class="estimate-route-card-list' + (useAbLayout ? " estimate-route-card-list--ab" : "") + '">' + cards + "</div>" +
+        (useAbLayout ? renderSharedTollNote(hasTollNote) : "") +
       "</section>"
     );
   }
@@ -2108,6 +2119,9 @@
         };
       }))
       : "";
+    const hasTollNote = routes.some(function(route){
+      return route.usesToll === true || route.routeStrategy === "toll_allowed" || route.routeStrategy === "time_priority";
+    });
 
     const compact = options?.compact === true;
     const stepReviewPending = compact && isPreFixedFareMode() && !state.distanceRouteReviewed;
@@ -2125,15 +2139,15 @@
       const description = getRouteDisplayDescription(route);
       const roadTypeLabel = getRoadTypeLabel(route.roadType || legPlan.roadType || state.roadType);
       const abInfo = getRouteAbInfo(route);
-      const tollNote = route.usesToll === true || route.routeStrategy === "toll_allowed" || route.routeStrategy === "time_priority"
+      const tollNote = !useAbLayout && (route.usesToll === true || route.routeStrategy === "toll_allowed" || route.routeStrategy === "time_priority")
         ? "有料道路料金は見積料金に含まれず、別途必要です。"
         : "";
       const waypointLabel = route.intermediateWaypoint?.waypointLabel
         ? String(route.intermediateWaypoint.waypointLabel)
         : "";
       const showAsSelected = !stepReviewPending && isSelected;
-      const selectLabel = getRouteSelectButtonLabel(showAsSelected);
       const titleHtml = renderRouteCardTitle(abInfo, summary);
+      const buttonLabelHtml = renderRouteSelectButtonLabel(showAsSelected);
       const cardClass = "estimate-route-card"
         + (compact ? " estimate-route-card--compact" : "")
         + (isSelected ? " is-selected" : "")
@@ -2147,10 +2161,10 @@
               ? '<p class="estimate-route-card-description estimate-route-card-description--compact">' + escapeHtml(description) + "</p>"
               : "") +
             '<div class="estimate-route-card-compact-meta">' +
-              escapeHtml(distanceLabel || "-") + "　" + escapeHtml(durationLabel || "-") +
+              escapeHtml(distanceLabel || "-") + " " + escapeHtml(durationLabel || "-") +
             "</div>" +
             (confirmable
-              ? '<button type="button" class="estimate-route-select-btn' + (showAsSelected ? " is-selected" : "") + '" data-select-route-id="' + escapeAttr(routeId) + '" data-select-route-leg="' + escapeAttr(legKey) + '"' + (showAsSelected ? " disabled" : "") + ">" + escapeHtml(selectLabel) + "</button>"
+              ? '<button type="button" class="estimate-route-select-btn' + (showAsSelected ? " is-selected" : "") + '" data-select-route-id="' + escapeAttr(routeId) + '" data-select-route-leg="' + escapeAttr(legKey) + '"' + (showAsSelected ? " disabled" : "") + ">" + buttonLabelHtml + "</button>"
               : "") +
           "</article>"
         );
@@ -2175,18 +2189,19 @@
             '<div><dt>事前確定運賃</dt><dd class="estimate-route-card-fare">' + escapeHtml(fareLabel) + "</dd></div>" +
           "</dl>" +
           (confirmable
-            ? '<button type="button" class="estimate-route-select-btn' + (isSelected ? " is-selected" : "") + '" data-select-route-id="' + escapeAttr(routeId) + '" data-select-route-leg="' + escapeAttr(legKey) + '"' + (isSelected ? " disabled" : "") + ">" + escapeHtml(getRouteSelectButtonLabel(isSelected)) + "</button>"
+            ? '<button type="button" class="estimate-route-select-btn' + (isSelected ? " is-selected" : "") + '" data-select-route-id="' + escapeAttr(routeId) + '" data-select-route-leg="' + escapeAttr(legKey) + '"' + (isSelected ? " disabled" : "") + ">" + renderRouteSelectButtonLabel(isSelected) + "</button>"
             : "") +
         "</article>"
       );
     }).join("");
 
     return (
-      '<section class="estimate-route-selection' + (confirmable ? "" : " estimate-route-selection--fallback") + '" aria-label="' + escapeAttr(sectionTitle) + '">' +
+      '<section class="estimate-route-selection' + (confirmable ? "" : " estimate-route-selection--fallback") + (useAbLayout ? " estimate-route-selection--ab" : "") + '" aria-label="' + escapeAttr(sectionTitle) + '">' +
         '<h4 class="estimate-route-selection-title">' + escapeHtml(sectionTitle) + "</h4>" +
         notice +
         similarNotice +
         '<div class="estimate-route-card-list' + (useAbLayout ? " estimate-route-card-list--ab" : "") + '">' + cards + "</div>" +
+        (useAbLayout ? renderSharedTollNote(hasTollNote) : "") +
       "</section>"
     );
   }
@@ -2474,8 +2489,9 @@
         const wrap = mapContainer.closest(".estimate-route-map-wrap") || mapContainer.parentElement;
         mapContainer.innerHTML = "";
         if(wrap){
-          const existingLegend = wrap.querySelector(".estimate-route-map-legend");
-          if(existingLegend){
+          const existingLegend = wrap.querySelector(".estimate-route-map-legend")
+            || wrap.nextElementSibling;
+          if(existingLegend && existingLegend.classList && existingLegend.classList.contains("estimate-route-map-legend")){
             existingLegend.remove();
           }
         }
@@ -2518,7 +2534,8 @@
         map.fitBounds(bounds, 48);
 
         if(display.shouldShowLegend(segments) && wrap){
-          wrap.insertAdjacentHTML("beforeend", display.buildLegendHtml(segments));
+          // MAP下に外出し（スマホでは重ねず、PCでもwrap直下に配置）
+          wrap.insertAdjacentHTML("afterend", display.buildLegendHtml(segments));
         }
       });
     }catch(error){

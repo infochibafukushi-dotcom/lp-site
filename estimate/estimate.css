@@ -572,22 +572,21 @@
   margin-top:14px;
 }
 .estimate-route-map-legend{
-  position:absolute;
-  right:8px;
-  bottom:8px;
-  z-index:2;
   display:flex;
   flex-direction:column;
   gap:5px;
+  margin-top:8px;
   padding:8px 10px;
   border-radius:8px;
-  background:rgba(255,255,255,0.92);
+  background:#fff;
   border:1px solid rgba(0,0,0,0.08);
-  box-shadow:0 1px 4px rgba(0,0,0,0.12);
+  box-shadow:none;
   font-size:11px;
-  line-height:1.3;
+  line-height:1.4;
   color:#333;
-  max-width:calc(100% - 16px);
+}
+.estimate-route-map-legend--ab{
+  gap:4px;
 }
 .estimate-route-map-legend-section{
   display:flex;
@@ -830,6 +829,61 @@
   font-size:12px;
   line-height:1.65;
   color:#355c3a;
+}
+.estimate-route-selection-toll-note{
+  margin:10px 0 0;
+  font-size:12px;
+  line-height:1.55;
+  color:#8a6010;
+}
+.estimate-route-select-btn-label-short{
+  display:none;
+}
+.estimate-route-card-list--ab{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  align-items:stretch;
+  gap:8px;
+  width:100%;
+}
+.estimate-route-card-list--ab .estimate-route-card{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  padding:10px;
+}
+.estimate-route-card-list--ab .estimate-route-card-title-full{
+  display:none;
+}
+.estimate-route-card-list--ab .estimate-route-card-title-short{
+  display:block;
+  font-size:14px;
+}
+.estimate-route-card-list--ab .estimate-route-card-description,
+.estimate-route-card-list--ab .estimate-route-card-description--compact,
+.estimate-route-card-list--ab .estimate-route-card-toll-note,
+.estimate-route-card-list--ab .estimate-route-card-meta--fare-only,
+.estimate-route-card-list--ab .estimate-route-card-meta div:nth-child(n+3){
+  display:none;
+}
+.estimate-route-card-list--ab .estimate-route-card-compact-meta,
+.estimate-route-card-list--ab .estimate-roundtrip-pair-meta{
+  margin-bottom:8px;
+  font-size:12px;
+  line-height:1.55;
+}
+.estimate-route-card-list--ab .estimate-route-card-meta{
+  margin-bottom:8px;
+}
+.estimate-route-card-list--ab .estimate-route-card-meta div{
+  font-size:12px;
+  padding:3px 0;
+}
+.estimate-route-card-list--ab .estimate-route-select-btn{
+  margin-top:auto;
+  min-height:44px;
+  padding:10px 8px;
+  font-size:13px;
 }
 .estimate-route-card-meta{
   margin:0 0 10px;
@@ -1502,51 +1556,132 @@
   body.estimate-has-mobile-reserve-bar .estimate-route-selection{
     scroll-margin-bottom:100px;
   }
+
+  html,
+  body.estimate-page,
+  .estimate-page{
+    overflow-x:hidden;
+  }
+
+  .estimate-route-result-area,
+  .estimate-result-route-block{
+    width:100vw;
+    max-width:100vw;
+    margin-left:calc(50% - 50vw);
+    margin-right:calc(50% - 50vw);
+    padding-left:8px;
+    padding-right:8px;
+    box-sizing:border-box;
+  }
+
+  .estimate-route-result-area .estimate-route-preview--inline,
+  .estimate-route-result-area .estimate-route-selection,
+  .estimate-result-route-block .estimate-route-preview,
+  .estimate-result-route-block .estimate-route-selection{
+    margin-left:0;
+    margin-right:0;
+    border-left:0;
+    border-right:0;
+    border-radius:0;
+    box-sizing:border-box;
+  }
+
+  .estimate-route-result-area .estimate-route-preview--inline,
+  .estimate-result-route-block .estimate-route-preview{
+    padding-left:0;
+    padding-right:0;
+    background:transparent;
+    border:0;
+  }
+
+  .estimate-route-result-area .estimate-route-map,
+  .estimate-result-route-block .estimate-route-map{
+    width:100%;
+    border-radius:0;
+    height:min(52vw, 280px);
+    min-height:200px;
+  }
+
+  .estimate-route-result-area .estimate-route-map-wrap,
+  .estimate-result-route-block .estimate-route-map-wrap{
+    margin-left:-8px;
+    margin-right:-8px;
+    width:calc(100% + 16px);
+  }
+
+  .estimate-route-result-area .estimate-route-map-legend,
+  .estimate-result-route-block .estimate-route-map-legend{
+    position:static;
+    margin:8px 0 0;
+    padding:8px;
+    border-radius:8px;
+    background:#fff;
+    box-shadow:none;
+  }
+
+  .estimate-route-result-area .estimate-route-selection,
+  .estimate-result-route-block .estimate-route-selection{
+    padding:12px 0;
+    background:transparent;
+    border:0;
+  }
+
+  .estimate-route-card-list--ab{
+    gap:8px;
+  }
+
+  .estimate-route-card-list--ab .estimate-route-card{
+    padding:8px;
+  }
+
+  .estimate-route-card-list--ab .estimate-route-card-title-short{
+    font-size:13px;
+  }
+
+  .estimate-route-card-list--ab .estimate-route-card-compact-meta,
+  .estimate-route-card-list--ab .estimate-roundtrip-pair-meta{
+    font-size:11px;
+    line-height:1.45;
+  }
+
+  .estimate-route-card-list--ab .estimate-route-ab-badge{
+    width:20px;
+    height:20px;
+    font-size:11px;
+  }
+
+  .estimate-route-card-list--ab .estimate-route-select-btn{
+    min-height:42px;
+    padding:8px 6px;
+    font-size:13px;
+  }
+
+  .estimate-route-card-list--ab .estimate-route-select-btn-label-full{
+    display:none;
+  }
+
+  .estimate-route-card-list--ab .estimate-route-select-btn-label-short{
+    display:inline;
+  }
+
+  .estimate-route-selection--ab .estimate-route-selection-note{
+    font-size:12px;
+  }
 }
 
-@media (min-width:430px){
-  .estimate-route-card-list--ab{
-    grid-template-columns:repeat(2, minmax(0, 1fr));
-    align-items:stretch;
-    gap:10px;
-  }
+@media (max-width:360px){
   .estimate-route-card-list--ab .estimate-route-card{
-    display:flex;
-    flex-direction:column;
-    min-width:0;
-    padding:10px;
-  }
-  .estimate-route-card-list--ab .estimate-route-card-title-full{
-    display:none;
+    padding:6px;
   }
   .estimate-route-card-list--ab .estimate-route-card-title-short{
-    display:block;
-    font-size:14px;
-  }
-  .estimate-route-card-list--ab .estimate-route-card-description,
-  .estimate-route-card-list--ab .estimate-route-card-description--compact,
-  .estimate-route-card-list--ab .estimate-route-card-toll-note,
-  .estimate-route-card-list--ab .estimate-route-card-meta--fare-only,
-  .estimate-route-card-list--ab .estimate-route-card-meta div:nth-child(n+3){
-    display:none;
+    font-size:12px;
   }
   .estimate-route-card-list--ab .estimate-route-card-compact-meta,
   .estimate-route-card-list--ab .estimate-roundtrip-pair-meta{
-    margin-bottom:8px;
-    font-size:12px;
-    line-height:1.55;
-  }
-  .estimate-route-card-list--ab .estimate-route-card-meta{
-    margin-bottom:8px;
-  }
-  .estimate-route-card-list--ab .estimate-route-card-meta div{
-    font-size:12px;
-    padding:3px 0;
+    font-size:10px;
   }
   .estimate-route-card-list--ab .estimate-route-select-btn{
-    margin-top:auto;
-    min-height:44px;
-    padding:10px 8px;
-    font-size:13px;
+    min-height:40px;
+    font-size:12px;
   }
 }

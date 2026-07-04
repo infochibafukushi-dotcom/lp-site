@@ -485,17 +485,11 @@
     const lineItems = [];
     const isAbLegend = keys.has("routeA") || keys.has("routeB");
     if(isAbLegend){
-      const abLabels = {};
-      (segments || []).forEach(function(segment){
-        if(segment?.key === "routeA" || segment?.key === "routeB"){
-          abLabels[segment.key] = segment.label || (segment.key === "routeA" ? "A 時間優先ルート" : "B 一般道優先ルート");
-        }
-      });
       if(keys.has("routeA")){
         lineItems.push(
           '<div class="estimate-route-map-legend-item">' +
             '<span class="estimate-route-map-legend-swatch estimate-route-map-legend-swatch--route-a" aria-hidden="true"></span>' +
-            "<span>" + (abLabels.routeA || "A 時間優先ルート") + "（実線）</span>" +
+            "<span>A 赤線：時間優先ルート</span>" +
           "</div>"
         );
       }
@@ -503,7 +497,7 @@
         lineItems.push(
           '<div class="estimate-route-map-legend-item">' +
             '<span class="estimate-route-map-legend-swatch estimate-route-map-legend-swatch--route-b estimate-route-map-legend-swatch--dashed" aria-hidden="true"></span>' +
-            "<span>" + (abLabels.routeB || "B 一般道優先ルート") + "（破線）</span>" +
+            "<span>B 青点線：一般道優先ルート</span>" +
           "</div>"
         );
       }
@@ -532,6 +526,16 @@
         "</div>"
       );
     }
+    if(isAbLegend){
+      return (
+        '<div class="estimate-route-map-legend estimate-route-map-legend--ab" aria-label="ルート凡例">' +
+          '<div class="estimate-route-map-legend-section">' +
+            lineItems.join("") +
+          "</div>" +
+        "</div>"
+      );
+    }
+
     const markerItems = [
       '<div class="estimate-route-map-legend-item">' +
         '<span class="estimate-route-map-legend-marker estimate-route-map-legend-marker--origin" aria-hidden="true">発</span>' +
