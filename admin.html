@@ -1669,6 +1669,14 @@ body{
         </div>
         <div class="preview" id="preFixedFareApplicationStatus">まだ読み込んでいません。</div>
       </div>
+      <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e5e5e5;">
+        <p class="note" style="margin-bottom:8px;"><strong>提出セット一括PDF</strong><br>申請書様式2、画面証跡、統合説明資料、運用フロー、Q&A、追加資料を1つのPDFにまとめます。印刷時はブラウザの印刷画面で部数を3部に指定してください。</p>
+        <div class="actions" style="flex-wrap:wrap; gap:8px;">
+          <button type="button" id="preFixedFareSubmissionFullSetBuildBtn">提出セット一括PDFを作成</button>
+          <button type="button" class="secondary" id="preFixedFareSubmissionFullSetOpenBtn">提出セット一括PDFを開く</button>
+        </div>
+        <div class="preview" id="preFixedFareSubmissionFullSetStatus">まだ作成していません。</div>
+      </div>
     </div>
   </div>
 
@@ -1718,6 +1726,7 @@ body{
 <script src="./admin-pre-fixed-fare-report.js?v=print02"></script>
 <script src="./shared/pre-fixed-fare-application-print.js?v=appform01"></script>
 <script src="./admin-pre-fixed-fare-application.js?v=appform01"></script>
+<script src="./admin-pre-fixed-fare-submission-set.js?v=fullset01"></script>
 <script>
 const CONFIG_PATH = 'data/config.json';
 const SECTIONS_PATH = 'data/sections.json';
