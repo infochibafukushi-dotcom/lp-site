@@ -90,7 +90,7 @@
     "link": "tel:09063314289"
   },
   "officialLine": {
-    "qrImage": "./assets/line/official-line-qr.svg",
+    "qrImage": "./assets/line/official-line-add-friend-qr.png",
     "qrCaption": "スマートフォンで読み取って友だち追加できます"
   },
   "popupSettings": {
