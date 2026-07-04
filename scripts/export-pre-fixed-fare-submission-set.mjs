@@ -194,7 +194,8 @@ async function exportAppendixPdf(browser, page, options){
     };
   }, options);
   assert(built.html.length > 5000, "別紙セットHTMLが短すぎます");
-  assert(built.html.includes("別紙1"), "別紙セットHTMLに別紙1がありません");
+  assert(built.html.includes("appendix-distance-fare"), "別紙1の改ページクラスがありません");
+  assert(built.html.includes("page-break-before appendix-section appendix-distance-fare"), "別紙1が新ページ開始用クラス付きではありません");
   assert(built.html.includes("画面証跡資料"), "別紙セットに画面証跡参照文がありません");
   assert(!built.html.includes("capture-image"), "別紙セットに重複キャプチャ画像が残っています");
   assert(built.html.includes("page-break-before table-section no-split-table"), "別紙の平準化係数表改ページクラスがありません");

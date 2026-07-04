@@ -28,7 +28,7 @@
       return "<tr>" + cells + "</tr>";
     }).join("");
     return (
-      "<div class='table-wrap'>" +
+      "<div class='table-wrap table-section no-orphan-table'>" +
       "<table" + (className ? " class='" + escapeHtml(className) + "'" : "") + "><thead><tr>" + th + "</tr></thead><tbody>" + body + "</tbody></table>" +
       "</div>"
     );
@@ -52,7 +52,7 @@
       return "";
     }
     return (
-      "<section class='page-break-before table-section no-split-table'>" +
+      "<section class='page-break-before table-section no-split-table no-orphan-table'>" +
       "<h3 class='subsection-title'>参考：千葉県内交通圏の平準化係数（申請欄への自動転記ではない）</h3>" +
       "<p class='footer-note'>以下はシステム設定値の参考一覧です。申請欄には、申請対象の交通圏に対応する関東運輸局公示の係数を転記してください。</p>" +
       buildTable(["交通圏", "参考係数"], rows, { className: "table-reference" }) +
@@ -64,7 +64,7 @@
     if(global.PreFixedFarePrintLayoutCss){
       return global.PreFixedFarePrintLayoutCss.getWordPrintCss();
     }
-    return "@page { size: A4 portrait; margin: 16mm 14mm 20mm 14mm; } body { font-size: 11pt; }";
+    return "@page { size: A4 portrait; margin: 8mm; } body { font-size: 11pt; }";
   }
 
   function wrapWordDocument(title, bodyHtml, editNote){
@@ -87,44 +87,41 @@
       return "<li><strong>" + escapeHtml(link.label) + "</strong><br><a href='" + escapeHtml(link.url) + "'>" + escapeHtml(link.url) + "</a><br>" + escapeHtml(link.note || "") + "</li>";
     }).join("");
     return (
-      "<div class='word-section'>" +
-      "<h1 class='doc-title'>" + escapeHtml(payload.title) + "</h1>" +
+      "<section class='appendix-section appendix-application-helper'>" +
+      "<h2 class='appendix-title'>" + escapeHtml(payload.title) + "</h2>" +
       "<p class='meta-line'>作成日：" + escapeHtml(payload.meta?.createdAt || "") + "　" + formatBusinessMetaLine(payload.meta) + "</p>" +
       buildList(payload.intro) +
-      "<h2 class='section-title'>公式リンク欄</h2><ul>" + linksHtml + "</ul>" +
-      "<section class='subsection-block'>" +
-      "<h2 class='section-title'>記入補助項目</h2>" +
+      "<h3 class='subsection-title'>公式リンク欄</h3><ul>" + linksHtml + "</ul>" +
+      "<h3 class='subsection-title'>記入補助項目</h3>" +
       buildKeyValueTable(payload.helperFields || []) +
       renderCoefficientReference(payload) +
       "<p class='footer-note'>" + escapeHtml(payload.notice || "") + "</p>" +
-      "</section>" +
-      "</div>"
+      "</section>"
     );
   }
 
   function renderDistanceFareTable(payload){
     return (
-      "<div class='word-section'>" +
-      "<h1 class='doc-title'>" + escapeHtml(payload.title) + "</h1>" +
+      "<section class='page-break-before appendix-section appendix-distance-fare'>" +
+      "<h2 class='appendix-title'>" + escapeHtml(payload.title) + "</h2>" +
       "<p class='meta-line'>" + formatBusinessMetaLine(payload.meta) + "</p>" +
       buildList(payload.intro) +
       buildKeyValueTable(payload.fields || []) +
-      renderCoefficientReference(payload) +
-      "</div>"
+      "</section>"
     );
   }
 
   function renderServiceFeeTable(payload){
     return (
-      "<div class='word-section'>" +
-      "<h1 class='doc-title'>" + escapeHtml(payload.title) + "</h1>" +
+      "<section class='page-break-before appendix-section appendix-service-fee'>" +
+      "<h2 class='appendix-title'>" + escapeHtml(payload.title) + "</h2>" +
       buildList(payload.intro) +
       buildTable(
         ["区分", "金額", "事前確定運賃に含めるか", "明細表示", "備考"],
         payload.feeRows || [],
         { className: "table-fees" }
       ) +
-      "</div>"
+      "</section>"
     );
   }
 
@@ -132,7 +129,7 @@
     const sectionsHtml = (payload.sections || []).map(function(section){
       const rows = (section.items || []).map(buildCheckboxRow).join("");
       return (
-        "<section class='small-section'>" +
+        "<section class='table-section'>" +
         "<h3 class='subsection-title'>" + escapeHtml(section.title) + "</h3>" +
         "<table class='table-checklist'><thead><tr><th>確認</th><th>項目</th></tr></thead><tbody>" + rows + "</tbody></table>" +
         "</section>"
@@ -142,20 +139,20 @@
       return [label, ""];
     });
     return (
-      "<div class='word-section'>" +
-      "<h1 class='doc-title'>" + escapeHtml(payload.title) + "</h1>" +
+      "<section class='page-break-before appendix-section appendix-device-checklist'>" +
+      "<h2 class='appendix-title'>" + escapeHtml(payload.title) + "</h2>" +
       buildList(payload.intro) +
       sectionsHtml +
-      "<h2 class='section-title'>署名欄</h2>" +
+      "<h3 class='subsection-title'>署名欄</h3>" +
       buildKeyValueTable(signatureRows) +
-      "</div>"
+      "</section>"
     );
   }
 
   function renderScreenCaptureEvidence(payload){
     return (
-      "<section class='subsection-block word-section'>" +
-      "<h1 class='doc-title'>" + escapeHtml(payload.title) + "</h1>" +
+      "<section class='page-break-before appendix-section appendix-screen-reference'>" +
+      "<h2 class='appendix-title'>" + escapeHtml(payload.title) + "</h2>" +
       buildList(payload.intro) +
       "<div class='note-box notice-box'>" +
       "<p>利用者のルート選択、旅客同意確認、乗務員用確定ルート確認、領収書・レシート明細画面については、別添「画面証跡資料」P2〜P5を参照。</p>" +
@@ -168,20 +165,19 @@
   function renderScreenshotSheet(payload){
     const screensHtml = (payload.screens || []).map(function(screen, index){
       return (
-        "<div class='word-section'>" +
+        "<section class='table-section'>" +
         "<h3 class='subsection-title'>" + escapeHtml(String(index + 1) + ". " + screen.name) + "</h3>" +
         "<p><strong>確認内容：</strong>" + escapeHtml(screen.purpose || "") + "</p>" +
         "<p><strong>備考：</strong>" + escapeHtml(screen.note || "") + "</p>" +
-        "<div class='paste-box'>&nbsp;</div>" +
-        "</div>"
+        "</section>"
       );
     }).join("");
     return (
-      "<div class='word-section'>" +
-      "<h1 class='doc-title'>" + escapeHtml(payload.title) + "</h1>" +
+      "<section class='page-break-before appendix-section'>" +
+      "<h2 class='appendix-title'>" + escapeHtml(payload.title) + "</h2>" +
       buildList(payload.intro) +
       screensHtml +
-      "</div>"
+      "</section>"
     );
   }
 
@@ -199,12 +195,14 @@
           partId,
           payload._options || {}
         );
-        return "<div class='word-section'>" + renderDocumentBody(partPayload) + "</div>";
+        return renderDocumentBody(partPayload);
       }).join("");
       return (
+        "<section class='appendix-set-cover'>" +
         "<h1 class='doc-title'>" + escapeHtml(payload.title) + "</h1>" +
         "<p class='meta-line'>" + formatBusinessMetaLine(payload.meta) + "</p>" +
         buildList(payload.intro) +
+        "</section>" +
         parts
       );
     }

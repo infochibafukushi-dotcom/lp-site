@@ -14,7 +14,7 @@
       "html,body{margin:0;padding:0;width:auto;box-sizing:border-box;background:#ffffff;color:#111827;}" +
       "*{box-sizing:border-box;}" +
       ".print-page,.pdf-page,.report-page{width:auto;min-height:auto;margin:0;padding:0;box-sizing:border-box;overflow:visible;}" +
-      ".print-page:last-child,.pdf-page:last-child,.report-page:last-child{break-after:auto;page-break-after:auto;}" +
+      ".print-page:last-child,.pdf-page:last-child,.report-page:last-child,.appendix-section:last-child,.word-section:last-child,.word-document > :last-child{break-after:auto;page-break-after:auto;}" +
       "table{width:100%;max-width:100%;table-layout:fixed;border-collapse:collapse;}" +
       "td,th{word-break:break-word;overflow-wrap:anywhere;white-space:normal;}" +
       ".page-break-before{break-before:page;page-break-before:always;}" +
@@ -89,18 +89,31 @@
       "* { box-sizing: border-box; }",
       "body { font-family: 'Yu Gothic', 'Meiryo', 'MS PGothic', sans-serif; font-size: 10.5pt; line-height: 1.55; color: #111827; margin: 0; }",
       ".word-document { width: auto; margin: 0; padding: 0; }",
+      ".word-document > :last-child, .appendix-section:last-child, .word-section:last-child { break-after: auto; page-break-after: auto; }",
       ".word-section { margin: 0 0 4mm; }",
       ".page-break-before { break-before: page; page-break-before: always; }",
-      ".no-split-table, .no-split-table table, .no-split-table tr { break-inside: avoid; page-break-inside: avoid; }",
+      ".appendix-section { margin: 0 0 4mm; }",
+      ".appendix-distance-fare, .appendix-service-fee, .appendix-device-checklist, .appendix-screen-reference { break-before: page; page-break-before: always; }",
+      ".table-section { margin: 0 0 4mm; }",
+      ".table-section table { width: 100%; table-layout: fixed; border-collapse: collapse; }",
+      ".table-section thead { display: table-header-group; }",
+      ".table-section tr { break-inside: avoid; page-break-inside: avoid; }",
+      ".no-orphan-table, .no-split-table { break-inside: avoid; page-break-inside: avoid; }",
+      ".no-orphan-table table, .no-split-table table, .no-orphan-table tr, .no-split-table tr { break-inside: avoid; page-break-inside: avoid; }",
       "h1.doc-title { font-size: 18pt; font-weight: 700; text-align: center; margin: 0 0 6mm; }",
-      "h2.section-title { font-size: 16pt; font-weight: 700; margin: 0 0 4mm; border-bottom: 1px solid #333; padding-bottom: 2mm; }",
+      "h2.section-title, h2.appendix-title { font-size: 16pt; font-weight: 700; margin: 0 0 4mm; border-bottom: 1px solid #333; padding-bottom: 2mm; text-align: left; }",
       "h3.subsection-title { font-size: 12.5pt; font-weight: 700; margin: 0 0 3mm; }",
       "p { margin: 0 0 3mm; font-size: 10.5pt; line-height: 1.55; }",
       "ul { margin: 0 0 3mm 5mm; padding: 0; }",
       "li { margin: 0 0 1.5mm; font-size: 10.5pt; line-height: 1.55; }",
       "table { width: 100%; max-width: 100%; table-layout: fixed; border-collapse: collapse; margin: 0 0 4mm; font-size: 9pt; line-height: 1.45; }",
-      "th { font-size: 9.5pt; font-weight: 700; background: #f2f2f2; }",
+      "th { font-size: 9.5pt; font-weight: 700; background: #f2f2f2; text-align: center; }",
       "td, th { border: 1px solid #999; padding: 2mm; vertical-align: top; word-break: break-word; overflow-wrap: anywhere; white-space: normal; }",
+      "td { font-size: 9pt; line-height: 1.45; }",
+      "table.table-kv td:first-child, table.table-reference td:first-child, table.table-checklist td:first-child { text-align: center; vertical-align: middle; font-weight: 600; }",
+      "table.table-kv td:nth-child(2), table.table-reference td:nth-child(2) { text-align: left; }",
+      "table.table-reference td:nth-child(2), table.table-fees td:nth-child(2) { text-align: center; }",
+      "table.table-fees td:nth-child(3), table.table-fees td:nth-child(4) { text-align: center; }",
       ".check-col { width: 28pt; text-align: center; font-size: 14pt; }",
       ".notice-box { border: 1px solid #ccc; background: #fafafa; padding: 4mm; margin: 0 0 4mm; font-size: 8.5pt; }",
       ".meta-line { font-size: 9pt; color: #64748b; margin-bottom: 4mm; }",
