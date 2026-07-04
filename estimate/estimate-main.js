@@ -1828,21 +1828,32 @@
     );
   }
 
-  function getRouteSelectButtonLabel(isSelected, options){
-    const roundTrip = options?.roundTrip === true;
-    if(isSelected){
-      return roundTrip ? "この往復ルートを選択中" : "このルートを選択中";
-    }
-    return roundTrip ? "この往復ルートを選択" : "このルートを選択";
+  function getRouteSelectButtonLabel(isSelected){
+    return isSelected ? "このルートで料金確認中" : "このルートで料金確認";
   }
 
-  function renderRouteSelectButtonLabel(isSelected, options){
-    const fullLabel = getRouteSelectButtonLabel(isSelected, options);
-    const shortLabel = isSelected ? "選択中" : "選択";
+  function renderRouteSelectButtonLabel(isSelected){
+    const fullLabel = getRouteSelectButtonLabel(isSelected);
+    const shortLabel = isSelected ? "確認中" : "料金確認";
     return (
       '<span class="estimate-route-select-btn-label-full">' + escapeHtml(fullLabel) + "</span>" +
       '<span class="estimate-route-select-btn-label-short">' + escapeHtml(shortLabel) + "</span>"
     );
+  }
+
+  function renderRouteCardFareLine(routeResult){
+    const preFixedAmount = Number(routeResult?.quoteSnapshot?.adjustedDistanceFareAmount) || 0;
+    const totalAmount = Number(routeResult?.total) || 0;
+    if(preFixedAmount > 0){
+      return '<div class="estimate-route-card-fare-line">見積金額：' + escapeHtml(formatYen(preFixedAmount)) + "</div>";
+    }
+    if(totalAmount > 0){
+      return '<div class="estimate-route-card-fare-line">見積金額：' + escapeHtml(formatYen(totalAmount)) + "</div>";
+    }
+    if(routeResult){
+      return '<div class="estimate-route-card-fare-line">見積金額：算定中</div>';
+    }
+    return "";
   }
 
   function renderSharedTollNote(hasTollNote){
@@ -2079,14 +2090,11 @@
       const totalDistanceLabel = formatRouteDistanceMeters(pair.totalDistanceMeters);
       const totalDurationLabel = formatRouteDurationSeconds(pair.totalDurationSeconds);
       const pairResult = computeResultForRoundTripPair(pair);
-      const preFixedAmount = Number(pairResult?.quoteSnapshot?.adjustedDistanceFareAmount) || 0;
-      const fareLabel = preFixedAmount > 0
-        ? formatYen(preFixedAmount)
-        : (pairResult ? formatYen(pairResult.total) : "-");
+      const fareLineHtml = renderRouteCardFareLine(pairResult);
       const showAsSelected = !stepReviewPending && isSelected;
       const selectDisabled = showAsSelected;
       const titleHtml = renderRouteCardTitle(abInfo, pair.label);
-      const buttonLabelHtml = renderRouteSelectButtonLabel(showAsSelected, { roundTrip: true });
+      const buttonLabelHtml = renderRouteSelectButtonLabel(showAsSelected);
       const metaHtml = (
         '<div class="estimate-roundtrip-pair-meta">' +
           "<div>行き " + escapeHtml(outboundDistanceLabel || "-") + " " + escapeHtml(outboundDurationLabel || "-") + "</div>" +
@@ -2100,6 +2108,7 @@
           '<article class="estimate-route-card estimate-route-card--compact estimate-roundtrip-pair-card' + (isSelected ? " is-selected" : "") + (abInfo ? " estimate-route-card--ab-" + abInfo.colorClass : "") + '">' +
             titleHtml +
             metaHtml +
+            fareLineHtml +
             '<button type="button" class="estimate-route-select-btn' + (showAsSelected ? " is-selected" : "") + '" data-select-roundtrip-pair="' + escapeAttr(pair.strategy) + '"' + (selectDisabled ? " disabled" : "") + ">" + buttonLabelHtml + "</button>" +
           "</article>"
         );
@@ -2109,10 +2118,8 @@
         '<article class="estimate-route-card estimate-roundtrip-pair-card' + (isSelected ? " is-selected" : "") + (abInfo ? " estimate-route-card--ab-" + abInfo.colorClass : "") + '">' +
           titleHtml +
           metaHtml +
-          '<dl class="estimate-route-card-meta estimate-route-card-meta--fare-only">' +
-            '<div><dt>事前確定運賃</dt><dd class="estimate-route-card-fare">' + escapeHtml(fareLabel) + "</dd></div>" +
-          "</dl>" +
-          '<button type="button" class="estimate-route-select-btn' + (isSelected ? " is-selected" : "") + '" data-select-roundtrip-pair="' + escapeAttr(pair.strategy) + '"' + (isSelected ? " disabled" : "") + ">" + renderRouteSelectButtonLabel(isSelected, { roundTrip: true }) + "</button>" +
+          fareLineHtml +
+          '<button type="button" class="estimate-route-select-btn' + (isSelected ? " is-selected" : "") + '" data-select-roundtrip-pair="' + escapeAttr(pair.strategy) + '"' + (isSelected ? " disabled" : "") + ">" + renderRouteSelectButtonLabel(isSelected) + "</button>" +
         "</article>"
       );
     }).join("");
@@ -2207,10 +2214,7 @@
       const routeId = String(route.routeId || "");
       const isSelected = routeId === selectedId || (!selectedId && index === 0);
       const routeResult = computeResultForRoute(route, legKey);
-      const preFixedAmount = Number(routeResult?.quoteSnapshot?.adjustedDistanceFareAmount) || 0;
-      const fareLabel = preFixedAmount > 0
-        ? formatYen(preFixedAmount)
-        : (routeResult ? formatYen(routeResult.total) : "-");
+      const fareLineHtml = renderRouteCardFareLine(routeResult);
       const distanceLabel = formatRouteDistanceMeters(route.distanceMeters);
       const durationLabel = formatRouteDurationSeconds(route.durationSeconds);
       const summary = getRouteDisplayLabel(route, index);
@@ -2239,8 +2243,9 @@
               ? '<p class="estimate-route-card-description estimate-route-card-description--compact">' + escapeHtml(description) + "</p>"
               : "") +
             '<div class="estimate-route-card-compact-meta">' +
-              escapeHtml(distanceLabel || "-") + " " + escapeHtml(durationLabel || "-") +
+              escapeHtml(distanceLabel || "-") + " / " + escapeHtml(durationLabel || "-") +
             "</div>" +
+            fareLineHtml +
             (confirmable
               ? '<button type="button" class="estimate-route-select-btn' + (showAsSelected ? " is-selected" : "") + '" data-select-route-id="' + escapeAttr(routeId) + '" data-select-route-leg="' + escapeAttr(legKey) + '"' + (showAsSelected ? " disabled" : "") + ">" + buttonLabelHtml + "</button>"
               : "") +
@@ -2264,8 +2269,8 @@
             (waypointLabel
               ? "<div><dt>主要経由</dt><dd>" + escapeHtml(waypointLabel) + "</dd></div>"
               : "") +
-            '<div><dt>事前確定運賃</dt><dd class="estimate-route-card-fare">' + escapeHtml(fareLabel) + "</dd></div>" +
           "</dl>" +
+          fareLineHtml +
           (confirmable
             ? '<button type="button" class="estimate-route-select-btn' + (isSelected ? " is-selected" : "") + '" data-select-route-id="' + escapeAttr(routeId) + '" data-select-route-leg="' + escapeAttr(legKey) + '"' + (isSelected ? " disabled" : "") + ">" + renderRouteSelectButtonLabel(isSelected) + "</button>"
             : "") +
@@ -3079,11 +3084,43 @@
     return base;
   }
 
+  function getResultHeroLabel(){
+    if(isPreFixedFareMode()){
+      return "事前確定運賃";
+    }
+    return getResultTotalLabel();
+  }
+
+  function renderResultPolicyNotice(){
+    const notes = String(getResultNotes() || "").trim();
+    if(!notes){
+      return "";
+    }
+    const title = isPreFixedFareMode()
+      ? "事前確定運賃の適用について"
+      : "ご利用にあたっての注意";
+    return (
+      '<section class="estimate-result-policy-notice" aria-label="' + escapeAttr(title) + '">' +
+        '<h4 class="estimate-result-policy-notice-title">' + escapeHtml(title) + "</h4>" +
+        '<div class="estimate-result-policy-notice-body">' + escapeHtml(notes) + "</div>" +
+      "</section>"
+    );
+  }
+
   function getResultTotalLabel(){
     if(isPreFixedFareMode()){
       return state.config.resultLabels?.fixedFareSection || "事前確定運賃込み合計";
     }
     return state.config.resultLabels?.totalEstimateSection || state.config.resultLabels?.total || "合計目安";
+  }
+
+  function renderEstimateTopBar(){
+    return (
+      '<header class="estimate-top-bar">' +
+        '<button type="button" class="estimate-top-bar-btn estimate-top-bar-reset" id="estimateResetBtn">最初からやり直す</button>' +
+        '<a class="estimate-top-bar-btn estimate-top-bar-home" href="../index.html">ホーム</a>' +
+      "</header>"
+    );
   }
 
   function formatResultTotalAmount(total){
@@ -3467,7 +3504,7 @@
   }
 
   function renderResult(result){
-    const totalLabel = getResultTotalLabel();
+    const totalLabel = getResultHeroLabel();
     const reservationUrl = getReservationUrl();
     const lineUrl = state.ctaUrls.line || "#";
     const phoneUrl = state.ctaUrls.phone || "#";
@@ -3549,7 +3586,6 @@
             <div class="estimate-total-label">${escapeHtml(totalLabel)}</div>
             <div class="estimate-total-amount">${escapeHtml(formatResultTotalAmount(result.total))}</div>
           </div>
-          <div class="estimate-result-notes estimate-result-notes--hero">${escapeHtml(getResultNotes())}</div>
         </div>
         <div class="estimate-cta-group estimate-cta-group--result" id="estimateResultReservationCta">
           <a class="estimate-cta-primary" href="${escapeAttr(reservationUrl)}" rel="noopener noreferrer">${escapeHtml(getReservationCtaLabel())}</a>
@@ -3567,6 +3603,7 @@
           ${renderRouteSelectionSection(result)}
           ${routeCardHtml}
         </div>
+        ${renderResultPolicyNotice()}
         <div class="estimate-result-actions">
           <button type="button" class="estimate-pdf-btn" id="estimatePdfBtn">見積書PDFを保存</button>
           <div class="estimate-pdf-feedback" id="estimatePdfFeedback" aria-live="polite"></div>
@@ -3633,10 +3670,10 @@
     page.classList.remove("estimate-has-mobile-reserve-bar");
 
     root.innerHTML = `
+      ${renderEstimateTopBar()}
       <div class="estimate-wrap">
         <div class="estimate-header">
           <h1 class="estimate-title">${escapeHtml(getLpFareModeTitleText())}</h1>
-          <button type="button" class="estimate-reset-btn" id="estimateResetBtn">最初からやり直す</button>
         </div>
         <p class="estimate-lead" id="estimateLeadText">${escapeHtml(getLpFareModeLeadText())}</p>
         ${stepsHtml}

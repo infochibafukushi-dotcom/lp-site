@@ -2,6 +2,56 @@
   background:#f5f5f5;
   color:#222;
   min-height:100vh;
+  padding-top:56px;
+}
+body.estimate-page > header{
+  display:none;
+}
+.estimate-top-bar{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:9500;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  min-height:48px;
+  padding:8px 12px;
+  padding-top:calc(8px + env(safe-area-inset-top, 0px));
+  background:#fff;
+  border-bottom:1px solid #e5e0d8;
+  box-shadow:0 1px 4px rgba(45,42,38,.08);
+}
+.estimate-top-bar-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:36px;
+  padding:8px 12px;
+  border:1px solid #d8cbb8;
+  border-radius:999px;
+  background:#fff;
+  color:#666;
+  font-size:13px;
+  font-weight:700;
+  line-height:1.2;
+  text-decoration:none;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.estimate-top-bar-reset{
+  color:#666;
+}
+.estimate-top-bar-home{
+  color:#9a6b16;
+}
+.estimate-top-bar-btn:hover,
+.estimate-top-bar-btn:active{
+  background:#faf8f5;
+  border-color:#9a6b16;
+  color:#9a6b16;
 }
 .estimate-wrap{
   max-width:720px;
@@ -874,9 +924,17 @@
 .estimate-route-card-list--ab .estimate-route-card-description,
 .estimate-route-card-list--ab .estimate-route-card-description--compact,
 .estimate-route-card-list--ab .estimate-route-card-toll-note,
-.estimate-route-card-list--ab .estimate-route-card-meta--fare-only,
 .estimate-route-card-list--ab .estimate-route-card-meta div:nth-child(n+3){
   display:none;
+}
+.estimate-route-card-fare-line{
+  margin:0 0 10px;
+  font-size:13px;
+  font-weight:700;
+  line-height:1.4;
+  color:#c62828;
+  white-space:normal;
+  word-break:break-word;
 }
 .estimate-route-card-list--ab .estimate-route-card-compact-meta,
 .estimate-route-card-list--ab .estimate-roundtrip-pair-meta{
@@ -1058,18 +1116,34 @@
 }
 .estimate-total-section--hero{
   margin-top:0;
-  margin-bottom:18px;
+  margin-bottom:12px;
   padding:18px 14px;
   background:#fff8f0;
   border:1px solid #f0dfc8;
   border-radius:14px;
 }
-.estimate-result-notes--hero{
-  margin-top:10px;
-  text-align:center;
-}
 .estimate-cta-group--result{
   margin:0 0 20px;
+}
+.estimate-result-policy-notice{
+  margin-top:20px;
+  padding:14px 14px 12px;
+  border:1px solid #efe7dc;
+  border-radius:12px;
+  background:#faf8f4;
+}
+.estimate-result-policy-notice-title{
+  margin:0 0 8px;
+  font-size:14px;
+  font-weight:700;
+  color:#2d2a26;
+}
+.estimate-result-policy-notice-body{
+  margin:0;
+  font-size:13px;
+  line-height:1.8;
+  color:#666;
+  white-space:pre-line;
 }
 .estimate-cta-group--result .estimate-cta-primary{
   width:100%;
@@ -1569,6 +1643,27 @@
     scroll-margin-bottom:100px;
   }
 
+  .estimate-page{
+    padding-top:52px;
+  }
+
+  .estimate-title{
+    font-size:clamp(15px, 4.1vw, 18px);
+    line-height:1.25;
+    white-space:nowrap;
+    letter-spacing:-0.02em;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .estimate-route-card-fare-line{
+    margin:0 0 8px;
+    font-size:12px;
+    line-height:1.35;
+    white-space:normal;
+    word-break:break-word;
+  }
+
   .estimate-step-back-btn{
     display:inline-flex;
     align-items:center;
@@ -1765,14 +1860,17 @@
   .estimate-route-card-list .estimate-route-card-description,
   .estimate-route-card-list .estimate-route-card-description--compact,
   .estimate-route-card-list .estimate-route-card-toll-note,
-  .estimate-route-card-list .estimate-route-card-meta--fare-only,
   .estimate-route-card-list .estimate-route-card-meta div:nth-child(n+3),
   .estimate-route-card-list--ab .estimate-route-card-description,
   .estimate-route-card-list--ab .estimate-route-card-description--compact,
   .estimate-route-card-list--ab .estimate-route-card-toll-note,
-  .estimate-route-card-list--ab .estimate-route-card-meta--fare-only,
   .estimate-route-card-list--ab .estimate-route-card-meta div:nth-child(n+3){
     display:none;
+  }
+
+  .estimate-route-card-list .estimate-route-card-fare-line,
+  .estimate-route-card-list--ab .estimate-route-card-fare-line{
+    display:block;
   }
 
   .estimate-route-card-list .estimate-route-card-compact-meta,
