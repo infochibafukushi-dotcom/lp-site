@@ -26,63 +26,73 @@
       return "<li>" + escapeHtml(item) + "</li>";
     }).join("");
     return (
-      "<div class='compatibility'>" +
+      "<section class='compatibility'>" +
         "<h2>" + escapeHtml(mutuality?.title || "") + "</h2>" +
         "<p>" + escapeHtml(mutuality?.intro || "") + "</p>" +
         "<ul>" + items + "</ul>" +
-      "</div>"
+      "</section>"
     );
   }
 
   function buildPrintStyles(){
     return (
       "@page{size:A4 portrait;margin:12mm;}" +
-      "html,body{margin:0;padding:0;background:#ffffff;color:#1f2937;font-family:'Yu Gothic','Meiryo',sans-serif;font-size:10.5pt;line-height:1.65;}" +
-      "*{box-sizing:border-box;overflow-wrap:break-word;word-break:normal;}" +
-      ".print-page{width:100%;box-sizing:border-box;}" +
-      "h1{font-size:16pt;margin:0 0 2mm;color:#1b3a6b;line-height:1.3;}" +
-      ".subtitle{font-size:11pt;margin:0 0 2mm;color:#334155;font-weight:700;}" +
-      ".meta{font-size:9.5pt;margin:0 0 4mm;color:#64748b;}" +
-      "h2{font-size:12pt;margin:0 0 2mm;color:#1b3a6b;}" +
+      "html,body{width:100%;margin:0;padding:0;background:#ffffff;}" +
+      "body{font-family:'Yu Gothic','Meiryo',sans-serif;font-size:10.5pt;line-height:1.6;color:#1f2937;}" +
+      "main.print-page{width:100%;max-width:none;margin:0;padding:0;box-sizing:border-box;display:block;}" +
+      "main.print-page,main.print-page *{box-sizing:border-box;}" +
+      "main.print-page *{max-width:100%;overflow-wrap:break-word;word-break:normal;}" +
+      "h1{font-size:16pt;margin:0 0 2mm;color:#1b3a6b;line-height:1.3;width:100%;}" +
+      ".subtitle{font-size:11pt;margin:0 0 2mm;color:#334155;font-weight:700;width:100%;}" +
+      ".meta{font-size:9.5pt;margin:0 0 4mm;color:#64748b;width:100%;}" +
+      "h2{font-size:12pt;margin:0 0 2mm;color:#1b3a6b;width:100%;}" +
       ".section-title{margin:4mm 0 3mm;padding-bottom:1mm;border-bottom:1.5pt solid #1b3a6b;}" +
-      ".note{background:#fff7ed;border-left:4px solid #c46a00;padding:3mm;margin:4mm 0;}" +
-      ".compatibility{background:#eefaf3;border-left:4px solid #16885a;padding:4mm;margin:4mm 0 6mm;}" +
+      ".note{width:100%;margin:4mm 0;padding:4mm;background:#fff7ed;border-left:4px solid #c46a00;}" +
+      ".compatibility{width:100%;margin:4mm 0;padding:4mm;background:#eefaf3;border-left:4px solid #16885a;}" +
       ".compatibility ul{margin:2mm 0 0;padding-left:5mm;}" +
       ".compatibility li{margin:0 0 1.5mm;}" +
-      ".qa-block{break-inside:avoid;page-break-inside:avoid;margin:0 0 8mm;border:1px solid #cbd5e1;}" +
-      ".qa-question{background:#eaf3fb;padding:3mm;font-weight:700;color:#16365c;}" +
-      ".qa-answer{padding:3mm;background:#ffffff;}" +
+      ".qa-block{width:100%;margin:0 0 7mm;border:1px solid #cbd5e1;page-break-inside:avoid;break-inside:avoid;}" +
+      ".qa-question{width:100%;background:#eaf3fb;color:#16365c;font-weight:700;padding:3mm;}" +
+      ".qa-answer{width:100%;background:#ffffff;padding:3mm;}" +
       ".qa-label{font-weight:700;color:#1b3a6b;}" +
-      "@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}"
+      "@media print{" +
+      "html,body,main.print-page{width:100% !important;max-width:none !important;margin-left:0 !important;margin-right:0 !important;padding-left:0 !important;padding-right:0 !important;}" +
+      "body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}" +
+      "}" +
+      "@media screen{" +
+      "html,body,main.print-page{width:100%;max-width:none;margin:0;padding:0;}" +
+      "}"
     );
   }
 
   function buildReportHtml(data){
     return (
-      "<div class='print-page'>" +
+      "<main class='print-page'>" +
         "<h1>" + escapeHtml(data.title || "") + "</h1>" +
         "<p class='subtitle'>" + escapeHtml(data.subtitle || "") + "</p>" +
         "<p class='meta'>作成日：" + escapeHtml(data.meta?.createdAt || "") +
           "　作成元：" + escapeHtml(data.meta?.createdBy || "") + "</p>" +
-        "<div class='note'>" + escapeHtml(data.introNote || "") + "</div>" +
+        "<section class='note'>" + escapeHtml(data.introNote || "") + "</section>" +
         buildMutualityBlock(data.mutuality) +
         "<h2 class='section-title'>想定質問と回答</h2>" +
         buildQaBlocks(data.qaItems) +
-        "<div class='note'><strong>注意事項：</strong>" + escapeHtml(data.footerNote || "") + "</div>" +
-      "</div>"
+        "<section class='note'><strong>注意事項：</strong>" + escapeHtml(data.footerNote || "") + "</section>" +
+      "</main>"
     );
   }
 
   function buildPrintDocument(data){
     return (
       "<!DOCTYPE html><html lang='ja'><head><meta charset='UTF-8'>" +
+      "<meta name='viewport' content='width=device-width,initial-scale=1'>" +
       "<title>" + escapeHtml(data.title || DOCUMENT_TITLE) + "</title>" +
       "<style>" + buildPrintStyles() + "</style>" +
       "</head><body>" +
       buildReportHtml(data) +
       "<script>" +
       "window.addEventListener('load',function(){" +
-      "setTimeout(function(){try{window.focus();window.print();}catch(e){}},200);" +
+      "try{if(window.opener){window.moveTo(0,0);window.resizeTo(screen.availWidth,screen.availHeight);}}catch(e){}" +
+      "setTimeout(function(){try{window.focus();window.print();}catch(e){}},300);" +
       "});" +
       "<\/script>" +
       "</body></html>"

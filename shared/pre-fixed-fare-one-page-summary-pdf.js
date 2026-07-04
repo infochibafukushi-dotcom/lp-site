@@ -16,14 +16,14 @@
   function buildFlowHtml(flowSteps){
     const steps = Array.isArray(flowSteps) ? flowSteps : [];
     return (
-      "<div class='flow-wrap'>" +
+      "<section class='flow-wrap'>" +
         "<h2>運用フロー</h2>" +
         "<div class='flow'>" +
           steps.map(function(step){
             return "<div class='flow-item'>" + escapeHtml(step) + "</div>";
           }).join("") +
         "</div>" +
-      "</div>"
+      "</section>"
     );
   }
 
@@ -36,13 +36,13 @@
             return "<li>" + escapeHtml(item) + "</li>";
           }).join("");
           return (
-            "<div class='" + toneClass(section.tone) + "'>" +
+            "<section class='" + toneClass(section.tone) + "'>" +
               "<div class='card-title'>" +
                 "<span class='card-num'>" + escapeHtml(section.number || "") + "</span>" +
                 "<span>" + escapeHtml(section.title || "") + "</span>" +
               "</div>" +
               "<ul>" + items + "</ul>" +
-            "</div>"
+            "</section>"
           );
         }).join("") +
       "</div>"
@@ -64,64 +64,72 @@
       return "<tr>" + cells + "</tr>";
     }).join("");
     return (
-      "<div class='table-wrap'>" +
+      "<section class='table-wrap'>" +
         "<h2>" + escapeHtml(table.title || "") + "</h2>" +
         "<table>" +
           "<thead><tr>" + th + "</tr></thead>" +
           "<tbody>" + body + "</tbody>" +
         "</table>" +
-      "</div>"
+      "</section>"
     );
   }
 
   function buildPrintStyles(){
     return (
       "@page{size:A4 landscape;margin:10mm;}" +
-      "html,body{margin:0;padding:0;background:#ffffff;color:#1f2937;font-family:'Yu Gothic','Meiryo',sans-serif;font-size:9.5pt;line-height:1.45;}" +
-      "*{box-sizing:border-box;overflow-wrap:break-word;}" +
-      ".print-page{width:100%;box-sizing:border-box;}" +
-      ".page{width:100%;}" +
-      ".page-2{break-before:page;page-break-before:always;}" +
+      "html,body{width:100%;margin:0;padding:0;background:#ffffff;}" +
+      "body{font-family:'Yu Gothic','Meiryo',sans-serif;font-size:9.5pt;line-height:1.45;color:#1f2937;}" +
+      "main.print-page{width:100%;max-width:none;margin:0;padding:0;box-sizing:border-box;display:block;}" +
+      "main.print-page,main.print-page *{box-sizing:border-box;}" +
+      "main.print-page *{max-width:100%;overflow-wrap:break-word;word-break:normal;}" +
+      "section{width:100%;max-width:100%;}" +
       "h1{font-size:15pt;margin:0 0 1.5mm;color:#1b3a6b;line-height:1.3;}" +
       ".subtitle{font-size:10pt;margin:0 0 1mm;color:#334155;font-weight:700;}" +
-      ".meta{font-size:9pt;margin:0 0 3mm;color:#64748b;}" +
+      ".meta{font-size:9pt;margin:0;color:#64748b;}" +
       "h2{font-size:11pt;margin:0 0 2mm;color:#1b3a6b;}" +
-      ".header-row{display:flex;justify-content:space-between;align-items:flex-start;gap:4mm;margin-bottom:3mm;padding-bottom:2mm;border-bottom:1.5pt solid #1b3a6b;}" +
-      ".overview{margin:0 0 3mm;padding:3mm;background:#eef5fb;border-left:4px solid #2f6fad;}" +
-      ".flow-wrap{margin:0 0 3mm;}" +
-      ".flow{display:grid;grid-template-columns:repeat(4,1fr);gap:4mm;margin:4mm 0;}" +
+      ".header-row{display:flex;justify-content:space-between;align-items:flex-start;gap:4mm;width:100%;margin-bottom:3mm;padding-bottom:2mm;border-bottom:1.5pt solid #1b3a6b;}" +
+      ".summary{width:100%;max-width:100%;margin:0 0 3mm;padding:3mm;background:#eef5fb;border-left:4px solid #2f6fad;}" +
+      ".flow-wrap{width:100%;margin:0 0 3mm;}" +
+      ".flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4mm;width:100%;margin:4mm 0;}" +
       ".flow-item{border:1px solid #16885a;border-radius:4px;padding:2.5mm;text-align:center;font-weight:700;white-space:normal;background:#f3faf6;color:#14532d;}" +
-      ".cards{display:grid;grid-template-columns:repeat(2,1fr);gap:4mm;}" +
-      ".card{border:1px solid #bfdbfe;border-radius:6px;padding:3mm;break-inside:avoid;page-break-inside:avoid;background:#ffffff;}" +
+      ".cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4mm;width:100%;}" +
+      ".card{border:1px solid #bfdbfe;border-radius:6px;padding:3mm;page-break-inside:avoid;break-inside:avoid;background:#ffffff;width:100%;max-width:100%;}" +
       ".card.warning{border-color:#f59e0b;background:#fff7ed;}" +
       ".card-title{display:flex;align-items:center;gap:2mm;font-weight:700;color:#1b3a6b;margin-bottom:1.5mm;}" +
       ".card.warning .card-title{color:#9a4d0f;}" +
-      ".card-num{display:inline-flex;align-items:center;justify-content:center;min-width:5mm;height:5mm;border-radius:50%;background:#1b3a6b;color:#ffffff;font-size:8pt;}" +
+      ".card-num{display:inline-flex;align-items:center;justify-content:center;min-width:5mm;height:5mm;border-radius:50%;background:#1b3a6b;color:#ffffff;font-size:8pt;flex-shrink:0;}" +
       ".card.warning .card-num{background:#c56a1a;}" +
       ".card ul{margin:0;padding-left:4.5mm;}" +
       ".card li{margin:0 0 1mm;}" +
-      ".table-wrap{margin:0 0 4mm;}" +
-      "table{width:100%;border-collapse:collapse;margin-top:4mm;font-size:9pt;}" +
+      ".table-wrap{width:100%;max-width:100%;margin:0 0 4mm;}" +
+      "table{width:100%;max-width:100%;border-collapse:collapse;margin-top:4mm;font-size:9pt;}" +
       "th,td{border:1px solid #cbd5e1;padding:2mm;vertical-align:top;}" +
       "th{background:#dbeafe;color:#16365c;}" +
       "td.row-label{font-weight:700;}" +
       "td.row-0{background:#fff7ed;color:#9a4d0f;}" +
       "td.row-1{background:#eef5fb;color:#1b4f86;}" +
       "td.row-2{background:#eefaf3;color:#166534;}" +
-      ".note-box,.record-box{margin:0 0 4mm;padding:3mm;border-radius:4px;}" +
+      ".note-box,.record-box{width:100%;max-width:100%;margin:0 0 4mm;padding:3mm;border-radius:4px;}" +
       ".note-box{background:#fff7ed;border-left:4px solid #c46a00;}" +
       ".record-box{background:#eef5fb;border-left:4px solid #2f6fad;}" +
       ".note-box ul,.record-box ul{margin:0;padding-left:5mm;}" +
       ".note-box li,.record-box li{margin:0 0 1.5mm;}" +
-      "@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}" +
-      ".page-2{break-before:page;page-break-before:always;}}"
+      ".page-break{page-break-before:always;break-before:page;}" +
+      "@media print{" +
+      "html,body,main.print-page{width:100% !important;max-width:none !important;margin-left:0 !important;margin-right:0 !important;padding-left:0 !important;padding-right:0 !important;}" +
+      "body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}" +
+      ".page-break{page-break-before:always;break-before:page;}" +
+      "}" +
+      "@media screen{" +
+      "html,body,main.print-page{width:100%;max-width:none;margin:0;padding:0;}" +
+      "}"
     );
   }
 
   function buildReportHtml(data){
     return (
-      "<div class='print-page'>" +
-        "<div class='page page-1'>" +
+      "<main class='print-page'>" +
+        "<section class='page-one'>" +
           "<div class='header-row'>" +
             "<div>" +
               "<h1>" + escapeHtml(data.title || "") + "</h1>" +
@@ -129,43 +137,45 @@
             "</div>" +
             "<p class='meta'>作成日：" + escapeHtml(data.meta?.createdAt || "") + "</p>" +
           "</div>" +
-          "<div class='overview'>" + escapeHtml(data.overview || "") + "</div>" +
+          "<section class='summary'>" + escapeHtml(data.overview || "") + "</section>" +
           buildFlowHtml(data.flowSteps) +
           buildCardsHtml(data.sections) +
-        "</div>" +
-        "<div class='page page-2'>" +
+        "</section>" +
+        "<section class='page-break page-two'>" +
           buildTableHtml(data.changeTable) +
-          "<div class='record-box'>" +
+          "<section class='record-box'>" +
             "<h2>保存記録の説明</h2>" +
             "<ul>" +
               "<li>予約時は、選択された走行予定ルート、主要経由地点、運賃額、同意日時、スナップショットハッシュを保存します。</li>" +
               "<li>運行時は、運行開始時刻、ルート変更ログ、追加介助料、実費、精算額、領収書・レシート情報を保存します。</li>" +
               "<li>予約ID・見積番号・運行記録を紐づけ、同意内容と実際の運行・精算内容を後から照合できる設計です。</li>" +
             "</ul>" +
-          "</div>" +
-          "<div class='note-box'>" +
+          "</section>" +
+          "<section class='note-box'>" +
             "<h2>注意事項</h2>" +
             "<ul>" +
               "<li>本資料は運輸局説明用の運用フロー要約です。正式な申請様式、運賃表、算定根拠資料、システム概要書、統合説明資料とあわせて使用します。</li>" +
               "<li>事前確定運賃として提示する場合は、2以上の走行予定ルートから旅客が選択することを前提とします。</li>" +
               "<li>有料道路料金、迎車料金、介助料、待機料、実費は、事前確定運賃とは区分して表示・精算します。</li>" +
             "</ul>" +
-          "</div>" +
-        "</div>" +
-      "</div>"
+          "</section>" +
+        "</section>" +
+      "</main>"
     );
   }
 
   function buildPrintDocument(data){
     return (
       "<!DOCTYPE html><html lang='ja'><head><meta charset='UTF-8'>" +
+      "<meta name='viewport' content='width=device-width,initial-scale=1'>" +
       "<title>" + escapeHtml(data.title || DOCUMENT_TITLE) + "</title>" +
       "<style>" + buildPrintStyles() + "</style>" +
       "</head><body>" +
       buildReportHtml(data) +
       "<script>" +
       "window.addEventListener('load',function(){" +
-      "setTimeout(function(){try{window.focus();window.print();}catch(e){}},200);" +
+      "try{if(window.opener){window.moveTo(0,0);window.resizeTo(screen.availWidth,screen.availHeight);}}catch(e){}" +
+      "setTimeout(function(){try{window.focus();window.print();}catch(e){}},300);" +
       "});" +
       "<\/script>" +
       "</body></html>"
