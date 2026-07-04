@@ -34,6 +34,8 @@
   let delegatedBound = false;
   let mobileReserveBarResizeBound = false;
   let mobileReserveBarResizeTimer = null;
+  let routeMapAnimationTimers = [];
+  let routeMapAnimationLifecycleBound = false;
   // 初回表示・再読み込み時はページ上部から開始する（STEPカード途中への自動スクロールを抑止）
   let pageEntryScrollPending = true;
   let mobileReserveBarObserver = null;
@@ -1736,7 +1738,7 @@
     if(!allSimilar){
       return "";
     }
-    return '<p class="estimate-route-selection-similar-note">近距離のため、A/Bともほぼ同じルートです。</p>';
+    return '<p class="estimate-route-selection-similar-note">近距離のため、A/Bともほぼ同じルートです。地図上の矢印で進行方向を確認できます。</p>';
   }
 
   function getRouteSelectButtonLabel(isSelected, options){
@@ -2308,7 +2310,115 @@
     }, state.returnStopAddress);
   }
 
+  function prefersReducedMotion(){
+    return Boolean(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }
+
+  function stopRouteMapAnimations(){
+    routeMapAnimationTimers.forEach(function(timerId){
+      clearInterval(timerId);
+    });
+    routeMapAnimationTimers = [];
+  }
+
+  function bindRouteMapAnimationLifecycle(){
+    if(routeMapAnimationLifecycleBound){
+      return;
+    }
+    routeMapAnimationLifecycleBound = true;
+    window.addEventListener("pagehide", stopRouteMapAnimations);
+  }
+
+  function buildRouteArrowIcon(color){
+    return {
+      path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+      scale: 3,
+      strokeColor: color,
+      strokeOpacity: 0.95,
+      strokeWeight: 1,
+      fillColor: color,
+      fillOpacity: 0.95,
+      rotation: 0
+    };
+  }
+
+  function buildRouteDashIcon(color){
+    return {
+      path: "M 0,-1 0,1",
+      strokeOpacity: 0.95,
+      strokeColor: color,
+      scale: 4,
+      strokeWeight: 2
+    };
+  }
+
+  function buildRoutePolylineIcons(segment, useAbSegments){
+    const color = segment.color || "#1565C0";
+    const isDashed = useAbSegments && (segment.lineStyle === "dashed" || segment.key === "routeB");
+    const icons = [];
+    if(isDashed){
+      icons.push({
+        icon: buildRouteDashIcon(color),
+        offset: "0",
+        repeat: "12px"
+      });
+    }
+    icons.push({
+      icon: buildRouteArrowIcon(color),
+      offset: prefersReducedMotion() ? "12%" : "0%",
+      repeat: "72px"
+    });
+    return {
+      icons: icons,
+      arrowIconIndex: icons.length - 1,
+      isDashed: isDashed
+    };
+  }
+
+  function startRouteArrowAnimation(polyline, arrowIconIndex){
+    if(!polyline || arrowIconIndex < 0 || prefersReducedMotion()){
+      return;
+    }
+    const cycleMs = 1800;
+    const stepMs = 60;
+    const stepPercent = 100 / (cycleMs / stepMs);
+    let offset = 0;
+    const timerId = setInterval(function(){
+      const icons = polyline.get("icons");
+      if(!Array.isArray(icons) || !icons[arrowIconIndex]){
+        return;
+      }
+      offset = (offset + stepPercent) % 100;
+      icons[arrowIconIndex] = Object.assign({}, icons[arrowIconIndex], {
+        offset: offset.toFixed(1) + "%"
+      });
+      polyline.set("icons", icons);
+    }, stepMs);
+    routeMapAnimationTimers.push(timerId);
+  }
+
+  function drawRouteSegmentPolyline(map, segment, useAbSegments){
+    if(!segment?.path || segment.path.length < 2){
+      return null;
+    }
+    const iconConfig = buildRoutePolylineIcons(segment, useAbSegments);
+    const routeLine = new window.google.maps.Polyline({
+      path: segment.path,
+      geodesic: true,
+      strokeColor: segment.color,
+      strokeOpacity: iconConfig.isDashed ? 0 : (useAbSegments ? 0.82 : 0.95),
+      strokeWeight: useAbSegments ? (iconConfig.isDashed ? 5 : 6) : 5,
+      icons: iconConfig.icons
+    });
+    routeLine.setMap(map);
+    startRouteArrowAnimation(routeLine, iconConfig.arrowIconIndex);
+    return routeLine;
+  }
+
   async function renderRouteMapIfNeeded(){
+    stopRouteMapAnimations();
+    bindRouteMapAnimationLifecycle();
+
     const mapContainers = document.querySelectorAll(".estimate-route-map");
     if(!mapContainers.length) return;
 
@@ -2358,6 +2468,8 @@
 
     try{
       await loadGoogleMapsJsApi();
+      // 非同期待ちの間に再描画が走った場合に備え、描画直前でもタイマーを止める
+      stopRouteMapAnimations();
       mapContainers.forEach(function(mapContainer){
         const wrap = mapContainer.closest(".estimate-route-map-wrap") || mapContainer.parentElement;
         mapContainer.innerHTML = "";
@@ -2376,7 +2488,7 @@
           fullscreenControl: false
         });
 
-        // A(実線)を先に、B(破線)を後に描画し、重なり時も破線で区別できるようにする
+        // A(実線)を先に、B(破線)を後に描画し、重なり時も破線と矢印で区別できるようにする
         const orderedSegments = useAbSegments
           ? segments.slice().sort(function(left, right){
             if(left.key === right.key){
@@ -2387,37 +2499,7 @@
           : segments;
 
         orderedSegments.forEach(function(segment){
-          if(!segment.path || segment.path.length < 2){
-            return;
-          }
-          const isDashedAbRoute = useAbSegments && (segment.lineStyle === "dashed" || segment.key === "routeB");
-          const routeLine = isDashedAbRoute
-            ? new window.google.maps.Polyline({
-              path: segment.path,
-              geodesic: true,
-              strokeColor: segment.color,
-              strokeOpacity: 0,
-              strokeWeight: 5,
-              icons: [{
-                icon: {
-                  path: "M 0,-1 0,1",
-                  strokeOpacity: 0.95,
-                  strokeColor: segment.color,
-                  scale: 4,
-                  strokeWeight: 2
-                },
-                offset: "0",
-                repeat: "12px"
-              }]
-            })
-            : new window.google.maps.Polyline({
-              path: segment.path,
-              geodesic: true,
-              strokeColor: segment.color,
-              strokeOpacity: useAbSegments ? 0.82 : 0.95,
-              strokeWeight: useAbSegments ? 6 : 5
-            });
-          routeLine.setMap(map);
+          drawRouteSegmentPolyline(map, segment, useAbSegments);
         });
 
         markers.forEach(function(markerInfo){
@@ -2440,6 +2522,7 @@
         }
       });
     }catch(error){
+      stopRouteMapAnimations();
       mapContainers.forEach(function(mapContainer){
         mapContainer.innerHTML = '<p class="estimate-route-map-error">' + escapeHtml(error?.message || "地図表示に失敗しました。") + "</p>";
       });

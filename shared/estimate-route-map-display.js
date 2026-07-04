@@ -124,7 +124,8 @@
     return decodePolyline(route?.encodedPolyline || "");
   }
 
-  function pushAbSegment(segments, meta, route, isRoundTrip){
+  function pushAbSegment(segments, meta, route, options){
+    const opts = options || {};
     const path = pathFromRoute(route);
     if(path.length < 2){
       return;
@@ -135,8 +136,9 @@
       color: meta.color,
       lineStyle: meta.lineStyle || "solid",
       path: path,
-      label: isRoundTrip ? meta.roundTripLabel : meta.oneWayLabel,
-      isAbRoute: true
+      label: opts.isRoundTrip ? meta.roundTripLabel : meta.oneWayLabel,
+      isAbRoute: true,
+      legRole: opts.legRole || "outbound"
     });
   }
 
@@ -157,10 +159,10 @@
       const returnA = findCandidateByStrategy(returnLeg, "time_priority");
       const returnB = findCandidateByStrategy(returnLeg, "general_road_priority");
       if(outboundA && returnA && outboundB && returnB){
-        pushAbSegment(segments, metaA, outboundA, true);
-        pushAbSegment(segments, metaA, returnA, true);
-        pushAbSegment(segments, metaB, outboundB, true);
-        pushAbSegment(segments, metaB, returnB, true);
+        pushAbSegment(segments, metaA, outboundA, { isRoundTrip: true, legRole: "outbound" });
+        pushAbSegment(segments, metaA, returnA, { isRoundTrip: true, legRole: "return" });
+        pushAbSegment(segments, metaB, outboundB, { isRoundTrip: true, legRole: "outbound" });
+        pushAbSegment(segments, metaB, returnB, { isRoundTrip: true, legRole: "return" });
         return segments;
       }
     }
@@ -169,8 +171,8 @@
     const routeA = findCandidateByStrategy(candidateSource, "time_priority");
     const routeB = findCandidateByStrategy(candidateSource, "general_road_priority");
     if(routeA && routeB){
-      pushAbSegment(segments, metaA, routeA, false);
-      pushAbSegment(segments, metaB, routeB, false);
+      pushAbSegment(segments, metaA, routeA, { isRoundTrip: false, legRole: "outbound" });
+      pushAbSegment(segments, metaB, routeB, { isRoundTrip: false, legRole: "outbound" });
     }
     return segments;
   }
