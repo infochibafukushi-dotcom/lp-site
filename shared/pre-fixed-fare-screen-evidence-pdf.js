@@ -31,21 +31,19 @@
     return "<table" + (className ? " class='" + escapeHtml(className) + "'" : "") + ">" + colgroup + "<thead><tr>" + th + "</tr></thead><tbody>" + body + "</tbody></table>";
   }
 
-  function pdfPage(pageId, bodyHtml, options){
-    options = options || {};
-    const breakClass = options.isLast ? "" : " pdf-page-break";
+  function screenEvidencePage(pageId, bodyHtml){
     return (
-      "<div class='pdf-page" + breakClass + "' data-page-id='" + escapeHtml(pageId) + "'>" +
-      "<div class='pdf-page-inner'>" + bodyHtml + "</div>" +
-      "</div>"
+      "<section class='screen-evidence-page' data-page-id='" + escapeHtml(pageId) + "'>" +
+      bodyHtml +
+      "</section>"
     );
   }
 
   function buildMissingImageBlock(imageFile){
     return (
-      "<div class='evidence-image-missing'>" +
-      "<p class='evidence-image-missing-label'>画像ファイル未配置</p>" +
-      "<p class='evidence-image-missing-path'>" + escapeHtml(imageFile || "") + "</p>" +
+      "<div class='screen-evidence-shot screen-evidence-shot--missing'>" +
+      "<p class='screen-evidence-shot-missing-label'>画像ファイル未配置</p>" +
+      "<p class='screen-evidence-shot-missing-path'>" + escapeHtml(imageFile || "") + "</p>" +
       "</div>"
     );
   }
@@ -55,15 +53,15 @@
       return buildMissingImageBlock(screen.imageFile);
     }
     return (
-      "<div class='evidence-image-wrap'>" +
-      "<img class='evidence-image' src='" + escapeHtml(screen.imageSrc) + "' alt='" + escapeHtml(screen.pageTitle) + "' loading='eager'>" +
+      "<div class='screen-evidence-shot'>" +
+      "<img src='" + escapeHtml(screen.imageSrc) + "' alt='" + escapeHtml(screen.pageTitle) + "' loading='eager'>" +
       "</div>"
     );
   }
 
   function buildCoverPage(data){
     const info = data.caseInfo || {};
-    return pdfPage("cover", (
+    return screenEvidencePage("cover", (
       "<h1 class='cover-title'>" + escapeHtml(data.title || "") + "</h1>" +
       buildTable(
         ["項目", "内容"],
@@ -94,22 +92,21 @@
 
   function buildScreenPage(screen, imageAvailable, options){
     options = options || {};
-    return pdfPage(screen.pageId, (
+    return screenEvidencePage(screen.pageId, (
       "<h2 class='screen-title'>" + escapeHtml(screen.pageTitle || "") + "</h2>" +
       buildImageBlock(screen, imageAvailable) +
       "<p class='proof-text'>" + escapeHtml(screen.proofText || "") + "</p>" +
       "<p class='verification-note verification-note--compact'>" + escapeHtml(options.verificationNote || "") + "</p>"
-    ), { isLast: !!options.isLast });
+    ));
   }
 
   function buildReportHtml(data, imageAvailabilityMap){
     const availability = imageAvailabilityMap || {};
     const screens = Array.isArray(data.screens) ? data.screens : [];
     const pages = [buildCoverPage(data)];
-    screens.forEach(function(screen, index){
+    screens.forEach(function(screen){
       pages.push(buildScreenPage(screen, !!availability[screen.imageSrc], {
-        verificationNote: data.verificationNote,
-        isLast: index === screens.length - 1
+        verificationNote: data.verificationNote
       }));
     });
     return (
@@ -138,7 +135,7 @@
   }
 
   function waitForImagesToLoad(container){
-    const images = Array.from(container.querySelectorAll("img.evidence-image"));
+    const images = Array.from(container.querySelectorAll(".screen-evidence-shot img"));
     if(!images.length){
       return Promise.resolve();
     }
@@ -156,23 +153,22 @@
   function getEvidenceCss(){
     return (
       ".pre-fixed-fare-screen-evidence,.pre-fixed-fare-screen-evidence *{box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Yu Gothic','Meiryo',sans-serif;color:#111111;}" +
-      ".pre-fixed-fare-screen-evidence{width:720px;background:#ffffff;line-height:1.45;font-size:10.5px;padding:0;margin:0;}" +
-      ".pre-fixed-fare-screen-evidence .pdf-page{width:720px;height:1000px;max-height:1000px;overflow:hidden;page-break-inside:avoid;break-inside:avoid;margin:0;padding:0;position:relative;}" +
-      ".pre-fixed-fare-screen-evidence .pdf-page-break{page-break-after:always !important;break-after:page !important;}" +
-      ".pre-fixed-fare-screen-evidence .pdf-page-inner{height:980px;max-height:980px;display:flex;flex-direction:column;overflow:hidden;padding:4px 0 0;}" +
+      ".pre-fixed-fare-screen-evidence{width:100%;background:#ffffff;line-height:1.45;font-size:10.5px;padding:0;margin:0;}" +
+      ".pre-fixed-fare-screen-evidence .screen-evidence-page{width:100%;min-height:auto;padding:18mm 14mm;box-sizing:border-box;page-break-inside:avoid;break-inside:avoid-page;}" +
+      ".pre-fixed-fare-screen-evidence .screen-evidence-page + .screen-evidence-page{page-break-before:always;break-before:page;}" +
       ".pre-fixed-fare-screen-evidence h1.cover-title{font-size:20px;margin:0 0 12px;color:#1b3a6b;}" +
-      ".pre-fixed-fare-screen-evidence h2.screen-title{font-size:14px;margin:0 0 8px;color:#1b3a6b;border-bottom:2px solid #1b3a6b;padding-bottom:4px;flex:0 0 auto;}" +
-      ".pre-fixed-fare-screen-evidence table{width:100%;border-collapse:collapse;table-layout:fixed;margin:0 0 10px;flex:0 0 auto;}" +
+      ".pre-fixed-fare-screen-evidence h2.screen-title{font-size:14px;margin:0 0 8px;color:#1b3a6b;border-bottom:2px solid #1b3a6b;padding-bottom:4px;}" +
+      ".pre-fixed-fare-screen-evidence table{width:100%;border-collapse:collapse;table-layout:fixed;margin:0 0 10px;}" +
       ".pre-fixed-fare-screen-evidence th,.pre-fixed-fare-screen-evidence td{border:1px solid #d9d9d9;padding:5px;vertical-align:top;font-size:10px;line-height:1.35;}" +
       ".pre-fixed-fare-screen-evidence th{background:#f6f6f6;font-weight:700;}" +
-      ".pre-fixed-fare-screen-evidence .verification-note{margin:10px 0 0;padding:8px;background:#eef5fb;border-left:4px solid #2f6fad;font-size:9.5px;line-height:1.5;flex:0 0 auto;}" +
+      ".pre-fixed-fare-screen-evidence .verification-note{margin:10px 0 0;padding:8px;background:#eef5fb;border-left:4px solid #2f6fad;font-size:9.5px;line-height:1.5;}" +
       ".pre-fixed-fare-screen-evidence .verification-note--compact{margin-top:8px;font-size:9px;}" +
-      ".pre-fixed-fare-screen-evidence .evidence-image-wrap{flex:1 1 auto;display:flex;align-items:flex-start;justify-content:center;min-height:0;margin:0 0 8px;overflow:hidden;}" +
-      ".pre-fixed-fare-screen-evidence .evidence-image{display:block;max-width:100%;width:100%;height:auto;max-height:760px;object-fit:contain;object-position:top center;}" +
-      ".pre-fixed-fare-screen-evidence .evidence-image-missing{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px dashed #94a3b8;background:#f8fafc;min-height:420px;margin:0 0 8px;padding:24px;text-align:center;}" +
-      ".pre-fixed-fare-screen-evidence .evidence-image-missing-label{font-size:14px;font-weight:700;color:#475569;margin:0 0 8px;}" +
-      ".pre-fixed-fare-screen-evidence .evidence-image-missing-path{font-size:9px;color:#64748b;margin:0;word-break:break-all;}" +
-      ".pre-fixed-fare-screen-evidence .proof-text{margin:0;font-size:10px;line-height:1.5;color:#334155;flex:0 0 auto;}"
+      ".pre-fixed-fare-screen-evidence .screen-evidence-shot{margin:0 0 8px;}" +
+      ".pre-fixed-fare-screen-evidence .screen-evidence-shot img{display:block;width:100%;max-height:210mm;object-fit:contain;object-position:top center;}" +
+      ".pre-fixed-fare-screen-evidence .screen-evidence-shot--missing{border:2px dashed #94a3b8;background:#f8fafc;min-height:120mm;padding:24px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;}" +
+      ".pre-fixed-fare-screen-evidence .screen-evidence-shot-missing-label{font-size:14px;font-weight:700;color:#475569;margin:0 0 8px;}" +
+      ".pre-fixed-fare-screen-evidence .screen-evidence-shot-missing-path{font-size:9px;color:#64748b;margin:0;word-break:break-all;}" +
+      ".pre-fixed-fare-screen-evidence .proof-text{margin:0;font-size:10px;line-height:1.5;color:#334155;}"
     );
   }
 
@@ -207,15 +203,16 @@
 
     const container = document.createElement("div");
     container.style.position = "absolute";
-    container.style.left = "0";
+    container.style.left = "-9999px";
     container.style.top = "0";
-    container.style.width = "720px";
+    container.style.width = "210mm";
     container.style.background = "#ffffff";
     container.innerHTML = "<style>" + getEvidenceCss() + "</style>" + reportHtml;
     document.body.appendChild(container);
 
     const reportElement = container.querySelector(".pre-fixed-fare-screen-evidence");
-    const pageCount = reportElement.querySelectorAll(".pdf-page").length;
+    const pageElements = reportElement.querySelectorAll(".screen-evidence-page");
+    const pageCount = pageElements.length;
     if(pageCount !== EXPECTED_PAGE_COUNT){
       console.warn("[PreFixedFareScreenEvidencePdf] unexpected page count:", pageCount, "expected:", EXPECTED_PAGE_COUNT);
     }
@@ -223,12 +220,17 @@
     try{
       await waitForImagesToLoad(reportElement);
       await html2pdf().set({
-        margin: [8, 8, 12, 8],
+        margin: [0, 0, 0, 0],
         filename: reportData.pdfFilename || global.PreFixedFareScreenEvidenceData?.PDF_FILENAME || "pre-fixed-fare-screen-evidence.pdf",
         image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollX: 0, scrollY: 0 },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-        pagebreak: { mode: ["css", "legacy"], after: [".pdf-page-break"] }
+        pagebreak: {
+          mode: ["css", "legacy"],
+          before: [".screen-evidence-page + .screen-evidence-page"],
+          after: [],
+          avoid: [".screen-evidence-page"]
+        }
       }).from(reportElement).save();
     }finally{
       container.remove();
@@ -236,7 +238,8 @@
 
     return {
       pageCount: pageCount,
-      imageAvailability: imageAvailability
+      imageAvailability: imageAvailability,
+      pageIds: Array.from(pageElements).map(function(el){ return el.getAttribute("data-page-id"); })
     };
   }
 
