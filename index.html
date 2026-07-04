@@ -723,6 +723,42 @@ main{
   .estimate-steps{
     grid-template-columns:repeat(3, minmax(0, 1fr));
   }
+
+  /* PC: ヘッダー電話番号の視認性向上 */
+  .pc-phone-inline a{
+    font-size:18px;
+    font-weight:700;
+    line-height:1.4;
+  }
+
+  /* PC: STEPカード文字サイズ */
+  .estimate-step-card{
+    padding:22px 24px;
+  }
+  .estimate-step-num{
+    font-size:14px;
+    font-weight:800;
+  }
+  .estimate-step-card .card-item-title{
+    font-size:18px;
+    font-weight:800;
+    line-height:1.5;
+  }
+  .estimate-step-card .section-text{
+    font-size:16px;
+    line-height:1.8;
+  }
+
+  /* PC: ご利用例画像を小さめに制御 */
+  #price-examples .example-image,
+  #price-examples .price-example-card img{
+    width:100%;
+    max-width:760px;
+    max-height:360px;
+    object-fit:contain;
+    display:block;
+    margin:0 auto;
+  }
 }
 
 .card-item-cta-wrap{
@@ -1061,6 +1097,24 @@ main{
   }
   #price-examples .card-item{
     overflow:hidden;
+  }
+
+  /* スマホ: ご利用例画像を横幅100%近くまで広げる */
+  #price-examples .example-image-wrap,
+  #price-examples .price-example-card .example-image-wrap{
+    width:calc(100% + 24px);
+    max-width:none;
+    margin-left:-12px;
+    margin-right:-12px;
+  }
+  #price-examples .example-image,
+  #price-examples .price-example-card img{
+    width:100%;
+    max-width:100%;
+    height:auto;
+    max-height:none;
+    object-fit:contain;
+    display:block;
   }
 }
 
