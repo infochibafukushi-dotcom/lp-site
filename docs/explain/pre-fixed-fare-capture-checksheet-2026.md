@@ -23,6 +23,8 @@
 | **利用者名（検証用）** | （提出資料ではマスク） |
 | **備考** | 案件番号: 26705-MAINS-0001 |
 
+**画像保存先:** `screenshots/pre-fixed-fare-approval-20260705/`（提出前メモ: 同フォルダ `NOTES.md`）
+
 ---
 
 ## 2. 4画面キャプチャ記録
@@ -33,6 +35,17 @@
 | 2 | 旅客同意確認画面（reservation-v4） | ☑ | `02_consent_confirm_EST-20260705-3755.png` | 2026/07/05 03:40 | 補助: `02b_reservation_complete_202607050600.png` |
 | 3 | ドライバーの確定ルート確認画面（care-taxi-meter） | ☑ | `03_confirmed_route_202607050600.png` | 2026/07/05 | 補助: `03a_driver_reservation_list_202607050600.png`, `03b_fixed_fare_meter_202607050600.png` |
 | 4 | 領収書・レシート明細画面（care-taxi-meter） | ☑ | `04_receipt_detail_202607050600.png` | 2026/07/05 | 補助: `04a_settlement_202607050600.png`, `04b_receipt_complete_202607050600.png` |
+
+### 認可資料・追加資料ページ — 貼付候補4枚
+
+| No | ファイル |
+|---|---|
+| 1 | `screenshots/pre-fixed-fare-approval-20260705/01_route_selection_EST-20260705-3755.png` |
+| 2 | `screenshots/pre-fixed-fare-approval-20260705/03b_fixed_fare_meter_202607050600.png`（同意証跡セクション） |
+| 3 | `screenshots/pre-fixed-fare-approval-20260705/03b_fixed_fare_meter_202607050600.png` |
+| 4 | `screenshots/pre-fixed-fare-approval-20260705/03b_fixed_fare_meter_202607050600.png`（料金・内訳） |
+
+詳細・マスク方針: `screenshots/pre-fixed-fare-approval-20260705/NOTES.md`
 
 ### ファイル名の推奨形式
 
