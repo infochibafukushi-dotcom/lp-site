@@ -14,12 +14,16 @@
 | 確定運賃 | 28,000円 |
 | 電話番号 | 090-6331-4289 |
 
-## ファイル
+## 提出セット一覧
 
-| ファイル | 内容 |
-|----------|------|
-| `pre-fixed-fare-screen-evidence-v1-candidate.pdf` | 画面証跡資料（提出候補版 v1） |
-| `pre-fixed-fare-application-form-style2-v1-candidate.pdf` | 認可申請書 様式2（提出候補版 v1） |
+| No | 資料名 | 用途 | ファイル名 |
+|----|--------|------|------------|
+| 1 | 申請書様式2 | 関東運輸局への認可申請書本体 | `pre-fixed-fare-application-form-style2-v1-candidate.pdf` |
+| 2 | 画面証跡資料 | 配車アプリの実画面操作証跡（検証用予約データ） | `pre-fixed-fare-screen-evidence-v1-candidate.pdf` |
+| 3 | 配車アプリ概要資料 / 統合説明資料 | 配車アプリ概要・システム全体説明・公示要件対応 | `pre-fixed-fare-integrated-summary-v1-candidate.pdf` |
+| 4 | 運用フロー資料 | 運用フロー・監査証跡・保存期間の説明 | `pre-fixed-fare-operations-summary-v1-candidate.pdf` |
+| 5 | Q&A資料 | 想定問答・補足説明 | `pre-fixed-fare-qa-v1-candidate.pdf` |
+| 6 | 追加資料・別紙セット | 記入補助・距離制運賃表・料金表・確認台紙等 | `pre-fixed-fare-submission-appendix-set-v1-candidate.pdf` |
 
 ## 申請書（様式2）入力値
 
@@ -42,9 +46,20 @@
 | P4 | ドライバー用確定ルート確認画面 |
 | P5 | 領収書・レシート明細画面 |
 
+## 出力元（管理画面 admin.html）
+
+| 資料 | 出力ボタン |
+|------|------------|
+| 申請書様式2 | 事前確定運賃 申請書印刷 → 申請書を印刷 |
+| 画面証跡資料 | 画面証跡資料PDF |
+| 統合説明資料 | 事前確定運賃システム 統合説明資料PDFを出力 |
+| 運用フロー資料 | 事前確定運賃M 運用・監査説明資料PDFを出力 |
+| Q&A資料 | 事前確定運賃 認可説明Q&A 印刷用ページを開く |
+| 別紙セット | 提出用 別紙セットをまとめて出力 |
+
 ## 備考
 
-- 検証用予約データ（申請者本人による操作証跡）を使用
-- 電話番号・案件番号は lp-site `6a34ea1`、care-taxi-meter `052f55e` の整合修正を反映
-- 画面証跡出力元：管理画面 `admin.html` → 画面証跡資料PDF
-- 申請書出力元：管理画面 `admin.html` → 事前確定運賃 申請書印刷（様式2）
+- 本フォルダは事前相談・提出候補用の資料セット（v1）です
+- 検証用予約データ（申請者本人による操作証跡）を画面証跡に使用
+- 電話番号・案件番号の整合修正は lp-site `6a34ea1`、care-taxi-meter `052f55e` を反映済み
+- 正式な認可申請様式は関東運輸局の公式Word様式を使用してください（本セットの申請書PDFは入力済み印刷用）
