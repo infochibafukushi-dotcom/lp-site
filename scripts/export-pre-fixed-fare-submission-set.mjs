@@ -2,23 +2,26 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import puppeteer from "puppeteer";
+import { PDFDocument } from "pdf-lib";
+import { verifyPdfBlankPages } from "./verify-pdf-blank-pages.mjs";
 
 const rootDir = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const adminUrl = pathToFileURL(path.join(rootDir, "admin.html")).href;
 const outputDir = path.join(rootDir, "docs/submission/20260705");
 const DEFAULT_CHROME = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 
+const PDF_MARGIN = { top: "8mm", right: "8mm", bottom: "8mm", left: "8mm" };
+const FOOTER_TEMPLATE = "<div style='font-size:9px;width:100%;text-align:center;color:#505050;'><span class='pageNumber'></span></div>";
+
 const TARGETS = {
+  application: "pre-fixed-fare-application-form-style2-v1-candidate.pdf",
+  screenEvidence: "pre-fixed-fare-screen-evidence-v1-candidate.pdf",
   integrated: "pre-fixed-fare-integrated-summary-v1-candidate.pdf",
   operations: "pre-fixed-fare-operations-summary-v1-candidate.pdf",
   qa: "pre-fixed-fare-qa-v1-candidate.pdf",
-  appendix: "pre-fixed-fare-submission-appendix-set-v1-candidate.pdf"
+  appendix: "pre-fixed-fare-submission-appendix-set-v1-candidate.pdf",
+  fullSet: "pre-fixed-fare-submission-full-set-v1-candidate.pdf"
 };
-
-const EXISTING = [
-  "pre-fixed-fare-application-form-style2-v1-candidate.pdf",
-  "pre-fixed-fare-screen-evidence-v1-candidate.pdf"
-];
 
 function resolveChromeExecutable(){
   const candidates = [
@@ -35,21 +38,55 @@ function assert(condition, message){
   }
 }
 
-async function ensureHtml2Pdf(page){
+async function exportPdfFromHtml(browser, html, filePath, options){
+  options = options || {};
+  const tempHtmlPath = path.join(rootDir, ".tmp-export-" + path.basename(filePath, ".pdf") + ".html");
+  fs.writeFileSync(tempHtmlPath, html, "utf8");
+  const page = await browser.newPage();
+  await page.goto(pathToFileURL(tempHtmlPath).href, { waitUntil: "domcontentloaded", timeout: 120000 });
   await page.evaluate(async function(){
-    if(typeof html2pdf !== "undefined"){
-      return;
-    }
-    await new Promise(function(resolve, reject){
-      const script = document.createElement("script");
-      script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
-      script.async = true;
-      script.setAttribute("data-pre-fixed-fare-report-pdf", "1");
-      script.onload = resolve;
-      script.onerror = function(){ reject(new Error("PDFライブラリの読み込みに失敗しました。")); };
-      document.head.appendChild(script);
-    });
+    const images = Array.from(document.images);
+    await Promise.all(images.map(function(img){
+      if(img.complete && img.naturalWidth > 0){
+        return Promise.resolve();
+      }
+      return new Promise(function(resolve){
+        img.addEventListener("load", resolve, { once: true });
+        img.addEventListener("error", resolve, { once: true });
+      });
+    }));
   });
+  await new Promise(function(resolve){ setTimeout(resolve, 1200); });
+  const pdfOptions = {
+    path: filePath,
+    format: "A4",
+    printBackground: true,
+    margin: PDF_MARGIN
+  };
+  if(options.footer){
+    pdfOptions.displayHeaderFooter = true;
+    pdfOptions.headerTemplate = "<div></div>";
+    pdfOptions.footerTemplate = FOOTER_TEMPLATE;
+  }
+  await page.pdf(pdfOptions);
+  const htmlText = await page.evaluate(function(){
+    return document.body ? document.body.innerText : "";
+  });
+  await page.close();
+  try{
+    fs.unlinkSync(tempHtmlPath);
+  }catch(error){
+    // ignore cleanup errors
+  }
+  const size = fs.statSync(filePath).size;
+  const pageCount = await getPdfPageCount(filePath);
+  return { filePath: filePath, size: size, htmlText: htmlText, pageCount: pageCount };
+}
+
+async function getPdfPageCount(filePath){
+  const bytes = fs.readFileSync(filePath);
+  const pdf = await PDFDocument.load(bytes, { ignoreEncryption: true });
+  return pdf.getPageCount();
 }
 
 async function loadExportOptions(page){
@@ -70,145 +107,70 @@ async function loadExportOptions(page){
   });
 }
 
+async function exportApplicationPdf(browser, page){
+  const saved = JSON.parse(fs.readFileSync(path.join(rootDir, "data/pre-fixed-fare-application.json"), "utf8"));
+  const html = await page.evaluate(function(data){
+    return window.PreFixedFareApplicationPrint.buildPrintDocument(data, { autoPrint: false });
+  }, saved);
+  const filePath = path.join(outputDir, TARGETS.application);
+  const result = await exportPdfFromHtml(browser, html, filePath, { footer: false });
+  assert(result.pageCount === 1, "申請書様式2が1ページではありません: " + result.pageCount);
+  assert(result.htmlText.includes("添付書類等"), "申請書に添付書類等がありません");
+  return result;
+}
+
+async function exportScreenEvidencePdf(browser, page){
+  const built = await page.evaluate(async function(){
+    const reportData = window.PreFixedFareScreenEvidenceData.buildReportData();
+    const availability = await window.PreFixedFareScreenEvidencePdf.probeImages(reportData.screens || []);
+    const reportHtml = window.PreFixedFareScreenEvidencePdf.buildReportHtml(reportData, availability);
+    const css = window.PreFixedFareScreenEvidencePdf.getEvidenceCss
+      ? window.PreFixedFareScreenEvidencePdf.getEvidenceCss()
+      : "";
+    return {
+      html: "<!DOCTYPE html><html lang='ja'><head><meta charset='UTF-8'><style>" + css + "</style></head><body>" + reportHtml + "</body></html>",
+      htmlText: reportHtml.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(),
+      projectNumber: reportData.caseInfo?.projectNumber || ""
+    };
+  });
+  assert(built.html.includes("screen-evidence-shot--receipt"), "画面証跡HTMLにレシート枠がありません");
+  const filePath = path.join(outputDir, TARGETS.screenEvidence);
+  const result = await exportPdfFromHtml(browser, built.html, filePath, { footer: false });
+  assert(result.pageCount === 5, "画面証跡PDFが5ページではありません: " + result.pageCount);
+  assert(built.htmlText.includes("260705-MAINS-0001"), "画面証跡に案件番号がありません");
+  assert(built.htmlText.includes("28,000"), "画面証跡に確定運賃がありません");
+  return result;
+}
+
 async function exportIntegratedPdf(browser, page, options){
   const built = await page.evaluate(function(exportOptions){
     const reportData = window.PreFixedFareIntegratedSummaryData.buildReportData(exportOptions);
     const html = window.PreFixedFareIntegratedSummaryPdf.buildPrintDocument(reportData);
     return {
       html: html,
-      htmlText: window.PreFixedFareIntegratedSummaryPdf.buildReportHtml(reportData).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(),
-      pageCount: reportData ? 20 : 0
+      htmlText: window.PreFixedFareIntegratedSummaryPdf.buildReportHtml(reportData).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()
     };
   }, options);
-  assert(built.html.includes("capture-image"), "統合説明資料HTMLに画面キャプチャ画像がありません");
-  assert(built.html.length > 20000, "統合説明資料HTMLが短すぎます");
-
-  const tempHtmlPath = path.join(rootDir, ".tmp-integrated-summary-export.html");
-  fs.writeFileSync(tempHtmlPath, built.html, "utf8");
-
-  const integratedPage = await browser.newPage();
-  await integratedPage.goto(pathToFileURL(tempHtmlPath).href, { waitUntil: "domcontentloaded", timeout: 120000 });
-  await integratedPage.evaluate(async function(){
-    const images = Array.from(document.images);
-    await Promise.all(images.map(function(img){
-      if(img.complete && img.naturalWidth > 0){
-        return Promise.resolve();
-      }
-      return new Promise(function(resolve){
-        img.addEventListener("load", resolve, { once: true });
-        img.addEventListener("error", resolve, { once: true });
-      });
-    }));
-  });
-  await new Promise(function(resolve){ setTimeout(resolve, 1500); });
+  assert(built.html.includes("画面証跡資料"), "統合説明資料に画面証跡参照文がありません");
+  assert(!built.html.includes("capture-image"), "統合説明資料に重複キャプチャ画像が残っています");
+  assert(built.html.includes("page-break-before table-section no-split-table"), "平準化係数表の改ページクラスがありません");
   const filePath = path.join(outputDir, TARGETS.integrated);
-  await integratedPage.pdf({
-    path: filePath,
-    format: "A4",
-    printBackground: true,
-    margin: { top: "16mm", right: "14mm", bottom: "20mm", left: "14mm" },
-    displayHeaderFooter: true,
-    headerTemplate: "<div></div>",
-    footerTemplate: "<div style='font-size:9px;width:100%;text-align:center;color:#505050;'><span class='pageNumber'></span> / <span class='totalPages'></span></div>"
-  });
-  try{
-    fs.unlinkSync(tempHtmlPath);
-  }catch(error){
-    // ignore cleanup errors
-  }
-  const size = fs.statSync(filePath).size;
-  const htmlText = await integratedPage.evaluate(function(){
-    return document.body ? document.body.innerText : "";
-  });
-  await integratedPage.close();
-  return { filePath: filePath, size: size, htmlText: htmlText, pageCount: built.pageCount };
+  const result = await exportPdfFromHtml(browser, built.html, filePath, { footer: true });
+  assert(result.size > 200000, "統合説明資料PDFが小さすぎます");
+  assert(result.htmlText.includes("事前確定運賃システム 統合説明資料"), "統合説明資料タイトル不正");
+  return result;
 }
 
-async function exportOperationsPdf(page){
-  const result = await page.evaluate(async function(){
+async function exportOperationsPdf(browser, page){
+  const html = await page.evaluate(function(){
     const reportData = window.PreFixedFareOperationsSummaryData.buildReportData();
-    const reportHtml = window.PreFixedFareOperationsSummaryPdf.buildReportHtml(reportData);
-    const reportCss = window.PreFixedFareOperationsSummaryPdf.getReportCss();
-    const wrapper = document.createElement("div");
-    wrapper.style.position = "absolute";
-    wrapper.style.left = "0";
-    wrapper.style.top = "0";
-    wrapper.style.width = "720px";
-    wrapper.style.background = "#ffffff";
-    wrapper.innerHTML = "<style>" + reportCss + "</style>" + reportHtml;
-    document.body.appendChild(wrapper);
-    const reportElement = wrapper.querySelector(".pre-fixed-fare-operations-summary");
-    await new Promise(function(resolve){ requestAnimationFrame(resolve); });
-    await new Promise(function(resolve){ requestAnimationFrame(resolve); });
-    const blob = await html2pdf().set({
-      margin: [16, 14, 20, 14],
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollX: 0, scrollY: 0 },
-      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      pagebreak: { mode: ["css", "legacy"] }
-    }).from(reportElement).outputPdf("blob");
-    const htmlText = String(reportElement.innerText || "");
-    wrapper.remove();
-    const buffer = await blob.arrayBuffer();
-    return { bytes: Array.from(new Uint8Array(buffer)), htmlText: htmlText };
+    return window.PreFixedFareOperationsSummaryPdf.buildPrintDocument(reportData);
   });
   const filePath = path.join(outputDir, TARGETS.operations);
-  fs.writeFileSync(filePath, Buffer.from(result.bytes));
-  return { filePath: filePath, size: result.bytes.length, htmlText: result.htmlText };
-}
-
-async function exportAppendixPdf(browser, page, options){
-  const built = await page.evaluate(function(exportOptions){
-    const result = window.PreFixedFareSubmissionAppendixWord.buildWordDocumentHtml("submission-appendix-set", exportOptions);
-    return {
-      html: result.html,
-      title: result.payload.title,
-      pdfFilename: result.payload.pdfFilename
-    };
-  }, options);
-  assert(built.html.length > 5000, "別紙セットHTMLが短すぎます");
-  assert(built.html.includes("別紙1"), "別紙セットHTMLに別紙1がありません");
-  assert(built.html.includes("画面キャプチャ貼付資料"), "別紙セットに画面キャプチャ貼付資料がありません");
-  assert(!built.html.includes("class='paste-box'") && !built.html.includes('class="paste-box"'), "別紙セットに空欄貼付欄が残っています");
-  assert(built.html.includes("capture-image"), "別紙セットに実画像が含まれていません");
-
-  const appendixHtml = built.html;
-  const tempHtmlPath = path.join(rootDir, ".tmp-submission-appendix-export.html");
-  fs.writeFileSync(tempHtmlPath, appendixHtml, "utf8");
-
-  const appendixPage = await browser.newPage();
-  await appendixPage.goto(pathToFileURL(tempHtmlPath).href, { waitUntil: "domcontentloaded", timeout: 120000 });
-  await appendixPage.evaluate(async function(){
-    const images = Array.from(document.images);
-    await Promise.all(images.map(function(img){
-      if(img.complete && img.naturalWidth > 0){
-        return Promise.resolve();
-      }
-      return new Promise(function(resolve){
-        img.addEventListener("load", resolve, { once: true });
-        img.addEventListener("error", resolve, { once: true });
-      });
-    }));
-  });
-  await new Promise(function(resolve){ setTimeout(resolve, 1500); });
-  const filePath = path.join(outputDir, TARGETS.appendix);
-  await appendixPage.pdf({
-    path: filePath,
-    format: "A4",
-    printBackground: true,
-    margin: { top: "16mm", right: "14mm", bottom: "20mm", left: "14mm" }
-  });
-  try{
-    fs.unlinkSync(tempHtmlPath);
-  }catch(error){
-    // ignore cleanup errors
-  }
-  const size = fs.statSync(filePath).size;
-  const htmlText = await appendixPage.evaluate(function(){
-    return document.body ? document.body.innerText : "";
-  });
-  await appendixPage.close();
-  return { filePath: filePath, size: size, htmlText: htmlText };
+  const result = await exportPdfFromHtml(browser, html, filePath, { footer: true });
+  assert(result.size > 5000, "運用フローPDFが小さすぎます");
+  assert(result.htmlText.includes("事前確定運賃M"), "運用フロー資料タイトル不正");
+  return result;
 }
 
 async function exportQaPdf(browser, page){
@@ -216,51 +178,66 @@ async function exportQaPdf(browser, page){
     const reportData = window.PreFixedFareQaData.buildReportData();
     return window.PreFixedFareQaPdf.buildPrintDocument(reportData);
   });
-  assert(html.includes("想定質問と回答"), "Q&A HTMLが不正");
-  assert(html.includes("事前確定運賃システム"), "Q&A HTMLタイトル不正");
-  const qaPage = await browser.newPage();
-  await qaPage.setContent(html, { waitUntil: "networkidle0" });
   const filePath = path.join(outputDir, TARGETS.qa);
-  await qaPage.pdf({
-    path: filePath,
-    format: "A4",
-    printBackground: true,
-    margin: { top: "16mm", right: "14mm", bottom: "20mm", left: "14mm" }
-  });
-  const size = fs.statSync(filePath).size;
-  await qaPage.close();
-  return { filePath: filePath, size: size, htmlText: html };
+  const result = await exportPdfFromHtml(browser, html, filePath, { footer: false });
+  assert(result.size > 20000, "Q&A PDFが小さすぎます");
+  assert(result.htmlText.includes("想定質問と回答"), "Q&A HTMLが不正");
+  return result;
 }
 
-async function verifyButtons(page){
-  const buttons = await page.evaluate(function(){
+async function exportAppendixPdf(browser, page, options){
+  const built = await page.evaluate(function(exportOptions){
+    const result = window.PreFixedFareSubmissionAppendixWord.buildWordDocumentHtml("submission-appendix-set", exportOptions);
     return {
-      integrated: Boolean(document.getElementById("preFixedFareIntegratedSummaryExportBtn")),
-      operations: Boolean(document.getElementById("preFixedFareOperationsSummaryExportBtn")),
-      qa: Boolean(document.getElementById("preFixedFareQaExportBtn")),
-      appendix: Boolean(document.getElementById("preFixedFareAppendixFullSetBtn")),
-      screenEvidence: Boolean(document.getElementById("preFixedFareScreenEvidenceExportBtn")),
-      application: Boolean(document.getElementById("pffaPrintBtn")),
-      integratedModule: Boolean(window.PreFixedFareIntegratedSummaryPdf),
-      operationsModule: Boolean(window.PreFixedFareOperationsSummaryPdf),
-      qaModule: Boolean(window.PreFixedFareQaPdf),
-      appendixModule: Boolean(window.PreFixedFareSubmissionAppendixPdf),
-      screenEvidenceModule: Boolean(window.PreFixedFareScreenEvidencePdf)
+      html: result.html,
+      title: result.payload.title
     };
-  });
-  Object.keys(buttons).forEach(function(key){
-    assert(buttons[key], "出力確認に失敗: " + key);
-  });
+  }, options);
+  assert(built.html.length > 5000, "別紙セットHTMLが短すぎます");
+  assert(built.html.includes("別紙1"), "別紙セットHTMLに別紙1がありません");
+  assert(built.html.includes("画面証跡資料"), "別紙セットに画面証跡参照文がありません");
+  assert(!built.html.includes("capture-image"), "別紙セットに重複キャプチャ画像が残っています");
+  assert(built.html.includes("page-break-before table-section no-split-table"), "別紙の平準化係数表改ページクラスがありません");
+  const filePath = path.join(outputDir, TARGETS.appendix);
+  const result = await exportPdfFromHtml(browser, built.html, filePath, { footer: false });
+  assert(result.size > 5000, "別紙セットPDFが小さすぎます");
+  assert(result.htmlText.includes("別紙1"), "別紙セットに別紙1がありません");
+  return result;
+}
+
+async function buildFullSet(){
+  const mergedPdf = await PDFDocument.create();
+  const partSummaries = [];
+  const order = [
+    TARGETS.application,
+    TARGETS.screenEvidence,
+    TARGETS.integrated,
+    TARGETS.operations,
+    TARGETS.qa,
+    TARGETS.appendix
+  ];
+  for(const filename of order){
+    const filePath = path.join(outputDir, filename);
+    const bytes = fs.readFileSync(filePath);
+    const partPdf = await PDFDocument.load(bytes, { ignoreEncryption: true });
+    const pageCount = partPdf.getPageCount();
+    const copiedPages = await mergedPdf.copyPages(partPdf, partPdf.getPageIndices());
+    copiedPages.forEach(function(page){ mergedPdf.addPage(page); });
+    partSummaries.push({ filename: filename, pages: pageCount });
+  }
+  const mergedBytes = await mergedPdf.save();
+  const outputPath = path.join(outputDir, TARGETS.fullSet);
+  fs.writeFileSync(outputPath, mergedBytes);
+  return {
+    outputPath: outputPath,
+    totalPages: mergedPdf.getPageCount(),
+    parts: partSummaries,
+    size: mergedBytes.length
+  };
 }
 
 async function main(){
   fs.mkdirSync(outputDir, { recursive: true });
-  EXISTING.forEach(function(name){
-    const filePath = path.join(outputDir, name);
-    assert(fs.existsSync(filePath), "既存PDFがありません: " + name);
-    assert(fs.statSync(filePath).size > 10000, "既存PDFサイズが小さすぎます: " + name);
-  });
-
   const launchOptions = {
     headless: true,
     args: ["--no-sandbox", "--disable-setuid-sandbox", "--allow-file-access-from-files"]
@@ -274,43 +251,63 @@ async function main(){
   try{
     const page = await browser.newPage();
     await page.goto(adminUrl, { waitUntil: "networkidle0", timeout: 180000 });
-    await verifyButtons(page);
-    await ensureHtml2Pdf(page);
     const exportOptions = await loadExportOptions(page);
+
+    console.log("Exporting application form...");
+    const application = await exportApplicationPdf(browser, page);
+    console.log("  OK", application.filePath, application.size, "bytes", application.pageCount, "pages");
+
+    console.log("Exporting screen evidence...");
+    const screenEvidence = await exportScreenEvidencePdf(browser, page);
+    console.log("  OK", screenEvidence.filePath, screenEvidence.size, "bytes", screenEvidence.pageCount, "pages");
 
     console.log("Exporting integrated summary...");
     const integrated = await exportIntegratedPdf(browser, page, exportOptions);
-    assert(integrated.size > 1000000, "統合説明資料PDFが小さすぎます（画像未埋め込みの可能性）");
-    assert(integrated.htmlText.includes("事前確定運賃システム 統合説明資料"), "統合説明資料タイトル不正");
-    assert(integrated.htmlText.includes("関東運輸局提出・説明用"), "統合説明資料の位置づけ不正");
-    console.log("  OK", integrated.filePath, integrated.size, "bytes", "pages(html):", integrated.pageCount);
+    console.log("  OK", integrated.filePath, integrated.size, "bytes", integrated.pageCount, "pages");
 
     console.log("Exporting operations summary...");
-    const operations = await exportOperationsPdf(page);
-    assert(operations.size > 5000, "運用フローPDFが小さすぎます");
-    assert(operations.htmlText.includes("事前確定運賃M"), "運用フロー資料タイトル不正");
-    assert(operations.htmlText.includes("領収書に「事前確定運賃」"), "運用フロー資料の領収書説明不正");
-    console.log("  OK", operations.filePath, operations.size, "bytes");
+    const operations = await exportOperationsPdf(browser, page);
+    console.log("  OK", operations.filePath, operations.size, "bytes", operations.pageCount, "pages");
 
     console.log("Exporting Q&A...");
     const qa = await exportQaPdf(browser, page);
-    assert(qa.size > 20000, "Q&A PDFが小さすぎます");
-    assert(qa.htmlText.includes("事前確定運賃システム"), "Q&A HTMLタイトル不正");
-    console.log("  OK", qa.filePath, qa.size, "bytes");
+    console.log("  OK", qa.filePath, qa.size, "bytes", qa.pageCount, "pages");
 
     console.log("Exporting appendix set...");
     const appendix = await exportAppendixPdf(browser, page, exportOptions);
-    assert(appendix.size > 5000, "別紙セットPDFが小さすぎます");
-    assert(appendix.htmlText.includes("別紙1"), "別紙セットに別紙1がありません");
-    assert(appendix.htmlText.includes("株式会社 千葉福祉サポート"), "別紙セットに事業者名がありません");
-    console.log("  OK", appendix.filePath, appendix.size, "bytes");
+    console.log("  OK", appendix.filePath, appendix.size, "bytes", appendix.pageCount, "pages");
 
-    const allFiles = EXISTING.concat(Object.values(TARGETS));
-    allFiles.forEach(function(name){
-      const filePath = path.join(outputDir, name);
-      assert(fs.existsSync(filePath), "提出セットに不足: " + name);
-      console.log("SET", name, fs.statSync(filePath).size, "bytes");
-    });
+    console.log("Building full set...");
+    const fullSet = await buildFullSet();
+    console.log("  OK", fullSet.outputPath, fullSet.size, "bytes", fullSet.totalPages, "pages");
+
+    const checks = [
+      { label: "application", path: path.join(outputDir, TARGETS.application) },
+      { label: "screen-evidence", path: path.join(outputDir, TARGETS.screenEvidence) },
+      { label: "integrated", path: path.join(outputDir, TARGETS.integrated) },
+      { label: "operations", path: path.join(outputDir, TARGETS.operations) },
+      { label: "qa", path: path.join(outputDir, TARGETS.qa) },
+      { label: "appendix", path: path.join(outputDir, TARGETS.appendix) },
+      { label: "full-set", path: fullSet.outputPath }
+    ];
+
+    console.log("Blank page verification...");
+    for(const check of checks){
+      const review = await verifyPdfBlankPages(browser, check.path);
+      assert(review.blankPages.length === 0, check.label + " に白紙ページがあります: " + review.blankPages.join(", "));
+      console.log("  ", check.label, review.numPages, "pages, blank=0");
+    }
+
+    console.log("SUMMARY", JSON.stringify({
+      applicationPages: application.pageCount,
+      screenEvidencePages: screenEvidence.pageCount,
+      integratedPages: integrated.pageCount,
+      operationsPages: operations.pageCount,
+      qaPages: qa.pageCount,
+      appendixPages: appendix.pageCount,
+      fullSetPages: fullSet.totalPages,
+      fullSetParts: fullSet.parts
+    }, null, 2));
   }finally{
     await browser.close();
   }

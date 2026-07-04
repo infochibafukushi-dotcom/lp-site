@@ -88,33 +88,36 @@
   }
 
   function buildPrintStyles(){
+    const base = global.PreFixedFarePrintLayoutCss
+      ? global.PreFixedFarePrintLayoutCss.getBasePageRules()
+      : "@page{size:A4 portrait;margin:8mm;}html,body{margin:0;padding:0;width:auto;box-sizing:border-box;}";
     return (
-      "@page{size:A4 portrait;margin:18mm;}" +
-      "html,body{width:100%;margin:0;padding:0;background:#ffffff;color:#000000;}" +
-      "body{font-family:'Yu Gothic','Meiryo',serif;font-size:10.5pt;line-height:1.65;}" +
-      "main.print-page{width:100%;max-width:none;margin:0;padding:0;box-sizing:border-box;}" +
+      base +
+      "html,body{background:#ffffff;color:#000000;}" +
+      "body{font-family:'Yu Gothic','Meiryo',serif;font-size:10.5pt;line-height:1.5;}" +
+      "main.print-page{width:auto;max-width:none;margin:0;padding:0;box-sizing:border-box;}" +
       "main.print-page,main.print-page *{box-sizing:border-box;}" +
-      ".date-line{text-align:right;margin:0 0 10mm;}" +
-      ".addressee{margin:0 0 12mm;}" +
-      ".applicant-block{margin:0 0 12mm;margin-left:auto;width:72%;text-align:left;}" +
-      ".applicant-block p{margin:0 0 2.5mm;}" +
-      ".doc-title{text-align:center;font-size:11pt;font-weight:700;margin:0 0 8mm;line-height:1.5;}" +
-      ".lead{margin:0 0 8mm;text-indent:1em;}" +
-      ".ki{text-align:center;font-weight:700;margin:6mm 0 5mm;}" +
-      ".section{margin:0 0 5mm;}" +
-      ".section-title{font-weight:700;margin:0 0 2mm;}" +
-      ".section-body{margin:0;padding-left:1.2em;}" +
-      ".section-body p{margin:0 0 2.5mm;}" +
-      ".attachments{margin-top:6mm;}" +
-      ".attachments-title{font-weight:700;margin:0 0 2mm;}" +
-      ".attachments ul{margin:0;padding-left:1.4em;}" +
-      ".attachments li{margin:0 0 2mm;}" +
+      ".date-line{text-align:right;margin:0 0 5mm;font-size:10.5pt;}" +
+      ".addressee{margin:0 0 6mm;font-size:10.5pt;}" +
+      ".applicant-block{margin:0 0 6mm;margin-left:auto;width:68%;text-align:left;}" +
+      ".applicant-block p{margin:0 0 1.5mm;font-size:10.5pt;}" +
+      ".doc-title{text-align:center;font-size:15pt;font-weight:700;margin:0 0 5mm;line-height:1.4;}" +
+      ".lead{margin:0 0 5mm;text-indent:1em;font-size:10.5pt;}" +
+      ".ki{text-align:center;font-weight:700;font-size:12pt;margin:4mm 0 3mm;}" +
+      ".section{margin:0 0 3mm;}" +
+      ".section-title{font-weight:700;font-size:12pt;margin:0 0 1.5mm;}" +
+      ".section-body{margin:0;padding-left:1.2em;font-size:10.5pt;}" +
+      ".section-body p{margin:0 0 1.5mm;}" +
+      ".attachments{margin-top:4mm;}" +
+      ".attachments-title{font-weight:700;font-size:12pt;margin:0 0 1.5mm;}" +
+      ".attachments ul{margin:0;padding-left:1.4em;font-size:10pt;}" +
+      ".attachments li{margin:0 0 1mm;}" +
       "@media print{" +
-      "html,body,main.print-page{width:100% !important;max-width:none !important;}" +
+      "html,body,main.print-page{width:auto !important;max-width:none !important;}" +
       "body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}" +
       "}" +
       "@media screen{" +
-      "body{padding:18mm;max-width:210mm;margin:0 auto;}" +
+      "body{padding:8mm;max-width:210mm;margin:0 auto;}" +
       "}"
     );
   }

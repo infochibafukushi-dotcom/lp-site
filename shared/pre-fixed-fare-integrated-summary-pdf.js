@@ -40,30 +40,15 @@
     return "<div class='table-wrap'><table" + (className ? " class='" + escapeHtml(className) + "'" : "") + ">" + colgroup + "<thead><tr>" + th + "</tr></thead><tbody>" + body + "</tbody></table></div>";
   }
 
-  function subsection(title, bodyHtml){
+  function subsection(title, bodyHtml, options){
+    options = options || {};
+    const extraClass = options.extraClass ? " " + options.extraClass : "";
     return (
-      "<section class='small-section subsection-block'>" +
+      "<section class='subsection-block" + extraClass + "'>" +
       "<h3 class='section-title'>" + escapeHtml(title) + "</h3>" +
       "<div class='subsection-content'>" + bodyHtml + "</div>" +
       "</section>"
     );
-  }
-
-  function pageBottomSpacer(large){
-    return "<div class='pdf-page-fill" + (large ? " pdf-page-fill--large" : "") + "' aria-hidden='true'></div>";
-  }
-
-  function pageClipGuard(){
-    return "<div class='pdf-page-clip-guard' aria-hidden='true'></div>";
-  }
-
-  function pdfPage(pageId, bodyHtml, options){
-    options = options || {};
-    const breakClass = options.isLast ? "" : " pdf-page-break";
-    const inner = "<div class='pdf-page-inner'>" + bodyHtml +
-      (options.padBottom ? pageBottomSpacer(true) + pageClipGuard() : "") +
-      "</div>";
-    return "<div class='pdf-page" + breakClass + "' data-page-id='" + escapeHtml(pageId) + "'>" + inner + "</div>";
   }
 
   function numberLabel(value){
@@ -150,7 +135,8 @@
           ["営業区域", "係数", "根拠", "適用日"],
           coefficientRows,
           { className: "table-coefficients", colWidths: ["20%", "12%", "38%", "30%"] }
-        )
+        ),
+        { extraClass: "page-break-before table-section no-split-table" }
       ) +
       subsection("運賃と各種料金の区分",
         buildTable(
@@ -521,34 +507,63 @@
     );
   }
 
-  function capturePlaceholder(label){
-    return (
-      "<div class='capture-placeholder'>" +
-      "<p class='capture-placeholder-label'>" + escapeHtml(label || "画面キャプチャ貼付欄") + "</p>" +
-      "<p class='capture-placeholder-note'>（実画像を本枠内に貼付）</p>" +
-      "</div>"
+  function buildChapter6ScreenReference(appendix){
+    const screenshots = appendix?.screenshotCaptures || {};
+    return subsection(
+      screenshots.title || "画面キャプチャ貼付資料",
+      "<p>利用者のルート選択、旅客同意確認、乗務員用確定ルート確認、領収書・レシート明細画面については、別添「画面証跡資料」P2〜P5を参照。</p>" +
+      (screenshots.verificationNote
+        ? "<p class='verification-note'>" + escapeHtml(screenshots.verificationNote) + "</p>"
+        : "")
     );
   }
 
-  function captureImage(imageFile, alt){
-    return (
-      "<div class='capture-image-wrap'>" +
-      "<img class='capture-image' src='" + escapeHtml("./assets/evidence/pre-fixed-fare-20260705/" + imageFile) + "' alt='" + escapeHtml(alt || "") + "' loading='eager'>" +
-      "</div>"
-    );
-  }
+  function buildReportHtml(data){
+    const positioning = data.chapterPositioning || {};
+    const regulatory = data.regulatory || {};
+    const approval = data.approval || {};
+    const operations = data.operations || {};
+    const pct = operations.passengerChangeTermination || {};
+    const appendix = data.appendix || {};
 
-  function buildScreenshotSection(screen){
-    const imageHtml = screen.imageFile
-      ? captureImage(screen.imageFile, screen.title)
-      : capturePlaceholder("画面キャプチャ貼付欄（" + screen.title + "）");
     return (
-      "<section class='capture-card screenshot-block'>" +
-      "<h3>" + escapeHtml(screen.number + ". " + screen.title) + "</h3>" +
-      imageHtml +
-      "<p><strong>キャプチャ内容：</strong>" + escapeHtml(screen.captureContent || "") + "</p>" +
-      "<p class='caption'><strong>証明文：</strong>" + escapeHtml(screen.proofText || "") + "</p>" +
-      "</section>"
+      "<div class='pre-fixed-fare-integrated-summary report-page'>" +
+      "<section class='doc-cover'>" + buildCover(data.meta || {}, data.title) + "</section>" +
+      "<section class='doc-toc'>" + buildToc(data.toc) + "</section>" +
+      "<section class='chapter-start'>" +
+        chapterHeader(1, "システム基本方針と公示要件対応", positioning[1]) +
+        buildChapter1Page3(regulatory, data) +
+        buildChapter1Page4(regulatory) +
+        buildChapter1Page5(regulatory) +
+      "</section>" +
+      "<section class='chapter-start'>" +
+        chapterHeader(2, "利用者向け見積シミュレーターの動作と判定ロジック", positioning[2]) +
+        buildChapter2Page6(approval) +
+        buildChapter2Page7(approval) +
+      "</section>" +
+      "<section class='chapter-start'>" +
+        chapterHeader(3, "運行・精算における運用フローと監査証跡", positioning[3]) +
+        buildChapter3Page8(operations, data) +
+        buildChapter3Page9(operations) +
+        buildChapter3Page10(operations) +
+      "</section>" +
+      "<section class='chapter-start'>" +
+        chapterHeader(4, "旅客都合変更時の途中終了運用", positioning[4]) +
+        buildChapter4Page11(pct, data) +
+        buildChapter4Page12(pct) +
+      "</section>" +
+      "<section class='chapter-start'>" +
+        chapterHeader(5, "確認済み証跡と運用開始前確認項目", positioning[5]) +
+        buildChapter5Page13(data) +
+      "</section>" +
+      "<section class='chapter-start'>" +
+        chapterHeader(6, "追加資料（データ保存・画面キャプチャ・E2E・改ざん防止）", positioning[6]) +
+        buildChapter6Page14(appendix) +
+        buildChapter6Page15(appendix) +
+        buildChapter6ScreenReference(appendix) +
+        buildChapter6Page18(appendix) +
+      "</section>" +
+      "</div>"
     );
   }
 
@@ -592,21 +607,6 @@
     );
   }
 
-  function buildChapter6ScreenshotPage(appendix, screenIndex, titleSuffix){
-    const screenshots = appendix?.screenshotCaptures || {};
-    const screen = (screenshots.screens || [])[screenIndex];
-    if(!screen){
-      return "<p>—</p>";
-    }
-    return (
-      subsection((screenshots.title || "画面キャプチャ貼付資料") + titleSuffix,
-        (screenIndex === 0 && screenshots.intro ? "<p>" + escapeHtml(screenshots.intro) + "</p>" : "") +
-        (screenshots.verificationNote ? "<p class='verification-note'>" + escapeHtml(screenshots.verificationNote) + "</p>" : "") +
-        buildScreenshotSection(screen)
-      )
-    );
-  }
-
   function buildChapter6Page18(appendix){
     const e2e = appendix?.e2eTestCases || {};
     const tamper = appendix?.tamperProtection || {};
@@ -630,107 +630,6 @@
     );
   }
 
-  function buildPagePlan(data){
-    const positioning = data.chapterPositioning || {};
-    const regulatory = data.regulatory || {};
-    const approval = data.approval || {};
-    const operations = data.operations || {};
-    const pct = operations.passengerChangeTermination || {};
-    const appendix = data.appendix || {};
-
-    return [
-      { id: "p01-cover", html: buildCover(data.meta || {}, data.title) },
-      { id: "p02-toc", html: buildToc(data.toc) },
-      {
-        id: "p03-ch1-part1",
-        html: chapterHeader(1, "システム基本方針と公示要件対応", positioning[1]) + buildChapter1Page3(regulatory, data)
-      },
-      {
-        id: "p04-ch1-part2",
-        html: chapterSupplement(1, "システム基本方針と公示要件対応", "ルート選択・同意・証跡") + buildChapter1Page4(regulatory)
-      },
-      {
-        id: "p05-ch1-requirements",
-        html: chapterSupplement(1, "システム基本方針と公示要件対応", "公示要件対応表（続き）") + buildChapter1Page5(regulatory)
-      },
-      {
-        id: "p06-ch2-part1",
-        html: chapterHeader(2, "利用者向け見積シミュレーターの動作と判定ロジック", positioning[2]) + buildChapter2Page6(approval)
-      },
-      {
-        id: "p07-ch2-snapshot",
-        html: chapterSupplement(2, "利用者向け見積シミュレーターの動作と判定ロジック", "quoteSnapshot / handoff の保存（続き）") + buildChapter2Page7(approval)
-      },
-      {
-        id: "p08-ch3-part1",
-        html: chapterHeader(3, "運行・精算における運用フローと監査証跡", positioning[3]) + buildChapter3Page8(operations, data)
-      },
-      {
-        id: "p09-ch3-records",
-        html: chapterSupplement(3, "運行・精算における運用フローと監査証跡", "caseRecords・meter_fixed_fare_runs 保存項目") + buildChapter3Page9(operations)
-      },
-      {
-        id: "p10-ch3-e2e",
-        html: chapterSupplement(3, "運行・精算における運用フローと監査証跡", "本番相当環境E2E確認結果") + buildChapter3Page10(operations)
-      },
-      {
-        id: "p11-ch4-part1",
-        html: chapterHeader(4, "旅客都合変更時の途中終了運用", positioning[4]) + buildChapter4Page11(pct, data)
-      },
-      {
-        id: "p12-ch4-part2",
-        padBottom: true,
-        html: chapterSupplement(4, "旅客都合変更時の途中終了運用", "通常完了との判別・予約詳細表示") + buildChapter4Page12(pct)
-      },
-      {
-        id: "p13-ch5",
-        html: chapterHeader(5, "確認済み証跡と運用開始前確認項目", positioning[5]) + buildChapter5Page13(data)
-      },
-      {
-        id: "p14-ch6-retention",
-        html: chapterHeader(6, "追加資料（データ保存・画面キャプチャ・E2E・改ざん防止）", positioning[6]) + buildChapter6Page14(appendix)
-      },
-      {
-        id: "p15-ch6-output",
-        html: chapterSupplement(6, "追加資料（データ保存・画面キャプチャ・E2E・改ざん防止）", "監査時の出力方法") + buildChapter6Page15(appendix)
-      },
-      {
-        id: "p16-ch6-screenshot1",
-        html: chapterSupplement(6, "追加資料（データ保存・画面キャプチャ・E2E・改ざん防止）", "画面キャプチャ貼付資料（1/4）") + buildChapter6ScreenshotPage(appendix, 0, "（1/4）")
-      },
-      {
-        id: "p17-ch6-screenshot2",
-        html: chapterSupplement(6, "追加資料（データ保存・画面キャプチャ・E2E・改ざん防止）", "画面キャプチャ貼付資料（2/4）") + buildChapter6ScreenshotPage(appendix, 1, "（2/4）")
-      },
-      {
-        id: "p18-ch6-screenshot3",
-        html: chapterSupplement(6, "追加資料（データ保存・画面キャプチャ・E2E・改ざん防止）", "画面キャプチャ貼付資料（3/4）") + buildChapter6ScreenshotPage(appendix, 2, "（3/4）")
-      },
-      {
-        id: "p19-ch6-screenshot4",
-        html: chapterSupplement(6, "追加資料（データ保存・画面キャプチャ・E2E・改ざん防止）", "画面キャプチャ貼付資料（4/4）") + buildChapter6ScreenshotPage(appendix, 3, "（4/4）")
-      },
-      {
-        id: "p20-ch6-e2e-tamper",
-        html: chapterSupplement(6, "追加資料（データ保存・画面キャプチャ・E2E・改ざん防止）", "E2Eテスト・改ざん防止") + buildChapter6Page18(appendix)
-      }
-    ];
-  }
-
-  function buildReportHtml(data){
-    const pages = buildPagePlan(data);
-    return (
-      "<div class='pre-fixed-fare-integrated-summary'>" +
-      pages.map(function(page, index){
-        return pdfPage(page.id, page.html, {
-          padBottom: !!page.padBottom,
-          isLast: index === pages.length - 1
-        });
-      }).join("") +
-      "</div>"
-    );
-  }
-
   function getIntegratedPageCss(){
     if(!global.PreFixedFarePrintLayoutCss){
       throw new Error("印刷用レイアウトCSSモジュールが読み込まれていません。");
@@ -738,27 +637,13 @@
     const scope = ".pre-fixed-fare-integrated-summary";
     return (
       global.PreFixedFarePrintLayoutCss.getCorePrintCss(scope) +
-      scope + " .pdf-page{width:720px;height:1100px;max-height:1100px;overflow:hidden;page-break-inside:avoid;break-inside:avoid;page-break-after:always;break-after:page;margin:0;padding:0;position:relative;}" +
-      scope + " .pdf-page-break{page-break-after:always !important;break-after:page !important;}" +
-      scope + " .pdf-page-inner{height:1040px;max-height:1040px;display:flex;flex-direction:column;overflow:hidden;padding:2px 0 0;}" +
-      scope + " .pdf-page-fill{flex:1 1 auto;min-height:24px;background:#ffffff;}" +
-      scope + " .pdf-page-fill--large{min-height:120px;}" +
-      scope + " .pdf-page-clip-guard{flex:0 0 80px;height:80px;background:#ffffff;}" +
-      scope + " .cover-title{font-size:18pt;margin:8mm 0 5mm;text-align:center;}" +
-      scope + " .cover-subtitle{font-size:16pt;margin:0 0 8mm;text-align:center;color:#334155;}" +
-      scope + " .toc-heading{font-size:16pt;margin:0 0 5mm;}" +
-      scope + " .chapter-start{margin:0 0 4mm;break-inside:avoid;page-break-inside:avoid;}" +
+      scope + " .cover-title{font-size:18pt;margin:0 0 5mm;text-align:center;}" +
+      scope + " .cover-subtitle{font-size:16pt;margin:0 0 6mm;text-align:center;color:#334155;}" +
+      scope + " .toc-heading{font-size:16pt;margin:0 0 4mm;}" +
       scope + " .chapter-title{font-size:16pt;margin:0 0 4mm;border-bottom:2px solid #333;padding-bottom:2mm;}" +
-      scope + " .chapter-title--continued{font-size:16pt;}" +
-      scope + " .chapter-supplement{font-size:13pt;margin:0 0 4mm;color:#334155;border-bottom:1px solid #ddd;padding-bottom:2mm;}" +
       scope + " .chapter-positioning{font-size:9pt;color:#64748b;margin:0 0 4mm;}" +
-      scope + " .section-title{font-size:13pt;}" +
-      scope + " .verification-note{margin:0 0 4mm;padding:4mm;background:#eef5fb;border-left:4px solid #2f6fad;break-inside:avoid;page-break-inside:avoid;}" +
-      scope + " .e2e-reservation-note," + scope + " .meter-mode-note," + scope + " .prelaunch-swap-note," + scope + " .terminology-note{font-size:9pt;color:#64748b;}" +
-      scope + " .capture-placeholder{border:2px dashed #94a3b8;background:#f8fafc;min-height:40mm;padding:4mm;margin:3mm 0;text-align:center;break-inside:avoid;page-break-inside:avoid;}" +
-      scope + " .capture-placeholder-label{font-weight:700;color:#475569;margin:0 0 2mm;font-size:9pt;}" +
-      scope + " .capture-placeholder-note{font-size:9pt;color:#64748b;margin:0;}" +
-      scope + " .capture-image{display:block;max-width:92%;max-height:340px;object-fit:contain;object-position:top center;}"
+      scope + " .verification-note{margin:0 0 4mm;padding:4mm;background:#eef5fb;border-left:4px solid #2f6fad;}" +
+      scope + " .e2e-reservation-note," + scope + " .meter-mode-note," + scope + " .prelaunch-swap-note," + scope + " .terminology-note{font-size:9pt;color:#64748b;}"
     );
   }
 
@@ -794,7 +679,7 @@
     container.style.display = "block";
     container.style.visibility = "visible";
     container.style.opacity = "1";
-    container.style.width = "720px";
+    container.style.width = "auto";
     container.style.background = "#ffffff";
     container.style.color = "#111111";
     container.style.padding = "0";
@@ -806,10 +691,6 @@
   function ensureRenderableContent(reportElement){
     if(!reportElement){
       throw new Error("統合説明資料PDFの生成対象要素が作成できませんでした。");
-    }
-    const pageCount = reportElement.querySelectorAll(".pdf-page").length;
-    if(pageCount < EXPECTED_PAGE_COUNT){
-      console.warn("[PreFixedFareIntegratedSummaryPdf] page count below baseline:", pageCount, "baseline:", EXPECTED_PAGE_COUNT);
     }
     const htmlLength = String(reportElement.innerHTML || "").trim().length;
     const textLength = String(reportElement.innerText || "").trim().length;
@@ -842,8 +723,8 @@
       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
       pagebreak: {
         mode: ["css", "legacy"],
-        before: [],
-        after: [".pdf-page-break"]
+        before: [".chapter-start"],
+        after: []
       }
     };
   }
@@ -928,7 +809,7 @@
       wrapper: wrapper,
       reportElement: reportElement,
       htmlText: String(reportElement?.innerText || ""),
-      pageCount: reportElement.querySelectorAll(".pdf-page").length
+      pageCount: reportElement.querySelectorAll(".chapter-start").length
     };
   }
 
@@ -979,7 +860,6 @@
   global.PreFixedFareIntegratedSummaryPdf = {
     PDF_FILENAME: PDF_FILENAME,
     EXPECTED_PAGE_COUNT: EXPECTED_PAGE_COUNT,
-    buildPagePlan: buildPagePlan,
     buildReportHtml: buildReportHtml,
     buildPrintDocument: buildPrintDocument,
     renderPdfBlob: renderPdfBlob,

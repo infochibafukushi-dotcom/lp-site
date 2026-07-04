@@ -52,9 +52,11 @@
       return "";
     }
     return (
+      "<section class='page-break-before table-section no-split-table'>" +
       "<h3 class='subsection-title'>参考：千葉県内交通圏の平準化係数（申請欄への自動転記ではない）</h3>" +
       "<p class='footer-note'>以下はシステム設定値の参考一覧です。申請欄には、申請対象の交通圏に対応する関東運輸局公示の係数を転記してください。</p>" +
-      buildTable(["交通圏", "参考係数"], rows, { className: "table-reference" })
+      buildTable(["交通圏", "参考係数"], rows, { className: "table-reference" }) +
+      "</section>"
     );
   }
 
@@ -151,29 +153,14 @@
   }
 
   function renderScreenCaptureEvidence(payload){
-    const screensHtml = (payload.screens || []).map(function(screen, index){
-      const imageHtml = screen.imageFile
-        ? (
-          "<div class='capture-image-wrap'>" +
-          "<img class='capture-image' src='./assets/evidence/pre-fixed-fare-20260705/" + escapeHtml(screen.imageFile) + "' alt='" + escapeHtml(screen.name || "") + "' loading='eager'>" +
-          "</div>"
-        )
-        : "";
-      return (
-        "<section class='capture-card evidence-card'>" +
-        "<h3 class='subsection-title'>" + escapeHtml(String(index + 1) + ". " + screen.name) + "</h3>" +
-        "<p><strong>説明：</strong>" + escapeHtml(screen.purpose || "") + "</p>" +
-        (screen.note ? "<p class='caption'><strong>備考：</strong>" + escapeHtml(screen.note) + "</p>" : "") +
-        imageHtml +
-        "</section>"
-      );
-    }).join("");
     return (
       "<section class='subsection-block word-section'>" +
       "<h1 class='doc-title'>" + escapeHtml(payload.title) + "</h1>" +
       buildList(payload.intro) +
-      "<div class='note-box notice-box'>" + escapeHtml(payload.verificationNote || "") + "</div>" +
-      screensHtml +
+      "<div class='note-box notice-box'>" +
+      "<p>利用者のルート選択、旅客同意確認、乗務員用確定ルート確認、領収書・レシート明細画面については、別添「画面証跡資料」P2〜P5を参照。</p>" +
+      (payload.verificationNote ? "<p>" + escapeHtml(payload.verificationNote) + "</p>" : "") +
+      "</div>" +
       "</section>"
     );
   }
@@ -207,13 +194,12 @@
     if(id === "screen-capture-evidence") return renderScreenCaptureEvidence(payload);
     if(id === "screenshot-sheet") return renderScreenshotSheet(payload);
     if(id === "submission-appendix-set"){
-      const parts = (payload.parts || []).map(function(partId, index){
+      const parts = (payload.parts || []).map(function(partId){
         const partPayload = global.PreFixedFareSubmissionAppendixData.buildDocumentPayload(
           partId,
           payload._options || {}
         );
-        const breakClass = index > 0 ? " word-page-break" : "";
-        return "<div class='word-section" + breakClass + "'>" + renderDocumentBody(partPayload) + "</div>";
+        return "<div class='word-section'>" + renderDocumentBody(partPayload) + "</div>";
       }).join("");
       return (
         "<h1 class='doc-title'>" + escapeHtml(payload.title) + "</h1>" +

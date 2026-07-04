@@ -152,26 +152,29 @@
   }
 
   function getEvidenceCss(){
+    const base = global.PreFixedFarePrintLayoutCss
+      ? global.PreFixedFarePrintLayoutCss.getBasePageRules()
+      : "@page{size:A4 portrait;margin:8mm;}";
     return (
-      ".pre-fixed-fare-screen-evidence,.pre-fixed-fare-screen-evidence *{box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Yu Gothic','Meiryo',sans-serif;color:#111111;}" +
-      ".pre-fixed-fare-screen-evidence{width:100%;background:#ffffff;line-height:1.45;font-size:10.5px;padding:0;margin:0;}" +
-      ".pre-fixed-fare-screen-evidence .screen-evidence-page{width:100%;min-height:auto;padding:18mm 14mm;box-sizing:border-box;page-break-inside:avoid;break-inside:avoid-page;}" +
+      base +
+      ".pre-fixed-fare-screen-evidence,.pre-fixed-fare-screen-evidence *{box-sizing:border-box;font-family:'Yu Gothic','Meiryo',sans-serif;color:#111111;}" +
+      ".pre-fixed-fare-screen-evidence{width:auto;background:#ffffff;line-height:1.55;font-size:10.5pt;padding:0;margin:0;}" +
+      ".pre-fixed-fare-screen-evidence .screen-evidence-page{width:auto;min-height:auto;padding:0;box-sizing:border-box;}" +
       ".pre-fixed-fare-screen-evidence .screen-evidence-page + .screen-evidence-page{page-break-before:always;break-before:page;}" +
-      ".pre-fixed-fare-screen-evidence h1.cover-title{font-size:20px;margin:0 0 12px;color:#1b3a6b;}" +
-      ".pre-fixed-fare-screen-evidence h2.screen-title{font-size:14px;margin:0 0 8px;color:#1b3a6b;border-bottom:2px solid #1b3a6b;padding-bottom:4px;}" +
-      ".pre-fixed-fare-screen-evidence table{width:100%;border-collapse:collapse;table-layout:fixed;margin:0 0 10px;}" +
-      ".pre-fixed-fare-screen-evidence th,.pre-fixed-fare-screen-evidence td{border:1px solid #d9d9d9;padding:5px;vertical-align:top;font-size:10px;line-height:1.35;}" +
-      ".pre-fixed-fare-screen-evidence th{background:#f6f6f6;font-weight:700;}" +
-      ".pre-fixed-fare-screen-evidence .verification-note{margin:10px 0 0;padding:8px;background:#eef5fb;border-left:4px solid #2f6fad;font-size:9.5px;line-height:1.5;}" +
-      ".pre-fixed-fare-screen-evidence .verification-note--compact{margin-top:8px;font-size:9px;}" +
-      ".pre-fixed-fare-screen-evidence .screen-evidence-shot{margin:0 0 8px;}" +
-      ".pre-fixed-fare-screen-evidence .screen-evidence-shot--receipt{display:flex;justify-content:center;align-items:flex-start;margin:0 auto 8px;}" +
-      ".pre-fixed-fare-screen-evidence .screen-evidence-shot--receipt img{width:72%;max-width:72%;margin:0 auto;max-height:180mm;object-fit:contain;object-position:top center;}" +
-      ".pre-fixed-fare-screen-evidence .screen-evidence-shot img{display:block;width:100%;max-height:210mm;object-fit:contain;object-position:top center;}" +
-      ".pre-fixed-fare-screen-evidence .screen-evidence-shot--missing{border:2px dashed #94a3b8;background:#f8fafc;min-height:120mm;padding:24px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;}" +
-      ".pre-fixed-fare-screen-evidence .screen-evidence-shot-missing-label{font-size:14px;font-weight:700;color:#475569;margin:0 0 8px;}" +
-      ".pre-fixed-fare-screen-evidence .screen-evidence-shot-missing-path{font-size:9px;color:#64748b;margin:0;word-break:break-all;}" +
-      ".pre-fixed-fare-screen-evidence .proof-text{margin:0;font-size:10px;line-height:1.5;color:#334155;}"
+      ".pre-fixed-fare-screen-evidence h1.cover-title{font-size:18pt;font-weight:700;margin:0 0 6mm;color:#1b3a6b;}" +
+      ".pre-fixed-fare-screen-evidence h2.screen-title{font-size:16pt;font-weight:700;margin:0 0 4mm;color:#1b3a6b;border-bottom:2px solid #1b3a6b;padding-bottom:2mm;}" +
+      ".pre-fixed-fare-screen-evidence table{width:100%;max-width:100%;table-layout:fixed;border-collapse:collapse;margin:0 0 4mm;}" +
+      ".pre-fixed-fare-screen-evidence th,.pre-fixed-fare-screen-evidence td{border:1px solid #d9d9d9;padding:2mm;vertical-align:top;font-size:9pt;line-height:1.45;word-break:break-word;overflow-wrap:anywhere;}" +
+      ".pre-fixed-fare-screen-evidence th{background:#f6f6f6;font-weight:700;font-size:9.5pt;}" +
+      ".pre-fixed-fare-screen-evidence .verification-note{margin:4mm 0 0;padding:4mm;background:#eef5fb;border-left:4px solid #2f6fad;font-size:8.5pt;line-height:1.45;}" +
+      ".pre-fixed-fare-screen-evidence .verification-note--compact{margin-top:4mm;font-size:8.5pt;}" +
+      ".pre-fixed-fare-screen-evidence .screen-evidence-shot{margin:0 0 4mm;}" +
+      ".pre-fixed-fare-screen-evidence .screen-evidence-shot--receipt{display:flex;justify-content:center;align-items:flex-start;margin:0 auto 4mm;}" +
+      ".pre-fixed-fare-screen-evidence .screen-evidence-shot img{display:block;max-width:100%;max-height:200mm;object-fit:contain;object-position:top center;}" +
+      ".pre-fixed-fare-screen-evidence .screen-evidence-shot--missing{border:2px dashed #94a3b8;background:#f8fafc;min-height:80mm;padding:24px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;}" +
+      ".pre-fixed-fare-screen-evidence .screen-evidence-shot-missing-label{font-size:12pt;font-weight:700;color:#475569;margin:0 0 8px;}" +
+      ".pre-fixed-fare-screen-evidence .screen-evidence-shot-missing-path{font-size:8.5pt;color:#64748b;margin:0;word-break:break-all;}" +
+      ".pre-fixed-fare-screen-evidence .proof-text{margin:0;font-size:10pt;line-height:1.5;color:#334155;}"
     );
   }
 
@@ -208,7 +211,7 @@
     container.style.position = "absolute";
     container.style.left = "-9999px";
     container.style.top = "0";
-    container.style.width = "210mm";
+    container.style.width = "auto";
     container.style.background = "#ffffff";
     container.innerHTML = "<style>" + getEvidenceCss() + "</style>" + reportHtml;
     document.body.appendChild(container);
@@ -263,6 +266,7 @@
   global.PreFixedFareScreenEvidencePdf = {
     EXPECTED_PAGE_COUNT: EXPECTED_PAGE_COUNT,
     buildReportHtml: buildReportHtml,
+    getEvidenceCss: getEvidenceCss,
     probeImages: probeImages,
     savePdf: savePdf,
     generatePreFixedFareScreenEvidencePdf: generatePreFixedFareScreenEvidencePdf

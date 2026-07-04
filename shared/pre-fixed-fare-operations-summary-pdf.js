@@ -345,9 +345,9 @@
     const scope = ".pre-fixed-fare-operations-summary";
     return (
       global.PreFixedFarePrintLayoutCss.getCorePrintCss(scope) +
-      scope + "{visibility:visible;opacity:1;position:relative;top:0;left:0;padding:0;}" +
+      scope + "{visibility:visible;opacity:1;position:relative;top:0;left:0;padding:0;width:auto;}" +
       scope + " h2{padding-bottom:2mm;border-bottom:1px solid #ccc;}" +
-      scope + " .footer-note{margin-top:8mm;}"
+      scope + " .footer-note{margin-top:6mm;font-size:8.5pt;}"
     );
   }
 
@@ -362,7 +362,7 @@
     container.style.display = "block";
     container.style.visibility = "visible";
     container.style.opacity = "1";
-    container.style.width = "720px";
+    container.style.width = "auto";
     container.style.background = "#ffffff";
     container.style.color = "#111111";
     container.style.padding = "0";
@@ -395,6 +395,17 @@
     }
     await new Promise(function(resolve){ requestAnimationFrame(resolve); });
     await new Promise(function(resolve){ requestAnimationFrame(resolve); });
+  }
+
+  function buildPrintDocument(reportData){
+    const reportHtml = buildReportHtml(reportData);
+    return (
+      "<!DOCTYPE html><html lang='ja'><head><meta charset='UTF-8'>" +
+      "<meta name='viewport' content='width=device-width,initial-scale=1'>" +
+      "<title>" + escapeHtml(reportData.title || PDF_FILENAME) + "</title>" +
+      "<style>" + getReportCss() + "</style>" +
+      "</head><body>" + reportHtml + "</body></html>"
+    );
   }
 
   async function savePdf(reportData){
@@ -437,6 +448,7 @@
     PDF_FILENAME: PDF_FILENAME,
     getReportCss: getReportCss,
     buildReportHtml: buildReportHtml,
+    buildPrintDocument: buildPrintDocument,
     savePdf: savePdf,
     generatePreFixedFareOperationsSummaryPdf: generatePreFixedFareOperationsSummaryPdf
   };
