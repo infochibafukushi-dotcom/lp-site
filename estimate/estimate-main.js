@@ -1611,7 +1611,7 @@
     return (
       '<div class="estimate-sticky-reserve-bar estimate-sticky-reserve-bar--guide estimate-mobile-reserve-bar" id="estimateMobileReserveBar">' +
         '<div class="estimate-sticky-reserve-bar-inner estimate-mobile-reserve-bar-inner">' +
-          '<p class="estimate-sticky-reserve-bar-guide">次の画面で合計金額を確認し、その内容で予約へ進めます。</p>' +
+          '<p class="estimate-sticky-reserve-bar-guide">合計金額を確認してから、予約へ進めます。</p>' +
         "</div>" +
       "</div>"
     );
