@@ -722,10 +722,12 @@
       }
     });
 
+    const rawFixedFareTotal = rows.reduce(function(sum, row){ return sum + row.amount; }, 0);
     return {
       fareMode: fareMode,
       fixedFareBreakdown: rows,
-      fixedFareTotal: rows.reduce(function(sum, row){ return sum + row.amount; }, 0),
+      // reservation-v4 と同じく運賃本体は10円未満切り捨て（サービス料金は丸めない）
+      fixedFareTotal: Math.floor(Math.max(rawFixedFareTotal, 0) / 10) * 10,
       preFixedFareMeta: preFixedFareMeta
     };
   }
