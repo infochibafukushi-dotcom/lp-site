@@ -12,7 +12,7 @@
     consentedAt: "2026/07/05 03:40",
     origin: "中央区出洲港8-3-2",
     destination: "成田空港第二ターミナル",
-    projectNumber: "26705-MAINS-0001"
+    projectNumber: "260705-MAINS-0001"
   };
 
   const SCREENS = [
