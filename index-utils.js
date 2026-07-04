@@ -224,6 +224,55 @@
     };
   }
 
+  function ensureOfficialLineShape(config){
+    const current = config && config.officialLine && typeof config.officialLine === "object"
+      ? config.officialLine
+      : {};
+    return {
+      qrImage: String(current.qrImage || "").trim(),
+      qrCaption: String(current.qrCaption || "スマートフォンで読み取って友だち追加できます").trim()
+        || "スマートフォンで読み取って友だち追加できます"
+    };
+  }
+
+  function getOfficialLineUrl(section, config){
+    const fromSection = String(section?.lineUrl || "").trim();
+    if(fromSection && fromSection !== "#"){
+      return sanitizeUrl(fromSection, "#");
+    }
+
+    const footer = Array.isArray(config?.footer) ? config.footer : [];
+    const fromFooter = String(footer[1]?.link || "").trim();
+    if(fromFooter && fromFooter !== "#"){
+      return sanitizeUrl(fromFooter, "#");
+    }
+
+    const footerPc = Array.isArray(config?.footerPc) ? config.footerPc : [];
+    const fromFooterPc = String(footerPc[1]?.link || "").trim();
+    if(fromFooterPc && fromFooterPc !== "#"){
+      return sanitizeUrl(fromFooterPc, "#");
+    }
+
+    return "#";
+  }
+
+  function getOfficialLineQrImage(section, config){
+    const fromSection = String(section?.qrImage || "").trim();
+    if(fromSection){
+      return fromSection;
+    }
+    return String(config?.officialLine?.qrImage || "").trim();
+  }
+
+  function getOfficialLineQrCaption(section, config){
+    const fromSection = String(section?.qrCaption || "").trim();
+    if(fromSection){
+      return fromSection;
+    }
+    return String(config?.officialLine?.qrCaption || "スマートフォンで読み取って友だち追加できます").trim()
+      || "スマートフォンで読み取って友だち追加できます";
+  }
+
   function ensureConfigShape(config){
     const topDefaults = ["ボタン1", "ボタン2", "ボタン3"];
     const pcTopDefaults = ["ボタン1", "ボタン2", "ボタン3", "ボタン4"];
@@ -234,6 +283,7 @@
     config.footer = ensureFooterButtons(config.footer, footerDefaults);
     config.footerPc = ensureFooterButtons(config.footerPc || config.footer, footerDefaults);
     config.pcTopPhone = ensurePcTopPhoneShape(config);
+    config.officialLine = ensureOfficialLineShape(config);
 
     config.logoImage = config.logoImage || "";
     config.headerBgColor = config.headerBgColor || "#ffffff";
@@ -447,6 +497,14 @@
       text: section.configFooterCtas?.text || ""
     };
 
+    if(section.type === "official-line"){
+      section.note = section.note || "";
+      section.buttonText = section.buttonText || "LINEで相談する";
+      section.lineUrl = section.lineUrl || "";
+      section.qrImage = section.qrImage || "";
+      section.qrCaption = section.qrCaption || "";
+    }
+
     return section;
   }
 
@@ -615,6 +673,10 @@
     sanitizeUrl: sanitizeUrl,
     ensureConfigShape: ensureConfigShape,
     ensurePopupSettingsShape: ensurePopupSettingsShape,
+    ensureOfficialLineShape: ensureOfficialLineShape,
+    getOfficialLineUrl: getOfficialLineUrl,
+    getOfficialLineQrImage: getOfficialLineQrImage,
+    getOfficialLineQrCaption: getOfficialLineQrCaption,
     ensureSectionLinks: ensureSectionLinks,
     slugifySectionId: slugifySectionId,
     ensureUniqueSectionIds: ensureUniqueSectionIds,

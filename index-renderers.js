@@ -585,6 +585,48 @@
     `;
   }
 
+  function renderOfficialLine(section, config){
+    const lineUrl = window.IndexUtils.getOfficialLineUrl(section, config);
+    const qrImage = window.IndexUtils.getOfficialLineQrImage(section, config);
+    const qrCaption = window.IndexUtils.getOfficialLineQrCaption(section, config);
+    const buttonText = String(section.buttonText || "LINEで相談する").trim() || "LINEで相談する";
+    const note = String(section.note || "").trim();
+    const hasLineUrl = lineUrl && lineUrl !== "#";
+    const isExternal = /^https?:\/\//i.test(lineUrl);
+    const linkExtra = isExternal ? ' target="_blank" rel="noopener noreferrer"' : "";
+
+    const noteHtml = note
+      ? `<p class="official-line-note">${nl2brSafe(note)}</p>`
+      : "";
+
+    const actionsHtml = hasLineUrl
+      ? `<div class="official-line-actions">
+          <a class="official-line-button" href="${window.IndexUtils.escapeAttr(lineUrl)}"${linkExtra}>${window.IndexUtils.escapeHtml(buttonText)}</a>
+        </div>`
+      : "";
+
+    const qrHtml = qrImage
+      ? `<div class="official-line-qr">
+          <img class="official-line-qr-image" src="${window.IndexUtils.escapeAttr(qrImage)}" alt="公式LINE QRコード" loading="lazy" decoding="async" onerror="var q=this.closest('.official-line-qr');if(q){q.remove();}">
+          ${qrCaption ? `<p class="official-line-qr-caption">${window.IndexUtils.escapeHtml(qrCaption)}</p>` : ""}
+        </div>`
+      : "";
+
+    return `
+      <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section official-line-section align-${window.IndexUtils.escapeAttr(section.alignY || "middle")}" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#f7f5f0")}">
+        <div class="section-inner official-line-inner">
+          <div class="official-line-content">
+            <h2 class="section-title official-line-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "left")}">${window.IndexUtils.escapeHtml(section.title || "")}</h2>
+            <p class="section-text official-line-description text-${window.IndexUtils.escapeAttr(section.textSize || "medium")} text-${window.IndexUtils.escapeAttr(section.textAlign || "left")}">${nl2brSafe(section.text || "")}</p>
+            ${noteHtml}
+            ${actionsHtml}
+          </div>
+          ${qrHtml}
+        </div>
+      </section>
+    `;
+  }
+
   function renderSection(section, idx, config){
     section = window.IndexUtils.ensureSectionShape(section, idx);
     section.__imagePriority = idx === 0 ? "high" : "lazy";
@@ -612,6 +654,8 @@
         return renderAccordion(section);
       case "menu-list":
         return renderMenuList(section, config);
+      case "official-line":
+        return renderOfficialLine(section, config);
       default:
         return `
           <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section" style="background:#fff3cd">

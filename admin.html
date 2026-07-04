@@ -1171,6 +1171,21 @@ body{
               <div class="small">選択すると GitHub の assets/footer にアップロードされます。</div>
               <img id="footer2Preview" class="footer-image-preview" style="display:none;" alt="">
             </div>
+            <div class="row">
+              <label>公式LINE QR画像URL（PCセクション用）</label>
+              <input type="text" id="officialLineQrImage" oninput="setOfficialLineQrPreview(this.value)">
+              <div class="small">未設定の場合、PCの公式LINEセクションではQR枠を表示しません。下部固定LINEアイコンのリンク（LINE リンク）を公式LINE URLとして使います。</div>
+            </div>
+            <div class="row">
+              <label>公式LINE QR説明文</label>
+              <input type="text" id="officialLineQrCaption" placeholder="スマートフォンで読み取って友だち追加できます">
+            </div>
+            <div class="upload-box">
+              <label>公式LINE QR画像ファイル選択</label>
+              <input type="file" accept="image/*" onchange="uploadOfficialLineQrImage(this)">
+              <div class="small">選択すると GitHub の assets/line にアップロードされます。</div>
+              <img id="officialLineQrPreview" class="footer-image-preview" style="display:none;" alt="">
+            </div>
 
             <div class="row">
               <label>予約 名称</label>
@@ -2187,6 +2202,17 @@ function ensurePopupSettingsShape(config){
   return { patterns: patterns.map((pattern, index) => ensurePopupPatternShape(pattern, index)) };
 }
 
+function ensureOfficialLineShape(config){
+  const current = config && config.officialLine && typeof config.officialLine === 'object'
+    ? config.officialLine
+    : {};
+  return {
+    qrImage: String(current.qrImage || '').trim(),
+    qrCaption: String(current.qrCaption || 'スマートフォンで読み取って友だち追加できます').trim()
+      || 'スマートフォンで読み取って友だち追加できます'
+  };
+}
+
 function ensureConfigShape(config){
   const topDefaults = ['ボタン1', 'ボタン2', 'ボタン3'];
   const footerDefaults = ['電話', 'LINE', '予約'];
@@ -2196,6 +2222,7 @@ function ensureConfigShape(config){
   config.footer = ensureFooterButtons(config.footer, footerDefaults);
   config.footerPc = ensureFooterButtons(config.footerPc || config.footer, footerDefaults);
   config.pcTopPhone = ensurePcTopPhoneShape(config);
+  config.officialLine = ensureOfficialLineShape(config);
 
   config.logoImage = config.logoImage || '';
   config.headerBgColor = config.headerBgColor || '#ffffff';
@@ -2413,6 +2440,14 @@ function ensureSectionShape(section, index){
     text: section.menuBottomCard?.text || '料金の詳細やご不明点はお気軽にお問い合わせください。'
   };
 
+  if(section.type === 'official-line'){
+    section.note = section.note || '';
+    section.buttonText = section.buttonText || 'LINEで相談する';
+    section.lineUrl = section.lineUrl || '';
+    section.qrImage = section.qrImage || '';
+    section.qrCaption = section.qrCaption || '';
+  }
+
   ensureSectionLinks(section);
   return section;
 }
@@ -2562,6 +2597,10 @@ function buildConfigDraft(){
       number: getText('pcTopPhoneNumber'),
       link: getTrimmed('pcTopPhoneLink')
     },
+    officialLine: {
+      qrImage: getTrimmed('officialLineQrImage'),
+      qrCaption: getText('officialLineQrCaption').trim() || 'スマートフォンで読み取って友だち追加できます'
+    },
     popupSettings: collectPopupSettingsDraft()
   };
 }
@@ -2685,6 +2724,10 @@ function setFooterPreviewById(previewId, url){
 
 function setFooterPreview(index, url){
   setFooterPreviewById(`footer${index + 1}Preview`, url);
+}
+
+function setOfficialLineQrPreview(url){
+  setFooterPreviewById('officialLineQrPreview', url);
 }
 
 function setPopupImagePreview(index, url){
@@ -2824,6 +2867,10 @@ async function loadConfig(){
   document.getElementById('footer2Visible').checked = config.footer[1].visible !== false;
   document.getElementById('footer2Image').value = config.footer[1].image || '';
   setFooterPreview(1, config.footer[1].image || '');
+
+  document.getElementById('officialLineQrImage').value = config.officialLine.qrImage || '';
+  document.getElementById('officialLineQrCaption').value = config.officialLine.qrCaption || 'スマートフォンで読み取って友だち追加できます';
+  setOfficialLineQrPreview(config.officialLine.qrImage || '');
 
   document.getElementById('footer3Text').value = config.footer[2].text || '';
   document.getElementById('footer3Link').value = config.footer[2].link || '#';
@@ -3306,6 +3353,22 @@ function renderSectionPreview(section){
   const titleAlign = section.titleAlign || 'left';
   const textAlign = section.textAlign || 'left';
 
+  if(section.type === 'official-line'){
+    return `
+      <div class="section-preview-box" style="background:${escapeAttr(section.bgColor || '#f7f5f0')}">
+        <h3 class="section-preview-title align-${escapeAttr(titleAlign)}">${escapeHtml(section.title || '公式LINEでかんたん相談・予約確認')}</h3>
+        <div class="section-preview-text text-${escapeAttr(section.textSize || 'medium')} align-${escapeAttr(textAlign)}">
+          ${escapeHtml(section.text || '')}
+        </div>
+        <div style="margin-top:10px;">
+          <span style="display:inline-block;padding:8px 14px;border-radius:8px;background:#2f9e5f;color:#fff;font-size:13px;">${escapeHtml(section.buttonText || 'LINEで相談する')}</span>
+        </div>
+        ${section.note ? `<div class="section-preview-text" style="margin-top:10px;font-size:12px;color:#666;">${escapeHtml(section.note || '')}</div>` : ''}
+        ${section.qrImage ? `<div style="margin-top:10px;font-size:12px;color:#666;">QR画像: ${escapeHtml(section.qrImage)}</div>` : '<div style="margin-top:10px;font-size:12px;color:#666;">QR画像未設定時は config の公式LINE QR画像を使用（未設定なら非表示）</div>'}
+      </div>
+    `;
+  }
+
   if(section.type === 'accordion'){
     const items = Array.isArray(section.items) ? section.items : [];
     return `
@@ -3523,6 +3586,24 @@ async function uploadFooterImage(index, input){
     imageInput.value = url;
     setFooterPreview(index, url);
     setConfigSaveResult('画像アップロードに成功しました。最後に config.json を保存してください。', 'success');
+  }catch(error){
+    setConfigSaveResult('画像アップロード失敗: ' + error.message, 'error');
+  }finally{
+    input.value = '';
+  }
+}
+
+async function uploadOfficialLineQrImage(input){
+  try{
+    const file = input.files?.[0];
+    if(!file) return;
+
+    setConfigSaveResult('公式LINE QR画像アップロード中です...', 'warn');
+    const url = await uploadAssetFile(file, 'line');
+    const imageInput = document.getElementById('officialLineQrImage');
+    if(imageInput) imageInput.value = url;
+    setOfficialLineQrPreview(url);
+    setConfigSaveResult('QR画像アップロードに成功しました。最後に config.json を保存してください。', 'success');
   }catch(error){
     setConfigSaveResult('画像アップロード失敗: ' + error.message, 'error');
   }finally{
@@ -4340,6 +4421,7 @@ function renderSectionsEditor(){
     const isCards = ['card4','card3','card2'].includes(section.type);
     const isAccordion = section.type === 'accordion';
     const isMenuList = section.type === 'menu-list';
+    const isOfficialLine = section.type === 'official-line';
     const hasSingleImage = ['normal','card1-right','card1-left'].includes(section.type);
     const fullAnchorUrl = buildFullAnchorUrl(section.sectionId || '');
 
@@ -4414,6 +4496,30 @@ function renderSectionsEditor(){
               <label>説明文</label>
               <textarea oninput="updateSectionField(${index}, 'text', this.value)">${escapeHtml(section.text || '')}</textarea>
               <div class="small">改行したままLPに反映されます。</div>
+            </div>` : ''}
+
+            ${isOfficialLine ? `
+            <div class="row" style="grid-column:1 / -1;">
+              <label>補足文</label>
+              <textarea oninput="updateSectionField(${index}, 'note', this.value)">${escapeHtml(section.note || '')}</textarea>
+            </div>
+            <div class="row">
+              <label>ボタン文言</label>
+              <input type="text" value="${escapeAttr(section.buttonText || 'LINEで相談する')}" oninput="updateSectionField(${index}, 'buttonText', this.value)">
+            </div>
+            <div class="row">
+              <label>LINE URL（任意）</label>
+              <input type="text" value="${escapeAttr(section.lineUrl || '')}" oninput="updateSectionField(${index}, 'lineUrl', this.value)" placeholder="空欄時は下部メニューのLINEリンクを使用">
+              <div class="small">空欄の場合は config.json の下部メニュー LINE リンクを使います。</div>
+            </div>
+            <div class="row">
+              <label>QR画像URL（任意）</label>
+              <input type="text" value="${escapeAttr(section.qrImage || '')}" oninput="updateSectionField(${index}, 'qrImage', this.value)" placeholder="空欄時は config の公式LINE QR画像を使用">
+              <div class="small">空欄かつ config 未設定の場合、PCでもQR枠は表示しません。</div>
+            </div>
+            <div class="row">
+              <label>QR説明文（任意）</label>
+              <input type="text" value="${escapeAttr(section.qrCaption || '')}" oninput="updateSectionField(${index}, 'qrCaption', this.value)" placeholder="空欄時は config の説明文を使用">
             </div>` : ''}
 
             <div class="row">
@@ -4524,10 +4630,11 @@ function renderSectionsEditor(){
               ${renderMenuListGroupsEditor(section, index)}
             </div>` : ''}
 
+            ${!isOfficialLine ? `
             <div class="row" style="grid-column:1 / -1;">
               <label>セクション下部リンクボタン（最大3つ）</label>
               ${renderSectionLinksEditor(index, section)}
-            </div>
+            </div>` : ''}
 
             <div class="row" style="grid-column:1 / -1;">
               <label>表示見本</label>

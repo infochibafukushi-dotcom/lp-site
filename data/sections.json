@@ -625,6 +625,54 @@
     "areaDetailText": ""
   },
   {
+    "id": "section-official-line",
+    "sectionId": "official-line",
+    "type": "official-line",
+    "enabled": true,
+    "title": "公式LINEでかんたん相談・予約確認",
+    "text": "介護タクシーの料金目安、空き状況、必要な介助内容についてLINEでご相談いただけます。病院名・施設名・住所・お写真などを送っていただくと、よりスムーズに確認できます。",
+    "note": "お急ぎの場合はお電話ください。LINEは確認後、順番に返信いたします。",
+    "buttonText": "LINEで相談する",
+    "lineUrl": "",
+    "qrImage": "",
+    "qrCaption": "スマートフォンで読み取って友だち追加できます",
+    "textSize": "medium",
+    "bgColor": "#f7f5f0",
+    "alignY": "middle",
+    "titleAlign": "left",
+    "textAlign": "left",
+    "items": [],
+    "image": "",
+    "link": "#",
+    "images": [],
+    "links": [
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      },
+      {
+        "text": "",
+        "url": "#",
+        "visible": false
+      }
+    ],
+    "menuGroups": [],
+    "menuBottomCard": {
+      "visible": false,
+      "title": "ご予約・ご相談はこちら",
+      "text": "料金の詳細やご不明点はお気軽にお問い合わせください。"
+    },
+    "mobileCardColumns": "",
+    "areaDetailSummary": "",
+    "areaDetailText": ""
+  },
+  {
     "id": "section-faq",
     "sectionId": "faq-yokuaru",
     "type": "accordion",

@@ -89,6 +89,10 @@
     "number": "090-6331-4289",
     "link": "tel:09063314289"
   },
+  "officialLine": {
+    "qrImage": "./assets/line/official-line-qr.svg",
+    "qrCaption": "スマートフォンで読み取って友だち追加できます"
+  },
   "popupSettings": {
     "patterns": [
       {
