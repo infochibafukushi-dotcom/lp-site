@@ -1631,6 +1631,44 @@ body{
         </div>
         <div class="preview" id="preFixedFareSubmissionAppendixStatus">まだ出力していません。</div>
       </div>
+      <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e5e5e5;">
+        <p class="note" style="margin-bottom:8px;"><strong>事前確定運賃 申請書印刷（様式2）</strong><br>関東運輸局の「一般乗用旅客自動車運送事業の運賃及び料金（事前確定運賃）設定認可申請書」（様式2）を入力し、プレビュー・印刷できます。独自開発アプリ使用時の申請書です。ブラウザの印刷機能でPDF保存できます。</p>
+        <div class="row">
+          <label for="pffaApplicationDate">申請日</label>
+          <input type="date" id="pffaApplicationDate">
+        </div>
+        <div class="row">
+          <label for="pffaApplicantAddress">申請者住所</label>
+          <input type="text" id="pffaApplicantAddress" placeholder="例：千葉県千葉市中央区出洲港8-3-2">
+        </div>
+        <div class="row">
+          <label for="pffaApplicantName">氏名又は名称</label>
+          <input type="text" id="pffaApplicantName" placeholder="例：株式会社 千葉福祉サポート">
+        </div>
+        <div class="row">
+          <label for="pffaRepresentativeName">代表者氏名</label>
+          <input type="text" id="pffaRepresentativeName" placeholder="例：山本 ○○">
+        </div>
+        <div class="row">
+          <label for="pffaContact">連絡先</label>
+          <input type="text" id="pffaContact" placeholder="例：090-6331-4289">
+        </div>
+        <div class="row">
+          <label for="pffaOperatingArea">適用する営業区域</label>
+          <input type="text" id="pffaOperatingArea" placeholder="千葉交通圏">
+        </div>
+        <div class="row">
+          <label for="pffaDispatchAppName">使用する配車アプリ名称</label>
+          <input type="text" id="pffaDispatchAppName" placeholder="例：LP見積・予約連携システム">
+        </div>
+        <div class="actions" style="flex-wrap:wrap; gap:8px;">
+          <button type="button" id="pffaSaveBtn">申請書入力を保存</button>
+          <button type="button" class="secondary" id="pffaReloadBtn">再読み込み</button>
+          <button type="button" id="pffaPreviewBtn">申請書プレビュー</button>
+          <button type="button" id="pffaPrintBtn">申請書を印刷</button>
+        </div>
+        <div class="preview" id="preFixedFareApplicationStatus">まだ読み込んでいません。</div>
+      </div>
     </div>
   </div>
 
@@ -1678,6 +1716,8 @@ body{
 <script src="./shared/pre-fixed-fare-submission-appendix-pdf.js?v=appendix02"></script>
 <script src="./admin-pre-fixed-fare-submission-appendix.js?v=appendix02"></script>
 <script src="./admin-pre-fixed-fare-report.js?v=print02"></script>
+<script src="./shared/pre-fixed-fare-application-print.js?v=appform01"></script>
+<script src="./admin-pre-fixed-fare-application.js?v=appform01"></script>
 <script>
 const CONFIG_PATH = 'data/config.json';
 const SECTIONS_PATH = 'data/sections.json';
@@ -1918,6 +1958,11 @@ async function saveAllToGitHub(){
   if(typeof window.saveCarechanToGitHub === 'function'){
     if(!(await window.saveCarechanToGitHub(true))){
       failures.push('carechan.json');
+    }
+  }
+  if(typeof window.savePreFixedFareApplicationToGitHub === 'function'){
+    if(!(await window.savePreFixedFareApplicationToGitHub(true))){
+      failures.push('pre-fixed-fare-application.json');
     }
   }
 
@@ -4762,6 +4807,7 @@ async function saveFileToGitHub(path, contentString){
   }
   return result;
 }
+window.saveFileToGitHub = saveFileToGitHub;
 
 function normalizeSectionBeforeSave(section, index){
   const normalized = deepClone(ensureSectionShape(section, index));
