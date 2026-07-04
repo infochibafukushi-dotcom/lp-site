@@ -75,21 +75,205 @@
       .filter(function(row){ return row[0]; });
   }
 
-  function serviceFeeRows(){
-    return [
-      ["乗車地から降車地までの運賃", "申請書本体・認可運賃表に基づき記入", "含める", "事前確定運賃として表示", "事前確定運賃の本体"],
-      ["迎車料金", "申請書本体・認可料金表に基づき記入、または会社料金表に基づき記入", "原則別枠", "別行表示", "事前確定運賃とは区分"],
-      ["予約料金", "申請書本体・認可料金表に基づき記入、または会社料金表に基づき記入", "別枠", "別行表示", "事前確定運賃とは区分"],
-      ["介助料", "会社料金表に基づき記入", "別枠", "別行表示", "介護タクシーサービス料金"],
-      ["待機料", "会社料金表に基づき記入", "別枠", "別行表示", "実待機に応じて精算"],
-      ["付き添い料", "会社料金表に基づき記入", "別枠", "別行表示", "実対応に応じて精算"],
-      ["有料道路代", "実費に基づき記入", "別枠", "別行表示", "実費・別料金"],
-      ["駐車場代", "実費に基づき記入", "別枠", "別行表示", "実費・別料金"],
-      ["福祉タクシー券", "市町村の福祉タクシー券取扱いに基づき精算時充当", "精算側", "精算時表示", "運賃算定ではなく精算時充当"],
-      ["障害者割引", "申請書本体・認可運賃表または制度に基づき記入", "別枠", "別行表示", "適用時は割引前後を表示"],
-      ["深夜早朝割増", "申請書本体・認可運賃表に基づき記入", "別枠", "別行表示", "適用時は明細上で区分"],
-      ["キャンセル料", "キャンセルポリシーに基づき記入", "別枠", "別行表示", "キャンセルポリシーに基づく"]
-    ];
+  function formatEstimateYen(amount){
+    const value = Number(amount);
+    if(!Number.isFinite(value)){
+      return "";
+    }
+    return value.toLocaleString("ja-JP") + "円";
+  }
+
+  function findPreFixedTimeAdjustment(estimateConfig){
+    const components = Array.isArray(estimateConfig?.fareComponents?.pre_fixed_fare)
+      ? estimateConfig.fareComponents.pre_fixed_fare
+      : [];
+    return components.find(function(component){
+      return String(component?.key || "") === "timeAdjustment";
+    }) || null;
+  }
+
+  function buildEstimateFareItemRows(estimateConfig){
+    const config = estimateConfig || {};
+    const basic = config.basicFees || {};
+    const waitingFees = config.waitingFees || {};
+    const timeAdjustment = findPreFixedTimeAdjustment(config);
+    const timeParams = timeAdjustment?.params || {};
+    const rows = [];
+
+    rows.push([
+      "事前確定運賃本体",
+      "距離制運賃×平準化係数（1円単位四捨五入）",
+      "含める",
+      "事前確定運賃として表示",
+      "乗車地から降車地までの走行予定ルートに基づく運賃本体（data/estimate-config.json distancePricing・trafficZones、estimate/estimate-calc.js computeFixedFareBreakdown）",
+      "見積「事前確定運賃」セクション（fixedFareBreakdown・adjustedDistanceFareAmount）"
+    ]);
+
+    if(basic.pickupFee){
+      rows.push([
+        "迎車料",
+        formatEstimateYen(basic.pickupFee.amount) + "/回",
+        "含めない（別枠）",
+        "別行表示",
+        "data/estimate-config.json basicFees.pickupFee（固定料金）",
+        "fixedFareBreakdown・見積明細に表示（estimate/estimate-calc.js）"
+      ]);
+    }
+
+    rows.push([
+      "予約料",
+      "設定なし",
+      "—",
+      "—",
+      "LP見積設定（data/estimate-config.json）に予約料項目なし",
+      "LP見積では未使用"
+    ]);
+
+    if(basic.specialVehicleFee){
+      rows.push([
+        "特殊車両使用料",
+        formatEstimateYen(basic.specialVehicleFee.amount) + "/回",
+        "含めない（別枠）",
+        "別行表示（介助・サービス料金）",
+        "data/estimate-config.json basicFees.specialVehicleFee",
+        "serviceFees・見積「介助・サービス料金」セクション（estimate/estimate-calc.js）"
+      ]);
+    }
+
+    const assistanceItems = Array.isArray(config.categories?.assistance?.items)
+      ? config.categories.assistance.items
+      : [];
+    assistanceItems.forEach(function(item){
+      if(item?.visible === false){
+        return;
+      }
+      const amountLabel = formatEstimateYen(item.amount) + "/回";
+      rows.push([
+        item.label || item.id || "介助料",
+        amountLabel,
+        "含めない（別枠）",
+        Number(item.amount) > 0 ? "別行表示（介助・サービス料金）" : "金額0のため通常非表示",
+        "data/estimate-config.json categories.assistance." + String(item.id || ""),
+        "介助内容選択時にserviceFees（assistanceFee）へ反映"
+      ]);
+    });
+
+    const stairItems = Array.isArray(config.categories?.stairAssist?.items)
+      ? config.categories.stairAssist.items
+      : [];
+    stairItems.forEach(function(item){
+      if(item?.visible === false || String(item.id || "") === "stair-none"){
+        return;
+      }
+      rows.push([
+        "階段介助（" + String(item.label || item.id || "") + "）",
+        formatEstimateYen(item.amount) + "/回",
+        "含めない（別枠）",
+        Number(item.amount) > 0 ? "別行表示（介助・サービス料金）" : "金額0のため通常非表示",
+        "data/estimate-config.json categories.stairAssist." + String(item.id || ""),
+        "階段介助選択時にserviceFees（stairFee）へ反映"
+      ]);
+    });
+
+    const mobilityItems = Array.isArray(config.categories?.mobility?.items)
+      ? config.categories.mobility.items
+      : [];
+    mobilityItems.forEach(function(item){
+      if(item?.visible === false || !Number(item.amount)){
+        return;
+      }
+      rows.push([
+        String(item.label || item.id || "移動方法加算") + "（移動方法）",
+        formatEstimateYen(item.amount) + "/回",
+        "含めない（別枠）",
+        "別行表示（介助・サービス料金）",
+        "data/estimate-config.json categories.mobility." + String(item.id || ""),
+        "移動方法選択時にserviceFees（wheelchairFee）へ反映"
+      ]);
+    });
+
+    if(waitingFees.waiting30min){
+      rows.push([
+        waitingFees.waiting30min.label || "待機料",
+        formatEstimateYen(waitingFees.waiting30min.amount) + "/30分",
+        "含めない（別枠）",
+        "別行表示（介助・サービス料金）",
+        "data/estimate-config.json waitingFees.waiting30min（往復＋待機選択時）",
+        "roundTripAddon選択時にwaitingFeeへ反映"
+      ]);
+    }
+
+    if(waitingFees.escort30min){
+      rows.push([
+        waitingFees.escort30min.label || "付き添い料",
+        formatEstimateYen(waitingFees.escort30min.amount) + "/30分",
+        "含めない（別枠）",
+        "別行表示（介助・サービス料金）",
+        "data/estimate-config.json waitingFees.escort30min（往復＋付き添い選択時）",
+        "roundTripAddon選択時にescortFeeへ反映"
+      ]);
+    }
+
+    if(timeAdjustment){
+      const baseMinutes = Number(timeParams.baseMinutes) || 0;
+      const blockMinutes = Number(timeParams.perBlockMinutes) || 0;
+      const blockAmount = Number(timeParams.perBlockAmount) || 0;
+      rows.push([
+        timeAdjustment.label || "予定時間加算（概算）",
+        formatEstimateYen(blockAmount) + "/" + blockMinutes + "分（" + baseMinutes + "分以内0円）",
+        "含めない（別枠）",
+        "別行表示",
+        "data/estimate-config.json fareComponents.pre_fixed_fare.timeAdjustment",
+        "fixedFareBreakdown（timeAdjustment）へ反映"
+      ]);
+    }
+
+    rows.push([
+      "有料道路代",
+      "実費",
+      "含めない（別枠）",
+      "実費・別途費用",
+      "roadType=toll時にexpenses（tollRoadExpense）へ追加。金額は見積で算定しない（page.tollRoadNote）",
+      "見積「実費・別途費用」セクション（estimate/estimate-calc.js）"
+    ]);
+
+    rows.push([
+      "駐車場代",
+      "実費",
+      "含めない（別枠）",
+      "注意書きのみ",
+      "固定金額設定なし",
+      "見積注意書きのみ（estimate/estimate-main.js）"
+    ]);
+
+    rows.push([
+      "障害者割引",
+      "精算時確定",
+      "精算側",
+      "精算時表示",
+      "見積には反映しない（data/estimate-config.json page.disclaimer）",
+      "LP見積では未使用（精算時に記録）"
+    ]);
+
+    rows.push([
+      "福祉タクシー券",
+      "精算時充当",
+      "精算側",
+      "精算時表示",
+      "運賃算定に含めない（data/estimate-config.json page.disclaimer）",
+      "LP見積では未使用（精算時充当）"
+    ]);
+
+    rows.push([
+      "キャンセル料",
+      "設定なし",
+      "—",
+      "—",
+      "LP見積設定・計算ロジックに未実装",
+      "LP見積では未使用"
+    ]);
+
+    return rows;
   }
 
   function distanceFareFields(meta){
@@ -346,12 +530,17 @@
     }
 
     if(documentId === "service-fee-table"){
+      const estimateConfig = options?.estimateConfig || {};
+      const updatedAt = String(estimateConfig.updatedAt || "").trim();
       return Object.assign(base, {
         intro: [
-          "迎車料金、予約料金、介助料、待機料、有料道路代等は、事前確定運賃とは区分し、見積明細および領収書明細上も別行で表示する。",
-          "事前確定運賃は、原則として乗車地から降車地までの運賃部分を対象とする。"
+          "本表は、事前確定運賃とは別に収受又は精算する各種料金・付帯サービス料金・実費・割引等を整理したものである。",
+          "事前確定運賃は、原則として乗車地から降車地までの走行予定ルートに基づく運賃本体を対象とする。",
+          "迎車料、予約料、介助料、待機料、付き添い料、有料道路代、駐車場代等は、事前確定運賃とは区分し、見積明細及び領収書明細に別行で表示する。"
         ],
-        feeRows: serviceFeeRows()
+        feeRows: buildEstimateFareItemRows(estimateConfig),
+        sourceNote: "金額は data/estimate-config.json および estimate/estimate-calc.js の設定・計算ロジックに基づく"
+          + (updatedAt ? "（設定更新: " + updatedAt + "）" : "") + "。"
       });
     }
 
@@ -419,6 +608,7 @@
     TRAFFIC_ZONE_FILL: TRAFFIC_ZONE_FILL,
     COEFFICIENT_FILL: COEFFICIENT_FILL,
     buildMeta: buildMeta,
-    buildDocumentPayload: buildDocumentPayload
+    buildDocumentPayload: buildDocumentPayload,
+    buildEstimateFareItemRows: buildEstimateFareItemRows
   };
 })(typeof window !== "undefined" ? window : globalThis);

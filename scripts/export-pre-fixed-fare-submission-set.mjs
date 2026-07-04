@@ -25,7 +25,8 @@ const TARGETS = {
 
 const CANDIDATE_APPENDIX_PARTS = [
   "application-helper",
-  "distance-fare-table"
+  "distance-fare-table",
+  "service-fee-table"
 ];
 
 function resolveChromeExecutable(){
@@ -204,7 +205,8 @@ async function exportAppendixPdf(browser, page, options){
   assert(built.html.length > 5000, "別紙セットHTMLが短すぎます");
   assert(built.html.includes("appendix-distance-fare"), "別紙1の改ページクラスがありません");
   assert(built.html.includes("appendix-section appendix-distance-fare"), "別紙1が新ページ開始用クラス付きではありません");
-  assert(!built.html.includes("appendix-section appendix-service-fee"), "候補版別紙セットに別紙2が残っています");
+  assert(built.html.includes("appendix-section appendix-service-fee"), "候補版別紙セットに別紙2がありません");
+  assert(built.html.includes("table-fare-items"), "別紙2の料金科目表クラスがありません");
   assert(!built.html.includes("appendix-section appendix-device-checklist"), "候補版別紙セットに別紙3が残っています");
   assert(!built.html.includes("appendix-section appendix-screen-reference"), "候補版別紙セットに別紙4が残っています");
   assert(built.html.includes("page-break-before table-section no-split-table"), "別紙の平準化係数表改ページクラスがありません");
@@ -212,8 +214,11 @@ async function exportAppendixPdf(browser, page, options){
   const result = await exportPdfFromHtml(browser, built.html, filePath, { footer: false });
   assert(result.size > 5000, "別紙セットPDFが小さすぎます");
   assert(result.htmlText.includes("別紙1"), "別紙セットに別紙1がありません");
-  assert(!result.htmlText.includes("別紙2　各種料金表"), "候補版別紙セットに別紙2セクションが残っています");
-  assert(result.pageCount <= 5, "候補版別紙セットのページ数が多すぎます: " + result.pageCount);
+  assert(result.htmlText.includes("別紙2"), "別紙セットに別紙2がありません");
+  assert(result.htmlText.includes("800円"), "別紙2に迎車料金額がありません");
+  assert(result.htmlText.includes("1,100円") || result.htmlText.includes("1100円"), "別紙2に乗降介助金額がありません");
+  assert(result.htmlText.includes("設定なし"), "別紙2に未設定項目の整理がありません");
+  assert(result.pageCount <= 7, "候補版別紙セットのページ数が多すぎます: " + result.pageCount);
   return result;
 }
 

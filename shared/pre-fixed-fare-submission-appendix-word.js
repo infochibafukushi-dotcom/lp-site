@@ -116,11 +116,14 @@
       "<section class='appendix-section appendix-service-fee'>" +
       "<h2 class='appendix-title'>" + escapeHtml(payload.title) + "</h2>" +
       buildList(payload.intro) +
+      "<div class='table-section no-orphan-table'>" +
       buildTable(
-        ["区分", "金額", "事前確定運賃に含めるか", "明細表示", "備考"],
+        ["区分", "金額・単位", "事前確定運賃への含否", "明細表示", "説明", "LP見積での扱い"],
         payload.feeRows || [],
-        { className: "table-fees" }
+        { className: "table-fees table-fare-items" }
       ) +
+      "</div>" +
+      (payload.sourceNote ? "<p class='footer-note'>" + escapeHtml(payload.sourceNote) + "</p>" : "") +
       "</section>"
     );
   }
