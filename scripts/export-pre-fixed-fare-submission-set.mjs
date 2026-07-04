@@ -23,6 +23,11 @@ const TARGETS = {
   fullSet: "pre-fixed-fare-submission-full-set-v1-candidate.pdf"
 };
 
+const CANDIDATE_APPENDIX_PARTS = [
+  "application-helper",
+  "distance-fare-table"
+];
+
 function resolveChromeExecutable(){
   const candidates = [
     process.env.PUPPETEER_EXECUTABLE_PATH,
@@ -186,24 +191,55 @@ async function exportQaPdf(browser, page){
 }
 
 async function exportAppendixPdf(browser, page, options){
+  const exportOptions = Object.assign({}, options || {}, {
+    appendixParts: CANDIDATE_APPENDIX_PARTS
+  });
   const built = await page.evaluate(function(exportOptions){
     const result = window.PreFixedFareSubmissionAppendixWord.buildWordDocumentHtml("submission-appendix-set", exportOptions);
     return {
       html: result.html,
       title: result.payload.title
     };
-  }, options);
+  }, exportOptions);
   assert(built.html.length > 5000, "別紙セットHTMLが短すぎます");
   assert(built.html.includes("appendix-distance-fare"), "別紙1の改ページクラスがありません");
-  assert(built.html.includes("page-break-before appendix-section appendix-distance-fare"), "別紙1が新ページ開始用クラス付きではありません");
-  assert(built.html.includes("画面証跡資料"), "別紙セットに画面証跡参照文がありません");
-  assert(!built.html.includes("capture-image"), "別紙セットに重複キャプチャ画像が残っています");
+  assert(built.html.includes("appendix-section appendix-distance-fare"), "別紙1が新ページ開始用クラス付きではありません");
+  assert(!built.html.includes("appendix-section appendix-service-fee"), "候補版別紙セットに別紙2が残っています");
+  assert(!built.html.includes("appendix-section appendix-device-checklist"), "候補版別紙セットに別紙3が残っています");
+  assert(!built.html.includes("appendix-section appendix-screen-reference"), "候補版別紙セットに別紙4が残っています");
   assert(built.html.includes("page-break-before table-section no-split-table"), "別紙の平準化係数表改ページクラスがありません");
   const filePath = path.join(outputDir, TARGETS.appendix);
   const result = await exportPdfFromHtml(browser, built.html, filePath, { footer: false });
   assert(result.size > 5000, "別紙セットPDFが小さすぎます");
   assert(result.htmlText.includes("別紙1"), "別紙セットに別紙1がありません");
+  assert(!result.htmlText.includes("別紙2　各種料金表"), "候補版別紙セットに別紙2セクションが残っています");
+  assert(result.pageCount <= 5, "候補版別紙セットのページ数が多すぎます: " + result.pageCount);
   return result;
+}
+
+async function trimTrailingBlankPages(browser, filePath){
+  const review = await verifyPdfBlankPages(browser, filePath);
+  let trimCount = 0;
+  for(let index = review.pageTexts.length - 1; index >= 0; index--){
+    const text = String(review.pageTexts[index] || "").replace(/\s+/g, "").trim();
+    const ink = review.inkRatios[index] || 0;
+    if(review.blankPages.includes(index + 1) || (text.length < 30 && ink < 0.01)){
+      trimCount++;
+      continue;
+    }
+    break;
+  }
+  if(trimCount === 0){
+    return { trimmed: 0, numPages: review.numPages };
+  }
+  const bytes = fs.readFileSync(filePath);
+  const pdf = await PDFDocument.load(bytes, { ignoreEncryption: true });
+  const keepCount = pdf.getPageCount() - trimCount;
+  const trimmedPdf = await PDFDocument.create();
+  const copiedPages = await trimmedPdf.copyPages(pdf, Array.from({ length: keepCount }, function(_, index){ return index; }));
+  copiedPages.forEach(function(page){ trimmedPdf.addPage(page); });
+  fs.writeFileSync(filePath, await trimmedPdf.save());
+  return { trimmed: trimCount, numPages: keepCount };
 }
 
 async function buildFullSet(){
@@ -280,6 +316,12 @@ async function main(){
 
     console.log("Building full set...");
     const fullSet = await buildFullSet();
+    const trimResult = await trimTrailingBlankPages(browser, fullSet.outputPath);
+    if(trimResult.trimmed > 0){
+      fullSet.totalPages = trimResult.numPages;
+      fullSet.size = fs.statSync(fullSet.outputPath).size;
+      console.log("  trimmed trailing blank pages:", trimResult.trimmed);
+    }
     console.log("  OK", fullSet.outputPath, fullSet.size, "bytes", fullSet.totalPages, "pages");
 
     const checks = [

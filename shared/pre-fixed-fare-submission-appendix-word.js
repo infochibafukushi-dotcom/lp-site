@@ -102,7 +102,7 @@
 
   function renderDistanceFareTable(payload){
     return (
-      "<section class='page-break-before appendix-section appendix-distance-fare'>" +
+      "<section class='appendix-section appendix-distance-fare'>" +
       "<h2 class='appendix-title'>" + escapeHtml(payload.title) + "</h2>" +
       "<p class='meta-line'>" + formatBusinessMetaLine(payload.meta) + "</p>" +
       buildList(payload.intro) +
@@ -113,7 +113,7 @@
 
   function renderServiceFeeTable(payload){
     return (
-      "<section class='page-break-before appendix-section appendix-service-fee'>" +
+      "<section class='appendix-section appendix-service-fee'>" +
       "<h2 class='appendix-title'>" + escapeHtml(payload.title) + "</h2>" +
       buildList(payload.intro) +
       buildTable(
@@ -139,7 +139,7 @@
       return [label, ""];
     });
     return (
-      "<section class='page-break-before appendix-section appendix-device-checklist'>" +
+      "<section class='appendix-section appendix-device-checklist'>" +
       "<h2 class='appendix-title'>" + escapeHtml(payload.title) + "</h2>" +
       buildList(payload.intro) +
       sectionsHtml +
@@ -151,7 +151,7 @@
 
   function renderScreenCaptureEvidence(payload){
     return (
-      "<section class='page-break-before appendix-section appendix-screen-reference'>" +
+      "<section class='appendix-section appendix-screen-reference'>" +
       "<h2 class='appendix-title'>" + escapeHtml(payload.title) + "</h2>" +
       buildList(payload.intro) +
       "<div class='note-box notice-box'>" +

@@ -388,18 +388,22 @@
     }
 
     if(documentId === "submission-appendix-set"){
+      const defaultParts = [
+        "application-helper",
+        "distance-fare-table",
+        "service-fee-table",
+        "device-checklist",
+        "screen-capture-evidence"
+      ];
+      const parts = Array.isArray(options?.appendixParts) && options.appendixParts.length
+        ? options.appendixParts
+        : defaultParts;
       return Object.assign(base, {
         intro: [
           "事前確定運賃認可の事前相談・提出時に、統合説明資料へ添付しやすい別紙・確認資料の一式である。",
           "各別紙はWord上で改ページ・余白・表を手動調整して使用する。"
         ],
-        parts: [
-          "application-helper",
-          "distance-fare-table",
-          "service-fee-table",
-          "device-checklist",
-          "screen-capture-evidence"
-        ]
+        parts: parts
       });
     }
 
