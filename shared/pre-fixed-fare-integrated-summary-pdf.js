@@ -1,7 +1,7 @@
 (function(global){
   const HTML2PDF_CDN = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
   const PDF_FILENAME = "pre-fixed-fare-integrated-summary.pdf";
-  const EXPECTED_PAGE_COUNT = 18;
+  const EXPECTED_PAGE_COUNT = 20;
 
   function escapeHtml(text){
     return String(text ?? "")
@@ -530,11 +530,22 @@
     );
   }
 
+  function captureImage(imageFile, alt){
+    return (
+      "<div class='capture-image-wrap'>" +
+      "<img class='capture-image' src='" + escapeHtml("./assets/evidence/pre-fixed-fare-20260705/" + imageFile) + "' alt='" + escapeHtml(alt || "") + "' loading='eager'>" +
+      "</div>"
+    );
+  }
+
   function buildScreenshotSection(screen){
+    const imageHtml = screen.imageFile
+      ? captureImage(screen.imageFile, screen.title)
+      : capturePlaceholder("画面キャプチャ貼付欄（" + screen.title + "）");
     return (
       "<div class='screenshot-block'>" +
       "<h4>" + escapeHtml(screen.number + ". " + screen.title) + "</h4>" +
-      capturePlaceholder("画面キャプチャ貼付欄（" + screen.title + "）") +
+      imageHtml +
       "<p><strong>キャプチャ内容：</strong>" + escapeHtml(screen.captureContent || "") + "</p>" +
       "<p><strong>証明文：</strong>" + escapeHtml(screen.proofText || "") + "</p>" +
       "</div>"
@@ -581,23 +592,17 @@
     );
   }
 
-  function buildChapter6Page16(appendix){
+  function buildChapter6ScreenshotPage(appendix, screenIndex, titleSuffix){
     const screenshots = appendix?.screenshotCaptures || {};
-    const screens = (screenshots.screens || []).slice(0, 2);
+    const screen = (screenshots.screens || [])[screenIndex];
+    if(!screen){
+      return "<p>—</p>";
+    }
     return (
-      subsection(screenshots.title || "画面キャプチャ資料の構成案",
-        (screenshots.intro ? "<p>" + escapeHtml(screenshots.intro) + "</p>" : "") +
-        screens.map(buildScreenshotSection).join("")
-      )
-    );
-  }
-
-  function buildChapter6Page17(appendix){
-    const screenshots = appendix?.screenshotCaptures || {};
-    const screens = (screenshots.screens || []).slice(2, 4);
-    return (
-      subsection("画面キャプチャ資料の構成案（続き）",
-        screens.map(buildScreenshotSection).join("")
+      subsection((screenshots.title || "画面キャプチャ貼付資料") + titleSuffix,
+        (screenIndex === 0 && screenshots.intro ? "<p>" + escapeHtml(screenshots.intro) + "</p>" : "") +
+        (screenshots.verificationNote ? "<p class='verification-note'>" + escapeHtml(screenshots.verificationNote) + "</p>" : "") +
+        buildScreenshotSection(screen)
       )
     );
   }
@@ -691,14 +696,22 @@
       },
       {
         id: "p16-ch6-screenshot1",
-        html: chapterSupplement(6, "追加資料（データ保存・画面キャプチャ・E2E・改ざん防止）", "画面キャプチャ資料（1/2）") + buildChapter6Page16(appendix)
+        html: chapterSupplement(6, "追加資料（データ保存・画面キャプチャ・E2E・改ざん防止）", "画面キャプチャ貼付資料（1/4）") + buildChapter6ScreenshotPage(appendix, 0, "（1/4）")
       },
       {
         id: "p17-ch6-screenshot2",
-        html: chapterSupplement(6, "追加資料（データ保存・画面キャプチャ・E2E・改ざん防止）", "画面キャプチャ資料（2/2）") + buildChapter6Page17(appendix)
+        html: chapterSupplement(6, "追加資料（データ保存・画面キャプチャ・E2E・改ざん防止）", "画面キャプチャ貼付資料（2/4）") + buildChapter6ScreenshotPage(appendix, 1, "（2/4）")
       },
       {
-        id: "p18-ch6-e2e-tamper",
+        id: "p18-ch6-screenshot3",
+        html: chapterSupplement(6, "追加資料（データ保存・画面キャプチャ・E2E・改ざん防止）", "画面キャプチャ貼付資料（3/4）") + buildChapter6ScreenshotPage(appendix, 2, "（3/4）")
+      },
+      {
+        id: "p19-ch6-screenshot4",
+        html: chapterSupplement(6, "追加資料（データ保存・画面キャプチャ・E2E・改ざん防止）", "画面キャプチャ貼付資料（4/4）") + buildChapter6ScreenshotPage(appendix, 3, "（4/4）")
+      },
+      {
+        id: "p20-ch6-e2e-tamper",
         html: chapterSupplement(6, "追加資料（データ保存・画面キャプチャ・E2E・改ざん防止）", "E2Eテスト・改ざん防止") + buildChapter6Page18(appendix)
       }
     ];
@@ -721,42 +734,45 @@
   function getIntegratedPageCss(){
     return (
       ".pre-fixed-fare-integrated-summary,.pre-fixed-fare-integrated-summary *{box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Yu Gothic','Meiryo',sans-serif;background:transparent;color:#111111;}" +
-      ".pre-fixed-fare-integrated-summary{display:block;width:720px;background:#ffffff;color:#111111;line-height:1.42;font-size:10.5px;margin:0;padding:0;}" +
-      ".pre-fixed-fare-integrated-summary .pdf-page{width:720px;height:1000px;max-height:1000px;overflow:hidden;page-break-inside:avoid;break-inside:avoid;margin:0;padding:0;position:relative;}" +
+      ".pre-fixed-fare-integrated-summary{display:block;width:720px;background:#ffffff;color:#111111;line-height:1.45;font-size:11px;margin:0;padding:0;}" +
+      ".pre-fixed-fare-integrated-summary .pdf-page{width:720px;height:1000px;max-height:1000px;overflow:hidden;page-break-inside:avoid;break-inside:avoid;page-break-after:always;break-after:page;margin:0;padding:0;position:relative;}" +
       ".pre-fixed-fare-integrated-summary .pdf-page-break{page-break-after:always !important;break-after:page !important;}" +
-      ".pre-fixed-fare-integrated-summary .pdf-page-inner{height:980px;max-height:980px;display:flex;flex-direction:column;overflow:hidden;padding:2px 0 0;}" +
+      ".pre-fixed-fare-integrated-summary .pdf-page-inner{height:960px;max-height:960px;display:flex;flex-direction:column;overflow:hidden;padding:2px 0 0;}" +
       ".pre-fixed-fare-integrated-summary .pdf-page-fill{flex:1 1 auto;min-height:24px;background:#ffffff;}" +
       ".pre-fixed-fare-integrated-summary .pdf-page-fill--large{min-height:120px;}" +
-      ".pre-fixed-fare-integrated-summary .pdf-page-clip-guard{flex:0 0 56px;height:56px;background:#ffffff;}" +
-      ".pre-fixed-fare-integrated-summary h1{font-size:19px;margin:0 0 4px;color:#111111;line-height:1.3;}" +
+      ".pre-fixed-fare-integrated-summary .pdf-page-clip-guard{flex:0 0 72px;height:72px;background:#ffffff;}" +
+      ".pre-fixed-fare-integrated-summary h1{font-size:20px;margin:0 0 4px;color:#111111;line-height:1.3;break-after:avoid;page-break-after:avoid;}" +
       ".pre-fixed-fare-integrated-summary .cover-title{font-size:22px;margin:20px 0 8px;text-align:center;}" +
-      ".pre-fixed-fare-integrated-summary .cover-subtitle{font-size:13px;margin:0 0 16px;text-align:center;color:#444;}" +
+      ".pre-fixed-fare-integrated-summary .cover-subtitle{font-size:14px;margin:0 0 16px;text-align:center;color:#444;}" +
       ".pre-fixed-fare-integrated-summary .toc-heading{font-size:16px;margin:8px 0 10px;}" +
       ".pre-fixed-fare-integrated-summary .chapter-start{margin:0 0 6px;}" +
-      ".pre-fixed-fare-integrated-summary .chapter-title{font-size:15px;margin:0 0 5px;border-bottom:2px solid #333;padding-bottom:3px;}" +
-      ".pre-fixed-fare-integrated-summary .chapter-title--continued{font-size:14px;}" +
-      ".pre-fixed-fare-integrated-summary .chapter-supplement{font-size:12px;margin:0 0 8px;color:#333;border-bottom:1px solid #ddd;padding-bottom:3px;}" +
-      ".pre-fixed-fare-integrated-summary .chapter-positioning{font-size:10px;color:#444;margin:0 0 8px;}" +
-      ".pre-fixed-fare-integrated-summary .subsection-block{margin:0 0 8px;}" +
+      ".pre-fixed-fare-integrated-summary .chapter-title{font-size:16px;margin:0 0 5px;border-bottom:2px solid #333;padding-bottom:3px;break-after:avoid;page-break-after:avoid;}" +
+      ".pre-fixed-fare-integrated-summary .chapter-title--continued{font-size:15px;}" +
+      ".pre-fixed-fare-integrated-summary .chapter-supplement{font-size:13px;margin:0 0 8px;color:#333;border-bottom:1px solid #ddd;padding-bottom:3px;break-after:avoid;page-break-after:avoid;}" +
+      ".pre-fixed-fare-integrated-summary .chapter-positioning{font-size:10.5px;color:#444;margin:0 0 8px;}" +
+      ".pre-fixed-fare-integrated-summary .subsection-block{margin:0 0 8px;break-inside:avoid;page-break-inside:avoid;}" +
       ".pre-fixed-fare-integrated-summary .subsection-content{margin:0;}" +
-      ".pre-fixed-fare-integrated-summary h2{font-size:13.5px;margin:0 0 6px;color:#111111;}" +
-      ".pre-fixed-fare-integrated-summary .section-title{font-size:11.5px;margin:0 0 4px;color:#111111;}" +
-      ".pre-fixed-fare-integrated-summary h4{font-size:10.5px;margin:5px 0 3px;color:#333;}" +
+      ".pre-fixed-fare-integrated-summary h2{font-size:14px;margin:0 0 6px;color:#111111;break-after:avoid;page-break-after:avoid;}" +
+      ".pre-fixed-fare-integrated-summary .section-title{font-size:12px;margin:0 0 4px;color:#111111;break-after:avoid;page-break-after:avoid;}" +
+      ".pre-fixed-fare-integrated-summary h4{font-size:11px;margin:5px 0 3px;color:#333;break-after:avoid;page-break-after:avoid;}" +
       ".pre-fixed-fare-integrated-summary p{margin:0 0 5px;color:#111111;}" +
       ".pre-fixed-fare-integrated-summary ul,.pre-fixed-fare-integrated-summary ol{margin:0 0 5px 16px;padding:0;}" +
       ".pre-fixed-fare-integrated-summary li{margin:0 0 2px;color:#111111;}" +
-      ".pre-fixed-fare-integrated-summary table{width:100%;border-collapse:collapse;table-layout:fixed;margin:3px 0 5px;background:#ffffff;}" +
+      ".pre-fixed-fare-integrated-summary table{width:100%;border-collapse:collapse;table-layout:fixed;margin:3px 0 5px;background:#ffffff;page-break-inside:auto;}" +
       ".pre-fixed-fare-integrated-summary thead{display:table-header-group;}" +
-      ".pre-fixed-fare-integrated-summary th,.pre-fixed-fare-integrated-summary td{border:1px solid #d9d9d9;padding:3px 4px;vertical-align:top;white-space:normal;word-break:break-word;overflow-wrap:anywhere;color:#111111;background:#ffffff;font-size:9px;line-height:1.32;}" +
+      ".pre-fixed-fare-integrated-summary th,.pre-fixed-fare-integrated-summary td{border:1px solid #d9d9d9;padding:4px 5px;vertical-align:top;white-space:normal;word-break:break-word;overflow-wrap:anywhere;color:#111111;background:#ffffff;font-size:9.5px;line-height:1.38;}" +
       ".pre-fixed-fare-integrated-summary th{background:#f6f6f6;font-weight:700;}" +
       ".pre-fixed-fare-integrated-summary tr{page-break-inside:avoid;break-inside:avoid;}" +
-      ".pre-fixed-fare-integrated-summary .table-requirements td,.pre-fixed-fare-integrated-summary .table-requirements th,.pre-fixed-fare-integrated-summary .table-phase3-evidence td,.pre-fixed-fare-integrated-summary .table-phase3-evidence th{font-size:8px;}" +
+      ".pre-fixed-fare-integrated-summary .table-requirements td,.pre-fixed-fare-integrated-summary .table-requirements th,.pre-fixed-fare-integrated-summary .table-phase3-evidence td,.pre-fixed-fare-integrated-summary .table-phase3-evidence th{font-size:8.5px;}" +
       ".pre-fixed-fare-integrated-summary .footer-note{margin-top:8px;font-size:9px;color:#444;}" +
+      ".pre-fixed-fare-integrated-summary .verification-note{margin:4px 0 6px;padding:6px;background:#eef5fb;border-left:4px solid #2f6fad;font-size:9px;line-height:1.45;break-inside:avoid;page-break-inside:avoid;}" +
       ".pre-fixed-fare-integrated-summary .e2e-reservation-note,.pre-fixed-fare-integrated-summary .meter-mode-note,.pre-fixed-fare-integrated-summary .prelaunch-swap-note,.pre-fixed-fare-integrated-summary .terminology-note{margin:4px 0 0;font-size:9px;color:#444;}" +
       ".pre-fixed-fare-integrated-summary .capture-placeholder{border:2px dashed #94a3b8;background:#f8fafc;min-height:56px;padding:8px;margin:4px 0 6px;text-align:center;}" +
       ".pre-fixed-fare-integrated-summary .capture-placeholder-label{font-weight:700;color:#475569;margin:0 0 2px;font-size:9px;}" +
-      ".pre-fixed-fare-integrated-summary .capture-placeholder-note{font-size:8px;color:#64748b;margin:0;}" +
-      ".pre-fixed-fare-integrated-summary .screenshot-block{margin:0 0 8px;}"
+      ".pre-fixed-fare-integrated-summary .capture-placeholder-note{font-size:8.5px;color:#64748b;margin:0;}" +
+      ".pre-fixed-fare-integrated-summary .capture-image-wrap{display:flex;justify-content:center;margin:4px 0 6px;break-inside:avoid;page-break-inside:avoid;}" +
+      ".pre-fixed-fare-integrated-summary .capture-image{display:block;max-width:92%;max-height:360px;object-fit:contain;object-position:top center;}" +
+      ".pre-fixed-fare-integrated-summary .screenshot-block{margin:0 0 8px;break-inside:avoid;page-break-inside:avoid;}"
     );
   }
 
@@ -830,7 +846,7 @@
 
   function getHtml2PdfOptions(filename){
     return {
-      margin: [6, 6, 10, 6],
+      margin: [6, 14, 18, 14],
       filename: filename || PDF_FILENAME,
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollX: 0, scrollY: 0 },
@@ -867,6 +883,19 @@
     pdf.save(options.filename);
   }
 
+  async function waitForImages(reportElement){
+    const images = Array.from(reportElement.querySelectorAll("img"));
+    await Promise.all(images.map(function(img){
+      if(img.complete && img.naturalWidth > 0){
+        return Promise.resolve();
+      }
+      return new Promise(function(resolve){
+        img.addEventListener("load", resolve, { once: true });
+        img.addEventListener("error", resolve, { once: true });
+      });
+    }));
+  }
+
   async function renderToElement(reportData){
     const reportHtml = buildReportHtml(reportData);
     const wrapper = createRenderContainer(reportHtml);
@@ -874,6 +903,7 @@
     const reportElement = wrapper.querySelector(".pre-fixed-fare-integrated-summary");
     ensureRenderableContent(reportElement);
     await waitForRenderReady();
+    await waitForImages(reportElement);
     return {
       wrapper: wrapper,
       reportElement: reportElement,

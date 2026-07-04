@@ -191,6 +191,38 @@
     ];
   }
 
+  function screenCaptureEvidenceScreens(){
+    return [
+      {
+        name: "利用者の走行予定ルート選択画面",
+        imageFile: "01_route_selection_EST-20260705-3755.png",
+        purpose: "2以上の走行予定ルート候補を提示し、旅客が1つのルートを選択できる画面です。",
+        note: "見積番号 EST-20260705-3755"
+      },
+      {
+        name: "旅客同意確認画面",
+        imageFile: "02_consent_confirm_EST-20260705-3755.png",
+        purpose: "選択ルート・事前確定運賃額・注意事項を確認し、旅客同意を取得する画面です。",
+        note: ""
+      },
+      {
+        name: "ドライバー用確定ルート確認画面",
+        imageFile: "03_confirmed_route_202607050600.png",
+        purpose: "乗務員が旅客同意済みの確定ルート及び事前確定運賃額を確認する画面です。",
+        note: "予約ID 202607050600"
+      },
+      {
+        name: "領収書・レシート明細画面",
+        imageFile: "04_receipt_detail_202607050600.png",
+        purpose: "検証用予約データに基づき、事前確定運賃の精算・帳票表示を確認する画面です。",
+        note: "案件番号 260705-MAINS-0001"
+      }
+    ];
+  }
+
+  const SCREEN_CAPTURE_VERIFICATION_NOTE =
+    "本ページの画面画像は、申請者本人による検証用予約データを使用した操作証跡です。実在の第三者利用者の個人情報は含まれていません。";
+
   function screenshotScreens(){
     return [
       { name: "LP見積入力画面", purpose: "出発地・目的地・利用条件の入力", note: "" },
@@ -240,6 +272,12 @@
       title: "別紙4　画面スクリーンショット台紙",
       wordFilename: "pre-fixed-fare-screenshot-sheet.html",
       pdfFilename: "pre-fixed-fare-screenshot-sheet.pdf"
+    },
+    screenCaptureEvidence: {
+      id: "screen-capture-evidence",
+      title: "別紙4　画面キャプチャ貼付資料",
+      wordFilename: "pre-fixed-fare-screen-capture-evidence.html",
+      pdfFilename: "pre-fixed-fare-screen-capture-evidence.pdf"
     },
     fullSet: {
       id: "submission-appendix-set",
@@ -328,6 +366,17 @@
       });
     }
 
+    if(documentId === "screen-capture-evidence"){
+      return Object.assign(base, {
+        intro: [
+          "運輸局への説明時に、画面の見た目を紙で説明するための貼付資料である。",
+          "検証用予約データに基づく実画面を掲載する。"
+        ],
+        verificationNote: SCREEN_CAPTURE_VERIFICATION_NOTE,
+        screens: screenCaptureEvidenceScreens()
+      });
+    }
+
     if(documentId === "screenshot-sheet"){
       return Object.assign(base, {
         intro: [
@@ -349,7 +398,7 @@
           "distance-fare-table",
           "service-fee-table",
           "device-checklist",
-          "screenshot-sheet"
+          "screen-capture-evidence"
         ]
       });
     }

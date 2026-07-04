@@ -1,6 +1,9 @@
 (function(global){
   const DATA_RETENTION_TITLE = "事前確定運賃に係るデータ管理及び監査証跡保存規程";
-  const SCREENSHOT_TITLE = "画面キャプチャ資料の構成案";
+  const SCREENSHOT_TITLE = "画面キャプチャ貼付資料";
+  const EVIDENCE_IMAGE_BASE = "./assets/evidence/pre-fixed-fare-20260705/";
+  const SCREEN_CAPTURE_VERIFICATION_NOTE =
+    "本ページの画面画像は、申請者本人による検証用予約データを使用した操作証跡です。実在の第三者利用者の個人情報は含まれていません。";
   const E2E_TEST_TITLE = "本番相当環境E2Eテストケース表";
   const TAMPER_PROTECTION_TITLE = "改ざん防止及びスナップショットハッシュの取扱い";
 
@@ -62,11 +65,13 @@
     return {
       title: SCREENSHOT_TITLE,
       intro:
-        "以下は、運輸局への説明時に添付する画面キャプチャ資料の構成案である。実画像が未整備の場合は、各枠を「画面キャプチャ貼付欄」として使用する。",
+        "以下は、運輸局への説明時に添付する画面キャプチャ貼付資料である。検証用予約データに基づく実画面を掲載する。",
+      verificationNote: SCREEN_CAPTURE_VERIFICATION_NOTE,
       screens: [
         {
           number: "1",
-          title: "利用者予約・ルート選択画面",
+          title: "利用者の走行予定ルート選択画面",
+          imageFile: "01_route_selection_EST-20260705-3755.png",
           captureContent:
             "同一画面に「ルートA」「ルートB」など、2以上の走行予定ルートが並んでいる画面。各ルートについて、地図、距離、所要時間、事前確定運賃額、有料道路料金の有無を表示する。",
           proofText:
@@ -75,6 +80,7 @@
         {
           number: "2",
           title: "旅客同意確認画面",
+          imageFile: "02_consent_confirm_EST-20260705-3755.png",
           captureContent:
             "選択したルートの地図、事前確定運賃額、注意事項、同意ボタンを表示している画面。",
           proofText:
@@ -82,7 +88,8 @@
         },
         {
           number: "3",
-          title: "ドライバー用メーターアプリ画面",
+          title: "ドライバー用確定ルート確認画面",
+          imageFile: "03_confirmed_route_202607050600.png",
           captureContent:
             "地図上に同意済みの確定ルートを表示し、画面上に「事前確定運賃：〇〇円」などの固定運賃表示がある画面。",
           proofText:
@@ -90,12 +97,12 @@
         },
         {
           number: "4",
-          title: "決済・領収書発行画面",
+          title: "領収書・レシート明細画面",
+          imageFile: "04_receipt_detail_202607050600.png",
           captureContent:
-            "精算時の領収書又はレシートに、事前確定運賃、迎車料金、介助料、待機料、実費、有料道路料金、割引額等が別明細で表示されている画面。",
+            "精算時の領収書又はレシートに、事前確定運賃、支払方法、精算額が表示されている画面。",
           proofText:
-            "事前確定運賃である運賃本体と、介助料・待機料・実費等の付帯料金を区分して精算・表示し、旅客に誤認を与えない明細交付を行う。" +
-            "障害者割引等の割引額は、見積・同意時点では反映せず、精算時にメーターアプリで割引対象運賃・割引額・精算後金額を記録する。"
+            "検証用予約データに基づき、事前確定運賃の精算・帳票表示を確認する。事前確定運賃である運賃本体と、介助料・待機料・実費等の付帯料金を区分して精算・表示し、旅客に誤認を与えない明細交付を行う。"
         }
       ]
     };

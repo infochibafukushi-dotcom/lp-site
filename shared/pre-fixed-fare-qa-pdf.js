@@ -36,24 +36,24 @@
 
   function buildPrintStyles(){
     return (
-      "@page{size:A4 portrait;margin:12mm;}" +
+      "@page{size:A4 portrait;margin:16mm 14mm 18mm 14mm;}" +
       "html,body{width:100%;margin:0;padding:0;background:#ffffff;}" +
-      "body{font-family:'Yu Gothic','Meiryo',sans-serif;font-size:10.5pt;line-height:1.6;color:#1f2937;}" +
+      "body{font-family:'Yu Gothic','Meiryo',sans-serif;font-size:11pt;line-height:1.6;color:#1f2937;}" +
       "main.print-page{width:100%;max-width:none;margin:0;padding:0;box-sizing:border-box;display:block;}" +
       "main.print-page,main.print-page *{box-sizing:border-box;}" +
       "main.print-page *{max-width:100%;overflow-wrap:break-word;word-break:normal;}" +
-      "h1{font-size:16pt;margin:0 0 2mm;color:#1b3a6b;line-height:1.3;width:100%;}" +
-      ".subtitle{font-size:11pt;margin:0 0 2mm;color:#334155;font-weight:700;width:100%;}" +
+      "h1{font-size:16pt;margin:0 0 2mm;color:#1b3a6b;line-height:1.3;width:100%;break-after:avoid;page-break-after:avoid;}" +
+      ".subtitle{font-size:11.5pt;margin:0 0 2mm;color:#334155;font-weight:700;width:100%;}" +
       ".meta{font-size:9.5pt;margin:0 0 4mm;color:#64748b;width:100%;}" +
-      "h2{font-size:12pt;margin:0 0 2mm;color:#1b3a6b;width:100%;}" +
-      ".section-title{margin:4mm 0 3mm;padding-bottom:1mm;border-bottom:1.5pt solid #1b3a6b;}" +
-      ".note{width:100%;margin:4mm 0;padding:4mm;background:#fff7ed;border-left:4px solid #c46a00;}" +
-      ".compatibility{width:100%;margin:4mm 0;padding:4mm;background:#eefaf3;border-left:4px solid #16885a;}" +
+      "h2{font-size:13pt;margin:0 0 2mm;color:#1b3a6b;width:100%;break-after:avoid;page-break-after:avoid;}" +
+      ".section-title{margin:4mm 0 3mm;padding-bottom:1mm;border-bottom:1.5pt solid #1b3a6b;break-after:avoid;page-break-after:avoid;}" +
+      ".note{width:100%;margin:4mm 0;padding:4mm;background:#fff7ed;border-left:4px solid #c46a00;break-inside:avoid;page-break-inside:avoid;}" +
+      ".compatibility{width:100%;margin:4mm 0;padding:4mm;background:#eefaf3;border-left:4px solid #16885a;break-inside:avoid;page-break-inside:avoid;}" +
       ".compatibility ul{margin:2mm 0 0;padding-left:5mm;}" +
       ".compatibility li{margin:0 0 1.5mm;}" +
       ".qa-block{width:100%;margin:0 0 7mm;border:1px solid #cbd5e1;page-break-inside:avoid;break-inside:avoid;}" +
-      ".qa-question{width:100%;background:#eaf3fb;color:#16365c;font-weight:700;padding:3mm;}" +
-      ".qa-answer{width:100%;background:#ffffff;padding:3mm;}" +
+      ".qa-question{width:100%;background:#eaf3fb;color:#16365c;font-weight:700;padding:3mm;font-size:10.5pt;}" +
+      ".qa-answer{width:100%;background:#ffffff;padding:3mm;font-size:10.5pt;}" +
       ".qa-label{font-weight:700;color:#1b3a6b;}" +
       "@media print{" +
       "html,body,main.print-page{width:100% !important;max-width:none !important;margin-left:0 !important;margin-right:0 !important;padding-left:0 !important;padding-right:0 !important;}" +

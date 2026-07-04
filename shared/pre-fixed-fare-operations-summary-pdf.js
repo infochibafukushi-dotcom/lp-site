@@ -320,6 +320,29 @@
     );
   }
 
+  function getReportCss(){
+    return (
+      ".pre-fixed-fare-operations-summary,.pre-fixed-fare-operations-summary *{box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Yu Gothic','Meiryo',sans-serif;background:transparent;color:#111111;}" +
+      ".pre-fixed-fare-operations-summary{display:block;visibility:visible;opacity:1;position:relative;top:0;left:0;width:720px;background:#ffffff;color:#111111;line-height:1.5;font-size:11px;padding:4px 0 0;margin:0;}" +
+      ".pre-fixed-fare-operations-summary h1{font-size:20px;margin:0 0 4px;color:#111111;line-height:1.3;break-after:avoid;page-break-after:avoid;}" +
+      ".pre-fixed-fare-operations-summary .subtitle{font-size:11.5px;margin:0 0 8px;color:#444;}" +
+      ".pre-fixed-fare-operations-summary h2{font-size:14px;margin:14px 0 6px;padding-bottom:2px;border-bottom:1px solid #ccc;color:#111111;break-after:avoid;page-break-after:avoid;}" +
+      ".pre-fixed-fare-operations-summary h3{font-size:12px;margin:8px 0 5px;color:#111111;break-after:avoid;page-break-after:avoid;}" +
+      ".pre-fixed-fare-operations-summary p{margin:0 0 6px;color:#111111;}" +
+      ".pre-fixed-fare-operations-summary ul,.pre-fixed-fare-operations-summary ol{margin:0 0 6px 16px;padding:0;}" +
+      ".pre-fixed-fare-operations-summary li{margin:0 0 3px;color:#111111;}" +
+      ".pre-fixed-fare-operations-summary table{width:100%;border-collapse:collapse;table-layout:fixed;margin:5px 0 8px;background:#ffffff;page-break-inside:auto;}" +
+      ".pre-fixed-fare-operations-summary th,.pre-fixed-fare-operations-summary td{border:1px solid #d9d9d9;padding:5px 6px;vertical-align:top;white-space:normal;word-break:break-word;overflow-wrap:anywhere;color:#111111;background:#ffffff;box-sizing:border-box;font-size:10px;line-height:1.45;}" +
+      ".pre-fixed-fare-operations-summary th{background:#f6f6f6;font-weight:700;}" +
+      ".pre-fixed-fare-operations-summary section{break-inside:avoid;page-break-inside:avoid;margin:0 0 10px;}" +
+      ".pre-fixed-fare-operations-summary .report-section-title-block{break-inside:avoid;page-break-inside:avoid;}" +
+      ".pre-fixed-fare-operations-summary .report-section-body{break-inside:auto;page-break-inside:auto;}" +
+      ".pre-fixed-fare-operations-summary tr{break-inside:avoid;page-break-inside:avoid;}" +
+      ".pre-fixed-fare-operations-summary .table-meta tr,.pre-fixed-fare-operations-summary .table-e2e-meta tr{break-inside:avoid;page-break-inside:avoid;}" +
+      ".pre-fixed-fare-operations-summary .footer-note{margin-top:12px;font-size:9px;color:#444;}"
+    );
+  }
+
   function createRenderContainer(reportHtml){
     const container = document.createElement("div");
     container.className = "pre-fixed-fare-operations-summary-render-shell";
@@ -338,26 +361,7 @@
     container.style.margin = "0";
 
     container.innerHTML =
-      "<style>" +
-      ".pre-fixed-fare-operations-summary,.pre-fixed-fare-operations-summary *{box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Yu Gothic','Meiryo',sans-serif;background:transparent;color:#111111;}" +
-      ".pre-fixed-fare-operations-summary{display:block;visibility:visible;opacity:1;position:relative;top:0;left:0;width:720px;background:#ffffff;color:#111111;line-height:1.45;font-size:10.5px;padding:4px 0 0;margin:0;}" +
-      ".pre-fixed-fare-operations-summary h1{font-size:19px;margin:0 0 4px;color:#111111;line-height:1.3;}" +
-      ".pre-fixed-fare-operations-summary .subtitle{font-size:11px;margin:0 0 8px;color:#444;}" +
-      ".pre-fixed-fare-operations-summary h2{font-size:13.5px;margin:14px 0 6px;padding-bottom:2px;border-bottom:1px solid #ccc;color:#111111;break-after:avoid;page-break-after:avoid;}" +
-      ".pre-fixed-fare-operations-summary h3{font-size:11.5px;margin:8px 0 5px;color:#111111;break-after:avoid;page-break-after:avoid;}" +
-      ".pre-fixed-fare-operations-summary p{margin:0 0 6px;color:#111111;}" +
-      ".pre-fixed-fare-operations-summary ul,.pre-fixed-fare-operations-summary ol{margin:0 0 6px 16px;padding:0;}" +
-      ".pre-fixed-fare-operations-summary li{margin:0 0 3px;color:#111111;}" +
-      ".pre-fixed-fare-operations-summary table{width:100%;border-collapse:collapse;table-layout:fixed;margin:5px 0 8px;background:#ffffff;}" +
-      ".pre-fixed-fare-operations-summary th,.pre-fixed-fare-operations-summary td{border:1px solid #d9d9d9;padding:5px 6px;vertical-align:top;white-space:normal;word-break:break-word;overflow-wrap:anywhere;color:#111111;background:#ffffff;box-sizing:border-box;font-size:9.5px;line-height:1.4;}" +
-      ".pre-fixed-fare-operations-summary th{background:#f6f6f6;font-weight:700;}" +
-      ".pre-fixed-fare-operations-summary section{break-inside:auto;page-break-inside:auto;margin:0 0 10px;}" +
-      ".pre-fixed-fare-operations-summary .report-section-title-block{break-inside:avoid;page-break-inside:avoid;}" +
-      ".pre-fixed-fare-operations-summary .report-section-body{break-inside:auto;page-break-inside:auto;}" +
-      ".pre-fixed-fare-operations-summary tr{break-inside:auto;page-break-inside:auto;}" +
-      ".pre-fixed-fare-operations-summary .table-meta tr,.pre-fixed-fare-operations-summary .table-e2e-meta tr{break-inside:avoid;page-break-inside:avoid;}" +
-      ".pre-fixed-fare-operations-summary .footer-note{margin-top:12px;font-size:9.5px;color:#444;}" +
-      "</style>" +
+      "<style>" + getReportCss() + "</style>" +
       reportHtml;
     return container;
   }
@@ -397,7 +401,7 @@
 
     try{
       await html2pdf().set({
-        margin: [8, 8, 8, 8],
+        margin: [6, 14, 18, 14],
         filename: PDF_FILENAME,
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollX: 0, scrollY: 0 },
@@ -423,6 +427,7 @@
 
   global.PreFixedFareOperationsSummaryPdf = {
     PDF_FILENAME: PDF_FILENAME,
+    getReportCss: getReportCss,
     buildReportHtml: buildReportHtml,
     savePdf: savePdf,
     generatePreFixedFareOperationsSummaryPdf: generatePreFixedFareOperationsSummaryPdf
