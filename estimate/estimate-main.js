@@ -542,6 +542,18 @@
     );
   }
 
+  function renderActiveStepHead(stepNum, title){
+    return (
+      '<div class="estimate-step-head estimate-step-head--active">' +
+        '<div class="estimate-step-head-main">' +
+          '<div class="estimate-step-label">STEP' + stepNum + "</div>" +
+          '<h2 class="estimate-step-title">' + escapeHtml(title) + "</h2>" +
+        "</div>" +
+        renderStepBackButton(stepNum) +
+      "</div>"
+    );
+  }
+
   function applyStepChoice(stepId, nextValue, options){
     const opts = options || {};
     const previousValue = getStepValue(stepId);
@@ -803,13 +815,7 @@
 
     return `
       <section class="estimate-step estimate-step--active" data-step-id="${escapeAttr(step.id)}">
-        ${renderStepBackButton(stepNum)}
-        <div class="estimate-step-head">
-          <div>
-            <div class="estimate-step-label">STEP${stepNum}</div>
-            <h2 class="estimate-step-title">${escapeHtml(title)}</h2>
-          </div>
-        </div>
+        ${renderActiveStepHead(stepNum, title)}
         <div class="estimate-choice-group">${tripChoices}</div>
       </section>
     `;
@@ -832,13 +838,7 @@
 
     return `
       <section class="estimate-step estimate-step--active" data-step-id="${escapeAttr(step.id)}">
-        ${renderStepBackButton(stepNum)}
-        <div class="estimate-step-head">
-          <div>
-            <div class="estimate-step-label">STEP${stepNum}</div>
-            <h2 class="estimate-step-title">${escapeHtml(title)}</h2>
-          </div>
-        </div>
+        ${renderActiveStepHead(stepNum, title)}
         <div class="estimate-choice-group">${addonChoices}</div>
         <p class="estimate-step-note">待機または付き添いのいずれかを選択してください。</p>
       </section>
@@ -858,13 +858,7 @@
 
     return `
       <section class="estimate-step estimate-step--active" data-step-id="${escapeAttr(step.id)}">
-        ${renderStepBackButton(stepNum)}
-        <div class="estimate-step-head">
-          <div>
-            <div class="estimate-step-label">STEP${stepNum}</div>
-            <h2 class="estimate-step-title">${escapeHtml(title)}</h2>
-          </div>
-        </div>
+        ${renderActiveStepHead(stepNum, title)}
         <div class="estimate-choice-group">${choices}</div>
       </section>
     `;
@@ -893,13 +887,7 @@
 
     return `
       <section class="estimate-step estimate-step--active" data-step-id="${escapeAttr(step.id)}">
-        ${renderStepBackButton(stepNum)}
-        <div class="estimate-step-head">
-          <div>
-            <div class="estimate-step-label">STEP${stepNum}</div>
-            <h2 class="estimate-step-title">${escapeHtml(title)}</h2>
-          </div>
-        </div>
+        ${renderActiveStepHead(stepNum, title)}
         <div class="estimate-choice-group">${choices}</div>
         ${note}
       </section>
@@ -2978,13 +2966,7 @@
 
     return `
       <section class="estimate-step estimate-step--active${state.routePlan ? " estimate-step--has-route" : ""}" data-step-id="${escapeAttr(step.id)}">
-        ${renderStepBackButton(stepNum)}
-        <div class="estimate-step-head">
-          <div>
-            <div class="estimate-step-label">STEP${stepNum}</div>
-            <h2 class="estimate-step-title">${escapeHtml(label)}</h2>
-          </div>
-        </div>
+        ${renderActiveStepHead(stepNum, label)}
         ${renderReturnPlanSection()}
         ${roadTypeRadios}
         ${!hideRoadTypeRadios && state.roadType === "toll" ? `<p class="estimate-road-type-note">${escapeHtml(tollRoadNote)}</p>` : ""}

@@ -159,6 +159,13 @@
   gap:12px;
   margin-bottom:12px;
 }
+.estimate-step-head--active{
+  align-items:flex-start;
+}
+.estimate-step-head-main{
+  flex:1 1 auto;
+  min-width:0;
+}
 .estimate-step-label{
   font-size:14px;
   font-weight:700;
@@ -1730,9 +1737,10 @@ body.estimate-has-mobile-reserve-bar .estimate-wrap{
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    margin:0 0 10px;
-    padding:8px 12px;
-    min-height:36px;
+    flex:0 0 auto;
+    margin:0;
+    padding:7px 12px;
+    min-height:32px;
     border:1px solid #d8cbb8;
     border-radius:999px;
     background:#fff;
@@ -1741,6 +1749,7 @@ body.estimate-has-mobile-reserve-bar .estimate-wrap{
     font-weight:700;
     line-height:1.2;
     cursor:pointer;
+    white-space:nowrap;
   }
   .estimate-step-back-btn:hover,
   .estimate-step-back-btn:active{
