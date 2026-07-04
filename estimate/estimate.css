@@ -1577,11 +1577,12 @@ body.estimate-page > header{
     bottom:0;
     left:0;
     right:0;
-    z-index:9000;
+    z-index:9999;
     background:#fff;
     border-top:1px solid #e5e0d8;
     box-shadow:0 -4px 16px rgba(45,42,38,.12);
     padding:10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+    box-sizing:border-box;
   }
   .estimate-mobile-reserve-bar[hidden]{
     display:none !important;

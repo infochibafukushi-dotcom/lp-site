@@ -1667,27 +1667,8 @@
       return;
     }
     const isMobile = window.matchMedia && window.matchMedia("(max-width: 767px)").matches;
-    if(!isMobile){
-      setMobileReserveBarVisible(false);
-      return;
-    }
-    const primaryCta = document.getElementById("estimateResultReservationCta");
-    if(!primaryCta || typeof IntersectionObserver !== "function"){
-      setMobileReserveBarVisible(true);
-      return;
-    }
-    mobileReserveBarObserver = new IntersectionObserver(function(entries){
-      const entry = entries[0];
-      const primaryVisible = Boolean(entry && entry.isIntersecting && entry.intersectionRatio > 0);
-      setMobileReserveBarVisible(!primaryVisible);
-    }, {
-      root: null,
-      threshold: [0, 0.1, 0.25, 0.5, 1]
-    });
-    mobileReserveBarObserver.observe(primaryCta);
-    const rect = primaryCta.getBoundingClientRect();
-    const primaryVisible = rect.top < window.innerHeight && rect.bottom > 0;
-    setMobileReserveBarVisible(!primaryVisible);
+    // 見積結果表示中はスクロール位置に関係なく常時表示する
+    setMobileReserveBarVisible(isMobile);
   }
 
   function getDistanceRouteProceedLabel(){
@@ -3450,7 +3431,7 @@
     if(!window.EstimateQuoteRegister || typeof window.EstimateQuoteRegister.registerQuoteFromHandoff !== "function"){
       state.quoteRegisterStatus = "warn";
       state.quoteRegisterMessage = window.EstimateQuoteRegister?.REGISTER_WARN_MESSAGE
-        || "見積のサーバー登録に失敗しました。予約は可能ですが、表示内容が最新でない場合があります。お困りの際はお電話ください。";
+        || "見積登録に失敗しました。予約に進めない場合は、お電話ください。";
       return;
     }
     try{
@@ -3474,7 +3455,7 @@
     }catch(error){
       state.quoteRegisterStatus = "warn";
       state.quoteRegisterMessage = window.EstimateQuoteRegister?.REGISTER_WARN_MESSAGE
-        || "見積のサーバー登録に失敗しました。予約は可能ですが、表示内容が最新でない場合があります。お困りの際はお電話ください。";
+        || "見積登録に失敗しました。予約に進めない場合は、お電話ください。";
     }
   }
 
@@ -3490,7 +3471,7 @@
       }catch(error){
         state.quoteRegisterStatus = "warn";
         state.quoteRegisterMessage = window.EstimateQuoteRegister?.REGISTER_WARN_MESSAGE
-          || "見積のサーバー登録に失敗しました。予約は可能ですが、表示内容が最新でない場合があります。お困りの際はお電話ください。";
+          || "見積登録に失敗しました。予約に進めない場合は、お電話ください。";
       }
       refreshResultSection(result);
     })();
