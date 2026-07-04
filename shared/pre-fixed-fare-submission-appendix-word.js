@@ -27,7 +27,11 @@
       }).join("");
       return "<tr>" + cells + "</tr>";
     }).join("");
-    return "<table" + (className ? " class='" + escapeHtml(className) + "'" : "") + "><thead><tr>" + th + "</tr></thead><tbody>" + body + "</tbody></table>";
+    return (
+      "<div class='table-wrap'>" +
+      "<table" + (className ? " class='" + escapeHtml(className) + "'" : "") + "><thead><tr>" + th + "</tr></thead><tbody>" + body + "</tbody></table>" +
+      "</div>"
+    );
   }
 
   function buildKeyValueTable(rows){
@@ -55,32 +59,10 @@
   }
 
   function getWordCss(){
-    return [
-      "@page { size: A4 portrait; margin: 16mm 14mm 18mm 14mm; }",
-      "body { font-family: 'Yu Gothic', 'Meiryo', 'MS PGothic', sans-serif; font-size: 11pt; line-height: 1.5; color: #111; margin: 0; }",
-      ".word-document { max-width: 18cm; margin: 0 auto; }",
-      ".word-section { margin: 0 0 16pt; break-inside: avoid; page-break-inside: avoid; }",
-      ".word-page-break { page-break-before: always; break-before: page; }",
-      "h1.doc-title { font-size: 18pt; text-align: center; margin: 24pt 0 12pt; break-after: avoid; page-break-after: avoid; }",
-      "h2.section-title { font-size: 14pt; margin: 14pt 0 8pt; border-bottom: 1px solid #333; padding-bottom: 4pt; break-after: avoid; page-break-after: avoid; }",
-      "h3.subsection-title { font-size: 13pt; margin: 10pt 0 6pt; break-after: avoid; page-break-after: avoid; }",
-      "p { margin: 0 0 6pt; }",
-      "ul { margin: 0 0 8pt 18pt; padding: 0; }",
-      "li { margin: 0 0 3pt; }",
-      "table { width: 100%; border-collapse: collapse; margin: 8pt 0 12pt; page-break-inside: auto; }",
-      "th, td { border: 1px solid #999; padding: 5pt 6pt; vertical-align: top; word-wrap: break-word; font-size: 10pt; }",
-      "th { background: #f2f2f2; font-weight: 700; }",
-      "tr { break-inside: avoid; page-break-inside: avoid; }",
-      ".check-col { width: 28pt; text-align: center; font-size: 14pt; }",
-      ".notice-box { border: 1px solid #ccc; background: #fafafa; padding: 8pt; margin: 8pt 0 12pt; font-size: 9pt; break-inside: avoid; page-break-inside: avoid; }",
-      ".paste-box { border: 2px dashed #999; min-height: 140pt; margin: 6pt 0 10pt; background: #fcfcfc; }",
-      ".capture-image-wrap { display: flex; justify-content: center; margin: 8pt 0 12pt; break-inside: avoid; page-break-inside: avoid; }",
-      ".capture-image { display: block; max-width: 92%; max-height: 220mm; object-fit: contain; object-position: top center; }",
-      ".evidence-card { break-inside: avoid; page-break-inside: avoid; margin-bottom: 14pt; }",
-      ".meta-line { font-size: 10pt; color: #444; margin-bottom: 8pt; }",
-      ".footer-note { font-size: 9pt; color: #555; margin-top: 10pt; }",
-      "a { color: #0645ad; word-break: break-all; }"
-    ].join("\n");
+    if(global.PreFixedFarePrintLayoutCss){
+      return global.PreFixedFarePrintLayoutCss.getWordPrintCss();
+    }
+    return "@page { size: A4 portrait; margin: 16mm 14mm 20mm 14mm; } body { font-size: 11pt; }";
   }
 
   function wrapWordDocument(title, bodyHtml, editNote){
@@ -108,10 +90,12 @@
       "<p class='meta-line'>作成日：" + escapeHtml(payload.meta?.createdAt || "") + "　" + formatBusinessMetaLine(payload.meta) + "</p>" +
       buildList(payload.intro) +
       "<h2 class='section-title'>公式リンク欄</h2><ul>" + linksHtml + "</ul>" +
+      "<section class='subsection-block'>" +
       "<h2 class='section-title'>記入補助項目</h2>" +
       buildKeyValueTable(payload.helperFields || []) +
       renderCoefficientReference(payload) +
       "<p class='footer-note'>" + escapeHtml(payload.notice || "") + "</p>" +
+      "</section>" +
       "</div>"
     );
   }
@@ -146,8 +130,10 @@
     const sectionsHtml = (payload.sections || []).map(function(section){
       const rows = (section.items || []).map(buildCheckboxRow).join("");
       return (
+        "<section class='small-section'>" +
         "<h3 class='subsection-title'>" + escapeHtml(section.title) + "</h3>" +
-        "<table class='table-checklist'><thead><tr><th>確認</th><th>項目</th></tr></thead><tbody>" + rows + "</tbody></table>"
+        "<table class='table-checklist'><thead><tr><th>確認</th><th>項目</th></tr></thead><tbody>" + rows + "</tbody></table>" +
+        "</section>"
       );
     }).join("");
     const signatureRows = (payload.signatureFields || []).map(function(label){
@@ -174,21 +160,21 @@
         )
         : "";
       return (
-        "<div class='word-section evidence-card'>" +
+        "<section class='capture-card evidence-card'>" +
         "<h3 class='subsection-title'>" + escapeHtml(String(index + 1) + ". " + screen.name) + "</h3>" +
         "<p><strong>説明：</strong>" + escapeHtml(screen.purpose || "") + "</p>" +
-        (screen.note ? "<p><strong>備考：</strong>" + escapeHtml(screen.note) + "</p>" : "") +
+        (screen.note ? "<p class='caption'><strong>備考：</strong>" + escapeHtml(screen.note) + "</p>" : "") +
         imageHtml +
-        "</div>"
+        "</section>"
       );
     }).join("");
     return (
-      "<div class='word-section'>" +
+      "<section class='subsection-block word-section'>" +
       "<h1 class='doc-title'>" + escapeHtml(payload.title) + "</h1>" +
       buildList(payload.intro) +
-      "<p class='notice-box'>" + escapeHtml(payload.verificationNote || "") + "</p>" +
+      "<div class='note-box notice-box'>" + escapeHtml(payload.verificationNote || "") + "</div>" +
       screensHtml +
-      "</div>"
+      "</section>"
     );
   }
 

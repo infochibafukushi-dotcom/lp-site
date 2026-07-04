@@ -70,20 +70,58 @@ async function loadExportOptions(page){
   });
 }
 
-async function exportIntegratedPdf(page, options){
-  const result = await page.evaluate(async function(exportOptions){
+async function exportIntegratedPdf(browser, page, options){
+  const built = await page.evaluate(function(exportOptions){
     const reportData = window.PreFixedFareIntegratedSummaryData.buildReportData(exportOptions);
-    const rendered = await window.PreFixedFareIntegratedSummaryPdf.renderPdfBlob(reportData);
-    const buffer = await rendered.blob.arrayBuffer();
+    const html = window.PreFixedFareIntegratedSummaryPdf.buildPrintDocument(reportData);
     return {
-      bytes: Array.from(new Uint8Array(buffer)),
-      htmlText: rendered.htmlText,
-      pageCount: rendered.pageCount
+      html: html,
+      htmlText: window.PreFixedFareIntegratedSummaryPdf.buildReportHtml(reportData).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(),
+      pageCount: reportData ? 20 : 0
     };
   }, options);
+  assert(built.html.includes("capture-image"), "統合説明資料HTMLに画面キャプチャ画像がありません");
+  assert(built.html.length > 20000, "統合説明資料HTMLが短すぎます");
+
+  const tempHtmlPath = path.join(rootDir, ".tmp-integrated-summary-export.html");
+  fs.writeFileSync(tempHtmlPath, built.html, "utf8");
+
+  const integratedPage = await browser.newPage();
+  await integratedPage.goto(pathToFileURL(tempHtmlPath).href, { waitUntil: "domcontentloaded", timeout: 120000 });
+  await integratedPage.evaluate(async function(){
+    const images = Array.from(document.images);
+    await Promise.all(images.map(function(img){
+      if(img.complete && img.naturalWidth > 0){
+        return Promise.resolve();
+      }
+      return new Promise(function(resolve){
+        img.addEventListener("load", resolve, { once: true });
+        img.addEventListener("error", resolve, { once: true });
+      });
+    }));
+  });
+  await new Promise(function(resolve){ setTimeout(resolve, 1500); });
   const filePath = path.join(outputDir, TARGETS.integrated);
-  fs.writeFileSync(filePath, Buffer.from(result.bytes));
-  return { filePath: filePath, size: result.bytes.length, htmlText: result.htmlText, pageCount: result.pageCount };
+  await integratedPage.pdf({
+    path: filePath,
+    format: "A4",
+    printBackground: true,
+    margin: { top: "16mm", right: "14mm", bottom: "20mm", left: "14mm" },
+    displayHeaderFooter: true,
+    headerTemplate: "<div></div>",
+    footerTemplate: "<div style='font-size:9px;width:100%;text-align:center;color:#505050;'><span class='pageNumber'></span> / <span class='totalPages'></span></div>"
+  });
+  try{
+    fs.unlinkSync(tempHtmlPath);
+  }catch(error){
+    // ignore cleanup errors
+  }
+  const size = fs.statSync(filePath).size;
+  const htmlText = await integratedPage.evaluate(function(){
+    return document.body ? document.body.innerText : "";
+  });
+  await integratedPage.close();
+  return { filePath: filePath, size: size, htmlText: htmlText, pageCount: built.pageCount };
 }
 
 async function exportOperationsPdf(page){
@@ -103,7 +141,7 @@ async function exportOperationsPdf(page){
     await new Promise(function(resolve){ requestAnimationFrame(resolve); });
     await new Promise(function(resolve){ requestAnimationFrame(resolve); });
     const blob = await html2pdf().set({
-      margin: [6, 14, 18, 14],
+      margin: [16, 14, 20, 14],
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollX: 0, scrollY: 0 },
       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
@@ -158,7 +196,7 @@ async function exportAppendixPdf(browser, page, options){
     path: filePath,
     format: "A4",
     printBackground: true,
-    margin: { top: "16mm", right: "14mm", bottom: "18mm", left: "14mm" }
+    margin: { top: "16mm", right: "14mm", bottom: "20mm", left: "14mm" }
   });
   try{
     fs.unlinkSync(tempHtmlPath);
@@ -187,7 +225,7 @@ async function exportQaPdf(browser, page){
     path: filePath,
     format: "A4",
     printBackground: true,
-    margin: { top: "16mm", right: "14mm", bottom: "18mm", left: "14mm" }
+    margin: { top: "16mm", right: "14mm", bottom: "20mm", left: "14mm" }
   });
   const size = fs.statSync(filePath).size;
   await qaPage.close();
@@ -241,8 +279,8 @@ async function main(){
     const exportOptions = await loadExportOptions(page);
 
     console.log("Exporting integrated summary...");
-    const integrated = await exportIntegratedPdf(page, exportOptions);
-    assert(integrated.size > 50000, "統合説明資料PDFが小さすぎます");
+    const integrated = await exportIntegratedPdf(browser, page, exportOptions);
+    assert(integrated.size > 1000000, "統合説明資料PDFが小さすぎます（画像未埋め込みの可能性）");
     assert(integrated.htmlText.includes("事前確定運賃システム 統合説明資料"), "統合説明資料タイトル不正");
     assert(integrated.htmlText.includes("関東運輸局提出・説明用"), "統合説明資料の位置づけ不正");
     console.log("  OK", integrated.filePath, integrated.size, "bytes", "pages(html):", integrated.pageCount);

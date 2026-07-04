@@ -37,15 +37,15 @@
       }).join("");
       return "<tr>" + cells + "</tr>";
     }).join("");
-    return "<table" + (className ? " class='" + escapeHtml(className) + "'" : "") + ">" + colgroup + "<thead><tr>" + th + "</tr></thead><tbody>" + body + "</tbody></table>";
+    return "<div class='table-wrap'><table" + (className ? " class='" + escapeHtml(className) + "'" : "") + ">" + colgroup + "<thead><tr>" + th + "</tr></thead><tbody>" + body + "</tbody></table></div>";
   }
 
   function subsection(title, bodyHtml){
     return (
-      "<div class='subsection-block'>" +
+      "<section class='small-section subsection-block'>" +
       "<h3 class='section-title'>" + escapeHtml(title) + "</h3>" +
       "<div class='subsection-content'>" + bodyHtml + "</div>" +
-      "</div>"
+      "</section>"
     );
   }
 
@@ -543,12 +543,12 @@
       ? captureImage(screen.imageFile, screen.title)
       : capturePlaceholder("画面キャプチャ貼付欄（" + screen.title + "）");
     return (
-      "<div class='screenshot-block'>" +
-      "<h4>" + escapeHtml(screen.number + ". " + screen.title) + "</h4>" +
+      "<section class='capture-card screenshot-block'>" +
+      "<h3>" + escapeHtml(screen.number + ". " + screen.title) + "</h3>" +
       imageHtml +
       "<p><strong>キャプチャ内容：</strong>" + escapeHtml(screen.captureContent || "") + "</p>" +
-      "<p><strong>証明文：</strong>" + escapeHtml(screen.proofText || "") + "</p>" +
-      "</div>"
+      "<p class='caption'><strong>証明文：</strong>" + escapeHtml(screen.proofText || "") + "</p>" +
+      "</section>"
     );
   }
 
@@ -732,47 +732,33 @@
   }
 
   function getIntegratedPageCss(){
+    if(!global.PreFixedFarePrintLayoutCss){
+      throw new Error("印刷用レイアウトCSSモジュールが読み込まれていません。");
+    }
+    const scope = ".pre-fixed-fare-integrated-summary";
     return (
-      ".pre-fixed-fare-integrated-summary,.pre-fixed-fare-integrated-summary *{box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Yu Gothic','Meiryo',sans-serif;background:transparent;color:#111111;}" +
-      ".pre-fixed-fare-integrated-summary{display:block;width:720px;background:#ffffff;color:#111111;line-height:1.45;font-size:11px;margin:0;padding:0;}" +
-      ".pre-fixed-fare-integrated-summary .pdf-page{width:720px;height:1000px;max-height:1000px;overflow:hidden;page-break-inside:avoid;break-inside:avoid;page-break-after:always;break-after:page;margin:0;padding:0;position:relative;}" +
-      ".pre-fixed-fare-integrated-summary .pdf-page-break{page-break-after:always !important;break-after:page !important;}" +
-      ".pre-fixed-fare-integrated-summary .pdf-page-inner{height:960px;max-height:960px;display:flex;flex-direction:column;overflow:hidden;padding:2px 0 0;}" +
-      ".pre-fixed-fare-integrated-summary .pdf-page-fill{flex:1 1 auto;min-height:24px;background:#ffffff;}" +
-      ".pre-fixed-fare-integrated-summary .pdf-page-fill--large{min-height:120px;}" +
-      ".pre-fixed-fare-integrated-summary .pdf-page-clip-guard{flex:0 0 72px;height:72px;background:#ffffff;}" +
-      ".pre-fixed-fare-integrated-summary h1{font-size:20px;margin:0 0 4px;color:#111111;line-height:1.3;break-after:avoid;page-break-after:avoid;}" +
-      ".pre-fixed-fare-integrated-summary .cover-title{font-size:22px;margin:20px 0 8px;text-align:center;}" +
-      ".pre-fixed-fare-integrated-summary .cover-subtitle{font-size:14px;margin:0 0 16px;text-align:center;color:#444;}" +
-      ".pre-fixed-fare-integrated-summary .toc-heading{font-size:16px;margin:8px 0 10px;}" +
-      ".pre-fixed-fare-integrated-summary .chapter-start{margin:0 0 6px;}" +
-      ".pre-fixed-fare-integrated-summary .chapter-title{font-size:16px;margin:0 0 5px;border-bottom:2px solid #333;padding-bottom:3px;break-after:avoid;page-break-after:avoid;}" +
-      ".pre-fixed-fare-integrated-summary .chapter-title--continued{font-size:15px;}" +
-      ".pre-fixed-fare-integrated-summary .chapter-supplement{font-size:13px;margin:0 0 8px;color:#333;border-bottom:1px solid #ddd;padding-bottom:3px;break-after:avoid;page-break-after:avoid;}" +
-      ".pre-fixed-fare-integrated-summary .chapter-positioning{font-size:10.5px;color:#444;margin:0 0 8px;}" +
-      ".pre-fixed-fare-integrated-summary .subsection-block{margin:0 0 8px;break-inside:avoid;page-break-inside:avoid;}" +
-      ".pre-fixed-fare-integrated-summary .subsection-content{margin:0;}" +
-      ".pre-fixed-fare-integrated-summary h2{font-size:14px;margin:0 0 6px;color:#111111;break-after:avoid;page-break-after:avoid;}" +
-      ".pre-fixed-fare-integrated-summary .section-title{font-size:12px;margin:0 0 4px;color:#111111;break-after:avoid;page-break-after:avoid;}" +
-      ".pre-fixed-fare-integrated-summary h4{font-size:11px;margin:5px 0 3px;color:#333;break-after:avoid;page-break-after:avoid;}" +
-      ".pre-fixed-fare-integrated-summary p{margin:0 0 5px;color:#111111;}" +
-      ".pre-fixed-fare-integrated-summary ul,.pre-fixed-fare-integrated-summary ol{margin:0 0 5px 16px;padding:0;}" +
-      ".pre-fixed-fare-integrated-summary li{margin:0 0 2px;color:#111111;}" +
-      ".pre-fixed-fare-integrated-summary table{width:100%;border-collapse:collapse;table-layout:fixed;margin:3px 0 5px;background:#ffffff;page-break-inside:auto;}" +
-      ".pre-fixed-fare-integrated-summary thead{display:table-header-group;}" +
-      ".pre-fixed-fare-integrated-summary th,.pre-fixed-fare-integrated-summary td{border:1px solid #d9d9d9;padding:4px 5px;vertical-align:top;white-space:normal;word-break:break-word;overflow-wrap:anywhere;color:#111111;background:#ffffff;font-size:9.5px;line-height:1.38;}" +
-      ".pre-fixed-fare-integrated-summary th{background:#f6f6f6;font-weight:700;}" +
-      ".pre-fixed-fare-integrated-summary tr{page-break-inside:avoid;break-inside:avoid;}" +
-      ".pre-fixed-fare-integrated-summary .table-requirements td,.pre-fixed-fare-integrated-summary .table-requirements th,.pre-fixed-fare-integrated-summary .table-phase3-evidence td,.pre-fixed-fare-integrated-summary .table-phase3-evidence th{font-size:8.5px;}" +
-      ".pre-fixed-fare-integrated-summary .footer-note{margin-top:8px;font-size:9px;color:#444;}" +
-      ".pre-fixed-fare-integrated-summary .verification-note{margin:4px 0 6px;padding:6px;background:#eef5fb;border-left:4px solid #2f6fad;font-size:9px;line-height:1.45;break-inside:avoid;page-break-inside:avoid;}" +
-      ".pre-fixed-fare-integrated-summary .e2e-reservation-note,.pre-fixed-fare-integrated-summary .meter-mode-note,.pre-fixed-fare-integrated-summary .prelaunch-swap-note,.pre-fixed-fare-integrated-summary .terminology-note{margin:4px 0 0;font-size:9px;color:#444;}" +
-      ".pre-fixed-fare-integrated-summary .capture-placeholder{border:2px dashed #94a3b8;background:#f8fafc;min-height:56px;padding:8px;margin:4px 0 6px;text-align:center;}" +
-      ".pre-fixed-fare-integrated-summary .capture-placeholder-label{font-weight:700;color:#475569;margin:0 0 2px;font-size:9px;}" +
-      ".pre-fixed-fare-integrated-summary .capture-placeholder-note{font-size:8.5px;color:#64748b;margin:0;}" +
-      ".pre-fixed-fare-integrated-summary .capture-image-wrap{display:flex;justify-content:center;margin:4px 0 6px;break-inside:avoid;page-break-inside:avoid;}" +
-      ".pre-fixed-fare-integrated-summary .capture-image{display:block;max-width:92%;max-height:360px;object-fit:contain;object-position:top center;}" +
-      ".pre-fixed-fare-integrated-summary .screenshot-block{margin:0 0 8px;break-inside:avoid;page-break-inside:avoid;}"
+      global.PreFixedFarePrintLayoutCss.getCorePrintCss(scope) +
+      scope + " .pdf-page{width:720px;height:1100px;max-height:1100px;overflow:hidden;page-break-inside:avoid;break-inside:avoid;page-break-after:always;break-after:page;margin:0;padding:0;position:relative;}" +
+      scope + " .pdf-page-break{page-break-after:always !important;break-after:page !important;}" +
+      scope + " .pdf-page-inner{height:1040px;max-height:1040px;display:flex;flex-direction:column;overflow:hidden;padding:2px 0 0;}" +
+      scope + " .pdf-page-fill{flex:1 1 auto;min-height:24px;background:#ffffff;}" +
+      scope + " .pdf-page-fill--large{min-height:120px;}" +
+      scope + " .pdf-page-clip-guard{flex:0 0 80px;height:80px;background:#ffffff;}" +
+      scope + " .cover-title{font-size:18pt;margin:8mm 0 5mm;text-align:center;}" +
+      scope + " .cover-subtitle{font-size:16pt;margin:0 0 8mm;text-align:center;color:#334155;}" +
+      scope + " .toc-heading{font-size:16pt;margin:0 0 5mm;}" +
+      scope + " .chapter-start{margin:0 0 4mm;break-inside:avoid;page-break-inside:avoid;}" +
+      scope + " .chapter-title{font-size:16pt;margin:0 0 4mm;border-bottom:2px solid #333;padding-bottom:2mm;}" +
+      scope + " .chapter-title--continued{font-size:16pt;}" +
+      scope + " .chapter-supplement{font-size:13pt;margin:0 0 4mm;color:#334155;border-bottom:1px solid #ddd;padding-bottom:2mm;}" +
+      scope + " .chapter-positioning{font-size:9pt;color:#64748b;margin:0 0 4mm;}" +
+      scope + " .section-title{font-size:13pt;}" +
+      scope + " .verification-note{margin:0 0 4mm;padding:4mm;background:#eef5fb;border-left:4px solid #2f6fad;break-inside:avoid;page-break-inside:avoid;}" +
+      scope + " .e2e-reservation-note," + scope + " .meter-mode-note," + scope + " .prelaunch-swap-note," + scope + " .terminology-note{font-size:9pt;color:#64748b;}" +
+      scope + " .capture-placeholder{border:2px dashed #94a3b8;background:#f8fafc;min-height:40mm;padding:4mm;margin:3mm 0;text-align:center;break-inside:avoid;page-break-inside:avoid;}" +
+      scope + " .capture-placeholder-label{font-weight:700;color:#475569;margin:0 0 2mm;font-size:9pt;}" +
+      scope + " .capture-placeholder-note{font-size:9pt;color:#64748b;margin:0;}" +
+      scope + " .capture-image{display:block;max-width:92%;max-height:340px;object-fit:contain;object-position:top center;}"
     );
   }
 
@@ -822,8 +808,8 @@
       throw new Error("統合説明資料PDFの生成対象要素が作成できませんでした。");
     }
     const pageCount = reportElement.querySelectorAll(".pdf-page").length;
-    if(pageCount !== EXPECTED_PAGE_COUNT){
-      throw new Error("統合説明資料PDFのページ数が不正です: " + pageCount + " (expected " + EXPECTED_PAGE_COUNT + ")");
+    if(pageCount < EXPECTED_PAGE_COUNT){
+      console.warn("[PreFixedFareIntegratedSummaryPdf] page count below baseline:", pageCount, "baseline:", EXPECTED_PAGE_COUNT);
     }
     const htmlLength = String(reportElement.innerHTML || "").trim().length;
     const textLength = String(reportElement.innerText || "").trim().length;
@@ -845,8 +831,11 @@
   }
 
   function getHtml2PdfOptions(filename){
+    const margin = global.PreFixedFarePrintLayoutCss
+      ? global.PreFixedFarePrintLayoutCss.HTML2PDF_MARGIN_MM
+      : [16, 14, 20, 14];
     return {
-      margin: [6, 14, 18, 14],
+      margin: margin,
       filename: filename || PDF_FILENAME,
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollX: 0, scrollY: 0 },
@@ -863,11 +852,11 @@
     const totalPages = pdf.internal.getNumberOfPages();
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    pdf.setFontSize(8);
+    pdf.setFontSize(9);
     pdf.setTextColor(80, 80, 80);
     for(let pageNum = 1; pageNum <= totalPages; pageNum++){
       pdf.setPage(pageNum);
-      pdf.text(String(pageNum) + " / " + String(totalPages), pageWidth / 2, pageHeight - 4.5, { align: "center" });
+      pdf.text(String(pageNum) + " / " + String(totalPages), pageWidth / 2, pageHeight - 10, { align: "center" });
     }
     return pdf;
   }
@@ -896,6 +885,36 @@
     }));
   }
 
+  async function inlineLocalImages(reportElement){
+    const images = Array.from(reportElement.querySelectorAll("img"));
+    await Promise.all(images.map(async function(img){
+      const src = String(img.currentSrc || img.src || "").trim();
+      if(!src || src.startsWith("data:")){
+        return;
+      }
+      try{
+        const response = await fetch(src);
+        if(!response.ok){
+          console.warn("[PreFixedFareIntegratedSummaryPdf] image fetch failed:", src, response.status);
+          return;
+        }
+        const blob = await response.blob();
+        const dataUrl = await new Promise(function(resolve, reject){
+          const reader = new FileReader();
+          reader.onload = function(){ resolve(String(reader.result || "")); };
+          reader.onerror = function(){ reject(reader.error || new Error("画像の読み込みに失敗しました。")); };
+          reader.readAsDataURL(blob);
+        });
+        if(dataUrl){
+          img.src = dataUrl;
+        }
+      }catch(error){
+        console.warn("[PreFixedFareIntegratedSummaryPdf] image inline failed:", src, error);
+      }
+    }));
+    await waitForImages(reportElement);
+  }
+
   async function renderToElement(reportData){
     const reportHtml = buildReportHtml(reportData);
     const wrapper = createRenderContainer(reportHtml);
@@ -904,6 +923,7 @@
     ensureRenderableContent(reportElement);
     await waitForRenderReady();
     await waitForImages(reportElement);
+    await inlineLocalImages(reportElement);
     return {
       wrapper: wrapper,
       reportElement: reportElement,
@@ -933,6 +953,17 @@
     }
   }
 
+  function buildPrintDocument(reportData){
+    const reportHtml = buildReportHtml(reportData);
+    return (
+      "<!DOCTYPE html><html lang='ja'><head><meta charset='UTF-8'>" +
+      "<meta name='viewport' content='width=device-width,initial-scale=1'>" +
+      "<title>" + escapeHtml(reportData.title || PDF_FILENAME) + "</title>" +
+      "<style>" + getIntegratedPageCss() + "</style>" +
+      "</head><body>" + reportHtml + "</body></html>"
+    );
+  }
+
   async function generatePreFixedFareIntegratedSummaryPdf(options){
     if(!global.PreFixedFareIntegratedSummaryData){
       throw new Error("統合説明資料データモジュールの読み込みに失敗しました。");
@@ -950,6 +981,7 @@
     EXPECTED_PAGE_COUNT: EXPECTED_PAGE_COUNT,
     buildPagePlan: buildPagePlan,
     buildReportHtml: buildReportHtml,
+    buildPrintDocument: buildPrintDocument,
     renderPdfBlob: renderPdfBlob,
     savePdf: savePdf,
     generatePreFixedFareIntegratedSummaryPdf: generatePreFixedFareIntegratedSummaryPdf

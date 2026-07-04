@@ -36,14 +36,23 @@
       }).join("");
       return "<tr>" + cells + "</tr>";
     }).join("");
-    return "<table" + (className ? " class='" + escapeHtml(className) + "'" : "") + ">" + colgroup + "<thead><tr>" + th + "</tr></thead><tbody>" + body + "</tbody></table>";
+    return "<div class='table-wrap'><table" + (className ? " class='" + escapeHtml(className) + "'" : "") + ">" + colgroup + "<thead><tr>" + th + "</tr></thead><tbody>" + body + "</tbody></table></div>";
   }
 
   function section(title, bodyHtml){
     return (
-      "<section>" +
-      "<div class='report-section-title-block'><h2>" + escapeHtml(title) + "</h2></div>" +
-      "<div class='report-section-body'>" + bodyHtml + "</div>" +
+      "<section class='subsection-block section-title-with-body'>" +
+      "<h2>" + escapeHtml(title) + "</h2>" +
+      bodyHtml +
+      "</section>"
+    );
+  }
+
+  function smallSection(title, bodyHtml){
+    return (
+      "<section class='small-section'>" +
+      "<h3>" + escapeHtml(title) + "</h3>" +
+      bodyHtml +
       "</section>"
     );
   }
@@ -133,8 +142,8 @@
       return [row.field, row.value];
     });
     const e2eCaseTables = e2eCases.map(function(caseItem){
-      return (
-        "<h3>" + escapeHtml(caseItem.label || "") + "（予約ID " + escapeHtml(caseItem.reservationId || "") + "）</h3>" +
+      return smallSection(
+        (caseItem.label || "") + "（予約ID " + (caseItem.reservationId || "") + "）",
         buildTable(
           ["項目", "値"],
           [
@@ -174,30 +183,32 @@
       ) +
       section("3. GitHub Pages → driver-proxy → reservation-v4 → Firebase / caseRecords の本番構成",
         buildList(arch.intro) +
-        "<h3>構成要素</h3>" +
-        buildTable(
-          ["コンポーネント", "役割", "配置"],
-          archRows,
-          { className: "table-architecture", colWidths: ["30%", "42%", "28%"] }
+        smallSection("構成要素",
+          buildTable(
+            ["コンポーネント", "役割", "配置"],
+            archRows,
+            { className: "table-architecture", colWidths: ["30%", "42%", "28%"] }
+          )
         ) +
-        "<h3>データフロー</h3>" + buildList(arch.flowDiagram)
+        smallSection("データフロー", buildList(arch.flowDiagram))
       ) +
       section("4. METER_DRIVER_TOKENをフロント・GitHub・distに含めない設計",
         buildList(tokenSec.intro) +
-        "<h3>設計方針</h3>" + buildList(tokenSec.designPoints) +
-        "<h3>注意事項</h3>" + buildList(tokenSec.caveats)
+        smallSection("設計方針", buildList(tokenSec.designPoints)) +
+        smallSection("注意事項", buildList(tokenSec.caveats))
       ) +
       section("5. snapshotHashVerified / confirmedFareMatchesSnapshot / 同意スナップショットによる整合性確認",
         buildList(integrity.intro) +
-        "<h3>検証項目</h3>" +
-        buildTable(
-          ["検証名", "説明"],
-          integrityRows,
-          { className: "table-integrity", colWidths: ["32%", "68%"] }
+        smallSection("検証項目",
+          buildTable(
+            ["検証名", "説明"],
+            integrityRows,
+            { className: "table-integrity", colWidths: ["32%", "68%"] }
+          )
         ) +
-        "<h3>検証フロー</h3>" + buildList(integrity.verificationFlow) +
+        smallSection("検証フロー", buildList(integrity.verificationFlow)) +
         (integrity.tamperProtectionNote
-          ? "<h3>改ざん防止の位置づけ</h3><p>" + escapeHtml(integrity.tamperProtectionNote) + "</p>"
+          ? smallSection("改ざん防止の位置づけ", "<p>" + escapeHtml(integrity.tamperProtectionNote) + "</p>")
           : "")
       ) +
       section("6. caseRecords保存項目",
@@ -209,32 +220,35 @@
       ) +
       section("7. meter_fixed_fare_runs による start / complete 記録",
         buildList(meterRuns.intro) +
-        "<h3>start-fixed-fare 記録項目</h3>" +
-        buildTable(
-          ["フィールド", "説明"],
-          startRows,
-          { className: "table-meter-start", colWidths: ["30%", "70%"] }
+        smallSection("start-fixed-fare 記録項目",
+          buildTable(
+            ["フィールド", "説明"],
+            startRows,
+            { className: "table-meter-start", colWidths: ["30%", "70%"] }
+          )
         ) +
-        "<h3>complete-fixed-fare 記録項目</h3>" +
-        buildTable(
-          ["フィールド", "説明"],
-          completeRows,
-          { className: "table-meter-complete", colWidths: ["30%", "70%"] }
+        smallSection("complete-fixed-fare 記録項目",
+          buildTable(
+            ["フィールド", "説明"],
+            completeRows,
+            { className: "table-meter-complete", colWidths: ["30%", "70%"] }
+          )
         ) +
-        "<h3>運用メモ</h3>" + buildList(meterRuns.notes)
+        smallSection("運用メモ", buildList(meterRuns.notes))
       ) +
       section("8. 領収書に「事前確定運賃」と表示すること",
         buildList(receipt.intro) +
-        "<h3>表示ルール</h3>" + buildList(receipt.rules) +
-        "<h3>表示例</h3><p><strong>" + escapeHtml(receipt.example || "") + "</strong></p>"
+        smallSection("表示ルール", buildList(receipt.rules)) +
+        smallSection("表示例", "<p><strong>" + escapeHtml(receipt.example || "") + "</strong></p>")
       ) +
       section("9. 本番相当環境E2E確認結果",
         e2eCaseTables +
-        "<h3>確認結果</h3>" +
-        buildTable(
-          ["確認項目", "結果"],
-          e2eCheckRows,
-          { className: "table-e2e-checks", colWidths: ["72%", "28%"] }
+        smallSection("確認結果",
+          buildTable(
+            ["確認項目", "結果"],
+            e2eCheckRows,
+            { className: "table-e2e-checks", colWidths: ["72%", "28%"] }
+          )
         )
       ) +
       (function(){
@@ -263,7 +277,7 @@
       })() +
       section("10. 旅客都合変更時の基本運用",
         buildList(basicOp.intro) +
-        "<h3>途中終了のトリガー</h3>" + buildList(basicOp.triggers)
+        smallSection("途中終了のトリガー", buildList(basicOp.triggers))
       ) +
       section("11. 金額の扱い",
         buildList(pct.fareHandling)
@@ -272,43 +286,47 @@
         buildList(pct.meterAppFlow)
       ) +
       section("13. 保存される監査証跡",
-        "<h3>caseRecords 側</h3>" +
-        buildTable(
-          ["フィールド", "値"],
-          caseRecordAuditRows,
-          { className: "table-audit-case", colWidths: ["38%", "62%"] }
+        smallSection("caseRecords 側",
+          buildTable(
+            ["フィールド", "値"],
+            caseRecordAuditRows,
+            { className: "table-audit-case", colWidths: ["38%", "62%"] }
+          )
         ) +
-        "<h3>reservation-v4 / D1 側（旅客都合途中終了）</h3>" +
-        buildTable(
-          ["フィールド", "値"],
-          reservationAuditRows,
-          { className: "table-audit-reservation", colWidths: ["38%", "62%"] }
+        smallSection("reservation-v4 / D1 側（旅客都合途中終了）",
+          buildTable(
+            ["フィールド", "値"],
+            reservationAuditRows,
+            { className: "table-audit-reservation", colWidths: ["38%", "62%"] }
+          )
         ) +
-        "<h3>通常完了の場合</h3>" +
-        buildTable(
-          ["フィールド", "値"],
-          normalAuditRows,
-          { className: "table-audit-normal", colWidths: ["38%", "62%"] }
+        smallSection("通常完了の場合",
+          buildTable(
+            ["フィールド", "値"],
+            normalAuditRows,
+            { className: "table-audit-normal", colWidths: ["38%", "62%"] }
+          )
         )
       ) +
       section("14. 通常完了との判別方法",
-        "<h3>" + escapeHtml(comparison.normal?.label || "通常完了") + "</h3>" +
-        buildTable(
-          ["フィールド", "値"],
-          normalCompRows,
-          { className: "table-comparison-normal", colWidths: ["38%", "62%"] }
+        smallSection(comparison.normal?.label || "通常完了",
+          buildTable(
+            ["フィールド", "値"],
+            normalCompRows,
+            { className: "table-comparison-normal", colWidths: ["38%", "62%"] }
+          )
         ) +
-        "<h3>" + escapeHtml(comparison.passengerChange?.label || "旅客都合途中終了") + "</h3>" +
-        buildTable(
-          ["フィールド", "値"],
-          passengerCompRows,
-          { className: "table-comparison-passenger", colWidths: ["38%", "62%"] }
+        smallSection(comparison.passengerChange?.label || "旅客都合途中終了",
+          buildTable(
+            ["フィールド", "値"],
+            passengerCompRows,
+            { className: "table-comparison-passenger", colWidths: ["38%", "62%"] }
+          )
         )
       ) +
       section("15. 予約詳細・管理画面の表示",
-        "<h3>旅客都合途中終了時の表示項目</h3>" +
-        buildList(pct.adminDisplay?.passengerChangeItems) +
-        "<h3>通常完了時</h3><p>" + escapeHtml(pct.adminDisplay?.normalNote || "") + "</p>"
+        smallSection("旅客都合途中終了時の表示項目", buildList(pct.adminDisplay?.passengerChangeItems)) +
+        smallSection("通常完了時", "<p>" + escapeHtml(pct.adminDisplay?.normalNote || "") + "</p>")
       ) +
       section("16. 運用開始前の目視確認項目",
         "<p>" + escapeHtml(pct.verifiedNote || "") + "</p>" +
@@ -321,25 +339,15 @@
   }
 
   function getReportCss(){
+    if(!global.PreFixedFarePrintLayoutCss){
+      throw new Error("印刷用レイアウトCSSモジュールが読み込まれていません。");
+    }
+    const scope = ".pre-fixed-fare-operations-summary";
     return (
-      ".pre-fixed-fare-operations-summary,.pre-fixed-fare-operations-summary *{box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Yu Gothic','Meiryo',sans-serif;background:transparent;color:#111111;}" +
-      ".pre-fixed-fare-operations-summary{display:block;visibility:visible;opacity:1;position:relative;top:0;left:0;width:720px;background:#ffffff;color:#111111;line-height:1.5;font-size:11px;padding:4px 0 0;margin:0;}" +
-      ".pre-fixed-fare-operations-summary h1{font-size:20px;margin:0 0 4px;color:#111111;line-height:1.3;break-after:avoid;page-break-after:avoid;}" +
-      ".pre-fixed-fare-operations-summary .subtitle{font-size:11.5px;margin:0 0 8px;color:#444;}" +
-      ".pre-fixed-fare-operations-summary h2{font-size:14px;margin:14px 0 6px;padding-bottom:2px;border-bottom:1px solid #ccc;color:#111111;break-after:avoid;page-break-after:avoid;}" +
-      ".pre-fixed-fare-operations-summary h3{font-size:12px;margin:8px 0 5px;color:#111111;break-after:avoid;page-break-after:avoid;}" +
-      ".pre-fixed-fare-operations-summary p{margin:0 0 6px;color:#111111;}" +
-      ".pre-fixed-fare-operations-summary ul,.pre-fixed-fare-operations-summary ol{margin:0 0 6px 16px;padding:0;}" +
-      ".pre-fixed-fare-operations-summary li{margin:0 0 3px;color:#111111;}" +
-      ".pre-fixed-fare-operations-summary table{width:100%;border-collapse:collapse;table-layout:fixed;margin:5px 0 8px;background:#ffffff;page-break-inside:auto;}" +
-      ".pre-fixed-fare-operations-summary th,.pre-fixed-fare-operations-summary td{border:1px solid #d9d9d9;padding:5px 6px;vertical-align:top;white-space:normal;word-break:break-word;overflow-wrap:anywhere;color:#111111;background:#ffffff;box-sizing:border-box;font-size:10px;line-height:1.45;}" +
-      ".pre-fixed-fare-operations-summary th{background:#f6f6f6;font-weight:700;}" +
-      ".pre-fixed-fare-operations-summary section{break-inside:avoid;page-break-inside:avoid;margin:0 0 10px;}" +
-      ".pre-fixed-fare-operations-summary .report-section-title-block{break-inside:avoid;page-break-inside:avoid;}" +
-      ".pre-fixed-fare-operations-summary .report-section-body{break-inside:auto;page-break-inside:auto;}" +
-      ".pre-fixed-fare-operations-summary tr{break-inside:avoid;page-break-inside:avoid;}" +
-      ".pre-fixed-fare-operations-summary .table-meta tr,.pre-fixed-fare-operations-summary .table-e2e-meta tr{break-inside:avoid;page-break-inside:avoid;}" +
-      ".pre-fixed-fare-operations-summary .footer-note{margin-top:12px;font-size:9px;color:#444;}"
+      global.PreFixedFarePrintLayoutCss.getCorePrintCss(scope) +
+      scope + "{visibility:visible;opacity:1;position:relative;top:0;left:0;padding:0;}" +
+      scope + " h2{padding-bottom:2mm;border-bottom:1px solid #ccc;}" +
+      scope + " .footer-note{margin-top:8mm;}"
     );
   }
 
@@ -401,7 +409,7 @@
 
     try{
       await html2pdf().set({
-        margin: [6, 14, 18, 14],
+        margin: global.PreFixedFarePrintLayoutCss.HTML2PDF_MARGIN_MM,
         filename: PDF_FILENAME,
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollX: 0, scrollY: 0 },
