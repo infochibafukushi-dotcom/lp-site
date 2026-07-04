@@ -22,7 +22,7 @@
         targetCommit: TARGET_COMMIT,
         positioning: "運輸局への認可説明用資料（本資料は認可の可否を断定するものではない）",
         createdAt: todayJst(),
-        createdBy: "LP管理画面"
+        createdBy: "管理画面"
       },
       overviewNote: "本資料は、事前確定運賃に関するシステムの動作・判定ロジック・証跡保存の仕組みを、Phase 2 および Phase 3-B の実装と検証結果に基づいて説明するものです。",
       systemFlow: [

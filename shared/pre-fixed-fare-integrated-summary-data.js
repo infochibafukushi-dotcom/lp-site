@@ -76,7 +76,7 @@
       ),
       "注意事項を提示し同意取得",
       "同意導線・保存はコード・API・DB上確認済み",
-      "estimate-defaults preFixedFareNotice、reservation-v4 estimate_consent / quote_consents、本番E2E確認"
+      "estimate-defaults preFixedFareNotice、reservation-v4 estimate_consent / quote_consents、本番相当環境E2E確認"
     );
 
     next.snapshotConfirmed = (regulatory.snapshotConfirmed || []).concat([
@@ -88,7 +88,13 @@
 
     next.snapshotUnconfirmedTitle = "今後の強化候補";
     next.snapshotUnconfirmed = [
-      "サーバー署名（HMAC等）— 現状は snapshotHash による整合性確認で代替"
+      "サーバー署名（HMAC等）— 将来的な外部API連携・複数事業者連携時の追加対策として検討"
+    ];
+    next.tamperProtectionSummary = [
+      "スナップショットハッシュは、改ざん防止そのものではなく、同意時点データとの整合性確認・不一致検知のための仕組みとして位置づける",
+      "見積・同意時点のデータセットからSHA-256方式による一方向性のスナップショットハッシュを生成・保存する",
+      "運行開始時・精算時・監査確認時に再計算ハッシュと保存ハッシュを照合し、不一致時は管理者確認の対象とする",
+      "現行運用では、スナップショットハッシュ照合、データベース権限制御、操作ログ保存により整合性を確認できる体制を構築している"
     ];
 
     next.stateManagement = Object.assign({}, regulatory.stateManagement || {}, {
@@ -123,7 +129,7 @@
         businessName: resolvedBusinessName,
         target: "介護タクシーLP / 見積シミュレーター / 予約システム / メーターアプリ",
         createdAt: regulatory.meta?.createdAt || operations.meta?.createdAt || "",
-        createdBy: "LP管理画面",
+        createdBy: "管理画面",
         documentType: "運輸局への提出用説明資料案。最終的な申請書類への転記・体裁調整は申請担当者が行う。"
       },
       toc: [
@@ -131,19 +137,21 @@
         { chapter: 2, title: "利用者向け見積シミュレーターの動作と判定ロジック" },
         { chapter: 3, title: "運行・精算における運用フローと監査証跡" },
         { chapter: 4, title: "旅客都合変更時の途中終了運用" },
-        { chapter: 5, title: "確認済み証跡と運用開始前確認項目" }
+        { chapter: 5, title: "確認済み証跡と運用開始前確認項目" },
+        { chapter: 6, title: "追加資料（データ保存・画面キャプチャ・E2E・改ざん防止）" }
       ],
       chapterPositioning: {
         1: "本章は、関東運輸局の公示要件に対するシステム全体の対応方針・算定式・係数・ルート算定・同意証跡を整理したものです。",
         2: "本章は、利用者向け見積シミュレーターにおけるルート候補生成・選択ロジック・証跡保存の仕組みを説明します。",
         3: "本章は、LP見積からメーターアプリ運行・精算・完了までの本番フローと監査証跡を説明します。",
         4: "本章は、旅客都合によるルート変更等が発生した場合の途中終了運用を、認可改善の重要事項として独立して説明します。",
-        5: "本章は、本番E2E確認結果と運用開始前の確認項目を整理したものです。"
+        5: "本章は、本番相当環境E2E確認結果と運用開始前の確認項目を整理したものです。",
+        6: "本章は、データ保存規程、画面キャプチャ構成案、本番相当環境E2Eテストケース表、改ざん防止及びスナップショットハッシュの取扱いを整理した追加資料です。"
       },
       regulatory: regulatory,
       approval: approval,
       operations: operations,
-      e2eReservationNote: "※上記予約IDは本番環境におけるE2E確認時の検証IDである。確認完了後、予約データ整理により本番D1上の当該テスト予約は削除済み。確認結果は開発記録および本資料上の実施記録として保持している。",
+      e2eReservationNote: "※上記予約IDは本番相当環境におけるE2E確認（スモークテスト）時の検証IDである。確認完了後、予約データ整理により本番D1上の当該テスト予約は削除済み。確認結果は開発記録および本資料上の実施記録として保持している。",
       fareTableAppendixNote: "実際の申請時には、申請予定または認可後の距離制運賃表を別紙として添付し、本システムの距離制運賃マスターが当該運賃表に基づくことを示す。",
       fareFeeDisplayNote: "迎車料金・予約料金・介助料等については、事前確定運賃とは区分し、明細上も別行で表示する。",
       driverRouteDisplay: {
@@ -152,8 +160,8 @@
           "利用者が選択した selectedRoute / selectedRouteId / routePlan / polyline / 主要経由地点を quoteSnapshot に保存する",
           "reservation-v4 に保存された quoteSnapshot をメーターアプリが driver-proxy 経由で読み込む",
           "メーターアプリの予約詳細画面で迎車地・降車地・ルートID・見積距離・確定運賃等を確認できる",
-          "snapshotHashVerified により、予約保存時の見積内容とメーターアプリ読取時の内容が一致することを検証する（本番E2E確認済み）",
-          "confirmedFareMatchesSnapshot により、当初同意済み運賃額と読取運賃が一致することを検証する（本番E2E確認済み）"
+          "snapshotHashVerified により、予約保存時の見積内容とメーターアプリ読取時の内容が一致することを照合する（本番相当環境E2E確認済み）",
+          "confirmedFareMatchesSnapshot により、当初同意済み運賃額と読取運賃が一致することを照合する（本番相当環境E2E確認済み）"
         ],
         visualCheckNote: "運転者向けルート地図描画（polyline表示）は未実装のため、同一ルートまたは主要経由地点の最終目視確認は第5章の運用開始前確認項目とする。"
       },
@@ -163,7 +171,8 @@
         "事前確定運賃M 運用・監査説明資料",
         "reservation-v4 test:phase5 実行結果",
         "care-taxi-meter 本番GitHub Pages反映確認",
-        "complete-fixed-fare 本番E2E確認結果",
+        "complete-fixed-fare 本番相当環境E2E確認結果",
+        "事前確定運賃システム 追加資料（データ保存・画面キャプチャ・E2E・改ざん防止）",
         "本番D1 migration 0005 適用確認",
         "本番D1予約データ整理記録",
         "申請予定または認可後の距離制運賃表"
@@ -189,6 +198,9 @@
         "事前確定運賃M以外の通常メーターモード基本動作確認",
         "割引適用時の運賃前後表示の目視確認（福祉施策等を適用する場合）"
       ],
+      appendix: global.PreFixedFareApprovalAppendixData
+        ? global.PreFixedFareApprovalAppendixData.buildReportData()
+        : null,
       footerNote: "本資料は運輸局への提出用説明資料案です。公示要件に沿った運用が説明可能な状態を示すものであり、最終的な申請書類への転記・体裁調整は申請担当者が行ってください。"
     };
   }

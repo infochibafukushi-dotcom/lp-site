@@ -20,7 +20,7 @@
         meterAppUrl: "https://infochibafukushi-dotcom.github.io/care-taxi-meter/",
         positioning: "運輸局への提出用説明資料（本資料は認可の可否を断定するものではない）",
         createdAt: todayJst(),
-        createdBy: "LP管理画面"
+        createdBy: "管理画面"
       },
       overviewNote: "本資料は、LP見積からメーターアプリによる事前確定運賃M運行・精算・完了までの一連の本番運用を、運用・監査の観点から説明するものです。",
       overviewPoints: [
@@ -28,7 +28,7 @@
         "見積・同意・snapshotHash・reservation-v4保存から、メーター読取・運行・精算・領収書・完了までを一貫して証跡化します。",
         "運行開始後に旅客都合でルート変更・立ち寄り追加等が発生した場合は、事前確定M運送を途中終了し、以後は通常メーター等の別運送として新規開始します。",
         "本番構成は GitHub Pages（LP・メーター）→ Cloudflare Worker driver-proxy → reservation-v4 / Firebase / caseRecords です。",
-        "本番E2E確認（予約ID 209906021400：通常完了、209906041030：旅客都合途中終了）により、一連のフローが正常に動作することを確認済みです。"
+        "本番相当環境E2E確認（予約ID 209906021400：通常完了、209906041030：旅客都合途中終了）により、一連のフローが正常に動作することを確認済みです。"
       ],
       endToEndFlow: [
         "利用者がLP見積シミュレーターで走行予定ルート候補を選択し、見積額を確認する",
@@ -43,7 +43,7 @@
       ],
       productionArchitecture: {
         intro: [
-          "本番環境は、フロントエンド（GitHub Pages）とバックエンドAPI（driver-proxy / reservation-v4 / Firebase）を分離した構成です。",
+          "本番相当環境は、フロントエンド（GitHub Pages）とバックエンドAPI（driver-proxy / reservation-v4 / Firebase）を分離した構成です。",
           "メーターアプリはブラウザから driver-proxy を経由して予約データ・運行APIにアクセスします。"
         ],
         components: [
@@ -80,16 +80,17 @@
       },
       integrityChecks: {
         intro: [
-          "事前確定Mでは、見積時点の内容とメーター読取時点の予約データが一致していることを、複数の検証項目で確認します。"
+          "事前確定Mでは、見積時点の内容とメーター読取時点の予約データが一致していることを、複数の検証項目で確認します。",
+          "スナップショットハッシュは、改ざん防止そのものではなく、同意時点データとの整合性確認・不一致検知のための仕組みとして位置づけます。"
         ],
         checks: [
           {
             name: "snapshotHashVerified",
-            description: "同意スナップショットのハッシュ値が、保存時点の見積内容と一致することを検証する"
+            description: "同意スナップショットのハッシュ値が、保存時点の見積内容と一致することを照合する"
           },
           {
             name: "confirmedFareMatchesSnapshot",
-            description: "reservation-v4 に保存された確定運賃が、見積スナップショットの運賃と一致することを検証する"
+            description: "reservation-v4 に保存された確定運賃が、見積スナップショットの運賃と一致することを照合する"
           },
           {
             name: "同意スナップショット",
@@ -99,9 +100,11 @@
         verificationFlow: [
           "メーターアプリが予約詳細を読取する際、snapshotHash を再計算して保存値と照合する",
           "confirmedFareMatchesSnapshot により確定運賃の一致を確認する",
-          "不一致の場合は運行開始前にエラー表示し、不正な運賃での運行を防止する",
-          "本番E2E（予約ID 209906021400）で snapshotHashVerified / confirmedFareMatchesSnapshot / 同意スナップショット すべて OK を確認済み"
-        ]
+          "不一致の場合は運行開始前にエラー表示し、管理者確認の対象とする",
+          "本番相当環境E2E（予約ID 209906021400）で snapshotHashVerified / confirmedFareMatchesSnapshot / 同意スナップショット すべて OK を確認済み"
+        ],
+        tamperProtectionNote:
+          "現行運用では、スナップショットハッシュ照合、データベース権限制御、操作ログ保存により、予約時同意内容と運行・精算内容の整合性を確認できる体制を構築している。HMAC方式は将来的な外部API連携・複数事業者連携時の追加対策として検討する。"
       },
       caseRecordsFields: [
         { field: "reservationId", description: "予約ID" },
@@ -139,7 +142,7 @@
         notes: [
           "start-fixed-fare 実行時に運行開始レコードを作成する",
           "complete-fixed-fare 実行時に運行完了レコードを更新し、予約詳細に「事前確定M 完了」を反映する",
-          "本番E2E（予約ID 209906021400）で start-fixed-fare OK / complete-fixed-fare OK を確認済み"
+          "本番相当環境E2E（予約ID 209906021400）で start-fixed-fare OK / complete-fixed-fare OK を確認済み"
         ]
       },
       receiptDisplay: {
@@ -151,7 +154,7 @@
           "領収書の運賃欄に「事前確定運賃 ○○円」と表示する（○○は確定運賃の金額）",
           "金額は見積時に確定した運賃と一致させる（confirmedFareMatchesSnapshot 検証済み）",
           "領収書表示ラベルは caseRecords.receiptLabel にも保存する",
-          "本番E2E（予約ID 209906021400）で領収書「事前確定運賃 12,000円」表示 OK を確認済み"
+          "本番相当環境E2E（予約ID 209906021400）で領収書「事前確定運賃 12,000円」表示 OK を確認済み"
         ],
         example: "事前確定運賃 12,000円"
       },
@@ -288,8 +291,27 @@
       futurePlans: [
         "Firebase ID Token 検証を driver-proxy に追加し、curl等の直接アクセスをより厳密に制限する",
         "利用明細書PDFの fixed 専用表示対応（現時点では次期対応）",
-        "本番E2E証跡の定期更新（新規予約IDでの再確認）"
+        "本番相当環境E2E証跡の定期更新（新規予約IDでの再確認）"
       ],
+      e2eTestCases: global.PreFixedFareApprovalAppendixData
+        ? global.PreFixedFareApprovalAppendixData.buildE2eTestCases()
+        : {
+          title: "本番相当環境E2Eテストケース表",
+          note:
+            "本表は、本番相当環境におけるスモークテスト・E2E確認の実施記録である。予約IDに2099年の日付を含むものは、本番相当環境での検証用データであり、本番運用データではない。",
+          headers: ["ID", "テストシナリオ", "期待される挙動", "結果", "エビデンス"],
+          rows: [
+            ["TC-001", "通常の複数ルート選択・運行", "2以上のルートから旅客が選択し、同意した金額で運行完了", "合格", "予約ID: 209906021400"],
+            ["TC-002", "ルート候補が1件のみ", "事前確定運賃として確定せず、通常見積又は通常メーターへ切替", "合格", "システムログ確認済"],
+            ["TC-003", "旅客都合による途中降車", "事前確定運賃をその時点で終了し、以後は別運送又は通常メーター扱い", "合格", "予約ID: 2099041030"],
+            ["TC-004", "事故・通行止めによる迂回", "旅客了承ログを保存し、原則として当初の事前確定運賃を維持", "合格", "迂回ログ: RQ-04"],
+            ["TC-005", "障害者割引＋福祉タクシー券", "割引前・割引後運賃を表示し、福祉券は支払充当として処理", "合格", "精算レシート: R-005"],
+            ["TC-006", "スナップショット不一致検知", "保存データと再計算ハッシュが不一致の場合、管理者確認へ回す", "合格", "エラー検知ログ確認済"]
+          ]
+        },
+      tamperProtection: global.PreFixedFareApprovalAppendixData
+        ? global.PreFixedFareApprovalAppendixData.buildTamperProtection()
+        : null,
       footerNote: "本資料は運輸局提出用の運用・監査説明資料です。最終的な申請書類への転記・体裁調整は、申請担当者が行ってください。"
     };
   }

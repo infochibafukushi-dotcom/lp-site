@@ -50,7 +50,7 @@
         ["作成日", meta.createdAt || ""],
         ["システムバージョン", meta.systemVersion || ""],
         ["料金設定バージョン", meta.estimateConfigVersion || "未設定"],
-        ["作成元", meta.createdBy || "LP管理画面"]
+        ["作成元", meta.createdBy || "管理画面"]
       ],
       { className: "table-meta", colWidths: ["34%", "66%"] }
     );

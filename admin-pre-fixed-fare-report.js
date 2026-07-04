@@ -30,6 +30,13 @@
     box.textContent = message || "";
   }
 
+  function setApprovalAppendixStatus(message, type){
+    const box = document.getElementById("preFixedFareApprovalAppendixStatus");
+    if(!box) return;
+    box.className = "preview" + (type ? " " + type : "");
+    box.textContent = message || "";
+  }
+
   function setOnePageSummaryStatus(message, type){
     const box = document.getElementById("preFixedFareOnePageSummaryStatus");
     if(!box) return;
@@ -367,6 +374,40 @@
     }
   }
 
+  async function exportApprovalAppendixPdf(){
+    if(!global.PreFixedFareApprovalAppendixPdf){
+      throw new Error("事前確定運賃システム 追加資料PDFモジュールの読み込みに失敗しました。");
+    }
+    setApprovalAppendixStatus("PDFを作成しています...", "warn");
+    await global.PreFixedFareApprovalAppendixPdf.generatePreFixedFareApprovalAppendixPdf();
+    setApprovalAppendixStatus("PDFを保存しました。", "success");
+  }
+
+  function bindApprovalAppendixButton(){
+    const button = document.getElementById("preFixedFareApprovalAppendixExportBtn");
+    if(!button) return;
+    button.addEventListener("click", async function(){
+      button.disabled = true;
+      try{
+        await exportApprovalAppendixPdf();
+      }catch(error){
+        console.error(error);
+        const reason = String(error?.message || "");
+        if(
+          reason.includes("生成対象HTMLが空")
+          || reason.includes("組み立てに失敗")
+          || reason.includes("読み込みに失敗")
+        ){
+          setApprovalAppendixStatus(reason, "error");
+        }else{
+          setApprovalAppendixStatus("PDF作成に失敗しました。", "error");
+        }
+      }finally{
+        button.disabled = false;
+      }
+    });
+  }
+
   function bind(){
     bindRegulatoryButton();
     bindOnePageSummaryButton();
@@ -374,6 +415,7 @@
     bindApprovalSummaryButton();
     bindOperationsSummaryButton();
     bindIntegratedSummaryButton();
+    bindApprovalAppendixButton();
   }
 
   function bindOnce(){

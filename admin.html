@@ -1591,7 +1591,7 @@ body{
         <div class="preview" id="preFixedFareApprovalSummaryStatus">まだ出力していません。</div>
       </div>
       <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e5e5e5;">
-        <p class="note" style="margin-bottom:8px;"><strong>③ 事前確定運賃M 運用・監査説明資料</strong><br>LP見積からメーターアプリ運行・精算・完了までの本番フロー、driver-proxy構成、整合性確認、caseRecords・meter_fixed_fare_runs、本番E2E確認結果をまとめた説明資料を出力します。</p>
+        <p class="note" style="margin-bottom:8px;"><strong>③ 事前確定運賃M 運用・監査説明資料</strong><br>LP見積からメーターアプリ運行・精算・完了までの本番相当フロー、driver-proxy構成、整合性確認、caseRecords・meter_fixed_fare_runs、本番相当環境E2E確認結果をまとめた説明資料を出力します。</p>
         <div class="actions">
           <button type="button" id="preFixedFareOperationsSummaryExportBtn">事前確定運賃M 運用・監査説明資料PDFを出力</button>
         </div>
@@ -1604,6 +1604,13 @@ body{
           <button type="button" id="preFixedFareIntegratedSummaryWordExportBtn">事前確定運賃システム 統合説明資料 Word編集用HTMLを出力</button>
         </div>
         <div class="preview" id="preFixedFareIntegratedSummaryStatus">まだ出力していません。</div>
+      </div>
+      <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e5e5e5;">
+        <p class="note" style="margin-bottom:8px;"><strong>④-追加 事前確定運賃システム 追加資料</strong><br>データ保存規程、画面キャプチャ構成案、本番相当環境E2Eテストケース表、改ざん防止及びスナップショットハッシュの取扱いを1冊にまとめた追加資料を出力します。統合説明資料の第6章と同一内容です。</p>
+        <div class="actions">
+          <button type="button" id="preFixedFareApprovalAppendixExportBtn">事前確定運賃システム 追加資料PDFを出力</button>
+        </div>
+        <div class="preview" id="preFixedFareApprovalAppendixStatus">まだ出力していません。</div>
       </div>
       <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e5e5e5;">
         <p class="note" style="margin-bottom:8px;"><strong>提出用 別紙・確認資料</strong><br>事前確定運賃認可の事前相談・提出時に、統合説明資料へ添付しやすい別紙・確認資料を出力します。正式な認可申請様式は関東運輸局の公式様式を使用し、本画面では記入補助・別紙・確認台紙を作成します。</p>
@@ -1642,18 +1649,20 @@ body{
 <script src="./shared/estimate-defaults.js?v=admin-save-fix-20260703"></script>
 <script src="./shared/estimate-validate.js?v=admin-save-fix-20260703"></script>
 <script src="./admin-estimate.js?v=admin-save-fix-20260703"></script>
+<script src="./shared/pre-fixed-fare-approval-appendix-data.js?v=appendix03"></script>
+<script src="./shared/pre-fixed-fare-approval-appendix-pdf.js?v=appendix03"></script>
 <script src="./shared/pre-fixed-fare-report-data.js?v=39e326a1"></script>
 <script src="./shared/pre-fixed-fare-report-pdf.js?v=39e326a1"></script>
-<script src="./shared/pre-fixed-fare-one-page-summary-data.js?v=print02"></script>
-<script src="./shared/pre-fixed-fare-one-page-summary-pdf.js?v=print02"></script>
-<script src="./shared/pre-fixed-fare-qa-data.js?v=print02"></script>
-<script src="./shared/pre-fixed-fare-qa-pdf.js?v=print02"></script>
+<script src="./shared/pre-fixed-fare-one-page-summary-data.js?v=appendix03"></script>
+<script src="./shared/pre-fixed-fare-one-page-summary-pdf.js?v=appendix03"></script>
+<script src="./shared/pre-fixed-fare-qa-data.js?v=appendix03"></script>
+<script src="./shared/pre-fixed-fare-qa-pdf.js?v=appendix03"></script>
 <script src="./shared/pre-fixed-fare-approval-summary-data.js?v=39e326a1"></script>
 <script src="./shared/pre-fixed-fare-approval-summary-pdf.js?v=39e326a1"></script>
-<script src="./shared/pre-fixed-fare-operations-summary-data.js?v=39e326a1"></script>
-<script src="./shared/pre-fixed-fare-operations-summary-pdf.js?v=39e326a1"></script>
-<script src="./shared/pre-fixed-fare-integrated-summary-data.js?v=39e326a1"></script>
-<script src="./shared/pre-fixed-fare-integrated-summary-pdf.js?v=39e326a1"></script>
+<script src="./shared/pre-fixed-fare-operations-summary-data.js?v=appendix03"></script>
+<script src="./shared/pre-fixed-fare-operations-summary-pdf.js?v=appendix03"></script>
+<script src="./shared/pre-fixed-fare-integrated-summary-data.js?v=appendix03"></script>
+<script src="./shared/pre-fixed-fare-integrated-summary-pdf.js?v=appendix03"></script>
 <script src="./shared/pre-fixed-fare-integrated-summary-word.js?v=39e326a1"></script>
 <script src="./shared/pre-fixed-fare-submission-appendix-data.js?v=appendix02"></script>
 <script src="./shared/pre-fixed-fare-submission-appendix-word.js?v=appendix02"></script>

@@ -14,11 +14,18 @@ const REQUIRED_CHAPTERS = [
   "第3章",
   "第4章",
   "第5章",
+  "第6章",
   "システム基本方針と公示要件対応",
   "利用者向け見積シミュレーターの動作と判定ロジック",
   "運行・精算における運用フローと監査証跡",
   "旅客都合変更時の途中終了運用",
-  "確認済み証跡と運用開始前確認項目"
+  "確認済み証跡と運用開始前確認項目",
+  "追加資料（データ保存・画面キャプチャ・E2E・改ざん防止）",
+  "本番相当環境E2E確認結果",
+  "運送終了日から3年間保存",
+  "本番相当環境E2Eテストケース表",
+  "改ざん防止及びスナップショットハッシュの取扱い",
+  "データ管理及び監査証跡保存規程",
 ];
 
 const REQUIRED_CONTENT = [
@@ -53,7 +60,12 @@ const FORBIDDEN_PHRASES = [
   "認可済み",
   "運輸局が許可済み",
   "自動的に通常運行開始へ遷移",
-  "満額収受"
+  "満額収受",
+  "LP管理画面",
+  "本番環境E2E",
+  "100％検知",
+  "100％防御",
+  "運用前に定める"
 ];
 
 function resolveChromeExecutable(){
@@ -151,8 +163,12 @@ async function main(){
       "明示的ページブロック pdf-page がありません"
     );
     assert(
-      (moduleCheck.text.match(/data-page-id=/g) || []).length === 13,
-      "ページブロック数が13ではありません"
+      (moduleCheck.text.match(/data-page-id=/g) || []).length === 18,
+      "ページブロック数が18ではありません"
+    );
+    assert(
+      moduleCheck.text.includes("本番相当環境E2E確認結果"),
+      "第3章10P相当のE2E見出しがありません"
     );
     assert(
       moduleCheck.text.includes("quoteSnapshot / handoff の保存（続き）"),
@@ -161,10 +177,6 @@ async function main(){
     assert(
       moduleCheck.text.includes("caseRecords・meter_fixed_fare_runs 保存項目"),
       "第3章9P相当の補足見出しがありません"
-    );
-    assert(
-      moduleCheck.text.includes("本番E2E確認結果"),
-      "第3章10P相当のE2E見出しがありません"
     );
     const gpsmCount = (moduleCheck.text.match(/GPSM/g) || []).length;
     assert(gpsmCount <= 1, "GPSMの記載が多すぎます: " + gpsmCount);

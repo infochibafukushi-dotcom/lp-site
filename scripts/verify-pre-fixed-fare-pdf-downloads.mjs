@@ -53,6 +53,10 @@ const INTEGRATED_CHECKS = [
   "第3章",
   "第4章",
   "第5章",
+  "第6章",
+  "本番相当環境E2E確認結果",
+  "運送終了日から3年間保存",
+  "本番相当環境E2Eテストケース表",
   "旅客都合変更時の途中終了運用",
   "209906021400",
   "209906041030",
@@ -81,7 +85,10 @@ const FORBIDDEN_PHRASES = [
   "認可済み",
   "運輸局が許可済み",
   "自動的に通常運行開始へ遷移",
-  "満額収受"
+  "満額収受",
+  "LP管理画面",
+  "本番環境E2E",
+  "運用前に定める"
 ];
 
 function resolveChromeExecutable(){
@@ -127,7 +134,7 @@ async function writeUtf8FileSafe(filePath, content){
 async function assertIntegratedPdfLayout(filePath){
   const parser = new PDFParse({ data: fs.readFileSync(filePath) });
   const info = await parser.getInfo();
-  assert(info.total === 13, "統合PDFのページ数が13ではありません: " + info.total);
+  assert(info.total === 18, "統合PDFのページ数が18ではありません: " + info.total);
   const pageNumbers = Array.from({ length: info.total }, function(_, index){
     return index + 1;
   });

@@ -1,7 +1,7 @@
 (function(global){
   const HTML2PDF_CDN = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
   const PDF_FILENAME = "pre-fixed-fare-integrated-summary.pdf";
-  const EXPECTED_PAGE_COUNT = 13;
+  const EXPECTED_PAGE_COUNT = 18;
 
   function escapeHtml(text){
     return String(text ?? "")
@@ -193,7 +193,10 @@
       subsection("quoteSnapshot・証跡保存",
         "<h4>確認できる項目</h4>" + buildList(regulatory.snapshotConfirmed) +
         "<h4>" + escapeHtml(regulatory.snapshotUnconfirmedTitle || "今後の強化候補") + "</h4>" +
-        buildList(regulatory.snapshotUnconfirmed)
+        buildList(regulatory.snapshotUnconfirmed) +
+        (regulatory.tamperProtectionSummary
+          ? "<h4>改ざん防止及びスナップショットハッシュの取扱い</h4>" + buildList(regulatory.tamperProtectionSummary)
+          : "")
       ) +
       subsection("公示要件対応表",
         buildTable(
@@ -518,12 +521,117 @@
     );
   }
 
+  function capturePlaceholder(label){
+    return (
+      "<div class='capture-placeholder'>" +
+      "<p class='capture-placeholder-label'>" + escapeHtml(label || "画面キャプチャ貼付欄") + "</p>" +
+      "<p class='capture-placeholder-note'>（実画像を本枠内に貼付）</p>" +
+      "</div>"
+    );
+  }
+
+  function buildScreenshotSection(screen){
+    return (
+      "<div class='screenshot-block'>" +
+      "<h4>" + escapeHtml(screen.number + ". " + screen.title) + "</h4>" +
+      capturePlaceholder("画面キャプチャ貼付欄（" + screen.title + "）") +
+      "<p><strong>キャプチャ内容：</strong>" + escapeHtml(screen.captureContent || "") + "</p>" +
+      "<p><strong>証明文：</strong>" + escapeHtml(screen.proofText || "") + "</p>" +
+      "</div>"
+    );
+  }
+
+  function buildChapter6Page14(appendix){
+    const regulation = appendix?.dataRetentionRegulation || {};
+    const sections = regulation.sections || [];
+    const section1 = sections[0];
+    const section2 = sections[1];
+
+    function renderSection(section){
+      if(!section) return "";
+      return (
+        "<h4>" + escapeHtml(section.number + ". " + section.title) + "</h4>" +
+        (section.paragraphs || []).map(function(paragraph){
+          return "<p>" + escapeHtml(paragraph) + "</p>";
+        }).join("")
+      );
+    }
+
+    return (
+      subsection(regulation.title || "データ管理及び監査証跡保存規程",
+        renderSection(section1) + renderSection(section2)
+      )
+    );
+  }
+
+  function buildChapter6Page15(appendix){
+    const regulation = appendix?.dataRetentionRegulation || {};
+    const section3 = (regulation.sections || [])[2];
+    if(!section3) return "<p>—</p>";
+
+    return (
+      subsection("データ管理及び監査証跡保存規程（続き）",
+        "<h4>" + escapeHtml(section3.number + ". " + section3.title) + "</h4>" +
+        (section3.paragraphs || []).map(function(paragraph){
+          return "<p>" + escapeHtml(paragraph) + "</p>";
+        }).join("") +
+        buildList(section3.outputItems || []) +
+        (section3.closing ? "<p>" + escapeHtml(section3.closing) + "</p>" : "")
+      )
+    );
+  }
+
+  function buildChapter6Page16(appendix){
+    const screenshots = appendix?.screenshotCaptures || {};
+    const screens = (screenshots.screens || []).slice(0, 2);
+    return (
+      subsection(screenshots.title || "画面キャプチャ資料の構成案",
+        (screenshots.intro ? "<p>" + escapeHtml(screenshots.intro) + "</p>" : "") +
+        screens.map(buildScreenshotSection).join("")
+      )
+    );
+  }
+
+  function buildChapter6Page17(appendix){
+    const screenshots = appendix?.screenshotCaptures || {};
+    const screens = (screenshots.screens || []).slice(2, 4);
+    return (
+      subsection("画面キャプチャ資料の構成案（続き）",
+        screens.map(buildScreenshotSection).join("")
+      )
+    );
+  }
+
+  function buildChapter6Page18(appendix){
+    const e2e = appendix?.e2eTestCases || {};
+    const tamper = appendix?.tamperProtection || {};
+    return (
+      subsection(e2e.title || "本番相当環境E2Eテストケース表",
+        (e2e.note ? "<p class='e2e-reservation-note'>" + escapeHtml(e2e.note) + "</p>" : "") +
+        buildTable(
+          e2e.headers || ["ID", "テストシナリオ", "期待される挙動", "結果", "エビデンス"],
+          e2e.rows || [],
+          { className: "table-e2e-cases", colWidths: ["10%", "22%", "30%", "10%", "28%"] }
+        )
+      ) +
+      subsection(tamper.title || "改ざん防止及びスナップショットハッシュの取扱い",
+        (tamper.paragraphs || []).map(function(paragraph){
+          return "<p>" + escapeHtml(paragraph) + "</p>";
+        }).join("") +
+        (tamper.terminologyNote
+          ? "<p class='terminology-note'><strong>用語の位置づけ：</strong>" + escapeHtml(tamper.terminologyNote) + "</p>"
+          : "")
+      )
+    );
+  }
+
   function buildPagePlan(data){
     const positioning = data.chapterPositioning || {};
     const regulatory = data.regulatory || {};
     const approval = data.approval || {};
     const operations = data.operations || {};
     const pct = operations.passengerChangeTermination || {};
+    const appendix = data.appendix || {};
 
     return [
       { id: "p01-cover", html: buildCover(data.meta || {}, data.title) },
@@ -558,7 +666,7 @@
       },
       {
         id: "p10-ch3-e2e",
-        html: chapterSupplement(3, "運行・精算における運用フローと監査証跡", "本番E2E確認結果") + buildChapter3Page10(operations)
+        html: chapterSupplement(3, "運行・精算における運用フローと監査証跡", "本番相当環境E2E確認結果") + buildChapter3Page10(operations)
       },
       {
         id: "p11-ch4-part1",
@@ -572,6 +680,26 @@
       {
         id: "p13-ch5",
         html: chapterHeader(5, "確認済み証跡と運用開始前確認項目", positioning[5]) + buildChapter5Page13(data)
+      },
+      {
+        id: "p14-ch6-retention",
+        html: chapterHeader(6, "追加資料（データ保存・画面キャプチャ・E2E・改ざん防止）", positioning[6]) + buildChapter6Page14(appendix)
+      },
+      {
+        id: "p15-ch6-output",
+        html: chapterSupplement(6, "追加資料（データ保存・画面キャプチャ・E2E・改ざん防止）", "監査時の出力方法") + buildChapter6Page15(appendix)
+      },
+      {
+        id: "p16-ch6-screenshot1",
+        html: chapterSupplement(6, "追加資料（データ保存・画面キャプチャ・E2E・改ざん防止）", "画面キャプチャ資料（1/2）") + buildChapter6Page16(appendix)
+      },
+      {
+        id: "p17-ch6-screenshot2",
+        html: chapterSupplement(6, "追加資料（データ保存・画面キャプチャ・E2E・改ざん防止）", "画面キャプチャ資料（2/2）") + buildChapter6Page17(appendix)
+      },
+      {
+        id: "p18-ch6-e2e-tamper",
+        html: chapterSupplement(6, "追加資料（データ保存・画面キャプチャ・E2E・改ざん防止）", "E2Eテスト・改ざん防止") + buildChapter6Page18(appendix)
       }
     ];
   }
@@ -624,7 +752,11 @@
       ".pre-fixed-fare-integrated-summary tr{page-break-inside:avoid;break-inside:avoid;}" +
       ".pre-fixed-fare-integrated-summary .table-requirements td,.pre-fixed-fare-integrated-summary .table-requirements th,.pre-fixed-fare-integrated-summary .table-phase3-evidence td,.pre-fixed-fare-integrated-summary .table-phase3-evidence th{font-size:8px;}" +
       ".pre-fixed-fare-integrated-summary .footer-note{margin-top:8px;font-size:9px;color:#444;}" +
-      ".pre-fixed-fare-integrated-summary .e2e-reservation-note,.pre-fixed-fare-integrated-summary .meter-mode-note,.pre-fixed-fare-integrated-summary .prelaunch-swap-note{margin:4px 0 0;font-size:9px;color:#444;}"
+      ".pre-fixed-fare-integrated-summary .e2e-reservation-note,.pre-fixed-fare-integrated-summary .meter-mode-note,.pre-fixed-fare-integrated-summary .prelaunch-swap-note,.pre-fixed-fare-integrated-summary .terminology-note{margin:4px 0 0;font-size:9px;color:#444;}" +
+      ".pre-fixed-fare-integrated-summary .capture-placeholder{border:2px dashed #94a3b8;background:#f8fafc;min-height:56px;padding:8px;margin:4px 0 6px;text-align:center;}" +
+      ".pre-fixed-fare-integrated-summary .capture-placeholder-label{font-weight:700;color:#475569;margin:0 0 2px;font-size:9px;}" +
+      ".pre-fixed-fare-integrated-summary .capture-placeholder-note{font-size:8px;color:#64748b;margin:0;}" +
+      ".pre-fixed-fare-integrated-summary .screenshot-block{margin:0 0 8px;}"
     );
   }
 

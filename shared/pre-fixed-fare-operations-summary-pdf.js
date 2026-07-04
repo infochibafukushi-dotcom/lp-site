@@ -195,7 +195,10 @@
           integrityRows,
           { className: "table-integrity", colWidths: ["32%", "68%"] }
         ) +
-        "<h3>検証フロー</h3>" + buildList(integrity.verificationFlow)
+        "<h3>検証フロー</h3>" + buildList(integrity.verificationFlow) +
+        (integrity.tamperProtectionNote
+          ? "<h3>改ざん防止の位置づけ</h3><p>" + escapeHtml(integrity.tamperProtectionNote) + "</p>"
+          : "")
       ) +
       section("6. caseRecords保存項目",
         buildTable(
@@ -225,7 +228,7 @@
         "<h3>表示ルール</h3>" + buildList(receipt.rules) +
         "<h3>表示例</h3><p><strong>" + escapeHtml(receipt.example || "") + "</strong></p>"
       ) +
-      section("9. 本番E2E確認結果",
+      section("9. 本番相当環境E2E確認結果",
         e2eCaseTables +
         "<h3>確認結果</h3>" +
         buildTable(
@@ -234,6 +237,30 @@
           { className: "table-e2e-checks", colWidths: ["72%", "28%"] }
         )
       ) +
+      (function(){
+        const e2eCases = data.e2eTestCases || {};
+        if(!e2eCases.rows || !e2eCases.rows.length) return "";
+        return section("9-2. " + (e2eCases.title || "本番相当環境E2Eテストケース表"),
+          (e2eCases.note ? "<p>" + escapeHtml(e2eCases.note) + "</p>" : "") +
+          buildTable(
+            e2eCases.headers || ["ID", "テストシナリオ", "期待される挙動", "結果", "エビデンス"],
+            e2eCases.rows || [],
+            { className: "table-e2e-cases", colWidths: ["10%", "22%", "30%", "10%", "28%"] }
+          )
+        );
+      })() +
+      (function(){
+        const tamper = data.tamperProtection || {};
+        if(!tamper.paragraphs || !tamper.paragraphs.length) return "";
+        return section("9-3. " + (tamper.title || "改ざん防止及びスナップショットハッシュの取扱い"),
+          tamper.paragraphs.map(function(paragraph){
+            return "<p>" + escapeHtml(paragraph) + "</p>";
+          }).join("") +
+          (tamper.terminologyNote
+            ? "<p><strong>用語の位置づけ：</strong>" + escapeHtml(tamper.terminologyNote) + "</p>"
+            : "")
+        );
+      })() +
       section("10. 旅客都合変更時の基本運用",
         buildList(basicOp.intro) +
         "<h3>途中終了のトリガー</h3>" + buildList(basicOp.triggers)

@@ -140,7 +140,7 @@
         createdAt: todayJst(),
         systemVersion: REPORT_SYSTEM_VERSION,
         estimateConfigVersion: estimateVersionLabel(estimateConfig),
-        createdBy: "LP管理画面"
+        createdBy: "管理画面"
       },
       purpose: [
         "本資料は、一般乗用旅客自動車運送事業の事前確定運賃について、関東運輸局の公示要件に対するシステム対応を説明するための資料である。",

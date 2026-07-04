@@ -260,7 +260,7 @@
       coefficientSummary: COEFFICIENT_FILL,
       coefficientReferenceRows: buildCoefficientReferenceRows(estimateConfig),
       createdAt: todayJst(),
-      createdBy: "LP管理画面",
+      createdBy: "管理画面",
       systemName: SYSTEM_NAME
     };
   }
