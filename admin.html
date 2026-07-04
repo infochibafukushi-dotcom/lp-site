@@ -1084,7 +1084,7 @@ body{
               </div>
               <div class="row">
                 <label>テキスト</label>
-                <input type="text" id="pcTopPhoneLabel" placeholder="例: TEL：">
+                <input type="text" id="pcTopPhoneLabel" placeholder="例: 電話予約・ご相談：">
               </div>
               <div class="row">
                 <label>電話番号</label>
@@ -2139,7 +2139,7 @@ function buildPcTopPhoneFallback(config){
   const defaultLink = 'tel:09063314289';
   return {
     enabled: !!(phoneButton && phoneButton.visible !== false && rawLink),
-    label: 'TEL：',
+    label: '電話予約・ご相談：',
     number: fallbackDigits ? formatPhoneNumberForDisplay(fallbackDigits) : defaultNumber,
     link: rawLink || (fallbackDigits ? ('tel:' + fallbackDigits) : defaultLink)
   };
@@ -2152,7 +2152,7 @@ function ensurePcTopPhoneShape(config){
   const linkValue = String(current.link || fallback.link || '').trim();
   return {
     enabled: current.enabled === true || (current.enabled == null && fallback.enabled === true),
-    label: String(current.label || fallback.label || 'TEL：').trim() || 'TEL：',
+    label: String(current.label || fallback.label || '電話予約・ご相談：').trim() || '電話予約・ご相談：',
     number: numberValue || formatPhoneNumberForDisplay(digitsOnlyPhone(linkValue.replace(/^tel:/i, ''))) || '090-6331-4289',
     link: linkValue || (numberValue ? ('tel:' + digitsOnlyPhone(numberValue)) : fallback.link || 'tel:09063314289')
   };
@@ -2809,7 +2809,7 @@ async function loadConfig(){
   document.getElementById('btnPc4Visible').checked = config.buttonsPc[3]?.visible !== false;
 
   document.getElementById('pcTopPhoneEnabled').checked = config.pcTopPhone.enabled === true;
-  document.getElementById('pcTopPhoneLabel').value = config.pcTopPhone.label || 'TEL：';
+  document.getElementById('pcTopPhoneLabel').value = config.pcTopPhone.label || '電話予約・ご相談：';
   document.getElementById('pcTopPhoneNumber').value = config.pcTopPhone.number || '';
   document.getElementById('pcTopPhoneLink').value = config.pcTopPhone.link || '';
 

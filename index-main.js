@@ -143,7 +143,7 @@
   }
 
   const PC_TOP_PHONE_FALLBACK = {
-    label: "TEL：",
+    label: "電話予約・ご相談：",
     number: "090-6331-4289",
     link: "tel:09063314289"
   };
