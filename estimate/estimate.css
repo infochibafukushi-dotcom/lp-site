@@ -812,6 +812,20 @@
 .estimate-overall-route-card .estimate-route-card-compact-head{
   color:#2e6b3a;
 }
+.estimate-roundtrip-pair-meta{
+  margin:0 0 10px;
+  font-size:14px;
+  line-height:1.7;
+  color:#555;
+}
+.estimate-roundtrip-pair-meta .estimate-roundtrip-pair-total{
+  margin-top:2px;
+  font-weight:700;
+  color:#2d2a26;
+}
+.estimate-mobile-reserve-bar{
+  display:none;
+}
 .estimate-route-select-btn{
   width:100%;
   padding:10px 12px;
@@ -1345,4 +1359,69 @@
 }
 .estimate-prefixed-fare-stopover-note{
   color:#5a4a2f;
+}
+@media (max-width:767px){
+  .estimate-mobile-reserve-bar{
+    display:block;
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    z-index:9000;
+    background:#fff;
+    border-top:1px solid #e5e0d8;
+    box-shadow:0 -4px 16px rgba(45,42,38,.12);
+    padding:10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+  .estimate-mobile-reserve-bar[hidden]{
+    display:none !important;
+  }
+  .estimate-mobile-reserve-bar-inner{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    max-width:720px;
+    margin:0 auto;
+  }
+  .estimate-mobile-reserve-bar-amount{
+    flex:1 1 auto;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .estimate-mobile-reserve-bar-label{
+    font-size:11px;
+    line-height:1.3;
+    color:#666;
+  }
+  .estimate-mobile-reserve-bar-value{
+    font-size:18px;
+    font-weight:800;
+    line-height:1.2;
+    color:#c62828;
+  }
+  .estimate-mobile-reserve-bar-btn{
+    flex:0 0 auto;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:48px;
+    padding:12px 14px;
+    border-radius:12px;
+    background:#e87f00;
+    color:#fff;
+    font-size:14px;
+    font-weight:700;
+    text-decoration:none;
+    white-space:nowrap;
+  }
+  .estimate-page.estimate-has-mobile-reserve-bar,
+  body.estimate-has-mobile-reserve-bar{
+    padding-bottom:88px;
+  }
+  .estimate-page.estimate-has-mobile-reserve-bar .estimate-wrap,
+  body.estimate-has-mobile-reserve-bar .estimate-wrap{
+    padding-bottom:160px;
+  }
 }
