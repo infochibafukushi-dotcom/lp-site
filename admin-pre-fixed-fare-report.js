@@ -30,6 +30,13 @@
     box.textContent = message || "";
   }
 
+  function setOnePageSummaryStatus(message, type){
+    const box = document.getElementById("preFixedFareOnePageSummaryStatus");
+    if(!box) return;
+    box.className = "preview" + (type ? " " + type : "");
+    box.textContent = message || "";
+  }
+
   async function fetchJson(path){
     const response = await fetch(path + "?" + Date.now(), { cache: "no-store" });
     if(!response.ok){
@@ -47,6 +54,19 @@
       }
     }
     return null;
+  }
+
+  async function generatePreFixedFareOnePageSummaryPdf(){
+    if(!global.PreFixedFareOnePageSummaryPdf){
+      throw new Error("事前確定運賃 認可説明1枚資料PDFモジュールの読み込みに失敗しました。");
+    }
+    await global.PreFixedFareOnePageSummaryPdf.generatePreFixedFareOnePageSummaryPdf();
+  }
+
+  async function exportOnePageSummaryPdf(){
+    setOnePageSummaryStatus("PDFを作成しています...", "warn");
+    await generatePreFixedFareOnePageSummaryPdf();
+    setOnePageSummaryStatus("PDFを保存しました。", "success");
   }
 
   async function exportRegulatoryReportPdf(){
@@ -174,6 +194,32 @@
     });
   }
 
+  function bindOnePageSummaryButton(){
+    const button = document.getElementById("preFixedFareOnePageSummaryExportBtn");
+    if(!button) return;
+    button.addEventListener("click", async function(){
+      button.disabled = true;
+      try{
+        await exportOnePageSummaryPdf();
+      }catch(error){
+        console.error(error);
+        const reason = String(error?.message || "");
+        if(
+          reason.includes("生成対象HTMLが空")
+          || reason.includes("組み立てに失敗")
+          || reason.includes("読み込みに失敗")
+          || reason.includes("認可ルート")
+        ){
+          setOnePageSummaryStatus(reason, "error");
+        }else{
+          setOnePageSummaryStatus("PDF作成に失敗しました。", "error");
+        }
+      }finally{
+        button.disabled = false;
+      }
+    });
+  }
+
   function bindApprovalSummaryButton(){
     const button = document.getElementById("preFixedFareApprovalSummaryExportBtn");
     if(!button) return;
@@ -276,6 +322,7 @@
 
   function bind(){
     bindRegulatoryButton();
+    bindOnePageSummaryButton();
     bindApprovalSummaryButton();
     bindOperationsSummaryButton();
     bindIntegratedSummaryButton();
