@@ -2859,22 +2859,25 @@
               <span class="estimate-route-result-value">${escapeHtml(formatRouteDuration(calcResult.durationMinutes))}</span>
             </div>
           </div>
-          ${state.routePlan ? `
-            <div id="estimateRouteResultArea" class="estimate-route-result-area">
-              <section class="estimate-route-preview estimate-route-preview--inline" aria-label="走行予定ルート">
-                <h4 class="estimate-route-preview-title">走行予定ルート</h4>
-                <div class="estimate-route-map-wrap">
-                  <div class="estimate-route-map" role="img" aria-label="走行予定ルート地図"></div>
-                </div>
-              </section>
-              ${renderStepRouteSelection()}
-              <p class="estimate-route-mobile-summary-note">距離・時間は目安です。実際の運行状況により変わる場合があります。</p>
-            </div>
-          ` : ""}
         ` : ""}
         <p class="estimate-address-disclaimer estimate-note-pc-only">${escapeHtml(addressDisclaimer)}</p>
       </div>
     `;
+
+    const routeResultArea = state.routePlan
+      ? (
+        '<div id="estimateRouteResultArea" class="estimate-route-result-area">' +
+          '<section class="estimate-route-preview estimate-route-preview--inline" aria-label="走行予定ルート">' +
+            '<h4 class="estimate-route-preview-title">走行予定ルート</h4>' +
+            '<div class="estimate-route-map-wrap">' +
+              '<div class="estimate-route-map" role="img" aria-label="走行予定ルート地図"></div>' +
+            "</div>" +
+          "</section>" +
+          renderStepRouteSelection() +
+          '<p class="estimate-route-mobile-summary-note">距離・時間は目安です。実際の運行状況により変わる場合があります。</p>' +
+        "</div>"
+      )
+      : "";
 
     return `
       <section class="estimate-step estimate-step--active${state.routePlan ? " estimate-step--has-route" : ""}" data-step-id="${escapeAttr(step.id)}">
@@ -2890,6 +2893,7 @@
         ${addressPanel}
         <p class="estimate-step-note estimate-note-pc-only">${escapeHtml(note)}</p>
       </section>
+      ${routeResultArea}
     `;
   }
 

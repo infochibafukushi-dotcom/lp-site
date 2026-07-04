@@ -1553,21 +1553,55 @@
     scroll-margin-bottom:100px;
   }
 
-  html,
-  body.estimate-page,
-  .estimate-page{
-    overflow-x:hidden;
+  /* ルート選択は親STEPカード外に出したうえで、wrap余白を打ち消し画面幅いっぱいへ */
+  .estimate-wrap{
+    overflow:visible;
+    padding-left:0;
+    padding-right:0;
   }
 
-  .estimate-route-result-area,
+  .estimate-wrap > .estimate-header,
+  .estimate-wrap > .estimate-lead,
+  .estimate-wrap > .estimate-step,
+  .estimate-wrap > .estimate-result,
+  .estimate-wrap > .estimate-cta-group,
+  .estimate-wrap > .estimate-disclaimer{
+    margin-left:16px;
+    margin-right:16px;
+  }
+
+  .estimate-step,
+  .estimate-step--has-route,
+  .estimate-address-calc,
+  .estimate-result,
   .estimate-result-route-block{
-    width:100vw;
-    max-width:100vw;
-    margin-left:calc(50% - 50vw);
-    margin-right:calc(50% - 50vw);
-    padding-left:4px;
-    padding-right:4px;
+    overflow:visible !important;
+  }
+
+  /* STEPカード外に出したルート選択エリア：画面幅いっぱい */
+  .estimate-route-result-area{
+    width:100%;
+    max-width:100%;
+    margin:12px 0 0;
+    padding:0 4px;
     box-sizing:border-box;
+    border:0;
+    border-radius:0;
+    background:transparent;
+    overflow:visible;
+  }
+
+  /* 結果画面内のルートブロック：結果カードのpadding+wrap余白を打ち消し */
+  .estimate-result-route-block{
+    width:calc(100% + 72px);
+    max-width:none;
+    margin:12px -36px 0;
+    padding:0 4px;
+    box-sizing:border-box;
+    border:0;
+    border-radius:0;
+    background:transparent;
+    overflow:visible;
   }
 
   .estimate-route-result-area .estimate-route-preview--inline,
@@ -1575,22 +1609,19 @@
   .estimate-result-route-block .estimate-route-preview,
   .estimate-result-route-block .estimate-route-selection{
     margin:0;
+    padding:0;
     border:0;
     border-radius:0;
     background:transparent;
     box-shadow:none;
     box-sizing:border-box;
-  }
-
-  .estimate-route-result-area .estimate-route-preview--inline,
-  .estimate-result-route-block .estimate-route-preview{
-    padding:0;
+    overflow:visible;
   }
 
   .estimate-route-result-area .estimate-route-preview-title,
   .estimate-result-route-block .estimate-route-preview-title{
     padding:0 4px;
-    margin-bottom:6px;
+    margin:0 0 6px;
   }
 
   .estimate-route-result-area .estimate-route-map,
@@ -1603,21 +1634,26 @@
 
   .estimate-route-result-area .estimate-route-map-wrap,
   .estimate-result-route-block .estimate-route-map-wrap{
-    margin-left:-4px;
-    margin-right:-4px;
-    width:calc(100% + 8px);
+    width:100%;
+    margin:0;
+    overflow:visible;
   }
 
   .estimate-route-result-area .estimate-route-map-legend,
   .estimate-result-route-block .estimate-route-map-legend{
     position:static;
-    margin:4px 0 6px;
-    padding:4px 6px;
+    width:100%;
+    max-width:100%;
+    margin:4px 0 8px;
+    padding:6px 8px;
     border-radius:6px;
-    border-color:#e8e8e8;
+    border:1px solid #e8e8e8;
     background:#fff;
     box-shadow:none;
-    font-size:10px;
+    font-size:11px;
+    box-sizing:border-box;
+    overflow:visible;
+    white-space:normal;
   }
 
   .estimate-route-result-area .estimate-route-selection,
@@ -1628,57 +1664,117 @@
   .estimate-route-result-area .estimate-route-selection-title,
   .estimate-result-route-block .estimate-route-selection-title{
     margin:0 0 4px;
-    padding:0 2px;
+    padding:0 4px;
     font-size:14px;
   }
 
   .estimate-route-result-area .estimate-route-selection-note,
   .estimate-result-route-block .estimate-route-selection-note{
     margin:0 0 6px;
-    padding:0 2px;
+    padding:0 4px;
     font-size:12px;
+    white-space:normal;
+    overflow:visible;
   }
 
   .estimate-route-result-area .estimate-route-selection-toll-note,
   .estimate-result-route-block .estimate-route-selection-toll-note{
-    margin:6px 2px 0;
+    margin:6px 4px 0;
     font-size:11px;
+    white-space:normal;
+    overflow:visible;
   }
 
+  .estimate-route-card-list,
   .estimate-route-card-list--ab{
-    gap:4px;
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:8px;
+    width:100%;
+    max-width:100%;
+    padding:0 4px;
+    box-sizing:border-box;
+    overflow:visible;
   }
 
+  .estimate-route-card-list .estimate-route-card,
   .estimate-route-card-list--ab .estimate-route-card{
+    display:flex;
+    flex-direction:column;
+    min-width:0;
+    width:100%;
+    max-width:100%;
     padding:10px 8px;
+    box-sizing:border-box;
+    overflow:visible;
   }
 
+  .estimate-route-card-list .estimate-route-card-title-full,
+  .estimate-route-card-list--ab .estimate-route-card-title-full{
+    display:none;
+  }
+
+  .estimate-route-card-list .estimate-route-card-title-short,
   .estimate-route-card-list--ab .estimate-route-card-title-short{
-    font-size:13px;
+    display:block;
+    font-size:14px;
+    line-height:1.3;
+    white-space:normal;
+    overflow:visible;
+    word-break:break-word;
   }
 
+  .estimate-route-card-list .estimate-route-card-description,
+  .estimate-route-card-list .estimate-route-card-description--compact,
+  .estimate-route-card-list .estimate-route-card-toll-note,
+  .estimate-route-card-list .estimate-route-card-meta--fare-only,
+  .estimate-route-card-list .estimate-route-card-meta div:nth-child(n+3),
+  .estimate-route-card-list--ab .estimate-route-card-description,
+  .estimate-route-card-list--ab .estimate-route-card-description--compact,
+  .estimate-route-card-list--ab .estimate-route-card-toll-note,
+  .estimate-route-card-list--ab .estimate-route-card-meta--fare-only,
+  .estimate-route-card-list--ab .estimate-route-card-meta div:nth-child(n+3){
+    display:none;
+  }
+
+  .estimate-route-card-list .estimate-route-card-compact-meta,
+  .estimate-route-card-list .estimate-roundtrip-pair-meta,
+  .estimate-route-card-list .estimate-route-card-meta,
   .estimate-route-card-list--ab .estimate-route-card-compact-meta,
-  .estimate-route-card-list--ab .estimate-roundtrip-pair-meta{
-    font-size:11px;
+  .estimate-route-card-list--ab .estimate-roundtrip-pair-meta,
+  .estimate-route-card-list--ab .estimate-route-card-meta{
+    margin-bottom:8px;
+    font-size:12px;
     line-height:1.45;
+    white-space:normal;
+    overflow:visible;
+    word-break:break-word;
   }
 
+  .estimate-route-card-list .estimate-route-ab-badge,
   .estimate-route-card-list--ab .estimate-route-ab-badge{
     width:20px;
     height:20px;
     font-size:11px;
   }
 
+  .estimate-route-card-list .estimate-route-select-btn,
   .estimate-route-card-list--ab .estimate-route-select-btn{
+    width:100%;
+    min-width:0;
+    margin-top:auto;
     min-height:42px;
     padding:8px 6px;
     font-size:13px;
+    box-sizing:border-box;
   }
 
+  .estimate-route-card-list .estimate-route-select-btn-label-full,
   .estimate-route-card-list--ab .estimate-route-select-btn-label-full{
     display:none;
   }
 
+  .estimate-route-card-list .estimate-route-select-btn-label-short,
   .estimate-route-card-list--ab .estimate-route-select-btn-label-short{
     display:inline;
   }
@@ -1690,33 +1786,42 @@
 
   .estimate-note-mobile{
     display:inline;
+    white-space:normal;
   }
 
   .estimate-route-mobile-summary-note{
     display:block;
-    margin:8px 2px 0;
-    padding:0;
+    width:100%;
+    max-width:100%;
+    margin:8px 0 0;
+    padding:0 8px;
     font-size:12px;
     line-height:1.55;
     color:#888;
-  }
-
-  .estimate-step--has-route{
-    overflow:hidden;
+    white-space:normal;
+    overflow:visible;
+    text-overflow:clip;
+    word-break:break-word;
+    box-sizing:border-box;
   }
 }
 
 @media (max-width:360px){
+  .estimate-route-card-list .estimate-route-card,
   .estimate-route-card-list--ab .estimate-route-card{
     padding:8px 6px;
   }
+  .estimate-route-card-list .estimate-route-card-title-short,
   .estimate-route-card-list--ab .estimate-route-card-title-short{
     font-size:12px;
   }
+  .estimate-route-card-list .estimate-route-card-compact-meta,
+  .estimate-route-card-list .estimate-roundtrip-pair-meta,
   .estimate-route-card-list--ab .estimate-route-card-compact-meta,
   .estimate-route-card-list--ab .estimate-roundtrip-pair-meta{
-    font-size:10px;
+    font-size:11px;
   }
+  .estimate-route-card-list .estimate-route-select-btn,
   .estimate-route-card-list--ab .estimate-route-select-btn{
     min-height:40px;
     font-size:12px;
