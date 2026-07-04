@@ -31,6 +31,24 @@
   };
 
   let delegatedBound = false;
+  // 初回表示・再読み込み時はページ上部から開始する（STEPカード途中への自動スクロールを抑止）
+  let pageEntryScrollPending = true;
+
+  if("scrollRestoration" in history){
+    history.scrollRestoration = "manual";
+  }
+
+  function scrollPageToTop(){
+    window.scrollTo(0, 0);
+    if(document.documentElement){
+      document.documentElement.scrollTop = 0;
+    }
+    if(document.body){
+      document.body.scrollTop = 0;
+    }
+  }
+
+  scrollPageToTop();
 
   function escapeHtml(text){
     return String(text ?? "")
@@ -621,13 +639,8 @@
     if(window.EstimateHandoff?.clearHandoffRecord){
       window.EstimateHandoff.clearHandoffRecord();
     }
+    pageEntryScrollPending = true;
     renderPage();
-    requestAnimationFrame(function(){
-      const el = document.querySelector('[data-step-id="mobility"]');
-      if(el){
-        el.scrollIntoView({ behavior: "auto", block: "start" });
-      }
-    });
   }
 
   function getFareSections(result){
@@ -2872,6 +2885,14 @@
     if(!activeStep) return;
     if(state.lastActiveStepId === activeStep.id) return;
     state.lastActiveStepId = activeStep.id;
+    // ページ入場時・リセット直後はヘッダー／タイトルが見えるよう先頭へ
+    if(pageEntryScrollPending){
+      pageEntryScrollPending = false;
+      requestAnimationFrame(function(){
+        scrollPageToTop();
+      });
+      return;
+    }
     requestAnimationFrame(function(){
       const el = document.querySelector('[data-step-id="' + activeStep.id + '"]');
       if(el){
@@ -3295,7 +3316,13 @@
       syncAssistanceForMobility();
       syncRoundTripAddon();
 
+      pageEntryScrollPending = true;
       renderPage();
+      scrollPageToTop();
+      requestAnimationFrame(function(){
+        scrollPageToTop();
+        pageEntryScrollPending = false;
+      });
     }catch(error){
       showMessage("error", error.message || "読み込みに失敗しました。");
     }

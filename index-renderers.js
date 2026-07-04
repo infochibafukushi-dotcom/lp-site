@@ -292,8 +292,10 @@
       <div class="estimate-steps">
         ${items.map((item, index) => `
           <div class="estimate-step-card">
-            <div class="estimate-step-num">STEP ${index + 1}</div>
-            ${item?.title ? `<h3 class="card-item-title">${window.IndexUtils.escapeHtml(item.title)}</h3>` : ""}
+            <div class="estimate-step-head">
+              <div class="estimate-step-num">STEP ${index + 1}</div>
+              ${item?.title ? `<h3 class="card-item-title">${window.IndexUtils.escapeHtml(item.title)}</h3>` : ""}
+            </div>
             ${item?.text ? `<div class="section-text">${window.IndexUtils.escapeHtml(item.text)}</div>` : ""}
           </div>
         `).join("")}
@@ -512,8 +514,30 @@
     `;
   }
 
+  function renderMenuListItems(items, showPrices){
+    return items.length ? items.map((item, itemIndex) => `
+      <div style="padding:14px 0;${itemIndex < items.length - 1 ? 'border-bottom:1px solid #f3eee7;' : ''}">
+        ${showPrices ? `
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
+          <div style="min-width:0;flex:1 1 auto;">
+            <div style="font-size:clamp(18px, 1.8vw, 20px);font-weight:700;line-height:1.5;color:#2d2a26;">${window.IndexUtils.escapeHtml(item.name || '')}</div>
+            ${item.description ? `<div style="margin-top:6px;font-size:13px;line-height:1.8;color:#555;white-space:pre-line;word-break:break-word;">${window.IndexUtils.escapeHtml(item.description || '')}</div>` : ''}
+          </div>
+          <div style="flex:0 0 auto;font-size:clamp(20px, 2.2vw, 24px);font-weight:800;line-height:1.2;color:#9a6b16;white-space:nowrap;padding-left:12px;letter-spacing:0.01em;">${window.IndexUtils.escapeHtml(item.price || '')}</div>
+        </div>
+        ` : `
+        <div style="min-width:0;">
+          <div style="font-size:clamp(18px, 1.8vw, 20px);font-weight:700;line-height:1.5;color:#2d2a26;">${window.IndexUtils.escapeHtml(item.name || '')}</div>
+          ${item.description ? `<div style="margin-top:6px;font-size:13px;line-height:1.8;color:#555;white-space:pre-line;word-break:break-word;">${window.IndexUtils.escapeHtml(item.description || '')}</div>` : ''}
+        </div>
+        `}
+      </div>
+    `).join("") : `<div style="padding:16px 0;font-size:13px;color:#999;">メニューはまだありません</div>`;
+  }
+
   function renderMenuList(section, config){
     const isAreaSection = section?.sectionId === "taiou-area";
+    const isPricingSection = section?.sectionId === "pricing";
     const groups = Array.isArray(section.menuGroups) ? section.menuGroups : [];
     const bottomCard = section.menuBottomCard || { visible:false, title:'', text:'', buttonText:'', buttonUrl:'#' };
     const showPrices = menuListHasAnyPrice(groups);
@@ -521,6 +545,18 @@
 
     const cardsHtml = groups.length ? groups.map((group, groupIndex) => {
       const items = Array.isArray(group.items) ? group.items.filter(item => item && item.visible !== false) : [];
+      const itemsHtml = renderMenuListItems(items, showPrices);
+
+      if(isPricingSection){
+        return `
+          <div id="menu-list-cat-${groupIndex}" class="pricing-menu-card" style="background:#ffffff;border:1px solid #e7dfd4;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.04);margin:0 0 18px 0;">
+            <div style="padding:0 16px;">
+              ${itemsHtml}
+            </div>
+          </div>
+        `;
+      }
+
       return `
         <div id="menu-list-cat-${groupIndex}" style="background:#ffffff;border:1px solid #e7dfd4;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.04);margin:0 0 18px 0;">
           <button
@@ -534,24 +570,7 @@
           </button>
           <div style="display:block;border-top:1px solid #efe7dc;">
             <div style="padding:0 16px;">
-              ${items.length ? items.map((item, itemIndex) => `
-                <div style="padding:14px 0;${itemIndex < items.length - 1 ? 'border-bottom:1px solid #f3eee7;' : ''}">
-                  ${showPrices ? `
-                  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
-                    <div style="min-width:0;flex:1 1 auto;">
-                      <div style="font-size:clamp(18px, 1.8vw, 20px);font-weight:700;line-height:1.5;color:#2d2a26;">${window.IndexUtils.escapeHtml(item.name || '')}</div>
-                      ${item.description ? `<div style="margin-top:6px;font-size:13px;line-height:1.8;color:#555;white-space:pre-line;word-break:break-word;">${window.IndexUtils.escapeHtml(item.description || '')}</div>` : ''}
-                    </div>
-                    <div style="flex:0 0 auto;font-size:clamp(20px, 2.2vw, 24px);font-weight:800;line-height:1.2;color:#9a6b16;white-space:nowrap;padding-left:12px;letter-spacing:0.01em;">${window.IndexUtils.escapeHtml(item.price || '')}</div>
-                  </div>
-                  ` : `
-                  <div style="min-width:0;">
-                    <div style="font-size:clamp(18px, 1.8vw, 20px);font-weight:700;line-height:1.5;color:#2d2a26;">${window.IndexUtils.escapeHtml(item.name || '')}</div>
-                    ${item.description ? `<div style="margin-top:6px;font-size:13px;line-height:1.8;color:#555;white-space:pre-line;word-break:break-word;">${window.IndexUtils.escapeHtml(item.description || '')}</div>` : ''}
-                  </div>
-                  `}
-                </div>
-              `).join("") : `<div style="padding:16px 0;font-size:13px;color:#999;">メニューはまだありません</div>`}
+              ${itemsHtml}
             </div>
           </div>
         </div>
@@ -569,13 +588,19 @@
 
     const mainContentHtml = isAreaSection ? areaTagsHtml : cardsHtml;
 
+    const sectionClass = [
+      "section",
+      isAreaSection ? "section-area-tags" : "",
+      isPricingSection ? "section-pricing" : ""
+    ].filter(Boolean).join(" ");
+
     return `
-      <section${window.IndexUtils.getSectionAnchorAttr(section)} class="section${isAreaSection ? ' section-area-tags' : ''}" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#f7f5f0")};padding-left:20px;padding-right:20px;">
-        <div class="section-inner" style="max-width:720px;">
+      <section${window.IndexUtils.getSectionAnchorAttr(section)} class="${sectionClass}" style="background:${window.IndexUtils.escapeAttr(section.bgColor || "#f7f5f0")};padding-left:20px;padding-right:20px;">
+        <div class="section-inner${isPricingSection ? " pricing-section-inner" : ""}" style="max-width:720px;">
           <h2 class="section-title text-${window.IndexUtils.escapeAttr(section.titleAlign || "left")}">${window.IndexUtils.escapeHtml(section.title || "")}</h2>
           ${leadHtml}
         </div>
-        <div class="section-inner" style="max-width:720px;padding-top:8px;">
+        <div class="section-inner${isPricingSection ? " pricing-section-inner" : ""}" style="max-width:720px;padding-top:8px;">
           ${mainContentHtml}
           ${bottomCardHtml}
           ${renderSectionBottomLinks(section)}
