@@ -1095,26 +1095,72 @@ main{
   .example-image{
     border-radius:10px;
   }
-  #price-examples .card-item{
+  /* スマホ: ご利用例カード・画像を画面幅100%に広げる */
+  #price-examples{
+    width:100%;
+    max-width:none;
+    padding-left:0;
+    padding-right:0;
+    overflow-x:hidden;
+  }
+  #price-examples .section-inner{
+    width:100%;
+    max-width:none;
+    padding-left:0;
+    padding-right:0;
+  }
+  #price-examples .section-title,
+  #price-examples .section-inner > .section-text,
+  #price-examples .section-disclaimer,
+  #price-examples .section-bottom-links,
+  #price-examples .section-config-footer-ctas{
+    padding-left:16px;
+    padding-right:16px;
+    box-sizing:border-box;
+  }
+  #price-examples .card-grid-3{
+    width:100%;
+    max-width:none;
+    gap:12px;
+  }
+  #price-examples .card-item,
+  #price-examples .price-example-card{
+    width:100vw;
+    max-width:100vw;
+    margin-left:calc(50% - 50vw);
+    margin-right:calc(50% - 50vw);
+    border:none;
+    border-radius:0;
+    box-shadow:none;
+    box-sizing:border-box;
+    padding:16px 0 0;
     overflow:hidden;
   }
-
-  /* スマホ: ご利用例画像を横幅100%近くまで広げる */
+  #price-examples .price-example-card > :not(.example-image-wrap),
+  #price-examples .card-item.price-example-card > :not(.example-image-wrap){
+    padding-left:16px;
+    padding-right:16px;
+    box-sizing:border-box;
+  }
   #price-examples .example-image-wrap,
   #price-examples .price-example-card .example-image-wrap{
-    width:calc(100% + 24px);
+    width:100%;
     max-width:none;
-    margin-left:-12px;
-    margin-right:-12px;
+    margin-left:0;
+    margin-right:0;
   }
   #price-examples .example-image,
-  #price-examples .price-example-card img{
+  #price-examples .price-example-card img,
+  #price-examples .example-image-wrap img{
     width:100%;
     max-width:100%;
     height:auto;
     max-height:none;
     object-fit:contain;
     display:block;
+    border:none;
+    border-radius:0;
+    box-shadow:none;
   }
 }
 
