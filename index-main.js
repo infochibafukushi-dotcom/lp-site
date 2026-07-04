@@ -142,6 +142,47 @@
     throw lastError || new Error("JSON fetch failed");
   }
 
+  const PC_TOP_PHONE_FALLBACK = {
+    label: "TEL：",
+    number: "090-6331-4289",
+    link: "tel:09063314289"
+  };
+
+  function isPcViewport(){
+    return window.matchMedia ? window.matchMedia("(min-width: 769px)").matches : window.innerWidth >= 769;
+  }
+
+  function applyPcTopPhone(config){
+    const pcPhoneInline = document.getElementById("pcPhoneInline");
+    if(!pcPhoneInline) return;
+
+    // PCでは常に表示。スマホは CSS / .hidden で非表示。
+    if(!isPcViewport()){
+      pcPhoneInline.innerHTML = "";
+      pcPhoneInline.classList.add("hidden");
+      return;
+    }
+
+    const pcTopPhone = (config && config.pcTopPhone && typeof config.pcTopPhone === "object")
+      ? config.pcTopPhone
+      : {};
+    const label = String(pcTopPhone.label || PC_TOP_PHONE_FALLBACK.label).trim() || PC_TOP_PHONE_FALLBACK.label;
+    const number = String(pcTopPhone.number || PC_TOP_PHONE_FALLBACK.number).trim() || PC_TOP_PHONE_FALLBACK.number;
+    const digits = number.replace(/[^0-9+]/g, "");
+    const fallbackLink = digits ? ("tel:" + digits) : PC_TOP_PHONE_FALLBACK.link;
+    const link = window.IndexUtils.sanitizeUrl(
+      pcTopPhone.link || fallbackLink,
+      PC_TOP_PHONE_FALLBACK.link
+    );
+    const separator = label && number && !/[：:]$/.test(label) ? " " : "";
+    const displayText = label + separator + number;
+
+    pcPhoneInline.innerHTML =
+      `<a href="${window.IndexUtils.escapeAttr(link)}" aria-label="電話 ${window.IndexUtils.escapeAttr(displayText)}">` +
+      `${window.IndexUtils.escapeHtml(displayText)}</a>`;
+    pcPhoneInline.classList.remove("hidden");
+  }
+
   async function loadConfig(){
     const configRaw = await fetchJsonWithFallback([
       "./data/config.json",
@@ -208,21 +249,7 @@
       "予約"
     );
 
-    const pcPhoneInline = document.getElementById("pcPhoneInline");
-    if(pcPhoneInline){
-      const pcTopPhone = config.pcTopPhone || {};
-      const label = String(pcTopPhone.label || "").trim();
-      const number = String(pcTopPhone.number || "").trim();
-      const fallbackLink = number ? ("tel:" + number.replace(/[^0-9+]/g, "")) : "#";
-      const link = window.IndexUtils.sanitizeUrl(pcTopPhone.link || fallbackLink, "#");
-      if(isPc && pcTopPhone.enabled === true && (label || number)){
-        pcPhoneInline.innerHTML = `<a href="${window.IndexUtils.escapeAttr(link)}">${window.IndexUtils.escapeHtml(label)}${label && number ? " " : ""}${window.IndexUtils.escapeHtml(number)}</a>`;
-        pcPhoneInline.classList.remove("hidden");
-      }else{
-        pcPhoneInline.innerHTML = "";
-        pcPhoneInline.classList.add("hidden");
-      }
-    }
+    applyPcTopPhone(config);
 
     sitePassword = config.password || "95123";
     return config;
@@ -326,7 +353,9 @@
         if(window.SectionBottomButtons && typeof window.SectionBottomButtons.hydrateConfigFooterCtas === "function"){
           window.SectionBottomButtons.hydrateConfigFooterCtas(config);
         }
-      }).catch(function(){});
+      }).catch(function(){
+        applyPcTopPhone(null);
+      });
     };
     if(typeof mq.addEventListener === "function"){
       mq.addEventListener("change", handler);
@@ -347,6 +376,8 @@
   }
 
   async function init(){
+    // config 読み込み前でも PC ではフォールバック電話番号を表示する
+    applyPcTopPhone(null);
     try{
       bindLogoTrigger();
       bindResponsiveReload();
@@ -355,6 +386,7 @@
       await loadSections(config);
       renderPopup(config || {});
     }catch(error){
+      applyPcTopPhone(null);
       const container = document.getElementById("sectionsContainer");
       if(container){
         container.innerHTML = '<div class="empty-box">初期化に失敗しました。</div>';

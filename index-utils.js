@@ -167,11 +167,13 @@
     const phoneButton = config && Array.isArray(config.footer) ? config.footer[0] : null;
     const rawLink = phoneButton && phoneButton.link ? String(phoneButton.link).trim() : "";
     const fallbackDigits = digitsOnlyPhone(rawLink.replace(/^tel:/i, ""));
+    const defaultNumber = "090-6331-4289";
+    const defaultLink = "tel:09063314289";
     return {
       enabled: !!(phoneButton && phoneButton.visible !== false && rawLink),
-      label: "📞 電話予約",
-      number: fallbackDigits ? formatPhoneNumberForDisplay(fallbackDigits) : "",
-      link: rawLink || (fallbackDigits ? ("tel:" + fallbackDigits) : "")
+      label: "TEL：",
+      number: fallbackDigits ? formatPhoneNumberForDisplay(fallbackDigits) : defaultNumber,
+      link: rawLink || (fallbackDigits ? ("tel:" + fallbackDigits) : defaultLink)
     };
   }
 
@@ -182,9 +184,9 @@
     const linkValue = String(current.link || fallback.link || "").trim();
     return {
       enabled: current.enabled === true || (current.enabled == null && fallback.enabled === true),
-      label: String(current.label || fallback.label || "📞 電話予約").trim() || "📞 電話予約",
-      number: numberValue || formatPhoneNumberForDisplay(digitsOnlyPhone(linkValue.replace(/^tel:/i, ""))),
-      link: linkValue || (numberValue ? ("tel:" + digitsOnlyPhone(numberValue)) : fallback.link || "")
+      label: String(current.label || fallback.label || "TEL：").trim() || "TEL：",
+      number: numberValue || formatPhoneNumberForDisplay(digitsOnlyPhone(linkValue.replace(/^tel:/i, ""))) || "090-6331-4289",
+      link: linkValue || (numberValue ? ("tel:" + digitsOnlyPhone(numberValue)) : fallback.link || "tel:09063314289")
     };
   }
 
