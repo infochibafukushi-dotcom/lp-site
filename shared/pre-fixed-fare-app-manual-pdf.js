@@ -430,30 +430,155 @@
     });
   }
 
-  function mountPdfContainer(reportHtml){
+  function backupElementStyles(element){
+    if(!element){
+      return null;
+    }
+    return {
+      display: element.style.display,
+      maxHeight: element.style.maxHeight,
+      overflow: element.style.overflow,
+      position: element.style.position,
+      left: element.style.left,
+      top: element.style.top,
+      width: element.style.width,
+      maxWidth: element.style.maxWidth,
+      zIndex: element.style.zIndex,
+      background: element.style.background,
+      pointerEvents: element.style.pointerEvents
+    };
+  }
+
+  function restoreElementStyles(element, backup){
+    if(!element || !backup){
+      return;
+    }
+    Object.keys(backup).forEach(function(key){
+      element.style[key] = backup[key];
+    });
+  }
+
+  function applyExportVisibleStyles(element){
+    if(!element){
+      return;
+    }
+    element.style.display = "block";
+    element.style.maxHeight = "none";
+    element.style.overflow = "visible";
+    element.style.position = "fixed";
+    element.style.left = "0";
+    element.style.top = "0";
+    element.style.width = "210mm";
+    element.style.maxWidth = "210mm";
+    element.style.zIndex = "2147483647";
+    element.style.background = "#ffffff";
+    element.style.pointerEvents = "none";
+  }
+
+  function mountVisibleExportRoot(reportHtml){
+    const existing = document.getElementById("preFixedFareAppManualExportRoot");
+    if(existing){
+      existing.remove();
+    }
     const container = document.createElement("div");
+    container.id = "preFixedFareAppManualExportRoot";
     container.setAttribute("data-pre-fixed-fare-app-manual-pdf-root", "1");
-    container.style.position = "fixed";
-    container.style.left = "0";
-    container.style.top = "0";
-    container.style.width = "210mm";
-    container.style.maxWidth = "210mm";
-    container.style.background = "#ffffff";
-    container.style.color = "#111827";
-    container.style.zIndex = "2147483646";
-    container.style.opacity = "0.01";
-    container.style.pointerEvents = "none";
-    container.style.overflow = "visible";
+    applyExportVisibleStyles(container);
     container.innerHTML = "<style>" + getManualCss() + "</style>" + reportHtml;
     document.body.appendChild(container);
-
     const reportElement = container.querySelector(SCOPE.trim());
     if(reportElement){
       reportElement.style.width = "210mm";
       reportElement.style.maxWidth = "210mm";
       reportElement.style.background = "#ffffff";
     }
-    return { container: container, reportElement: reportElement };
+    return container;
+  }
+
+  async function renderVisibleReportTarget(reportHtml, options){
+    options = options || {};
+    const previewTarget = options.previewElement || document.getElementById("preFixedFareAppManualPreview");
+    if(previewTarget){
+      const styleBackup = backupElementStyles(previewTarget);
+      applyExportVisibleStyles(previewTarget);
+      previewTarget.innerHTML = "<style>" + getManualCss() + "</style>" + reportHtml;
+      const reportElement = previewTarget.querySelector(SCOPE.trim());
+      if(reportElement){
+        reportElement.style.width = "210mm";
+        reportElement.style.maxWidth = "210mm";
+        reportElement.style.background = "#ffffff";
+      }
+      return {
+        mountElement: previewTarget,
+        reportElement: reportElement,
+        cleanup: function(restorePreviewLayout){
+          if(restorePreviewLayout !== false){
+            restoreElementStyles(previewTarget, styleBackup);
+            if(!styleBackup.display){
+              previewTarget.style.display = "block";
+            }
+          }
+        }
+      };
+    }
+
+    const container = mountVisibleExportRoot(reportHtml);
+    return {
+      mountElement: container,
+      reportElement: container.querySelector(SCOPE.trim()),
+      cleanup: function(){
+        container.remove();
+      }
+    };
+  }
+
+  async function exportReportElementToPdf(reportElement, mountElement, reportData, prepared){
+    if(!reportElement){
+      throw new Error("生成対象HTMLが空です。");
+    }
+
+    const pageElements = reportElement.querySelectorAll(".manual-page");
+    const pageCount = pageElements.length;
+    logPdfDebug("data pages:", pageCount);
+    logPdfDebug("root exists:", !!reportElement);
+    logPdfDebug("root html length:", reportElement.innerHTML.length);
+    logPdfDebug("html2pdf exists:", typeof html2pdf !== "undefined");
+    logPdfDebug("generator exists:", typeof generatePreFixedFareAppManualPdf === "function");
+
+    if(pageCount !== EXPECTED_PAGE_COUNT){
+      console.warn("[PreFixedFareAppManualPdf] unexpected page count:", pageCount, "expected:", EXPECTED_PAGE_COUNT);
+    }
+
+    await waitForImagesToLoad(mountElement || reportElement);
+    await waitForLayout();
+
+    await html2pdf().set({
+      margin: [0, 0, 0, 0],
+      filename: reportData.pdfFilename || PDF_FILENAME,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: "#ffffff",
+        scrollX: 0,
+        scrollY: 0,
+        logging: false
+      },
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      pagebreak: {
+        mode: ["css", "legacy"],
+        before: [".manual-page + .manual-page"],
+        after: [],
+        avoid: [".manual-table-block", ".manual-screenshot-block", ".table-wrap"]
+      }
+    }).from(reportElement).save();
+
+    return {
+      pageCount: pageCount,
+      imageAvailability: prepared.imageAvailability,
+      pageIds: Array.from(pageElements).map(function(el){ return el.getAttribute("data-page-id"); })
+    };
   }
 
   async function buildPreparedReport(reportData){
@@ -567,64 +692,24 @@
     });
   }
 
-  async function savePdf(reportData){
+  async function savePdf(reportData, options){
+    options = options || {};
     await ensureHtml2Pdf();
     const prepared = await buildPreparedReport(reportData);
-    const reportHtml = prepared.reportHtml;
-    const mounted = mountPdfContainer(reportHtml);
-    const container = mounted.container;
-    const reportElement = mounted.reportElement;
+    const visibleTarget = await renderVisibleReportTarget(prepared.reportHtml, options);
+    const reportElement = visibleTarget.reportElement;
+    const mountElement = visibleTarget.mountElement;
 
     if(!reportElement){
-      container.remove();
+      visibleTarget.cleanup(false);
       throw new Error("生成対象HTMLが空です。");
     }
 
-    const pageElements = reportElement.querySelectorAll(".manual-page");
-    const pageCount = pageElements.length;
-    logPdfDebug("data pages:", pageCount);
-    logPdfDebug("root exists:", !!reportElement);
-    logPdfDebug("root html length:", reportElement.innerHTML.length);
-    logPdfDebug("html2pdf exists:", typeof html2pdf !== "undefined");
-    logPdfDebug("generator exists:", typeof generatePreFixedFareAppManualPdf === "function");
-
-    if(pageCount !== EXPECTED_PAGE_COUNT){
-      console.warn("[PreFixedFareAppManualPdf] unexpected page count:", pageCount, "expected:", EXPECTED_PAGE_COUNT);
-    }
-
     try{
-      await waitForImagesToLoad(container);
-      await waitForLayout();
-      await html2pdf().set({
-        margin: [0, 0, 0, 0],
-        filename: reportData.pdfFilename || PDF_FILENAME,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          allowTaint: false,
-          backgroundColor: "#ffffff",
-          scrollX: 0,
-          scrollY: 0,
-          logging: false
-        },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-        pagebreak: {
-          mode: ["css", "legacy"],
-          before: [".manual-page + .manual-page"],
-          after: [],
-          avoid: [".manual-table-block", ".manual-screenshot-block", ".table-wrap"]
-        }
-      }).from(reportElement).save();
+      return await exportReportElementToPdf(reportElement, mountElement, reportData, prepared);
     }finally{
-      container.remove();
+      visibleTarget.cleanup(true);
     }
-
-    return {
-      pageCount: pageCount,
-      imageAvailability: prepared.imageAvailability,
-      pageIds: Array.from(pageElements).map(function(el){ return el.getAttribute("data-page-id"); })
-    };
   }
 
   async function previewReportHtml(reportData, targetElement){
@@ -633,9 +718,21 @@
       throw new Error("プレビュー表示先が見つかりません。");
     }
     const prepared = await buildPreparedReport(reportData);
+    target.style.display = "block";
+    target.style.maxHeight = "480px";
+    target.style.overflow = "auto";
+    target.style.position = "";
+    target.style.left = "";
+    target.style.top = "";
+    target.style.width = "";
+    target.style.maxWidth = "";
+    target.style.zIndex = "";
+    target.style.background = "#fff";
     target.innerHTML = "<style>" + getManualCss() + "</style>" + prepared.reportHtml;
     const root = target.querySelector(SCOPE.trim());
     if(root){
+      root.style.width = "";
+      root.style.maxWidth = "";
       await waitForImagesToLoad(target);
     }
     return {
@@ -645,6 +742,7 @@
   }
 
   async function generatePreFixedFareAppManualPdf(options){
+    options = options || {};
     if(!global.PreFixedFareAppManualData){
       throw new Error("予約・運行中アプリ操作マニュアルPDFデータモジュールの読み込みに失敗しました。");
     }
@@ -655,7 +753,9 @@
     if(!String(reportData.title || "").trim()){
       throw new Error("pre-fixed-fare-app-manual-data の組み立てに失敗しました");
     }
-    return savePdf(reportData);
+    return savePdf(reportData, {
+      previewElement: options.previewElement || document.getElementById("preFixedFareAppManualPreview")
+    });
   }
 
   global.generatePreFixedFareAppManualPdf = generatePreFixedFareAppManualPdf;
@@ -665,6 +765,8 @@
     EXPECTED_PAGE_COUNT: EXPECTED_PAGE_COUNT,
     buildReportHtml: buildReportHtml,
     buildPreparedReport: buildPreparedReport,
+    renderVisibleReportTarget: renderVisibleReportTarget,
+    exportReportElementToPdf: exportReportElementToPdf,
     getManualCss: getManualCss,
     probeImages: probeImages,
     previewReportHtml: previewReportHtml,

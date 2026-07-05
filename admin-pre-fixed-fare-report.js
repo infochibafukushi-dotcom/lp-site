@@ -461,7 +461,9 @@
       throw new Error("予約・運行中アプリ操作マニュアルPDFモジュールの読み込みに失敗しました。");
     }
     setAppManualStatus("PDFを作成しています...", "warn");
-    const result = await global.PreFixedFareAppManualPdf.generatePreFixedFareAppManualPdf();
+    const result = await global.PreFixedFareAppManualPdf.generatePreFixedFareAppManualPdf({
+      previewElement: document.getElementById("preFixedFareAppManualPreview")
+    });
     const pageCount = result?.pageCount || 0;
     setAppManualStatus("PDFを保存しました。（" + pageCount + "ページ）", "success");
     return result;
