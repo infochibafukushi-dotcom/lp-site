@@ -7,7 +7,7 @@ const rootDir = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const adminUrl = "file:///" + path.join(rootDir, "admin.html").replace(/\\/g, "/");
 const printPagePath = path.join(rootDir, "manual", "pre-fixed-fare-app-operation-manual-print.html");
 const printPageUrl = "file:///" + printPagePath.replace(/\\/g, "/");
-const operationManualPath = path.join(rootDir, "manual", "pre-fixed-fare-operation.html");
+const METER_REVIEW_DEMO_RESERVATIONS_URL = "https://infochibafukushi-dotcom.github.io/care-taxi-meter/review-demo/reservations?reviewDemo=1&scenario=pre-fixed-fare-demo";
 const DEFAULT_CHROME = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 const EXPECTED_PAGE_COUNT = 17;
 
@@ -95,6 +95,10 @@ async function main(){
       const rootStyle = root ? getComputedStyle(root) : null;
       const pageStyle = firstPage ? getComputedStyle(firstPage) : null;
       const cssText = document.getElementById("preFixedFareAppManualPrintCss")?.textContent || "";
+      const operationQrUrl = window.PreFixedFareAppManualData
+        ? window.PreFixedFareAppManualData.resolveManualUrl("operationManual")
+        : "";
+      const coverHtml = coverPage ? coverPage.innerHTML : "";
       return {
         hasToolbar: Boolean(document.querySelector(".print-toolbar")),
         hasPrintBtn: Boolean(document.getElementById("printManualBtn")),
@@ -117,6 +121,8 @@ async function main(){
         firstPageOpacity: pageStyle?.opacity || "",
         cssHasDoubleBreakBefore: cssText.includes(".manual-page + .manual-page"),
         cssUsesManualPrintRoot: cssText.includes(".manual-print-root"),
+        operationQrUrl: operationQrUrl,
+        coverHasMeterDescription: coverHtml.includes("乗務員側で審査用デモ予約を確認し"),
         routeChangeHasTable: Boolean(routeChangePage?.querySelector("table")),
         routeChangeHasScreenshot: Boolean(routeChangePage?.querySelector(".manual-screenshot-img")),
         routeChangeOperationHasScreenshot: Boolean(routeChangeOperationPage?.querySelector(".manual-screenshot-img")),
@@ -155,7 +161,11 @@ async function main(){
       printCheck.printPagePath === "./manual/pre-fixed-fare-app-operation-manual-print.html",
       "PRINT_PAGE_RELATIVE_PATH が不正: " + printCheck.printPagePath
     );
-    assert(fs.existsSync(operationManualPath), "QR②リンク先 manual/pre-fixed-fare-operation.html がありません");
+    assert(
+      printCheck.operationQrUrl === METER_REVIEW_DEMO_RESERVATIONS_URL,
+      "QR② URL が不正: " + printCheck.operationQrUrl
+    );
+    assert(printCheck.coverHasMeterDescription, "QR②説明文がありません");
 
     await page.goto(adminUrl, { waitUntil: "networkidle0", timeout: 60000 });
 

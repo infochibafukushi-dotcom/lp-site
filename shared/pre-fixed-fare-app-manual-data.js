@@ -1,7 +1,9 @@
 (function(global){
+  const METER_REVIEW_DEMO_RESERVATIONS_URL = "https://infochibafukushi-dotcom.github.io/care-taxi-meter/review-demo/reservations?reviewDemo=1&scenario=pre-fixed-fare-demo";
+
   const PRE_FIXED_FARE_MANUAL_LINKS = {
     estimateReservation: "./estimate/?scenario=pre-fixed-fare-demo",
-    operationManual: "./manual/pre-fixed-fare-operation.html"
+    operationManual: METER_REVIEW_DEMO_RESERVATIONS_URL
   };
 
   const IMAGE_BASE = "./assets/manual/pre-fixed-fare/";
@@ -38,8 +40,8 @@
       id: "operationManual",
       label: "QR②",
       title: "運行中のメーター操作",
-      coverNote: "運行操作説明ページを開きます",
-      description: "乗務員が予約確認、運行開始、運行中操作、精算、領収書保存を行う流れを確認します。",
+      coverNote: "乗務員側で審査用デモ予約を確認し、運行開始、ルート変更・迂回、精算、領収書PDF保存までの流れを確認します。",
+      description: "乗務員側で審査用デモ予約を確認し、運行開始、ルート変更・迂回、精算、領収書PDF保存までの流れを確認します。",
       urlKey: "operationManual"
     }
   ];
@@ -470,6 +472,7 @@
 
   global.PreFixedFareAppManualData = {
     PRE_FIXED_FARE_MANUAL_LINKS: PRE_FIXED_FARE_MANUAL_LINKS,
+    METER_REVIEW_DEMO_RESERVATIONS_URL: METER_REVIEW_DEMO_RESERVATIONS_URL,
     DOCUMENT_INFO: DOCUMENT_INFO,
     DEMO_DATA: DEMO_DATA,
     IMAGE_BASE: IMAGE_BASE,

@@ -22,6 +22,9 @@
     { id: "slot-20260902-1400", label: "令和8年9月2日 14:00", iso: "2026-09-02T14:00:00+09:00" }
   ];
 
+  const METER_REVIEW_DEMO_RESERVATIONS_URL = "https://infochibafukushi-dotcom.github.io/care-taxi-meter/review-demo/reservations?reviewDemo=1&scenario=pre-fixed-fare-demo";
+  const METER_REVIEW_DEMO_COMPLETE_NOTE = "このボタンから、乗務員側のメーターアプリで審査用デモ予約を確認し、運行開始から精算までの流れを確認できます。この操作は本番予約・本番運行記録・売上・通知には反映されません。";
+
   const CONSENT_NOTICE =
     "走行予定ルート・事前確定運賃額・ルート変更時の取扱いを確認のうえ、審査用デモ予約として保存します。本操作は本番予約・本番カレンダー・通知・売上集計には反映されません。";
 
@@ -190,6 +193,8 @@
         summaryRow(esc, "待機料金", savedRecord.waitingFeeLabel) +
         summaryRow(esc, "合計", savedRecord.totalLabel) +
         "</tbody></table>" +
+        '<p class="estimate-review-demo-meter-note">' + esc(METER_REVIEW_DEMO_COMPLETE_NOTE) + "</p>" +
+        '<a class="estimate-review-demo-meter-btn" href="' + escAttr(METER_REVIEW_DEMO_RESERVATIONS_URL) + '" target="_blank" rel="noopener noreferrer">乗務員アプリでこの予約を確認する</a>' +
         "</section>"
       );
     }
@@ -254,6 +259,7 @@
     DEMO_DEFAULTS: DEMO_DEFAULTS,
     CALENDAR_SLOTS: CALENDAR_SLOTS,
     CONSENT_NOTICE: CONSENT_NOTICE,
+    METER_REVIEW_DEMO_RESERVATIONS_URL: METER_REVIEW_DEMO_RESERVATIONS_URL,
     isReviewDemoMode: isReviewDemoMode,
     shouldSkipProductionIntegrations: shouldSkipProductionIntegrations,
     findCalendarSlot: findCalendarSlot,

@@ -94,6 +94,9 @@ function runModuleTests(){
   assert(panelHtml.includes("審査用デモ予約を保存しました"), "completion title missing");
   assert(panelHtml.includes("PF-REVIEW-001"), "completion reservation id missing");
   assert(panelHtml.includes("7,800円"), "completion fare missing");
+  assert(panelHtml.includes("乗務員アプリでこの予約を確認する"), "meter app button missing");
+  assert(panelHtml.includes("care-taxi-meter/review-demo/reservations"), "meter app URL missing");
+  assert(panelHtml.includes("本番運行記録・売上・通知には反映されません"), "meter app note missing");
 
   const registerSandbox = loadModule("shared/pre-fixed-fare-review-demo.js");
   registerSandbox.window.location = { search: "?scenario=pre-fixed-fare-demo" };
@@ -214,6 +217,10 @@ async function runBrowserTests(){
     assert(
       manualDataCode.includes("./estimate/?scenario=pre-fixed-fare-demo"),
       "manual QR① URL must remain ./estimate/?scenario=pre-fixed-fare-demo"
+    );
+    assert(
+      manualDataCode.includes("care-taxi-meter/review-demo/reservations?reviewDemo=1&scenario=pre-fixed-fare-demo"),
+      "manual QR② URL must point to meter review demo reservations"
     );
 
     const normalPage = await browser.newPage();

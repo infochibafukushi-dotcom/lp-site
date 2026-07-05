@@ -2180,6 +2180,29 @@ body.estimate-has-mobile-reserve-bar .estimate-wrap{
   font-size:13px;
   font-weight:700;
 }
+.estimate-review-demo-meter-note{
+  margin:14px 0 10px;
+  padding:12px;
+  border-left:4px solid #2f6fad;
+  background:#eef5fb;
+  color:#1e3a5f;
+  font-size:13px;
+  line-height:1.55;
+}
+.estimate-review-demo-meter-btn{
+  display:block;
+  width:100%;
+  box-sizing:border-box;
+  margin-top:4px;
+  padding:14px 16px;
+  border-radius:999px;
+  background:#1b3a6b;
+  color:#fff;
+  font-size:16px;
+  font-weight:800;
+  text-align:center;
+  text-decoration:none;
+}
 .estimate-cta-primary--review-demo{
   background:#1b3a6b;
 }

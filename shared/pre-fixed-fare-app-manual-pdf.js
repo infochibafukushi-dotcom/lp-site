@@ -836,11 +836,14 @@
   }
 
   function getPrintPageDefaultOptions(){
+    const meterUrl = global.PreFixedFareAppManualData
+      ? global.PreFixedFareAppManualData.METER_REVIEW_DEMO_RESERVATIONS_URL
+      : "https://infochibafukushi-dotcom.github.io/care-taxi-meter/review-demo/reservations?reviewDemo=1&scenario=pre-fixed-fare-demo";
     return {
       imageBase: "../assets/manual/pre-fixed-fare/",
       manualLinks: {
         estimateReservation: "../estimate/?scenario=pre-fixed-fare-demo",
-        operationManual: "./pre-fixed-fare-operation.html"
+        operationManual: meterUrl
       }
     };
   }
