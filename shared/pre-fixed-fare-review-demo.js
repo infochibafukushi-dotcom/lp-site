@@ -3,6 +3,8 @@
   const STORAGE_KEY = "preFixedFareReviewReservations";
   const BANNER_TEXT = "審査用デモモード：本番予約・本番カレンダーには反映されません";
 
+  const DEMO_RESERVATION_ID = "PF-REVIEW-001";
+
   const DEMO_DEFAULTS = {
     reservationIdPrefix: "PF-REVIEW-",
     customerName: "審査用デモ",
@@ -45,6 +47,27 @@
     return Number(amount || 0).toLocaleString("ja-JP") + "円";
   }
 
+  function formatSavedAtLabel(isoString){
+    const date = new Date(isoString);
+    if(Number.isNaN(date.getTime())){
+      return String(isoString || "");
+    }
+    return new Intl.DateTimeFormat("ja-JP-u-ca-japanese", {
+      timeZone: "Asia/Tokyo",
+      era: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    }).format(date);
+  }
+
+  function getDemoReservationId(){
+    return DEMO_RESERVATION_ID;
+  }
+
   function readStorageList(){
     try{
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -60,9 +83,7 @@
   }
 
   function nextReservationId(){
-    const list = readStorageList();
-    const next = list.length + 1;
-    return DEMO_DEFAULTS.reservationIdPrefix + String(next).padStart(3, "0");
+    return DEMO_RESERVATION_ID;
   }
 
   function findCalendarSlot(slotId){
@@ -115,25 +136,38 @@
     options = options || {};
     const slot = findCalendarSlot(options.slotId) || CALENDAR_SLOTS[0];
     const fees = extractFeeBreakdown(options.result || {});
+    const origin = String(options.origin || DEMO_DEFAULTS.origin).trim() || DEMO_DEFAULTS.origin;
+    const destination = String(options.destination || DEMO_DEFAULTS.destination).trim() || DEMO_DEFAULTS.destination;
     const reservationId = options.reservationId || nextReservationId();
+    const preFixedFareLabel = formatYen(fees.preFixedFareYen);
+    const assistanceFeeLabel = formatYen(fees.assistanceFeeYen);
+    const waitingFeeLabel = formatYen(fees.waitingFeeYen);
+    const totalLabel = formatYen(fees.totalYen);
+    const serviceFeeYen = fees.assistanceFeeYen + fees.waitingFeeYen;
     return {
       reservationId: reservationId,
       scenario: SCENARIO,
       storageScope: STORAGE_KEY,
       customerName: DEMO_DEFAULTS.customerName,
-      origin: String(options.origin || DEMO_DEFAULTS.origin).trim() || DEMO_DEFAULTS.origin,
-      destination: String(options.destination || DEMO_DEFAULTS.destination).trim() || DEMO_DEFAULTS.destination,
+      origin: origin,
+      destination: destination,
+      pickup: origin,
       reservationAtLabel: slot.label,
       reservationAtIso: slot.iso,
-      preFixedFareLabel: formatYen(fees.preFixedFareYen),
-      assistanceFeeLabel: formatYen(fees.assistanceFeeYen),
-      waitingFeeLabel: formatYen(fees.waitingFeeYen),
-      totalLabel: formatYen(fees.totalYen),
+      reservationDateTime: slot.label,
+      preFixedFareLabel: preFixedFareLabel,
+      assistanceFeeLabel: assistanceFeeLabel,
+      waitingFeeLabel: waitingFeeLabel,
+      totalLabel: totalLabel,
+      fixedFare: preFixedFareLabel,
+      serviceFee: formatYen(serviceFeeYen),
+      totalFare: totalLabel,
       preFixedFareYen: fees.preFixedFareYen,
       assistanceFeeYen: fees.assistanceFeeYen,
       waitingFeeYen: fees.waitingFeeYen,
       totalYen: fees.totalYen,
       consentAtLabel: slot.label,
+      consentAt: slot.label,
       estimateNumber: String(options.estimateNumber || "").trim(),
       savedAt: new Date().toISOString(),
       isReviewDemo: true,
@@ -142,10 +176,24 @@
   }
 
   function saveReservation(record){
-    const list = readStorageList();
-    list.unshift(record);
-    writeStorageList(list.slice(0, 20));
-    return record;
+    const normalized = Object.assign({}, record, {
+      reservationId: DEMO_RESERVATION_ID,
+      storageScope: STORAGE_KEY,
+      scenario: SCENARIO,
+      isReviewDemo: true,
+      savedAt: record?.savedAt || new Date().toISOString()
+    });
+    writeStorageList([normalized]);
+    return normalized;
+  }
+
+  function clearReservations(){
+    writeStorageList([]);
+    try{
+      localStorage.removeItem(STORAGE_KEY);
+    }catch(error){
+      /* ignore */
+    }
   }
 
   function listReservations(){
@@ -169,6 +217,15 @@
     const url = getMeterReviewDemoReservationsUrl();
     return (
       '<a class="estimate-review-demo-meter-btn" href="' + url + '" target="_blank" rel="noopener noreferrer" data-review-demo-meter-open="1">乗務員アプリでこの予約を確認する</a>'
+    );
+  }
+
+  function buildReviewDemoCompleteActionsHtml(){
+    return (
+      '<div class="estimate-review-demo-complete-actions">' +
+      '<a class="estimate-review-demo-action-btn estimate-review-demo-action-btn--secondary" href="./estimate/?scenario=pre-fixed-fare-demo">最初からやり直す</a>' +
+      '<a class="estimate-review-demo-action-btn estimate-review-demo-action-btn--secondary" href="../admin.html" target="_blank" rel="noopener noreferrer">管理画面で確認する</a>' +
+      "</div>"
     );
   }
 
@@ -206,6 +263,7 @@
         "</tbody></table>" +
         '<p class="estimate-review-demo-meter-note">' + esc(METER_REVIEW_DEMO_COMPLETE_NOTE) + "</p>" +
         buildMeterReviewDemoOpenButtonHtml() +
+        buildReviewDemoCompleteActionsHtml() +
         "</section>"
       );
     }
@@ -266,6 +324,7 @@
   global.PreFixedFareReviewDemo = {
     SCENARIO: SCENARIO,
     STORAGE_KEY: STORAGE_KEY,
+    DEMO_RESERVATION_ID: DEMO_RESERVATION_ID,
     BANNER_TEXT: BANNER_TEXT,
     DEMO_DEFAULTS: DEMO_DEFAULTS,
     CALENDAR_SLOTS: CALENDAR_SLOTS,
@@ -273,12 +332,15 @@
     METER_REVIEW_DEMO_RESERVATIONS_URL: METER_REVIEW_DEMO_RESERVATIONS_URL,
     getMeterReviewDemoReservationsUrl: getMeterReviewDemoReservationsUrl,
     buildMeterReviewDemoOpenButtonHtml: buildMeterReviewDemoOpenButtonHtml,
+    formatSavedAtLabel: formatSavedAtLabel,
+    getDemoReservationId: getDemoReservationId,
     isReviewDemoMode: isReviewDemoMode,
     shouldSkipProductionIntegrations: shouldSkipProductionIntegrations,
     findCalendarSlot: findCalendarSlot,
     extractFeeBreakdown: extractFeeBreakdown,
     buildReservationRecord: buildReservationRecord,
     saveReservation: saveReservation,
+    clearReservations: clearReservations,
     listReservations: listReservations,
     renderBanner: renderBanner,
     renderReservationPanel: renderReservationPanel

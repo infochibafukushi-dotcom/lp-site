@@ -3222,11 +3222,14 @@
   }
 
   function renderEstimateTopBar(){
+    const homeLink = isReviewDemoMode()
+      ? ""
+      : '<a class="estimate-top-bar-btn estimate-top-bar-home" href="../index.html">ホームに戻る</a>';
     return (
       '<header class="estimate-top-bar">' +
         '<div class="estimate-top-bar-inner">' +
           '<button type="button" class="estimate-top-bar-btn estimate-top-bar-reset" id="estimateResetBtn">最初からやり直す</button>' +
-          '<a class="estimate-top-bar-btn estimate-top-bar-home" href="../index.html">ホームに戻る</a>' +
+          homeLink +
         "</div>" +
       "</header>"
     );

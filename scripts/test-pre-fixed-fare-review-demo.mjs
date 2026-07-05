@@ -85,6 +85,25 @@ function runModuleTests(){
   assert(saved.length === 1, "expected one saved demo reservation");
   assert(saved[0].storageScope === STORAGE_KEY, "storage scope mismatch");
 
+  const record2 = demo.buildReservationRecord({
+    slotId: "slot-20260901-1300",
+    origin: "更新後乗車地",
+    destination: "更新後目的地",
+    result: { total: 8800, quoteSnapshot: { fixedFareTotal: 7800 } }
+  });
+  demo.saveReservation(record2);
+  const overwritten = demo.listReservations();
+  assert(overwritten.length === 1, "overwrite should keep single demo reservation");
+  assert(overwritten[0].reservationId === "PF-REVIEW-001", "reservation id should remain PF-REVIEW-001");
+  assert(overwritten[0].origin === "更新後乗車地", "origin should be overwritten");
+  assert(overwritten[0].reservationAtLabel === "令和8年9月1日 13:00", "reservation datetime should be overwritten");
+
+  const savedAtLabel = demo.formatSavedAtLabel("2026-07-05T06:01:49.903Z");
+  assert(/令和|2026/.test(savedAtLabel), "savedAt label should be human readable: " + savedAtLabel);
+
+  demo.clearReservations();
+  assert(demo.listReservations().length === 0, "clearReservations should empty storage");
+
   const panelHtml = demo.renderReservationPanel({
     result: { total: 9700, quoteSnapshot: { fixedFareTotal: 7800 } },
     origin: record.origin,
@@ -97,6 +116,11 @@ function runModuleTests(){
   assert(panelHtml.includes("乗務員アプリでこの予約を確認する"), "meter app button missing");
   assert(panelHtml.includes('href="' + demo.METER_REVIEW_DEMO_RESERVATIONS_URL + '"'), "meter app absolute href missing");
   assert(panelHtml.includes("data-review-demo-meter-open=\"1\""), "meter app open handler marker missing");
+  assert(panelHtml.includes("最初からやり直す"), "restart action missing");
+  assert(panelHtml.includes("./estimate/?scenario=pre-fixed-fare-demo"), "restart demo url missing");
+  assert(panelHtml.includes("管理画面で確認する"), "admin action missing");
+  assert(panelHtml.includes("../admin.html"), "admin url missing");
+  assert(!panelHtml.includes("ホームに戻る"), "home link must not appear on completion panel");
   assert(!panelHtml.includes('href="./care-taxi-meter'), "meter app href must not be relative");
   assert(!panelHtml.includes('href="/care-taxi-meter'), "meter app href must not be root-relative");
   assert(panelHtml.includes("本番運行記録・売上・通知には反映されません"), "meter app note missing");
@@ -158,6 +182,7 @@ async function runBrowserTests(){
       demo.saveReservation(record);
       const stored = JSON.parse(localStorage.getItem(storageKey) || "[]");
       const reservationsStored = localStorage.getItem("reservations");
+      const topBarHtml = document.querySelector(".estimate-top-bar")?.innerHTML || "";
       return {
         hasModule: Boolean(demo),
         isDemoMode: demo.isReviewDemoMode(),
@@ -166,6 +191,7 @@ async function runBrowserTests(){
         reservationId: record.reservationId,
         storedCount: stored.length,
         storedScope: stored[0]?.storageScope || "",
+        hasHomeLinkInTopBar: topBarHtml.includes("ホームに戻る"),
         hasReservationsKey: reservationsStored !== null && reservationsStored !== "",
         registerSkippedPromise: window.EstimateQuoteRegister.registerQuoteFromHandoff({
           estimateNo: "BROWSER-001",
@@ -183,6 +209,7 @@ async function runBrowserTests(){
     );
     assert(estimateChecks.pageActive, "estimate page should have review demo active class");
     assert(estimateChecks.storedCount === 1, "demo reservation not saved to localStorage");
+    assert(estimateChecks.hasHomeLinkInTopBar === false, "home link should be hidden in review demo mode");
     assert(estimateChecks.storedScope === STORAGE_KEY, "demo reservation storage scope mismatch");
     assert(!estimateChecks.hasReservationsKey, "demo save should not write production reservations key");
 
@@ -199,16 +226,19 @@ async function runBrowserTests(){
     const adminChecks = await page.evaluate(function(storageKey){
       const listBox = document.getElementById("preFixedFareReviewDemoList");
       const refreshBtn = document.getElementById("preFixedFareReviewDemoRefreshBtn");
+      const deleteBtn = document.getElementById("preFixedFareReviewDemoDeleteBtn");
       const list = window.PreFixedFareReviewDemo?.listReservations?.() || [];
       return {
         hasListBox: Boolean(listBox),
         hasRefreshBtn: Boolean(refreshBtn),
+        hasDeleteBtn: Boolean(deleteBtn),
         listHtml: listBox ? listBox.innerHTML : "",
         listCount: list.length
       };
     }, STORAGE_KEY);
     assert(adminChecks.hasListBox, "admin review demo list box missing");
     assert(adminChecks.hasRefreshBtn, "admin review demo refresh button missing");
+    assert(adminChecks.hasDeleteBtn, "admin review demo delete button missing");
     assert(adminChecks.listCount >= 1, "admin should read saved demo reservations");
     assert(adminChecks.listHtml.includes("PF-REVIEW-"), "admin list should show demo reservation id");
 

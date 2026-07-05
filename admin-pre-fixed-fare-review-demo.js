@@ -30,6 +30,13 @@
     }
   }
 
+  function formatSavedAtLabel(value){
+    if(global.PreFixedFareReviewDemo && typeof global.PreFixedFareReviewDemo.formatSavedAtLabel === "function"){
+      return global.PreFixedFareReviewDemo.formatSavedAtLabel(value);
+    }
+    return String(value || "");
+  }
+
   function renderList(records){
     const list = Array.isArray(records) ? records : [];
     if(!list.length){
@@ -43,7 +50,7 @@
         "<td>" + escapeHtml(record.origin || "") + "</td>" +
         "<td>" + escapeHtml(record.destination || "") + "</td>" +
         "<td>" + escapeHtml(record.totalLabel || "") + "</td>" +
-        "<td>" + escapeHtml(record.savedAt || "") + "</td>" +
+        "<td>" + escapeHtml(formatSavedAtLabel(record.savedAt || "")) + "</td>" +
         "</tr>"
       );
     }).join("");
@@ -70,9 +77,25 @@
       "予約日時：" + escapeHtml(record.reservationAtLabel || "") + "<br>" +
       "事前確定運賃：" + escapeHtml(record.preFixedFareLabel || "") + "<br>" +
       "合計：" + escapeHtml(record.totalLabel || "") + "<br>" +
-      "同意日時：" + escapeHtml(record.consentAtLabel || record.reservationAtLabel || "") +
+      "保存日時：" + escapeHtml(formatSavedAtLabel(record.savedAt || "")) + "<br>" +
+      "同意日時：" + escapeHtml(record.consentAtLabel || record.consentAt || record.reservationAtLabel || "") +
       "</div>"
     );
+  }
+
+  function deleteSaved(){
+    const list = readList();
+    if(!list.length){
+      setStatus("削除する審査用デモ予約はありません。", "warn");
+      return;
+    }
+    if(global.PreFixedFareReviewDemo && typeof global.PreFixedFareReviewDemo.clearReservations === "function"){
+      global.PreFixedFareReviewDemo.clearReservations();
+    }else{
+      localStorage.removeItem(STORAGE_KEY);
+    }
+    refresh();
+    setStatus("保存済みの審査用デモ予約を削除しました。再度確認する場合は「QR①デモ予約を開く」から新しく保存してください。", "success");
   }
 
   function refresh(){
@@ -99,6 +122,10 @@
     if(refreshBtn){
       refreshBtn.addEventListener("click", refresh);
     }
+    const deleteBtn = document.getElementById("preFixedFareReviewDemoDeleteBtn");
+    if(deleteBtn){
+      deleteBtn.addEventListener("click", deleteSaved);
+    }
   }
 
   function bindOnce(){
@@ -118,6 +145,7 @@
 
   global.PreFixedFareReviewDemoAdmin = {
     readList: readList,
-    refresh: refresh
+    refresh: refresh,
+    deleteSaved: deleteSaved
   };
 })(typeof window !== "undefined" ? window : globalThis);
