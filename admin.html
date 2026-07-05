@@ -1677,6 +1677,14 @@ body{
         </div>
         <div class="preview" id="preFixedFareSubmissionFullSetStatus">まだ作成していません。</div>
       </div>
+      <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e5e5e5;">
+        <p class="note" style="margin-bottom:8px;"><strong>提出セットWord版</strong><br>提出候補PDFと同内容を、Word上で編集・手動調整できる .docx として提供します。PDFは提出候補版、Wordは印刷前確認・体裁調整用の原稿です。生成済みファイルを開くかダウンロードしてください。再生成は <code>node scripts/build-pre-fixed-fare-submission-word-set.mjs</code> で行います。</p>
+        <div class="actions" style="flex-wrap:wrap; gap:8px;">
+          <button type="button" class="secondary" id="preFixedFareSubmissionWordOpenBtn">提出セットWord版を開く</button>
+          <button type="button" class="secondary" id="preFixedFareSubmissionWordDownloadBtn">提出セットWord版をダウンロード</button>
+        </div>
+        <div class="preview" id="preFixedFareSubmissionWordStatus">まだ開いていません。</div>
+      </div>
     </div>
   </div>
 
@@ -1728,6 +1736,7 @@ body{
 <script src="./shared/pre-fixed-fare-application-print.js?v=appform02"></script>
 <script src="./admin-pre-fixed-fare-application.js?v=appform01"></script>
 <script src="./admin-pre-fixed-fare-submission-set.js?v=fullset01"></script>
+<script src="./admin-pre-fixed-fare-submission-word.js?v=wordset01"></script>
 <script>
 const CONFIG_PATH = 'data/config.json';
 const SECTIONS_PATH = 'data/sections.json';

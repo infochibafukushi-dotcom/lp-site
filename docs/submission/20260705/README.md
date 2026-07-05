@@ -25,6 +25,33 @@
 | 5 | Q&A資料 | 想定問答・補足説明 | `pre-fixed-fare-qa-v1-candidate.pdf` |
 | 6 | 追加資料・別紙セット | 記入補助・距離制運賃表・料金表・確認台紙等 | `pre-fixed-fare-submission-appendix-set-v1-candidate.pdf` |
 
+## 一式Word（編集・手動調整用）
+
+| 項目 | 内容 |
+|------|------|
+| 一式ファイル名 | `pre-fixed-fare-submission-full-set-v1-candidate.docx` |
+| 別紙セットのみ | `pre-fixed-fare-submission-appendix-set-v1-candidate.docx` |
+| 用途 | 提出候補PDFと同内容の編集可能原稿。印刷前の体裁調整・手動修正用 |
+| 作成方法 | `node scripts/build-pre-fixed-fare-submission-word-set.mjs` |
+| 管理画面 | 「認可・運賃資料」→「提出セットWord版を開く」/「提出セットWord版をダウンロード」 |
+
+### PDF版とWord版の使い分け
+
+- **PDF版**（`pre-fixed-fare-submission-full-set-v1-candidate.pdf` 等）は、提出候補版として維持する。運輸局への説明・印刷提出の基準資料とする。
+- **Word版**（`.docx`）は、PDFの代替ではなく、編集・手動調整用の追加ファイルである。表・本文をWord上で修正してから再印刷・再PDF化する場合に使用する。
+- Word版はPDFを直接変換したものではない。`data/*.json` および `shared/*` の元データから、編集可能なテキスト・表・画面証跡画像として生成する。
+
+### Word版の資料順
+
+1. 申請書様式2
+2. 画面証跡資料（画像貼り付け）
+3. 統合説明資料
+4. 運用フロー資料
+5. Q&A資料
+6. 追加資料・別紙セット（記入補助シート）
+7. 別紙1　距離制運賃表（新ページ開始）
+8. 別紙2　各種料金表（新ページ開始・LP見積設定値ベース）
+
 ## 一式PDF（印刷用）
 
 | 項目 | 内容 |
@@ -85,6 +112,7 @@
 ```bash
 node scripts/export-pre-fixed-fare-submission-set.mjs
 node scripts/build-pre-fixed-fare-submission-full-set.mjs
+node scripts/build-pre-fixed-fare-submission-word-set.mjs
 ```
 
 ## 申請書（様式2）入力値
@@ -119,6 +147,7 @@ node scripts/build-pre-fixed-fare-submission-full-set.mjs
 | Q&A資料 | 事前確定運賃 認可説明Q&A 印刷用ページを開く |
 | 別紙セット | 提出用 別紙セットをまとめて出力 |
 | 一式PDF | 提出セット一括PDFを作成 / 提出セット一括PDFを開く |
+| 一式Word | 提出セットWord版を開く / 提出セットWord版をダウンロード |
 
 ## 備考
 
