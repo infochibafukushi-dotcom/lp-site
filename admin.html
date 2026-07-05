@@ -1620,6 +1620,13 @@ body{
         <div class="preview" id="preFixedFareScreenEvidenceStatus">まだ出力していません。</div>
       </div>
       <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e5e5e5;">
+        <p class="note" style="margin-bottom:8px;"><strong>予約・運行中アプリ操作マニュアル</strong><br>かんたん見積から予約、乗務員アプリでの運行・精算、領収書保存までの実践手順を、認可説明用の操作マニュアルPDFとして出力します。表紙に審査用QR（かんたん見積～予約実践／運行中メーター操作）を掲載します。</p>
+        <div class="actions">
+          <button type="button" id="preFixedFareAppManualExportBtn">予約・運行中アプリ操作マニュアルPDF</button>
+        </div>
+        <div class="preview" id="preFixedFareAppManualStatus">まだ出力していません。</div>
+      </div>
+      <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e5e5e5;">
         <p class="note" style="margin-bottom:8px;"><strong>提出用 別紙・確認資料</strong><br>事前確定運賃認可の事前相談・提出時に、統合説明資料へ添付しやすい別紙・確認資料を出力します。正式な認可申請様式は関東運輸局の公式様式を使用し、本画面では記入補助・別紙・確認台紙を作成します。</p>
         <div class="actions" style="flex-wrap:wrap; gap:8px;">
           <button type="button" id="preFixedFareAppendixApplicationHelperBtn">事前確定運賃 認可申請様式リンク・記入補助シートを出力</button>
@@ -1735,6 +1742,8 @@ body{
 <script src="./shared/pre-fixed-fare-integrated-summary-word.js?v=39e326a1"></script>
 <script src="./shared/pre-fixed-fare-screen-evidence-data.js?v=20260705"></script>
 <script src="./shared/pre-fixed-fare-screen-evidence-pdf.js?v=20260705-meter-zoom"></script>
+<script src="./shared/pre-fixed-fare-app-manual-data.js?v=20260705-manual"></script>
+<script src="./shared/pre-fixed-fare-app-manual-pdf.js?v=20260705-manual"></script>
 <script src="./shared/pre-fixed-fare-submission-appendix-data.js?v=print08"></script>
 <script src="./shared/pre-fixed-fare-submission-appendix-word.js?v=print08"></script>
 <script src="./shared/pre-fixed-fare-submission-appendix-pdf.js?v=appendix02"></script>

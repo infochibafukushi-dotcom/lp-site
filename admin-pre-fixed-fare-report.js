@@ -44,6 +44,13 @@
     box.textContent = message || "";
   }
 
+  function setAppManualStatus(message, type){
+    const box = document.getElementById("preFixedFareAppManualStatus");
+    if(!box) return;
+    box.className = "preview" + (type ? " " + type : "");
+    box.textContent = message || "";
+  }
+
   function setOnePageSummaryStatus(message, type){
     const box = document.getElementById("preFixedFareOnePageSummaryStatus");
     if(!box) return;
@@ -449,6 +456,40 @@
     });
   }
 
+  async function exportAppManualPdf(){
+    if(!global.PreFixedFareAppManualPdf){
+      throw new Error("予約・運行中アプリ操作マニュアルPDFモジュールの読み込みに失敗しました。");
+    }
+    setAppManualStatus("PDFを作成しています...", "warn");
+    await global.PreFixedFareAppManualPdf.generatePreFixedFareAppManualPdf();
+    setAppManualStatus("PDFを保存しました。", "success");
+  }
+
+  function bindAppManualButton(){
+    const button = document.getElementById("preFixedFareAppManualExportBtn");
+    if(!button) return;
+    button.addEventListener("click", async function(){
+      button.disabled = true;
+      try{
+        await exportAppManualPdf();
+      }catch(error){
+        console.error(error);
+        const reason = String(error?.message || "");
+        if(
+          reason.includes("生成対象HTMLが空")
+          || reason.includes("組み立てに失敗")
+          || reason.includes("読み込みに失敗")
+        ){
+          setAppManualStatus(reason, "error");
+        }else{
+          setAppManualStatus("PDF作成に失敗しました。", "error");
+        }
+      }finally{
+        button.disabled = false;
+      }
+    });
+  }
+
   function bind(){
     bindRegulatoryButton();
     bindOnePageSummaryButton();
@@ -458,6 +499,7 @@
     bindIntegratedSummaryButton();
     bindApprovalAppendixButton();
     bindScreenEvidenceButton();
+    bindAppManualButton();
   }
 
   function bindOnce(){
