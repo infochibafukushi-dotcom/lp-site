@@ -729,7 +729,11 @@
       )
       : "";
     const display = global.EstimateRouteMapDisplay;
-    const segments = display && routePlan ? display.buildRouteMapSegments(routePlan) : [];
+    const segments = display && routePlan
+      ? (typeof display.buildDisplayRouteMapSegments === "function"
+        ? display.buildDisplayRouteMapSegments(routePlan)
+        : display.buildRouteMapSegments(routePlan))
+      : [];
     const legendHtml = hasMap && display && display.shouldShowLegend(segments)
       ? display.buildLegendPdfHtml(segments)
       : "";
@@ -920,7 +924,10 @@
       });
       return result?.location || null;
     });
-    const segments = display.buildRouteMapSegments(routePlan, waypointLatLng);
+    const buildSegments = typeof display.buildDisplayRouteMapSegments === "function"
+      ? display.buildDisplayRouteMapSegments.bind(display)
+      : display.buildRouteMapSegments.bind(display);
+    const segments = buildSegments(routePlan, waypointLatLng);
     const markers = display.buildRouteMapMarkers(routePlan, segments, waypointLatLng);
     const pathPoints = display.getAllPathPoints(segments);
     if(pathPoints.length < 2){

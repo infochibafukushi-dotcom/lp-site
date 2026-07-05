@@ -2656,17 +2656,15 @@
     }
 
     const waypointLatLng = await resolveRouteMapWaypointLatLng(routePlan);
-    const abSegments = typeof display.buildAbRouteMapSegments === "function"
-      ? display.buildAbRouteMapSegments(routePlan)
-      : [];
-    const useAbSegments = abSegments.some(function(segment){
+    const buildSegments = typeof display.buildDisplayRouteMapSegments === "function"
+      ? display.buildDisplayRouteMapSegments.bind(display)
+      : display.buildRouteMapSegments.bind(display);
+    const segments = buildSegments(routePlan, waypointLatLng);
+    const useAbSegments = segments.some(function(segment){
       return segment.key === "routeA";
-    }) && abSegments.some(function(segment){
+    }) && segments.some(function(segment){
       return segment.key === "routeB";
     });
-    const segments = useAbSegments
-      ? abSegments
-      : display.buildRouteMapSegments(routePlan, waypointLatLng);
     const markers = display.buildRouteMapMarkers(routePlan, segments, waypointLatLng);
     const allPoints = display.getAllPathPoints(segments);
     if(allPoints.length < 2){

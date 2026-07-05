@@ -126,8 +126,40 @@
     };
   }
 
+  function concatLegPaths(paths){
+    if(!Array.isArray(paths) || !paths.length){
+      return [];
+    }
+    const combined = paths[0].slice();
+    for(let i = 1; i < paths.length; i++){
+      const nextPath = paths[i];
+      if(!Array.isArray(nextPath) || nextPath.length < 2){
+        continue;
+      }
+      const startIndex = combined.length
+        && combined[combined.length - 1].lat === nextPath[0].lat
+        && combined[combined.length - 1].lng === nextPath[0].lng
+        ? 1
+        : 0;
+      combined.push.apply(combined, nextPath.slice(startIndex));
+    }
+    return combined.length >= 2 ? combined : [];
+  }
+
   function getLegPath(leg){
     const route = getLegPrimaryRoute(leg);
+    const routeLegs = Array.isArray(route?.routeLegs) ? route.routeLegs : [];
+    if(routeLegs.length >= 2){
+      const legPaths = routeLegs.map(function(routeLeg){
+        return decodePolyline(routeLeg?.encodedPolyline || "");
+      }).filter(function(path){
+        return path.length >= 2;
+      });
+      const combined = concatLegPaths(legPaths);
+      if(combined.length >= 2){
+        return combined;
+      }
+    }
     return decodePolyline(route?.encodedPolyline || leg?.encodedPolyline || "");
   }
 
@@ -183,46 +215,24 @@
     return true;
   }
 
-  function appendCandidateSegmentsForLegPair(segments, outboundLeg, returnLeg, isRoundTrip){
-    let hasA = false;
-    let hasB = false;
+  function appendCandidateSegmentsForLeg(segments, leg, options){
+    const opts = options || {};
+    const legRole = opts.legRole || "outbound";
+    const isRoundTrip = opts.isRoundTrip === true;
+    if(!leg){
+      return;
+    }
     CANDIDATE_STRATEGY_ORDER.forEach(function(strategy){
       const meta = CANDIDATE_ROUTE_META[strategy];
-      if(!meta){
+      const route = findCandidateByStrategy(leg, strategy);
+      if(!meta || !route){
         return;
       }
-      if(isRoundTrip){
-        const outboundRoute = findCandidateByStrategy(outboundLeg, strategy);
-        const returnRoute = findCandidateByStrategy(returnLeg, strategy);
-        if(!outboundRoute || !returnRoute){
-          return;
-        }
-        const outboundOk = pushAbSegment(segments, meta, outboundRoute, { isRoundTrip: true, legRole: "outbound" });
-        const returnOk = pushAbSegment(segments, meta, returnRoute, { isRoundTrip: true, legRole: "return" });
-        if(outboundOk && returnOk){
-          if(strategy === "time_priority"){
-            hasA = true;
-          }
-          if(strategy === "general_road_priority"){
-            hasB = true;
-          }
-        }
-        return;
-      }
-      const route = findCandidateByStrategy(outboundLeg, strategy);
-      if(!route){
-        return;
-      }
-      if(pushAbSegment(segments, meta, route, { isRoundTrip: false, legRole: "outbound" })){
-        if(strategy === "time_priority"){
-          hasA = true;
-        }
-        if(strategy === "general_road_priority"){
-          hasB = true;
-        }
-      }
+      pushAbSegment(segments, meta, route, {
+        isRoundTrip: isRoundTrip,
+        legRole: legRole
+      });
     });
-    return hasA && hasB;
   }
 
   function buildAbRouteMapSegments(routePlan){
@@ -233,34 +243,85 @@
 
     const outboundLeg = routePlan.outboundRoutePlan;
     const returnLeg = routePlan.returnRoutePlan;
+    const hasReturnLeg = Boolean(returnLeg);
 
-    if(outboundLeg && returnLeg){
-      if(appendCandidateSegmentsForLegPair(segments, outboundLeg, returnLeg, true)){
-        return segments;
-      }
-      segments.length = 0;
+    if(outboundLeg){
+      appendCandidateSegmentsForLeg(segments, outboundLeg, {
+        isRoundTrip: hasReturnLeg,
+        legRole: "outbound"
+      });
     }
-
-    const candidateSource = outboundLeg || routePlan;
-    if(appendCandidateSegmentsForLegPair(segments, candidateSource, null, false)){
-      return segments;
+    if(returnLeg){
+      appendCandidateSegmentsForLeg(segments, returnLeg, {
+        isRoundTrip: true,
+        legRole: "return"
+      });
     }
-    return [];
+    if(!outboundLeg && !returnLeg){
+      appendCandidateSegmentsForLeg(segments, routePlan, {
+        isRoundTrip: false,
+        legRole: "outbound"
+      });
+    }
+    return segments;
   }
 
   function hasAbRouteMapSegments(routePlan){
-    const segments = buildAbRouteMapSegments(routePlan);
-    let hasA = false;
-    let hasB = false;
-    segments.forEach(function(segment){
-      if(segment.key === "routeA"){
-        hasA = true;
-      }
-      if(segment.key === "routeB"){
-        hasB = true;
-      }
+    const outboundLeg = routePlan?.outboundRoutePlan || routePlan;
+    if(!outboundLeg){
+      return false;
+    }
+    return Boolean(findCandidateByStrategy(outboundLeg, "time_priority"))
+      && Boolean(findCandidateByStrategy(outboundLeg, "general_road_priority"));
+  }
+
+  function hasReturnAbRouteMapSegments(routePlan){
+    const returnLeg = routePlan?.returnRoutePlan;
+    if(!returnLeg){
+      return false;
+    }
+    return Boolean(findCandidateByStrategy(returnLeg, "time_priority"))
+      && Boolean(findCandidateByStrategy(returnLeg, "general_road_priority"));
+  }
+
+  function filterSegmentsByKeys(segments, keys){
+    const allowed = new Set(keys || []);
+    return (segments || []).filter(function(segment){
+      return allowed.has(segment.key);
     });
-    return hasA && hasB;
+  }
+
+  function filterAbSegmentsByLegRole(segments, legRole){
+    return (segments || []).filter(function(segment){
+      return segment.legRole === legRole;
+    });
+  }
+
+  function buildDisplayRouteMapSegments(routePlan, waypointLatLng){
+    const returnPlanType = String(routePlan?.returnPlanType || "");
+    const standardSegments = buildRouteMapSegments(routePlan, waypointLatLng);
+    const abSegments = buildAbRouteMapSegments(routePlan);
+    const useAbOnOutbound = hasAbRouteMapSegments(routePlan);
+    const useAbOnReturn = hasReturnAbRouteMapSegments(routePlan);
+
+    if(returnPlanType === "return_with_stop" && routePlan?.returnRoutePlan){
+      const returnSegments = filterSegmentsByKeys(standardSegments, ["stop", "return"]);
+      if(returnSegments.length){
+        const outboundSegments = useAbOnOutbound
+          ? filterAbSegmentsByLegRole(abSegments, "outbound")
+          : filterSegmentsByKeys(standardSegments, ["outbound"]);
+        if(outboundSegments.length){
+          return outboundSegments.concat(returnSegments);
+        }
+      }
+    }
+
+    if(useAbOnOutbound || useAbOnReturn){
+      if(abSegments.length){
+        return abSegments;
+      }
+    }
+    return standardSegments;
   }
 
   function haversineMeters(a, b){
@@ -613,11 +674,65 @@
       );
     }
     if(isAbLegend){
+      if(keys.has("stop") || keys.has("return") || keys.has("outbound")){
+        if(keys.has("outbound")){
+          lineItems.push(
+            '<div class="estimate-route-map-legend-item">' +
+              '<span class="estimate-route-map-legend-swatch estimate-route-map-legend-swatch--outbound" aria-hidden="true"></span>' +
+              "<span>往路</span>" +
+            "</div>"
+          );
+        }
+        if(keys.has("stop")){
+          lineItems.push(
+            '<div class="estimate-route-map-legend-item">' +
+              '<span class="estimate-route-map-legend-swatch estimate-route-map-legend-swatch--stop" aria-hidden="true"></span>' +
+              "<span>立ち寄り</span>" +
+            "</div>"
+          );
+        }
+        if(keys.has("return")){
+          lineItems.push(
+            '<div class="estimate-route-map-legend-item">' +
+              '<span class="estimate-route-map-legend-swatch estimate-route-map-legend-swatch--return" aria-hidden="true"></span>' +
+              "<span>復路</span>" +
+            "</div>"
+          );
+        }
+      }
+      const markerItems = [
+        '<div class="estimate-route-map-legend-item">' +
+          '<span class="estimate-route-map-legend-marker estimate-route-map-legend-marker--origin" aria-hidden="true">発</span>' +
+          "<span>出発地</span>" +
+        "</div>",
+        '<div class="estimate-route-map-legend-item">' +
+          '<span class="estimate-route-map-legend-marker estimate-route-map-legend-marker--destination" aria-hidden="true">着</span>' +
+          "<span>目的地</span>" +
+        "</div>"
+      ];
+      if(keys.has("stop")){
+        markerItems.push(
+          '<div class="estimate-route-map-legend-item">' +
+            '<span class="estimate-route-map-legend-marker estimate-route-map-legend-marker--waypoint" aria-hidden="true">寄</span>' +
+            "<span>立ち寄り地点</span>" +
+          "</div>"
+        );
+      }
+      const showMarkerSection = keys.has("stop") || keys.has("return") || keys.has("outbound");
       return (
         '<div class="estimate-route-map-legend estimate-route-map-legend--ab" aria-label="ルート凡例">' +
           '<div class="estimate-route-map-legend-section">' +
             lineItems.join("") +
           "</div>" +
+          (showMarkerSection
+            ? (
+              '<div class="estimate-route-map-legend-divider" aria-hidden="true"></div>' +
+              '<div class="estimate-route-map-legend-section">' +
+                '<div class="estimate-route-map-legend-heading">マーカー</div>' +
+                markerItems.join("") +
+              "</div>"
+            )
+            : "") +
         "</div>"
       );
     }
@@ -782,10 +897,10 @@
   }
 
   function hasRenderableRouteMap(routePlan){
-    if(hasAbRouteMapSegments(routePlan)){
+    if(hasAbRouteMapSegments(routePlan) || hasReturnAbRouteMapSegments(routePlan)){
       return true;
     }
-    return buildRouteMapSegments(routePlan).some(function(segment){
+    return buildDisplayRouteMapSegments(routePlan).some(function(segment){
       return Array.isArray(segment.path) && segment.path.length >= 2;
     });
   }
@@ -802,7 +917,9 @@
     normalizeLatLng: normalizeLatLng,
     buildRouteMapSegments: buildRouteMapSegments,
     buildAbRouteMapSegments: buildAbRouteMapSegments,
+    buildDisplayRouteMapSegments: buildDisplayRouteMapSegments,
     hasAbRouteMapSegments: hasAbRouteMapSegments,
+    hasReturnAbRouteMapSegments: hasReturnAbRouteMapSegments,
     buildRouteMapMarkers: buildRouteMapMarkers,
     shouldShowLegend: shouldShowLegend,
     buildLegendHtml: buildLegendHtml,

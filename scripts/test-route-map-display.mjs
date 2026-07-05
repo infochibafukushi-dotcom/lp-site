@@ -169,4 +169,89 @@ if(legJunctionSegments[1].key !== "stop"){
   throw new Error("leg junction stop segment mismatch");
 }
 
+function makeAbLeg(pathPoints, strategy, routeId){
+  const encodedPolyline = encodePolyline(pathPoints);
+  return {
+    selectedRouteId: routeId,
+    encodedPolyline: encodedPolyline,
+    routes: [{
+      routeId: routeId,
+      routeStrategy: strategy,
+      encodedPolyline: encodedPolyline,
+      distanceMeters: 1000
+    }],
+    routeCandidates: [{
+      routeId: routeId,
+      routeStrategy: strategy,
+      encodedPolyline: encodedPolyline,
+      distanceMeters: 1000
+    }]
+  };
+}
+
+const outboundAPath = [
+  { lat: 35.60, lng: 140.10 },
+  { lat: 35.61, lng: 140.11 },
+  { lat: 35.62, lng: 140.12 }
+];
+const outboundBPath = [
+  { lat: 35.60, lng: 140.10 },
+  { lat: 35.605, lng: 140.115 },
+  { lat: 35.62, lng: 140.12 }
+];
+const stopLegPath = [
+  { lat: 35.62, lng: 140.12 },
+  { lat: 35.615, lng: 140.105 }
+];
+const returnLegPath = [
+  { lat: 35.615, lng: 140.105 },
+  { lat: 35.60, lng: 140.10 }
+];
+const abStopPlan = {
+  tripType: "round_trip",
+  returnPlanType: "return_with_stop",
+  outboundRoutePlan: Object.assign(
+    makeAbLeg(outboundAPath, "time_priority", "route_a"),
+    {
+      routeCandidates: [
+        { routeId: "route_a", routeStrategy: "time_priority", encodedPolyline: encodePolyline(outboundAPath), distanceMeters: 1000 },
+        { routeId: "route_b", routeStrategy: "general_road_priority", encodedPolyline: encodePolyline(outboundBPath), distanceMeters: 1100 }
+      ]
+    }
+  ),
+  returnRoutePlan: Object.assign({}, makeLeg(returnPath), {
+    routes: [{
+      routeId: "route_0",
+      routeStrategy: "recommended",
+      encodedPolyline: encodePolyline(returnPath),
+      distanceMeters: 2000,
+      routeLegs: [
+        { encodedPolyline: encodePolyline(stopLegPath), endLatLng: { lat: 35.615, lng: 140.105 } },
+        { encodedPolyline: encodePolyline(returnLegPath), startLatLng: { lat: 35.615, lng: 140.105 } }
+      ]
+    }],
+    waypoint: {
+      waypointAddress: "東邦大医療センター佐倉",
+      waypointLatLng: { latitude: 35.615, longitude: 140.105 }
+    }
+  })
+};
+const abStopSegments = display.buildDisplayRouteMapSegments(abStopPlan, { lat: 35.615, lng: 140.105 });
+if(!abStopSegments.some(function(segment){ return segment.key === "routeA"; })){
+  throw new Error("return_with_stop + AB outbound should keep routeA");
+}
+if(!abStopSegments.some(function(segment){ return segment.key === "routeB"; })){
+  throw new Error("return_with_stop + AB outbound should keep routeB");
+}
+if(!abStopSegments.some(function(segment){ return segment.key === "stop"; })){
+  throw new Error("return_with_stop + AB outbound should include stop segment");
+}
+if(!abStopSegments.some(function(segment){ return segment.key === "return"; })){
+  throw new Error("return_with_stop + AB outbound should include return segment");
+}
+const abStopMarkers = display.buildRouteMapMarkers(abStopPlan, abStopSegments, { lat: 35.615, lng: 140.105 });
+if(!abStopMarkers.some(function(marker){ return marker.label === "寄"; })){
+  throw new Error("return_with_stop + AB outbound should include waypoint marker");
+}
+
 console.log("OK: route map display tests passed");
