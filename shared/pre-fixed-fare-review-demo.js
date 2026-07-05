@@ -161,6 +161,17 @@
     );
   }
 
+  function getMeterReviewDemoReservationsUrl(){
+    return METER_REVIEW_DEMO_RESERVATIONS_URL;
+  }
+
+  function buildMeterReviewDemoOpenButtonHtml(){
+    const url = getMeterReviewDemoReservationsUrl();
+    return (
+      '<a class="estimate-review-demo-meter-btn" href="' + url + '" target="_blank" rel="noopener noreferrer" data-review-demo-meter-open="1">乗務員アプリでこの予約を確認する</a>'
+    );
+  }
+
   function renderReservationPanel(options){
     options = options || {};
     const esc = typeof options.escapeHtml === "function" ? options.escapeHtml : function(v){ return String(v ?? ""); };
@@ -194,7 +205,7 @@
         summaryRow(esc, "合計", savedRecord.totalLabel) +
         "</tbody></table>" +
         '<p class="estimate-review-demo-meter-note">' + esc(METER_REVIEW_DEMO_COMPLETE_NOTE) + "</p>" +
-        '<a class="estimate-review-demo-meter-btn" href="' + escAttr(METER_REVIEW_DEMO_RESERVATIONS_URL) + '" target="_blank" rel="noopener noreferrer">乗務員アプリでこの予約を確認する</a>' +
+        buildMeterReviewDemoOpenButtonHtml() +
         "</section>"
       );
     }
@@ -260,6 +271,8 @@
     CALENDAR_SLOTS: CALENDAR_SLOTS,
     CONSENT_NOTICE: CONSENT_NOTICE,
     METER_REVIEW_DEMO_RESERVATIONS_URL: METER_REVIEW_DEMO_RESERVATIONS_URL,
+    getMeterReviewDemoReservationsUrl: getMeterReviewDemoReservationsUrl,
+    buildMeterReviewDemoOpenButtonHtml: buildMeterReviewDemoOpenButtonHtml,
     isReviewDemoMode: isReviewDemoMode,
     shouldSkipProductionIntegrations: shouldSkipProductionIntegrations,
     findCalendarSlot: findCalendarSlot,

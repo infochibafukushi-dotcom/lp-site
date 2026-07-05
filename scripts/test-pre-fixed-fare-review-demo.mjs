@@ -95,7 +95,10 @@ function runModuleTests(){
   assert(panelHtml.includes("PF-REVIEW-001"), "completion reservation id missing");
   assert(panelHtml.includes("7,800円"), "completion fare missing");
   assert(panelHtml.includes("乗務員アプリでこの予約を確認する"), "meter app button missing");
-  assert(panelHtml.includes("care-taxi-meter/review-demo/reservations"), "meter app URL missing");
+  assert(panelHtml.includes('href="' + demo.METER_REVIEW_DEMO_RESERVATIONS_URL + '"'), "meter app absolute href missing");
+  assert(panelHtml.includes("data-review-demo-meter-open=\"1\""), "meter app open handler marker missing");
+  assert(!panelHtml.includes('href="./care-taxi-meter'), "meter app href must not be relative");
+  assert(!panelHtml.includes('href="/care-taxi-meter'), "meter app href must not be root-relative");
   assert(panelHtml.includes("本番運行記録・売上・通知には反映されません"), "meter app note missing");
 
   const registerSandbox = loadModule("shared/pre-fixed-fare-review-demo.js");

@@ -3862,6 +3862,16 @@
         saveReviewDemoReservation(result);
       });
     }
+    root.querySelectorAll("[data-review-demo-meter-open]").forEach(function(link){
+      link.addEventListener("click", function(event){
+        const url = window.PreFixedFareReviewDemo?.getMeterReviewDemoReservationsUrl?.()
+          || window.PreFixedFareReviewDemo?.METER_REVIEW_DEMO_RESERVATIONS_URL
+          || String(link.getAttribute("href") || "").trim();
+        console.log("[review demo] open meter demo url:", url);
+        event.preventDefault();
+        window.open(url, "_blank", "noopener,noreferrer");
+      });
+    });
   }
 
   function bindDelegatedEvents(){
