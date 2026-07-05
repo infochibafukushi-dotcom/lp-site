@@ -43,8 +43,25 @@
       imageFile: "04_receipt_detail_202607050600.png",
       proofText:
         "検証用予約データに基づき、事前確定運賃の精算・帳票表示を確認する画面です。事前確定運賃、支払方法、精算額、領収書発行内容を確認でき、精算内容を旅客に明細として交付できることを示します。"
+    },
+    {
+      pageId: "meter-reservation-detail",
+      pageTitle: "乗務員端末 予約詳細（確定運賃・同意証跡）",
+      imageFile: "05_meter_reservation_detail_202607050600.png",
+      proofText:
+        "乗務員端末の予約詳細画面で、事前確定運賃（28,000円）、確定運賃の内訳（運賃本体・介助料金）、確定運賃に含まない特殊車両使用料（1,000円）および同意証跡を確認できることを示します。"
     }
   ];
+
+  const SUPPLEMENT_PAGE = {
+    pageId: "meter-service-fee-supplement",
+    title: "補足資料：乗務員端末（メーターアプリ）における各種料金確認画面証跡",
+    description:
+      "本画面は、乗務員端末において、事前確定運賃本体と各種料金を別行で確認・精算できることを示す補足資料である。各種料金は、別紙2「各種料金表」に基づき、事前確定運賃とは区分して収受・記録する。",
+    imageFile: "06_meter_service_fee_dispatch_202607050600.png",
+    proofText:
+      "メーター画面の予約・迎車メニューで迎車料800円、特殊車両料金1,000円を別枠で加算できることを示します（別紙2の迎車料・特殊車両使用料と一致）。"
+  };
 
   function buildReportData(options){
     options = options || {};
@@ -69,7 +86,10 @@
         documentType: "画面証跡資料（検証用予約データ）"
       },
       caseInfo: Object.assign({}, CASE_INFO),
-      screens: screens
+      screens: screens,
+      supplementPage: Object.assign({}, SUPPLEMENT_PAGE, {
+        imageSrc: IMAGE_BASE + SUPPLEMENT_PAGE.imageFile
+      })
     };
   }
 
@@ -79,6 +99,7 @@
     VERIFICATION_NOTE: VERIFICATION_NOTE,
     CASE_INFO: CASE_INFO,
     SCREENS: SCREENS,
+    SUPPLEMENT_PAGE: SUPPLEMENT_PAGE,
     buildReportData: buildReportData
   };
 })(typeof window !== "undefined" ? window : globalThis);

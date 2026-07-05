@@ -320,7 +320,7 @@ function buildApplicationChildren(formData){
     heading("1. 申請者の氏名又は名称及び住所並びに法人にあっては、その代表者の氏名", 3),
     paragraph("住所：" + (data.applicantAddress || "")),
     paragraph("氏名又は名称：" + (data.applicantName || "")),
-    paragraph("代表者氏名：" + (data.representativeName || "")),
+    paragraph("代表者氏名：" + (data.representativeName || "") + "　　　　　　　　　　　　印"),
     paragraph("連絡先：" + (data.contact || "")),
     heading("2. 設定しようとする運賃及び料金を適用する営業区域", 3),
     paragraph(data.operatingArea || "千葉交通圏"),
@@ -376,6 +376,27 @@ function buildScreenEvidenceChildren(data, imageMap){
       children.push(paragraph(data.verificationNote, { size: FONT_NOTE }));
     }
   });
+
+  const supplement = data.supplementPage;
+  if(supplement){
+    children.push(pageBreakParagraph());
+    children.push(heading(supplement.title || "", 2));
+    if(supplement.description){
+      children.push(paragraph(supplement.description));
+    }
+    const supplementBuffer = imageMap[supplement.imageFile];
+    if(supplementBuffer){
+      children.push(imageParagraph(supplementBuffer));
+    }else{
+      children.push(paragraph("（画像ファイル未配置: " + (supplement.imageFile || "") + "）"));
+    }
+    if(supplement.proofText){
+      children.push(paragraph(supplement.proofText));
+    }
+    if(data.verificationNote){
+      children.push(paragraph(data.verificationNote, { size: FONT_NOTE }));
+    }
+  }
   return children;
 }
 

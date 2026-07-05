@@ -122,13 +122,17 @@ async function exportApplicationPdf(browser, page){
   const result = await exportPdfFromHtml(browser, html, filePath, { footer: false });
   assert(result.pageCount === 1, "申請書様式2が1ページではありません: " + result.pageCount);
   assert(result.htmlText.includes("添付書類等"), "申請書に添付書類等がありません");
+  assert(result.htmlText.includes("山本 信勝") && result.htmlText.includes("印"), "申請書に代表者印欄がありません");
   return result;
 }
 
 async function exportScreenEvidencePdf(browser, page){
   const built = await page.evaluate(async function(){
     const reportData = window.PreFixedFareScreenEvidenceData.buildReportData();
-    const availability = await window.PreFixedFareScreenEvidencePdf.probeImages(reportData.screens || []);
+    const availability = await window.PreFixedFareScreenEvidencePdf.probeImages(
+      reportData.screens || [],
+      reportData.supplementPage
+    );
     const reportHtml = window.PreFixedFareScreenEvidencePdf.buildReportHtml(reportData, availability);
     const css = window.PreFixedFareScreenEvidencePdf.getEvidenceCss
       ? window.PreFixedFareScreenEvidencePdf.getEvidenceCss()
@@ -142,7 +146,9 @@ async function exportScreenEvidencePdf(browser, page){
   assert(built.html.includes("screen-evidence-shot--receipt"), "画面証跡HTMLにレシート枠がありません");
   const filePath = path.join(outputDir, TARGETS.screenEvidence);
   const result = await exportPdfFromHtml(browser, built.html, filePath, { footer: false });
-  assert(result.pageCount === 5, "画面証跡PDFが5ページではありません: " + result.pageCount);
+  assert(result.pageCount === 7, "画面証跡PDFが7ページではありません: " + result.pageCount);
+  assert(built.htmlText.includes("補足資料：乗務員端末"), "画面証跡に補足ページがありません");
+  assert(built.htmlText.includes("800"), "画面証跡補足に迎車料800円の表示がありません");
   assert(built.htmlText.includes("260705-MAINS-0001"), "画面証跡に案件番号がありません");
   assert(built.htmlText.includes("28,000"), "画面証跡に確定運賃がありません");
   return result;
@@ -218,6 +224,10 @@ async function exportAppendixPdf(browser, page, options){
   assert(result.htmlText.includes("800円"), "別紙2に迎車料金額がありません");
   assert(result.htmlText.includes("1,100円") || result.htmlText.includes("1100円"), "別紙2に乗降介助金額がありません");
   assert(result.htmlText.includes("設定なし"), "別紙2に未設定項目の整理がありません");
+  assert(result.htmlText.includes("22時から翌5時まで2割増"), "別紙1に深夜早朝割増の記載がありません");
+  assert(result.htmlText.includes("身体障害者・知的障害者は1割引"), "別紙1に障害者割引の記載がありません");
+  assert(result.htmlText.includes("令和8年9月1日予定"), "別紙1に適用開始予定日の記載がありません");
+  assert(!result.htmlText.includes("申請書本体・認可運賃表に基づき記入"), "別紙1にプレースホルダーが残っています");
   assert(result.pageCount <= 7, "候補版別紙セットのページ数が多すぎます: " + result.pageCount);
   return result;
 }

@@ -58,6 +58,14 @@
     ).trim() || DEFAULT_COMPANY_NAME;
   }
 
+  function formatRepresentativeStampLine(representativeName){
+    const name = String(representativeName || "").trim();
+    if(!name){
+      return "代表者氏名：　　　　　　　　　　　　　　　　印";
+    }
+    return "代表者氏名：" + name + "　　　　　　　　　　　　印";
+  }
+
   function buildDefaults(options){
     options = options || {};
     const config = options.config || {};
@@ -108,6 +116,7 @@
       ".section-title{font-weight:700;font-size:12pt;margin:0 0 1.5mm;}" +
       ".section-body{margin:0;padding-left:1.2em;font-size:10.5pt;}" +
       ".section-body p{margin:0 0 1.5mm;}" +
+      ".representative-stamp-line{letter-spacing:0.02em;}" +
       ".attachments{margin-top:4mm;}" +
       ".attachments-title{font-weight:700;font-size:12pt;margin:0 0 1.5mm;}" +
       ".attachments ul{margin:0;padding-left:1.4em;font-size:10pt;}" +
@@ -145,7 +154,7 @@
           "<div class='section-body'>" +
             "<p>住所：" + escapeHtml(data.applicantAddress) + "</p>" +
             "<p>氏名又は名称：" + escapeHtml(data.applicantName) + "</p>" +
-            "<p>代表者氏名：" + escapeHtml(data.representativeName) + "</p>" +
+            "<p class='representative-stamp-line'>" + escapeHtml(formatRepresentativeStampLine(data.representativeName)) + "</p>" +
             "<p>連絡先：" + escapeHtml(data.contact) + "</p>" +
           "</div>" +
         "</section>" +

@@ -45,12 +45,16 @@ function assert(condition, message){
   }
 }
 
-function readImageMap(screens){
+function readImageMap(screens, supplementPage){
   const map = {};
-  (screens || []).forEach(function(screen){
-    const filePath = path.join(evidenceDir, screen.imageFile || "");
-    if(screen.imageFile && fs.existsSync(filePath)){
-      map[screen.imageFile] = fs.readFileSync(filePath);
+  const files = (screens || []).map(function(screen){ return screen.imageFile; });
+  if(supplementPage && supplementPage.imageFile){
+    files.push(supplementPage.imageFile);
+  }
+  files.forEach(function(imageFile){
+    const filePath = path.join(evidenceDir, imageFile || "");
+    if(imageFile && fs.existsSync(filePath)){
+      map[imageFile] = fs.readFileSync(filePath);
     }
   });
   return map;
@@ -175,7 +179,7 @@ async function main(){
     const page = await browser.newPage();
     await page.goto(adminUrl, { waitUntil: "networkidle0", timeout: 180000 });
     const data = await extractSubmissionData(page);
-    const imageMap = readImageMap(data.screenEvidence.screens || []);
+    const imageMap = readImageMap(data.screenEvidence.screens || [], data.screenEvidence.supplementPage);
 
     assert(data.integratedHtml.length > 5000, "統合説明資料HTMLが短すぎます");
     assert(data.operationsHtml.length > 3000, "運用フロー資料HTMLが短すぎます");
@@ -191,7 +195,7 @@ async function main(){
     assert(feeText.includes("設定なし"), "別紙2に未設定項目がありません");
 
     const imageCount = Object.keys(imageMap).length;
-    assert(imageCount >= 4, "画面証跡画像が4件未満です: " + imageCount);
+    assert(imageCount >= 6, "画面証跡画像が6件未満です: " + imageCount);
 
     console.log("Building full set Word document...");
     const fullSections = buildFullSetSections(data, imageMap);

@@ -95,21 +95,29 @@
 - 事前確定運賃と各種料金（迎車料・介助料・待機料等）は区分して別行表示
 - 表セル余白：`padding 2.2mm`（上下）、`line-height 1.45`
 - 白紙ページ検出（ink ratio）を再生成時に実施
-- 一式PDFの総ページ数（最新再生成時: **46ページ**）
+- 一式PDFの総ページ数（最新再生成時: **48ページ**）
 
 | 資料 | ページ数 |
 |------|----------|
 | 申請書様式2 | 1 |
-| 画面証跡 | 5 |
+| 画面証跡 | 7（P6: 乗務員端末予約詳細、P7: 各種料金確認補足） |
 | 統合説明 | 22 |
 | 運用フロー | 9 |
 | Q&A | 3 |
 | 別紙セット | 6 |
-| **一式PDF** | **46** |
+| **一式PDF** | **48** |
+
+### 正式提出前の安全対策（2026/07/05 追記）
+
+- 申請書1ページ目：代表者氏名行を「代表者氏名：山本 信勝　　　　　　　　　　　　印」形式にし、押印余白を確保
+- 別紙1距離制運賃表：深夜早朝割増・障害者割引・端数処理・適用開始予定日を認可運賃表と矛盾しない内容で記載
+- 画面証跡P7：メーターアプリの予約・迎車メニュー証跡（迎車料800円・特殊車両1,000円）を補足資料として追加
+- 証跡画像再生成：`node scripts/render-pre-fixed-fare-meter-fee-evidence.mjs`（care-taxi-meter の実画面キャプチャ）
 
 ### 再生成コマンド
 
 ```bash
+node scripts/render-pre-fixed-fare-meter-fee-evidence.mjs
 node scripts/export-pre-fixed-fare-submission-set.mjs
 node scripts/build-pre-fixed-fare-submission-full-set.mjs
 node scripts/build-pre-fixed-fare-submission-word-set.mjs
@@ -121,7 +129,7 @@ node scripts/build-pre-fixed-fare-submission-word-set.mjs
 |------|------|
 | 申請者住所 | 千葉県千葉市中央区出洲港8-3-2 |
 | 氏名又は名称 | 株式会社 千葉福祉サポート |
-| 代表者氏名 | 山本信勝 |
+| 代表者氏名 | 山本 信勝（申請書1ページ目は「代表者氏名：山本 信勝　　　　　　　　　　　　印」） |
 | 連絡先 | 090-6331-4289 |
 | 適用する営業区域 | 千葉交通圏 |
 | 使用する配車アプリ名称 | ちばケアタクシー 事前確定運賃システム |
@@ -135,6 +143,8 @@ node scripts/build-pre-fixed-fare-submission-word-set.mjs
 | P3 | 旅客同意確認画面 |
 | P4 | ドライバー用確定ルート確認画面 |
 | P5 | 領収書・レシート明細画面 |
+| P6 | 乗務員端末 予約詳細（確定運賃・同意証跡） |
+| P7 | 補足資料：各種料金確認画面証跡（迎車料800円・特殊車両1,000円） |
 
 ## 出力元（管理画面 admin.html）
 

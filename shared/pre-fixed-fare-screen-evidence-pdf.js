@@ -1,6 +1,6 @@
 (function(global){
   const HTML2PDF_CDN = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
-  const EXPECTED_PAGE_COUNT = 5;
+  const EXPECTED_PAGE_COUNT = 7;
 
   function escapeHtml(text){
     return String(text ?? "")
@@ -101,6 +101,25 @@
     ));
   }
 
+  function buildSupplementPage(supplement, imageAvailable, options){
+    options = options || {};
+    if(!supplement){
+      return "";
+    }
+    return screenEvidencePage(supplement.pageId || "meter-service-fee-supplement", (
+      "<h2 class='screen-title'>" + escapeHtml(supplement.title || "") + "</h2>" +
+      "<p class='proof-text'>" + escapeHtml(supplement.description || "") + "</p>" +
+      buildImageBlock({
+        pageId: supplement.pageId || "meter-service-fee-supplement",
+        pageTitle: supplement.title || "",
+        imageSrc: supplement.imageSrc || "",
+        imageFile: supplement.imageFile || ""
+      }, imageAvailable) +
+      (supplement.proofText ? "<p class='proof-text'>" + escapeHtml(supplement.proofText) + "</p>" : "") +
+      "<p class='verification-note verification-note--compact'>" + escapeHtml(options.verificationNote || "") + "</p>"
+    ));
+  }
+
   function buildReportHtml(data, imageAvailabilityMap){
     const availability = imageAvailabilityMap || {};
     const screens = Array.isArray(data.screens) ? data.screens : [];
@@ -110,6 +129,11 @@
         verificationNote: data.verificationNote
       }));
     });
+    if(data.supplementPage){
+      pages.push(buildSupplementPage(data.supplementPage, !!availability[data.supplementPage.imageSrc], {
+        verificationNote: data.verificationNote
+      }));
+    }
     return (
       "<div class='pre-fixed-fare-screen-evidence'>" +
       pages.join("") +
@@ -126,12 +150,15 @@
     });
   }
 
-  async function probeImages(screens){
+  async function probeImages(screens, supplementPage){
     const availability = {};
     const list = Array.isArray(screens) ? screens : [];
     await Promise.all(list.map(async function(screen){
       availability[screen.imageSrc] = await probeImage(screen.imageSrc);
     }));
+    if(supplementPage && supplementPage.imageSrc){
+      availability[supplementPage.imageSrc] = await probeImage(supplementPage.imageSrc);
+    }
     return availability;
   }
 
@@ -201,7 +228,7 @@
 
   async function savePdf(reportData){
     await ensureHtml2Pdf();
-    const imageAvailability = await probeImages(reportData.screens || []);
+    const imageAvailability = await probeImages(reportData.screens || [], reportData.supplementPage);
     const reportHtml = buildReportHtml(reportData, imageAvailability);
     if(!String(reportHtml || "").trim()){
       throw new Error("生成対象HTMLが空です。");
