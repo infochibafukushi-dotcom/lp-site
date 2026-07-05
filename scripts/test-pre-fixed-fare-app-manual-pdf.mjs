@@ -82,24 +82,41 @@ async function main(){
     }, { timeout: 60000 });
 
     const printCheck = await page.evaluate(function(pageIds, expectedPageCount){
-      const root = document.getElementById("preFixedFareAppManualPrintRoot");
-      const pages = root ? root.querySelectorAll(".manual-page") : [];
-      const pageIdList = Array.from(pages).map(function(el){ return el.getAttribute("data-page-id"); });
+      const root = document.getElementById("manualPrintRoot");
+      const pages = root ? root.querySelectorAll(":scope > .manual-page") : [];
+      const allPages = root ? root.querySelectorAll(".manual-page") : [];
+      const pageIdList = Array.from(allPages).map(function(el){ return el.getAttribute("data-page-id"); });
       const missing = pageIds.filter(function(id){ return !pageIdList.includes(id); });
       const coverPage = root?.querySelector(".manual-page[data-page-id='cover']");
       const routeChangePage = root?.querySelector(".manual-page[data-page-id='route-change']");
       const routeChangeOperationPage = root?.querySelector(".manual-page[data-page-id='route-change-operation']");
       const screenshotImgs = root ? root.querySelectorAll(".manual-screenshot-img") : [];
+      const firstPage = root?.querySelector(".manual-page");
+      const rootStyle = root ? getComputedStyle(root) : null;
+      const pageStyle = firstPage ? getComputedStyle(firstPage) : null;
+      const cssText = document.getElementById("preFixedFareAppManualPrintCss")?.textContent || "";
       return {
         hasToolbar: Boolean(document.querySelector(".print-toolbar")),
-        hasPrintBtn: Boolean(document.getElementById("preFixedFareAppManualPrintBtn")),
+        hasPrintBtn: Boolean(document.getElementById("printManualBtn")),
         hasBackLink: Boolean(document.querySelector(".print-toolbar-link[href*='admin.html']")),
-        pageCount: pages.length,
+        hasManualPrintRoot: Boolean(root),
+        directChildPageCount: pages.length,
+        pageCount: allPages.length,
         pageIds: pageIdList,
         missing: missing,
         coverExists: Boolean(coverPage),
         coverQrCount: coverPage ? coverPage.querySelectorAll(".cover-qr-image").length : 0,
         screenshotCount: screenshotImgs.length,
+        bodyTextLength: String(document.body.innerText || "").length,
+        firstPageTextLength: String(firstPage?.innerText || "").length,
+        rootDisplay: rootStyle?.display || "",
+        rootVisibility: rootStyle?.visibility || "",
+        rootOpacity: rootStyle?.opacity || "",
+        firstPageDisplay: pageStyle?.display || "",
+        firstPageVisibility: pageStyle?.visibility || "",
+        firstPageOpacity: pageStyle?.opacity || "",
+        cssHasDoubleBreakBefore: cssText.includes(".manual-page + .manual-page"),
+        cssUsesManualPrintRoot: cssText.includes(".manual-print-root"),
         routeChangeHasTable: Boolean(routeChangePage?.querySelector("table")),
         routeChangeHasScreenshot: Boolean(routeChangePage?.querySelector(".manual-screenshot-img")),
         routeChangeOperationHasScreenshot: Boolean(routeChangeOperationPage?.querySelector(".manual-screenshot-img")),
@@ -109,10 +126,22 @@ async function main(){
       };
     }, REQUIRED_PAGE_IDS, EXPECTED_PAGE_COUNT);
 
+    assert(printCheck.hasManualPrintRoot, "manualPrintRoot がありません");
+    assert(printCheck.directChildPageCount === EXPECTED_PAGE_COUNT, "manual-page 直接子件数が不正: " + printCheck.directChildPageCount);
     assert(printCheck.hasToolbar, "印刷用ページにツールバーがありません");
     assert(printCheck.hasPrintBtn, "PDF保存・印刷ボタンがありません");
     assert(printCheck.hasBackLink, "管理画面に戻るリンクがありません");
     assert(printCheck.pageCount === EXPECTED_PAGE_COUNT, "manual-page 件数が不正: " + printCheck.pageCount);
+    assert(printCheck.cssHasDoubleBreakBefore === false, "印刷CSSに二重改ページ指定が残っています");
+    assert(printCheck.cssUsesManualPrintRoot, "印刷CSSに manual-print-root がありません");
+    assert(printCheck.bodyTextLength > 500, "body text length が小さすぎます: " + printCheck.bodyTextLength);
+    assert(printCheck.firstPageTextLength > 20, "first page text が空です");
+    assert(printCheck.rootDisplay === "block", "root display が block ではありません: " + printCheck.rootDisplay);
+    assert(printCheck.rootVisibility === "visible", "root visibility が visible ではありません");
+    assert(printCheck.rootOpacity === "1", "root opacity が 1 ではありません");
+    assert(printCheck.firstPageDisplay === "block", "first page display が block ではありません");
+    assert(printCheck.firstPageVisibility === "visible", "first page visibility が visible ではありません");
+    assert(printCheck.firstPageOpacity === "1", "first page opacity が 1 ではありません");
     assert(printCheck.expectedPageCount === EXPECTED_PAGE_COUNT, "EXPECTED_PAGE_COUNT が不正: " + printCheck.expectedPageCount);
     assert(printCheck.missing.length === 0, "不足ページ: " + printCheck.missing.join(", "));
     assert(printCheck.coverExists, "表紙ページがありません");

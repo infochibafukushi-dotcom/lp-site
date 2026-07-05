@@ -11,23 +11,22 @@
 <div class="print-toolbar">
   <p class="print-toolbar-title">事前確定運賃 予約・運行中アプリ操作マニュアル</p>
   <div class="print-toolbar-actions">
-    <button type="button" class="print-toolbar-btn" id="preFixedFareAppManualPrintBtn">PDF保存・印刷</button>
+    <button type="button" class="print-toolbar-btn" id="printManualBtn">PDF保存・印刷</button>
     <a class="print-toolbar-link" href="../admin.html">管理画面に戻る</a>
   </div>
 </div>
 <div class="print-status" id="preFixedFareAppManualPrintStatus">操作マニュアルを読み込んでいます...</div>
-<div id="preFixedFareAppManualPrintRoot"></div>
-<script src="../shared/libs/qrcode.min.js?v=app-manual-print-20260705"></script>
-<script src="../shared/estimate-qr.js?v=app-manual-print-20260705"></script>
-<script src="../shared/pre-fixed-fare-print-layout-css.js?v=app-manual-print-20260705"></script>
-<script src="../shared/pre-fixed-fare-app-manual-data.js?v=app-manual-print-20260705"></script>
-<script src="../shared/pre-fixed-fare-app-manual-pdf.js?v=app-manual-print-20260705"></script>
+<main id="manualPrintRoot" class="manual-print-root"></main>
+<script src="../shared/libs/qrcode.min.js?v=app-manual-print-css-20260705"></script>
+<script src="../shared/estimate-qr.js?v=app-manual-print-css-20260705"></script>
+<script src="../shared/pre-fixed-fare-app-manual-data.js?v=app-manual-print-css-20260705"></script>
+<script src="../shared/pre-fixed-fare-app-manual-pdf.js?v=app-manual-print-css-20260705"></script>
 <script>
 (function(){
   const cssNode = document.getElementById("preFixedFareAppManualPrintCss");
-  const root = document.getElementById("preFixedFareAppManualPrintRoot");
+  const root = document.getElementById("manualPrintRoot");
   const statusBox = document.getElementById("preFixedFareAppManualPrintStatus");
-  const printBtn = document.getElementById("preFixedFareAppManualPrintBtn");
+  const printBtn = document.getElementById("printManualBtn");
 
   function setStatus(message, isError){
     if(!statusBox) return;
@@ -39,9 +38,64 @@
     cssNode.textContent = window.PreFixedFareAppManualPdf.getPrintPageCss();
   }
 
+  function logPrintDiagnostics(){
+    const firstPage = document.querySelector(".manual-page");
+    const rootStyle = root ? getComputedStyle(root) : null;
+    const pageStyle = firstPage ? getComputedStyle(firstPage) : null;
+    console.log("[print manual] page count:", document.querySelectorAll(".manual-page").length);
+    console.log("[print manual] body text length:", document.body.innerText.length);
+    if(rootStyle){
+      console.log("[print manual] root display:", rootStyle.display);
+      console.log("[print manual] root visibility:", rootStyle.visibility);
+      console.log("[print manual] root opacity:", rootStyle.opacity);
+    }
+    if(firstPage){
+      console.log("[print manual] first page text:", String(firstPage.innerText || "").slice(0, 100));
+    }
+    if(pageStyle){
+      console.log("[print manual] first page display:", pageStyle.display);
+      console.log("[print manual] first page visibility:", pageStyle.visibility);
+      console.log("[print manual] first page opacity:", pageStyle.opacity);
+    }
+  }
+
+  async function waitForImages(container){
+    if(window.PreFixedFareAppManualPdf && typeof window.PreFixedFareAppManualPdf.waitForImagesToLoad === "function"){
+      await window.PreFixedFareAppManualPdf.waitForImagesToLoad(container);
+      return;
+    }
+    const images = Array.from((container || document).querySelectorAll("img"));
+    await Promise.all(images.map(function(img){
+      if(img.complete && img.naturalWidth > 0){
+        return Promise.resolve();
+      }
+      return new Promise(function(resolve){
+        img.addEventListener("load", resolve, { once: true });
+        img.addEventListener("error", resolve, { once: true });
+      });
+    }));
+  }
+
+  async function handlePrintManual(){
+    logPrintDiagnostics();
+    await waitForImages(root);
+    await new Promise(function(resolve){
+      requestAnimationFrame(function(){
+        requestAnimationFrame(resolve);
+      });
+    });
+    await new Promise(function(resolve){
+      setTimeout(resolve, 300);
+    });
+    window.print();
+  }
+
   if(printBtn){
     printBtn.addEventListener("click", function(){
-      window.print();
+      handlePrintManual().catch(function(error){
+        console.error(error);
+        setStatus(String(error && error.message ? error.message : "印刷の準備に失敗しました。"), true);
+      });
     });
   }
 
@@ -52,6 +106,7 @@
     }
     try{
       const result = await window.PreFixedFareAppManualPdf.renderPrintPage(root);
+      logPrintDiagnostics();
       setStatus("17ページの操作マニュアルを表示しました。「PDF保存・印刷」からブラウザの印刷画面を開き、「PDFに保存」を選択してください。（" + (result.pageCount || 0) + "ページ）");
     }catch(error){
       console.error(error);
