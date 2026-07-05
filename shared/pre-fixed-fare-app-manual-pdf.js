@@ -1,7 +1,7 @@
 (function(global){
   const HTML2PDF_CDN = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
   const PDF_FILENAME = "pre-fixed-fare-app-operation-manual.pdf";
-  const EXPECTED_PAGE_COUNT = 16;
+  const EXPECTED_PAGE_COUNT = 17;
   const SCOPE = ".pre-fixed-fare-app-manual";
 
   function escapeHtml(text){
@@ -122,21 +122,27 @@
     }).join("");
   }
 
+  function getScreenshotTypeClass(screenshot){
+    return screenshot?.screenshotType === "desktop" ? "is-desktop" : "is-mobile";
+  }
+
   function buildScreenshotBlock(screenshot, imageAvailable){
     if(!screenshot){
       return "";
     }
+    const typeClass = getScreenshotTypeClass(screenshot);
     const shotInner = imageAvailable
       ? (
+        "<div class='manual-screenshot-frame " + typeClass + "'>" +
         "<div class='manual-shot manual-shot--image manual-shot--annotated'>" +
-        "<img src='" + escapeHtml(screenshot.imageSrc) + "' alt='" + escapeHtml(screenshot.placeholderLabel || "") + "' loading='eager'>" +
+        "<img class='manual-screenshot-img' src='" + escapeHtml(screenshot.imageSrc) + "' alt='" + escapeHtml(screenshot.placeholderLabel || "") + "' loading='eager'>" +
         buildAnnotationOverlays(screenshot.annotations) +
-        "</div>"
+        "</div></div>"
       )
       : buildMissingScreenshotBlock(screenshot);
 
     return (
-      "<div class='manual-shot-wrap'>" +
+      "<div class='manual-screenshot-block manual-shot-wrap'>" +
       shotInner +
       buildCalloutList(screenshot.callouts) +
       "</div>"
@@ -150,9 +156,8 @@
     const qrItems = Array.isArray(data.qrItems) ? data.qrItems : [];
     const qrBlocks = qrItems.map(function(item, index){
       const dataUrl = qrDataUrls[item.id] || "";
-      const resolvedUrl = global.PreFixedFareAppManualData
-        ? global.PreFixedFareAppManualData.resolveManualUrl(item.urlKey)
-        : (item.url || "");
+      const captionLine1 = escapeHtml((item.label || ("QR" + (index + 1))) + "：" + (item.title || ""));
+      const captionLine2 = escapeHtml(item.coverNote || item.description || "");
       return (
         "<div class='cover-qr-item'>" +
         "<p class='cover-qr-label'>" + escapeHtml(item.label || ("QR" + (index + 1))) + "</p>" +
@@ -160,8 +165,7 @@
         (dataUrl
           ? "<img class='cover-qr-image' src='" + escapeHtml(dataUrl) + "' alt='" + escapeHtml(item.title || "") + "'>"
           : "<div class='cover-qr-image cover-qr-image--missing'>QR生成不可</div>") +
-        "<p class='cover-qr-url'>" + escapeHtml(resolvedUrl) + "</p>" +
-        "<p class='cover-qr-desc'>" + escapeHtml(item.description || "") + "</p>" +
+        "<p class='cover-qr-caption'>" + captionLine1 + "<br>" + captionLine2 + "</p>" +
         "</div>"
       );
     }).join("");
@@ -231,16 +235,19 @@
     const imageAvailable = screenshot ? !!imageAvailability[screenshot.imageSrc] : false;
     const tableHtml = page.table
       ? buildTable(page.table.headers || [], page.table.rows || [], {
-        className: "table-content",
+        className: "table-content manual-table",
         colWidths: page.table.colWidths || ["28%", "72%"]
       })
       : "";
+    const screenshotHtml = screenshot ? buildScreenshotBlock(screenshot, imageAvailable) : "";
     return manualPage(page.pageId || "content", (
+      "<div class='manual-section'>" +
       "<h2 class='page-title'>" + escapeHtml(page.title || "") + "</h2>" +
       "<p>" + escapeHtmlWithBreaks(page.description || "") + "</p>" +
       buildHighlightList(page.highlights) +
-      tableHtml +
-      buildScreenshotBlock(screenshot, imageAvailable)
+      (tableHtml ? "<div class='manual-table-block'>" + tableHtml + "</div>" : "") +
+      screenshotHtml +
+      "</div>"
     ));
   }
 
@@ -360,8 +367,10 @@
     return (
       base +
       core +
-      SCOPE + " .manual-page{width:auto;min-height:auto;padding:0;box-sizing:border-box;}" +
+      SCOPE + " .manual-page{width:auto;min-height:auto;padding:0;box-sizing:border-box;page-break-after:always;break-after:page;}" +
       SCOPE + " .manual-page + .manual-page{page-break-before:always;break-before:page;}" +
+      SCOPE + " .manual-section,.manual-table-block,.manual-screenshot-block,.manual-annotation-list,.table-wrap,.callout-list{break-inside:avoid;page-break-inside:avoid;}" +
+      SCOPE + " table,tr,td,th{break-inside:avoid;page-break-inside:avoid;}" +
       SCOPE + " .cover-header{text-align:center;margin:0 0 6mm;}" +
       SCOPE + " .cover-title-main{font-size:20pt;font-weight:700;margin:0 0 2mm;color:#1b3a6b;}" +
       SCOPE + " .cover-title-sub{font-size:16pt;font-weight:700;margin:0 0 4mm;color:#1b3a6b;line-height:1.35;}" +
@@ -373,8 +382,7 @@
       SCOPE + " .cover-qr-title{font-size:10pt;font-weight:700;margin:0 0 2mm;color:#111827;}" +
       SCOPE + " .cover-qr-image{display:block;width:34mm;height:34mm;margin:0 auto 2mm;object-fit:contain;}" +
       SCOPE + " .cover-qr-image--missing{display:flex;align-items:center;justify-content:center;width:34mm;height:34mm;border:1px dashed #94a3b8;font-size:8pt;color:#64748b;background:#fff;}" +
-      SCOPE + " .cover-qr-url{font-size:7.5pt;color:#64748b;margin:0 0 2mm;word-break:break-all;}" +
-      SCOPE + " .cover-qr-desc{font-size:8.5pt;line-height:1.45;margin:0;color:#334155;text-align:left;}" +
+      SCOPE + " .cover-qr-caption{font-size:8.5pt;line-height:1.45;margin:0;color:#334155;text-align:center;}" +
       SCOPE + " .cover-qr-note{margin:0 0 4mm;padding:3mm;background:#fff7ed;border-left:4px solid #c46a00;font-size:8.5pt;line-height:1.45;color:#7c2d12;}" +
       SCOPE + " .cover-document-meta{margin-top:2mm;padding-top:3mm;border-top:1px solid #cbd5e1;font-size:9.5pt;line-height:1.55;color:#334155;}" +
       SCOPE + " .cover-document-meta p{margin:0 0 1.5mm;}" +
@@ -389,13 +397,18 @@
       SCOPE + " .flow-card{display:flex;align-items:flex-start;gap:2mm;border:1px solid #dbeafe;background:#f8fbff;padding:2.5mm;min-height:12mm;}" +
       SCOPE + " .flow-card-no{display:inline-flex;align-items:center;justify-content:center;width:6mm;height:6mm;border-radius:50%;background:#1b3a6b;color:#fff;font-size:8.5pt;font-weight:700;flex:0 0 auto;}" +
       SCOPE + " .flow-card-text{font-size:9pt;line-height:1.45;color:#111827;}" +
+      SCOPE + " .manual-screenshot-block{margin-top:4mm;}" +
       SCOPE + " .manual-shot-wrap{margin-top:4mm;}" +
       SCOPE + " .manual-shot{margin:0 0 3mm;}" +
       SCOPE + " .manual-shot--image{border:2px solid #cbd5e1;padding:2mm;background:#fff;}" +
-      SCOPE + " .manual-shot--annotated{position:relative;}" +
-      SCOPE + " .manual-shot--image img{display:block;width:100%;max-height:82mm;object-fit:contain;object-position:top center;}" +
-      SCOPE + " .manual-page[data-page-id='route-change'] .manual-shot--image img," +
-      SCOPE + " .manual-page[data-page-id='reservation-save'] .manual-shot--image img{max-height:72mm;}" +
+      SCOPE + " .manual-shot--annotated{position:relative;display:inline-block;width:100%;}" +
+      SCOPE + " .manual-screenshot-frame{margin:0 auto;}" +
+      SCOPE + " .manual-screenshot-frame.is-mobile{max-width:92mm;}" +
+      SCOPE + " .manual-screenshot-frame.is-desktop{max-width:180mm;}" +
+      SCOPE + " .manual-screenshot-img{display:block;width:100%;height:auto;max-height:150mm;object-fit:contain;object-position:top center;}" +
+      SCOPE + " .manual-page[data-page-id='route-change-operation'] .manual-screenshot-frame.is-mobile{max-width:96mm;}" +
+      SCOPE + " .manual-page[data-page-id='route-change-operation'] .manual-screenshot-img{max-height:132mm;}" +
+      SCOPE + " .manual-page[data-page-id='reservation-save'] .manual-screenshot-img{max-height:120mm;}" +
       SCOPE + " .manual-annotation{position:absolute;box-sizing:border-box;border:2px solid #dc2626;background:rgba(220,38,38,.04);pointer-events:none;}" +
       SCOPE + " .manual-annotation-marker{position:absolute;top:-3.2mm;left:-1mm;background:#fff;color:#dc2626;font-size:10pt;font-weight:800;line-height:1;padding:0 1mm;}" +
       SCOPE + " .manual-annotation-label{position:absolute;left:0;bottom:-4.5mm;max-width:120%;background:#fff;color:#b91c1c;font-size:7.5pt;font-weight:700;line-height:1.2;padding:0 1mm;white-space:nowrap;}" +

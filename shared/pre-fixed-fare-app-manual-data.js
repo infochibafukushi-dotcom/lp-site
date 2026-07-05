@@ -6,7 +6,7 @@
 
   const IMAGE_BASE = "./assets/manual/pre-fixed-fare/";
   const PDF_FILENAME = "pre-fixed-fare-app-operation-manual.pdf";
-  const EXPECTED_PAGE_COUNT = 16;
+  const EXPECTED_PAGE_COUNT = 17;
 
   const COMPANY = {
     name: "株式会社 千葉福祉サポート",
@@ -30,6 +30,7 @@
       id: "estimateReservation",
       label: "QR①",
       title: "かんたん見積～予約実践",
+      coverNote: "審査用デモモードを開きます",
       description: "利用者が乗車地・目的地を入力し、ルート・運賃を確認して予約する流れを確認します。",
       urlKey: "estimateReservation"
     },
@@ -37,6 +38,7 @@
       id: "operationManual",
       label: "QR②",
       title: "運行中のメーター操作",
+      coverNote: "運行操作説明ページを開きます",
       description: "乗務員が予約確認、運行開始、運行中操作、精算、領収書保存を行う流れを確認します。",
       urlKey: "operationManual"
     }
@@ -85,10 +87,11 @@
 
   const ROUTE_CHANGE_TABLE = {
     headers: ["ケース", "アプリ操作", "収受方針"],
+    colWidths: ["22%", "38%", "40%"],
     rows: [
       ["渋滞", "通常運行継続", "事前確定運賃"],
-      ["事故・通行止め", "同意を得て迂回", "事前確定運賃"],
-      ["運転者判断の迂回", "同意を記録", "事前確定運賃"],
+      ["事故・通行止め", "旅客同意を得て迂回", "事前確定運賃"],
+      ["運転者判断の迂回", "旅客同意を記録", "事前確定運賃"],
       ["旅客都合の目的地変更", "事前確定運賃を終了", "新たな運送として扱う"],
       ["大規模交通規制", "状況に応じて通常運賃等へ切替", "事前説明のうえ対応"]
     ]
@@ -126,6 +129,7 @@
   function screenshotEntry(config){
     return Object.assign({
       placeholderOnly: false,
+      screenshotType: "mobile",
       annotations: [],
       callouts: []
     }, config || {});
@@ -245,6 +249,7 @@
       description: "事業者は管理画面で、事前確定運賃予約の内容を確認します。予約内容、走行予定ルート、確定運賃額、利用者同意の有無を確認できます。",
       highlights: ["予約一覧", "予約詳細", "事前確定運賃フラグ", "走行予定ルート", "確定運賃額", "同意済み表示"],
       screenshot: screenshotEntry({
+        screenshotType: "desktop",
         imageFile: "admin-confirm.png",
         placeholderLabel: "管理画面：事前確定運賃予約詳細",
         annotations: [
@@ -324,7 +329,12 @@
       title: "ルート変更・迂回時の対応",
       description:
         "事故、通行止め、交通規制など外的要因によりルート変更が必要な場合は、旅客の同意を得たうえで迂回します。この場合、収受する運賃は原則として事前確定運賃額とします。\n\n旅客都合により目的地変更や大幅な経路変更が発生した場合は、事前確定運賃による運送を一度終了し、必要に応じて新たな運送として扱います。",
-      table: ROUTE_CHANGE_TABLE,
+      table: ROUTE_CHANGE_TABLE
+    },
+    {
+      pageId: "route-change-operation",
+      title: "ルート変更・迂回時のアプリ操作",
+      description: "ルート変更・迂回時は、アプリ上で変更理由と旅客同意を記録し、収受方針に沿って運行を継続します。",
       screenshot: screenshotEntry({
         imageFile: "route-change.png",
         placeholderLabel: "例外処理：ルート変更・迂回時の操作画面",
@@ -407,6 +417,7 @@
       imageSrc: IMAGE_BASE + (screenshot.imageFile || ""),
       placeholderLabel: screenshot.placeholderLabel || "",
       placeholderOnly: screenshot.placeholderOnly === true,
+      screenshotType: screenshot.screenshotType === "desktop" ? "desktop" : "mobile",
       annotations: Array.isArray(screenshot.annotations) ? screenshot.annotations.slice() : [],
       callouts: Array.isArray(screenshot.callouts) ? screenshot.callouts.slice() : []
     };
