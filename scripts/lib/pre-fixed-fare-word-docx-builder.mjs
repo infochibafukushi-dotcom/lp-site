@@ -492,6 +492,39 @@ function buildAppendixServiceFee(payload){
   return children;
 }
 
+function buildReviewChecklistChildren(data){
+  const rows = (data.checkpoints || []).map(function(item){
+    return [
+      String(item.no),
+      item.point,
+      item.content,
+      item.document,
+      item.status
+    ];
+  });
+  return [
+    heading(data.title || "事前確定運賃 認可審査確認ポイント一覧", 1),
+    paragraph(data.intro || ""),
+    buildTable(
+      ["No", "審査確認ポイント", "確認内容", "掲載資料", "状態"],
+      rows,
+      { colWidths: [6, 14, 34, 32, 14], labelCols: [0, 1], amountCols: [0, 4] }
+    )
+  ];
+}
+
+function buildAttachmentIndexChildren(data){
+  return [
+    heading(data.title || "添付資料一覧・ページ対応表", 1),
+    buildTable(
+      ["資料番号", "資料名", "主な確認内容", "掲載ページ", "備考"],
+      data.rows || [],
+      { colWidths: [12, 22, 34, 14, 18], labelCols: [0], amountCols: [3] }
+    ),
+    paragraph("※掲載ページは一式提出候補PDF（final-candidate）のページ番号です。再出力時に実ページへ更新されます。", { size: FONT_NOTE })
+  ];
+}
+
 function buildAppendixSetCover(payload){
   return [
     heading(payload.title || "事前確定運賃 提出用別紙セット", 1),
@@ -546,7 +579,9 @@ export {
   buildAppendixDistanceFare,
   buildAppendixServiceFee,
   buildAppendixSetCover,
+  buildAttachmentIndexChildren,
   buildQaChildren,
+  buildReviewChecklistChildren,
   buildScreenEvidenceChildren,
   createSubmissionDocument,
   htmlToDocxChildren,

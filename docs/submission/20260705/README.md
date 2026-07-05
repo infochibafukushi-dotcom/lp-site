@@ -123,6 +123,60 @@ node scripts/build-pre-fixed-fare-submission-full-set.mjs
 node scripts/build-pre-fixed-fare-submission-word-set.mjs
 ```
 
+## 審査向け final-candidate（2026/07/05）
+
+運輸局審査官が確認ポイント順にたどれるよう、**情報を削除せず**見出し・順番・参照を整理した提出候補版です。旧 `*-v1-candidate` は残し、本版を `*-v1-final-candidate` として別出力します。
+
+| 項目 | 内容 |
+|------|------|
+| 一式PDF | `pre-fixed-fare-submission-full-set-v1-final-candidate.pdf`（**56ページ**） |
+| 一式Word | `pre-fixed-fare-submission-full-set-v1-final-candidate.docx` |
+
+### final-candidate 結合順（審査論点順）
+
+1. 申請書
+2. **審査確認ポイント一覧**（16項目）
+3. **添付資料一覧・ページ対応表**
+4. 実画面証跡資料（P1〜P7）
+5. 統合説明資料（審査向け10章構成・27ページ）
+6. 運用・監査説明資料
+7. Q&A
+8. 別紙セット（記入補助・別紙1・別紙2）
+
+### 統合説明資料（審査向け章構成）
+
+1. 事前確定運賃の申請概要
+2. 認可審査要件への対応
+3. 実画面証跡
+4. 運賃算定根拠
+5. 各種料金との区分
+6. 例外運用
+7. 監査証跡・保存・照合
+8. 本番相当環境E2E確認
+9. Q&A（別添参照）
+10. 補足・運用開始前確認項目
+
+### final-candidate 再生成コマンド
+
+```bash
+node scripts/export-pre-fixed-fare-submission-set.mjs
+node scripts/export-pre-fixed-fare-submission-final-set.mjs
+node scripts/build-pre-fixed-fare-submission-final-word-set.mjs
+```
+
+### ページ対応（final-candidate 一式）
+
+| 資料 | 掲載ページ |
+|------|------------|
+| 申請書 | P1 |
+| 審査確認ポイント一覧 | P2〜P3 |
+| 添付資料一覧 | P4 |
+| 画面証跡 | P5〜P11 |
+| 統合説明（審査向け） | P12〜P38 |
+| 運用・監査説明 | P39〜P47 |
+| Q&A | P48〜P50 |
+| 別紙セット | P51〜P56 |
+
 ## 申請書（様式2）入力値
 
 | 項目 | 内容 |

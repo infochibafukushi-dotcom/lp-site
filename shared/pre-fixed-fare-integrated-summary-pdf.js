@@ -518,7 +518,358 @@
     );
   }
 
-  function buildReportHtml(data){
+  function buildReviewScreenReference(){
+    return subsection("実画面証跡資料との対応",
+      "<p>別添「実画面証跡資料」に、以下の画面証跡を掲載している。</p>" +
+      buildTable(
+        ["画面", "確認内容", "掲載"],
+        [
+          ["ルート選択画面", "2以上の走行予定ルート提示と旅客選択", "画面証跡 P2"],
+          ["旅客同意確認画面", "事前確定運賃額・選択ルート・注意事項の同意取得", "画面証跡 P3"],
+          ["ドライバー確認画面", "旅客同意済み確定ルート・事前確定運賃額の確認", "画面証跡 P4"],
+          ["領収書・レシート明細画面", "事前確定運賃としての明細表示", "画面証跡 P5"],
+          ["予約詳細（メーター）", "確定運賃内訳・各種料金の区分表示", "画面証跡 P6"],
+          ["各種料金確認画面", "迎車料・特殊車両料金等の別枠加算", "画面証跡 P7（補足資料）"]
+        ],
+        { className: "table-screen-ref", colWidths: ["24%", "46%", "30%"] }
+      )
+    );
+  }
+
+  function buildChapterReview1Overview(data){
+    const regulatory = data.regulatory || {};
+    const meta = data.meta || {};
+    return (
+      subsection("申請目的", buildList(regulatory.purpose)) +
+      subsection("使用する配車アプリ名称",
+        "<p>ちばケアタクシー LP見積シミュレーター / 予約システム（reservation-v4） / メーターアプリ（care-taxi-meter）</p>" +
+        "<p>対象：" + escapeHtml(meta.target || "") + "</p>"
+      ) +
+      subsection("対象営業区域", "<p>千葉交通圏（申請書・別紙1参照）</p>") +
+      subsection("適用する運賃・料金の種類",
+        buildList([
+          "事前確定運賃本体（距離制運賃 × 平準化係数）",
+          "各種料金（迎車料、介助料、待機料、付き添い料、有料道路代、駐車場代等）— 別紙2参照",
+          "障害者割引、福祉タクシー券等 — 精算時に記録"
+        ])
+      )
+    );
+  }
+
+  function buildChapterReview2Requirements(regulatory, data){
+    const multiRouteRows = mapRows(regulatory.multiRouteRows, function(row){
+      return [row.item, row.status, row.basis];
+    });
+    const requirementRows = mapRows(regulatory.requirementRows, function(row){
+      return [row.requirement, row.policy, row.current, row.evidence];
+    });
+    const tollRows = mapRows(regulatory.tollRows, function(row){
+      return [row.item, row.status, row.basis];
+    });
+
+    return (
+      subsection("電子地図による推計走行距離", buildList(regulatory.mapAndRouteDesign)) +
+      subsection("距離制運賃×平準化係数",
+        "<p><strong>" + escapeHtml(regulatory.notices?.formulaText || "") + "</strong></p>" +
+        buildList(regulatory.notices?.formulas)
+      ) +
+      subsection("時間距離併用制運賃の除外",
+        "<p>事前確定運賃の算定では、時間距離併用制運賃を用いず、距離制運賃を基準とする。別紙2の「予定時間加算」はLP上の概算見積補助項目であり、正式な事前確定運賃本体には含めない。</p>"
+      ) +
+      subsection("2以上のルート提示",
+        buildTable(["項目", "状況", "根拠"], multiRouteRows, { className: "table-multi-route", colWidths: ["24%", "16%", "60%"] })
+      ) +
+      subsection("有料道路利用有無の選択",
+        buildTable(["項目", "状況", "根拠"], tollRows, { className: "table-toll", colWidths: ["24%", "16%", "60%"] })
+      ) +
+      subsection("旅客同意",
+        buildList(regulatory.userNoticeItems) +
+        "<h4>同意前注意事項</h4>" + buildList(regulatory.cautionBeforeConsent)
+      ) +
+      subsection("運転者への同一ルート提示",
+        (data?.driverRouteDisplay?.status ? "<p><strong>現状：</strong>" + escapeHtml(data.driverRouteDisplay.status) + "</p>" : "") +
+        buildList(data?.driverRouteDisplay?.points || []) +
+        "<p class='note'>地図描画の最終目視確認は第10章に整理する。</p>"
+      ) +
+      subsection("公示要件対応表",
+        buildTable(
+          ["公示要件", "システム対応方針", "現状", "根拠"],
+          requirementRows,
+          { className: "table-requirements", colWidths: ["24%", "30%", "14%", "32%"] }
+        )
+      )
+    );
+  }
+
+  function buildChapterReview4FareBasis(regulatory, data){
+    const coefficientRows = mapRows(regulatory.coefficientRows, function(row){
+      return [row.area, numberLabel(row.coefficient), row.basis, row.appliedAt];
+    });
+    return (
+      subsection("距離制運賃表",
+        (data?.fareTableAppendixNote ? "<p>" + escapeHtml(data.fareTableAppendixNote) + "</p>" : "") +
+        "<p>詳細は別紙1「距離制運賃表」を参照。</p>"
+      ) +
+      subsection("平準化係数",
+        "<p>" + escapeHtml(regulatory.coefficientPolicy || "") + "</p>" +
+        buildTable(
+          ["営業区域", "係数", "根拠", "適用日"],
+          coefficientRows,
+          { className: "table-coefficients", colWidths: ["20%", "12%", "38%", "30%"] }
+        ),
+        { extraClass: "page-break-before table-section no-split-table" }
+      ) +
+      subsection("算定式",
+        (regulatory.notices?.fareBasisNote ? "<p>" + escapeHtml(regulatory.notices.fareBasisNote) + "</p>" : "") +
+        buildList(regulatory.notices?.formulas) +
+        "<p><strong>" + escapeHtml(regulatory.notices?.formulaText || "") + "</strong></p>"
+      ) +
+      subsection("四捨五入", "<p>事前確定運賃算定時は1円未満の端数を四捨五入する（別紙1参照）。</p>")
+    );
+  }
+
+  function buildChapterReview5FeeSeparation(regulatory, data){
+    const fareFeeRows = mapRows(regulatory.fareAndFeeRows, function(row){
+      return [row.category, row.include, row.handling];
+    });
+    return (
+      subsection("事前確定運賃本体と各種料金の区分",
+        (data?.fareFeeDisplayNote ? "<p>" + escapeHtml(data.fareFeeDisplayNote) + "</p>" : "") +
+        buildTable(
+          ["区分", "事前確定運賃に含めるか", "扱い"],
+          fareFeeRows,
+          { className: "table-fare-fees", colWidths: ["34%", "20%", "46%"] }
+        ) +
+        "<p>詳細は別紙2「各種料金表」を参照。迎車料800円、特殊車両使用料1,000円等は事前確定運賃本体とは区分して表示・精算する。</p>"
+      )
+    );
+  }
+
+  function buildChapterReview6Exceptions(approval, pct, data){
+    const judgmentRows = mapRows(approval.judgmentRows, function(row){
+      return [row.condition, row.system, row.reservationUrl, row.button, row.handling];
+    });
+    return (
+      buildChapter4Page11(pct, data) +
+      buildChapter4Page12(pct) +
+      subsection("判定ロジック（候補1件時・帰り立ち寄り等）",
+        buildTable(
+          ["条件", "システム", "予約URL", "ボタン", "扱い"],
+          judgmentRows,
+          { className: "table-judgment", colWidths: ["22%", "18%", "18%", "18%", "24%"] }
+        ) +
+        buildList(approval.judgmentNotes)
+      ) +
+      subsection("候補1件のみの場合の確認対応",
+        buildList(approval.singleCandidate?.intro) +
+        buildList(approval.singleCandidate?.ui) +
+        "<p>" + escapeHtml(approval.singleCandidate?.evidence || "") + "</p>"
+      ) +
+      subsection("帰り立ち寄りありの全体ルート合成",
+        buildList(approval.returnWithStop?.intro) +
+        buildList(approval.returnWithStop?.structure) +
+        buildList(approval.returnWithStop?.display)
+      ) +
+      subsection("事故・通行止め等の迂回", "<p>外的要因による迂回は旅客都合変更と区別し、記録を残して運用する。詳細は別添Q&A資料および運用・監査説明資料を参照。</p>")
+    );
+  }
+
+  function buildChapterReview7Tamper(appendix, regulatory){
+    const tamper = appendix?.tamperProtection || {};
+    return subsection(tamper.title || "改ざん防止及びスナップショットハッシュの取扱い",
+      buildList(regulatory.tamperProtectionSummary) +
+      (tamper.paragraphs || []).map(function(paragraph){
+        return "<p>" + escapeHtml(paragraph) + "</p>";
+      }).join("") +
+      (tamper.terminologyNote
+        ? "<p class='terminology-note'><strong>用語の位置づけ：</strong>" + escapeHtml(tamper.terminologyNote) + "</p>"
+        : "")
+    );
+  }
+
+  function buildChapterReview7Audit(operations, data, regulatory, appendix){
+    return (
+      buildChapter3Page8(operations, data) +
+      buildChapter3Page9(operations) +
+      subsection("quoteSnapshot・証跡保存",
+        "<h4>確認できる項目</h4>" + buildList(regulatory.snapshotConfirmed) +
+        "<h4>" + escapeHtml(regulatory.snapshotUnconfirmedTitle || "今後の強化候補") + "</h4>" +
+        buildList(regulatory.snapshotUnconfirmed)
+      ) +
+      buildChapter6Page14(appendix) +
+      buildChapter6Page15(appendix) +
+      buildChapterReview7Tamper(appendix, regulatory)
+    );
+  }
+
+  function buildChapterReview8E2e(data, operations, appendix){
+    const e2e = operations.e2eEvidence || {};
+    const verifiedChecks = (e2e.checks || []).filter(function(row){
+      return row.result === "OK";
+    });
+    return (
+      buildChapter3Page10(operations) +
+      subsection("確認済み予約ID",
+        buildTable(
+          ["区分", "予約ID", "表示"],
+          (e2e.cases || []).map(function(caseItem){
+            return [caseItem.label, caseItem.reservationId, caseItem.displayLabel];
+          }),
+          { className: "table-verified-ids", colWidths: ["28%", "24%", "48%"] }
+        ) +
+        (data.e2eReservationNote
+          ? "<p class='e2e-reservation-note'>" + escapeHtml(data.e2eReservationNote) + "</p>"
+          : "")
+      ) +
+      subsection("確認済み内容",
+        buildTable(
+          ["確認項目", "結果"],
+          verifiedChecks.map(function(row){ return [row.item, row.result]; }),
+          { className: "table-verified-checks", colWidths: ["74%", "26%"] }
+        )
+      ) +
+      subsection(appendix?.e2eTestCases?.title || "本番相当環境E2Eテストケース表",
+        (appendix?.e2eTestCases?.note ? "<p class='e2e-reservation-note'>" + escapeHtml(appendix.e2eTestCases.note) + "</p>" : "") +
+        buildTable(
+          appendix?.e2eTestCases?.headers || ["ID", "テストシナリオ", "期待される挙動", "結果", "エビデンス"],
+          appendix?.e2eTestCases?.rows || [],
+          { className: "table-e2e-cases", colWidths: ["10%", "22%", "30%", "10%", "28%"] }
+        )
+      )
+    );
+  }
+
+  function buildChapterReview9Qa(data){
+    const topics = [
+      "算定式と距離制運賃・平準化係数",
+      "2以上のルート提示と旅客選択",
+      "旅客同意と注意事項",
+      "運転者への同一ルート提示",
+      "各種料金との区分",
+      "旅客都合ルート変更時の途中終了",
+      "事故・通行止め等の迂回",
+      "候補1件時の扱い",
+      "監査証跡・保存期間",
+      "snapshotHashによる整合性確認"
+    ];
+    return (
+      "<p>" + escapeHtml(data.qaChapterNote || "") + "</p>" +
+      subsection("主要論点一覧", buildList(topics)) +
+      "<p>全文は別添「Q&A資料」を参照。</p>"
+    );
+  }
+
+  function buildChapterReview10Supplement(data, operations){
+    const preLaunchTitle = data.preLaunchChecksSectionTitle || "運用開始前確認項目";
+    const preLaunchChecks = Array.isArray(data.integratedPreLaunchChecks) ? data.integratedPreLaunchChecks : [];
+    const tokenCaveats = operations.tokenSecurity?.caveats || [];
+    const driverNote = data?.driverRouteDisplay?.visualCheckNote || "";
+    const futureItems = (data.regulatory?.snapshotUnconfirmed || []).concat([
+      "運転者向けルート地図描画（polyline表示）の最終目視確認",
+      "Firebase ID Token検証の今後対応",
+      "利用明細書PDF fixed専用表示対応",
+      "本番相当E2E証跡の定期更新"
+    ]);
+
+    return (
+      subsection(preLaunchTitle,
+        "<p>" + escapeHtml(data.preLaunchCheckIntro || "") + "</p>" +
+        buildList(preLaunchChecks) +
+        (data.preLaunchCheckSwapNote ? "<p class='prelaunch-swap-note'>" + escapeHtml(data.preLaunchCheckSwapNote) + "</p>" : "")
+      ) +
+      (driverNote ? subsection("運転者向けルート表示の最終確認", "<p>" + escapeHtml(driverNote) + "</p>") : "") +
+      subsection("将来強化候補", buildList(futureItems)) +
+      (tokenCaveats.length ? subsection("認証・セキュリティの今後対応", buildList(tokenCaveats)) : "") +
+      subsection("根拠資料・確認資料一覧", buildList(data.referenceMaterials)) +
+      subsection("申請担当者による最終確認項目",
+        buildList([
+          "申請書代表者印の押印",
+          "別紙1・別紙2の最終数値確認",
+          "画面証跡の実画面一致確認",
+          "一式PDFのページ対応表と実ページの照合",
+          "運用開始前目視確認項目の実施記録"
+        ])
+      ) +
+      "<p class='footer-note'>" + escapeHtml(data.footerNote || "") + "</p>"
+    );
+  }
+
+  function buildFullSetToc(fullSetToc){
+    const rows = [];
+    (fullSetToc || []).forEach(function(item){
+      rows.push([item.no, item.title, ""]);
+      (item.children || []).forEach(function(child){
+        rows.push(["", child, ""]);
+      });
+    });
+    return (
+      "<h2 class='toc-heading'>一式提出候補 目次（審査論点順）</h2>" +
+      buildTable(["No", "項目", ""], rows, { className: "table-fullset-toc", colWidths: ["12%", "68%", "20%"] })
+    );
+  }
+
+  function buildReviewOrientedReportHtml(data){
+    const positioning = data.reviewChapterPositioning || data.chapterPositioning || {};
+    const regulatory = data.regulatory || {};
+    const approval = data.approval || {};
+    const operations = data.operations || {};
+    const pct = operations.passengerChangeTermination || {};
+    const appendix = data.appendix || {};
+    const reviewToc = data.reviewToc || data.toc || [];
+
+    return (
+      "<div class='pre-fixed-fare-integrated-summary report-page'>" +
+      "<section class='doc-cover'>" + buildCover(data.meta || {}, data.title) + "</section>" +
+      "<section class='doc-toc'>" + buildFullSetToc(data.fullSetToc) + buildToc(reviewToc) + "</section>" +
+      "<section class='chapter-start'>" +
+        chapterHeader(1, reviewToc[0]?.title || "事前確定運賃の申請概要", positioning[1]) +
+        buildChapterReview1Overview(data) +
+      "</section>" +
+      "<section class='chapter-start'>" +
+        chapterHeader(2, reviewToc[1]?.title || "認可審査要件への対応", positioning[2]) +
+        buildChapterReview2Requirements(regulatory, data) +
+      "</section>" +
+      "<section class='chapter-start'>" +
+        chapterHeader(3, reviewToc[2]?.title || "実画面証跡", positioning[3]) +
+        buildReviewScreenReference() +
+        buildChapter6ScreenReference(appendix) +
+      "</section>" +
+      "<section class='chapter-start'>" +
+        chapterHeader(4, reviewToc[3]?.title || "運賃算定根拠", positioning[4]) +
+        buildChapterReview4FareBasis(regulatory, data) +
+      "</section>" +
+      "<section class='chapter-start'>" +
+        chapterHeader(5, reviewToc[4]?.title || "各種料金との区分", positioning[5]) +
+        buildChapterReview5FeeSeparation(regulatory, data) +
+      "</section>" +
+      "<section class='chapter-start'>" +
+        chapterHeader(6, reviewToc[5]?.title || "例外運用", positioning[6]) +
+        buildChapterReview6Exceptions(approval, pct, data) +
+      "</section>" +
+      "<section class='chapter-start'>" +
+        chapterHeader(7, reviewToc[6]?.title || "監査証跡・保存・照合", positioning[7]) +
+        buildChapterReview7Audit(operations, data, regulatory, appendix) +
+      "</section>" +
+      "<section class='chapter-start'>" +
+        chapterHeader(8, reviewToc[7]?.title || "本番相当環境E2E確認", positioning[8]) +
+        buildChapterReview8E2e(data, operations, appendix) +
+      "</section>" +
+      "<section class='chapter-start'>" +
+        chapterHeader(9, reviewToc[8]?.title || "Q&A", positioning[9]) +
+        buildChapterReview9Qa(data) +
+      "</section>" +
+      "<section class='chapter-start'>" +
+        chapterHeader(10, reviewToc[9]?.title || "補足・運用開始前確認項目", positioning[10]) +
+        buildChapterReview10Supplement(data, operations) +
+      "</section>" +
+      "</div>"
+    );
+  }
+
+  function buildReportHtml(data, options){
+    if(options && options.reviewOriented){
+      return buildReviewOrientedReportHtml(data);
+    }
     const positioning = data.chapterPositioning || {};
     const regulatory = data.regulatory || {};
     const approval = data.approval || {};
@@ -834,8 +1185,10 @@
     }
   }
 
-  function buildPrintDocument(reportData){
-    const reportHtml = buildReportHtml(reportData);
+  function buildPrintDocument(reportData, options){
+    options = options || {};
+    const reviewOriented = Boolean(options.reviewOriented || reportData.reviewOriented);
+    const reportHtml = buildReportHtml(reportData, { reviewOriented: reviewOriented });
     return (
       "<!DOCTYPE html><html lang='ja'><head><meta charset='UTF-8'>" +
       "<meta name='viewport' content='width=device-width,initial-scale=1'>" +
@@ -861,6 +1214,7 @@
     PDF_FILENAME: PDF_FILENAME,
     EXPECTED_PAGE_COUNT: EXPECTED_PAGE_COUNT,
     buildReportHtml: buildReportHtml,
+    buildReviewOrientedReportHtml: buildReviewOrientedReportHtml,
     buildPrintDocument: buildPrintDocument,
     renderPdfBlob: renderPdfBlob,
     savePdf: savePdf,
