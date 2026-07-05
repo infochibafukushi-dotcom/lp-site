@@ -53,8 +53,9 @@
       return buildMissingImageBlock(screen.imageFile);
     }
     const receiptClass = screen.pageId === "receipt-detail" ? " screen-evidence-shot--receipt" : "";
+    const meterClass = screen.pageId === "meter-reservation-detail" ? " screen-evidence-shot--meter-detail" : "";
     return (
-      "<div class='screen-evidence-shot" + receiptClass + "'>" +
+      "<div class='screen-evidence-shot" + receiptClass + meterClass + "'>" +
       "<img src='" + escapeHtml(screen.imageSrc) + "' alt='" + escapeHtml(screen.pageTitle) + "' loading='eager'>" +
       "</div>"
     );
@@ -198,6 +199,8 @@
       ".pre-fixed-fare-screen-evidence .screen-evidence-shot{margin:0 0 4mm;}" +
       ".pre-fixed-fare-screen-evidence .screen-evidence-shot--receipt{display:flex;justify-content:center;align-items:flex-start;margin:0 auto 4mm;}" +
       ".pre-fixed-fare-screen-evidence .screen-evidence-shot img{display:block;max-width:100%;max-height:200mm;object-fit:contain;object-position:top center;}" +
+      ".pre-fixed-fare-screen-evidence .screen-evidence-shot--meter-detail{display:flex;justify-content:center;align-items:flex-start;margin:0 auto 4mm;}" +
+      ".pre-fixed-fare-screen-evidence .screen-evidence-shot--meter-detail img{width:100%;max-width:175mm;max-height:215mm;object-fit:contain;object-position:top center;}" +
       ".pre-fixed-fare-screen-evidence .screen-evidence-shot--missing{border:2px dashed #94a3b8;background:#f8fafc;min-height:80mm;padding:24px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;}" +
       ".pre-fixed-fare-screen-evidence .screen-evidence-shot-missing-label{font-size:12pt;font-weight:700;color:#475569;margin:0 0 8px;}" +
       ".pre-fixed-fare-screen-evidence .screen-evidence-shot-missing-path{font-size:8.5pt;color:#64748b;margin:0;word-break:break-all;}" +

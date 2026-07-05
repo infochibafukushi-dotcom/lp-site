@@ -3,6 +3,8 @@
   const SUBMISSION_DIR = "./docs/submission/20260705/";
   const FULL_SET_FILENAME = "pre-fixed-fare-submission-full-set-v1-candidate.pdf";
   const FULL_SET_PATH = SUBMISSION_DIR + FULL_SET_FILENAME;
+  const FINAL_SET_FILENAME = "pre-fixed-fare-submission-full-set-v1-final-candidate.pdf";
+  const FINAL_SET_PATH = SUBMISSION_DIR + FINAL_SET_FILENAME;
 
   const SOURCE_FILES = [
     {
@@ -165,17 +167,30 @@
       setSubmissionSetStatus("提出セット一括PDFを開けませんでした。ポップアップブロックを解除してください。", "error");
       return;
     }
-    setSubmissionSetStatus("提出セット一括PDFを開きました: " + FULL_SET_PATH, "ok");
+    setSubmissionSetStatus("提出セット一括PDF（candidate）を開きました: " + FULL_SET_PATH, "ok");
+  }
+
+  function handleOpenSubmissionFinalSet(){
+    const opened = window.open(FINAL_SET_PATH + "?" + Date.now(), "_blank", "noopener");
+    if(!opened){
+      setSubmissionSetStatus("final-candidate PDFを開けませんでした。ポップアップブロックを解除してください。", "error");
+      return;
+    }
+    setSubmissionSetStatus("審査向け final-candidate PDFを開きました: " + FINAL_SET_PATH, "ok");
   }
 
   function initPreFixedFareSubmissionSet(){
     const buildBtn = document.getElementById("preFixedFareSubmissionFullSetBuildBtn");
     const openBtn = document.getElementById("preFixedFareSubmissionFullSetOpenBtn");
+    const finalOpenBtn = document.getElementById("preFixedFareSubmissionFinalSetOpenBtn");
     if(buildBtn){
       buildBtn.addEventListener("click", handleBuildSubmissionFullSet);
     }
     if(openBtn){
       openBtn.addEventListener("click", handleOpenSubmissionFullSet);
+    }
+    if(finalOpenBtn){
+      finalOpenBtn.addEventListener("click", handleOpenSubmissionFinalSet);
     }
   }
 

@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import puppeteer from "puppeteer";
 
 const rootDir = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
@@ -34,6 +34,62 @@ function copyReservationEvidence(){
   assert(fs.existsSync(sourceReservationPath), "予約詳細証跡画像が見つかりません: " + sourceReservationPath);
   fs.mkdirSync(evidenceDir, { recursive: true });
   fs.copyFileSync(sourceReservationPath, reservationCopyPath);
+}
+
+async function cropMeterReservationDetail(browser){
+  const launchOptions = {
+    headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox", "--allow-file-access-from-files"]
+  };
+  const chromePath = resolveChromeExecutable();
+  if(chromePath){
+    launchOptions.executablePath = chromePath;
+  }
+  const cropBrowser = browser || await puppeteer.launch(launchOptions);
+  const shouldClose = !browser;
+  try{
+    const page = await cropBrowser.newPage();
+    const sourceUrl = pathToFileURL(reservationCopyPath).href;
+    await page.goto("about:blank");
+    await page.setContent(
+      "<!DOCTYPE html><html><body style='margin:0;background:#fff'><img id='src' src='" + sourceUrl + "'></body></html>",
+      { waitUntil: "networkidle0", timeout: 120000 }
+    );
+    const dataUrl = await page.evaluate(async function(){
+      const img = document.getElementById("src");
+      await new Promise(function(resolve){
+        if(img.complete && img.naturalWidth > 0){
+          resolve();
+          return;
+        }
+        img.addEventListener("load", resolve, { once: true });
+        img.addEventListener("error", resolve, { once: true });
+      });
+      const width = img.naturalWidth;
+      const height = img.naturalHeight;
+      if(!width || !height){
+        throw new Error("予約詳細画像の読み込みに失敗しました");
+      }
+      const cropHeight = Math.min(height, Math.round(height * 0.72));
+      const scale = 1.35;
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(width * scale);
+      canvas.height = Math.round(cropHeight * scale);
+      const ctx = canvas.getContext("2d");
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(img, 0, 0, width, cropHeight, 0, 0, canvas.width, canvas.height);
+      return canvas.toDataURL("image/png");
+    });
+    const base64 = String(dataUrl || "").replace(/^data:image\/png;base64,/, "");
+    assert(base64.length > 1000, "予約詳細画像のトリミングに失敗しました");
+    fs.writeFileSync(reservationCopyPath, Buffer.from(base64, "base64"));
+    assert(fs.statSync(reservationCopyPath).size > 10000, "トリミング後の予約詳細画像が小さすぎます");
+  }finally{
+    if(shouldClose){
+      await cropBrowser.close();
+    }
+  }
 }
 
 async function waitForServer(url, timeoutMs){
@@ -112,15 +168,26 @@ async function captureDispatchModal(){
 }
 
 async function main(){
-  copyReservationEvidence();
-  if(!fs.existsSync(path.join(meterDir, "dist/index.html"))){
-    throw new Error("care-taxi-meter の dist が未ビルドです。先に npm run build を実行してください。");
+  const cropScript = path.join(rootDir, "scripts/crop-meter-reservation-evidence.mjs");
+  if(fs.existsSync(cropScript)){
+    const { spawnSync } = await import("node:child_process");
+    const cropResult = spawnSync(process.execPath, [cropScript], { stdio: "inherit" });
+    if(cropResult.status !== 0){
+      throw new Error("予約詳細画像のトリミングに失敗しました");
+    }
+  }else{
+    copyReservationEvidence();
   }
-  await captureDispatchModal();
-  assert(fs.existsSync(outputPath), "補足用メーター画面証跡の保存に失敗しました");
-  assert(fs.statSync(outputPath).size > 10000, "補足用メーター画面証跡のサイズが小さすぎます");
+  if(fs.existsSync(path.join(meterDir, "dist/index.html"))){
+    await captureDispatchModal();
+    assert(fs.existsSync(outputPath), "補足用メーター画面証跡の保存に失敗しました");
+    assert(fs.statSync(outputPath).size > 10000, "補足用メーター画面証跡のサイズが小さすぎます");
+    console.log("OK", outputPath);
+  }else{
+    console.warn("care-taxi-meter dist 未ビルドのため 06 画像キャプチャをスキップします");
+    assert(fs.existsSync(outputPath), "既存の補足用メーター画面証跡がありません: " + outputPath);
+  }
   console.log("OK", reservationCopyPath);
-  console.log("OK", outputPath);
 }
 
 main().catch(function(error){

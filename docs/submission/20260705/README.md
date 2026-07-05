@@ -159,10 +159,12 @@ node scripts/build-pre-fixed-fare-submission-word-set.mjs
 ### final-candidate 再生成コマンド
 
 ```bash
-node scripts/export-pre-fixed-fare-submission-set.mjs
+node scripts/crop-meter-reservation-evidence.mjs
 node scripts/export-pre-fixed-fare-submission-final-set.mjs
 node scripts/build-pre-fixed-fare-submission-final-word-set.mjs
 ```
+
+**注意:** 審査向け一式は `pre-fixed-fare-submission-full-set-v1-final-candidate.pdf` です。`pre-fixed-fare-submission-full-set-v1-candidate.pdf`（48ページ）は旧構成のまま残しています。
 
 ### ページ対応（final-candidate 一式）
 

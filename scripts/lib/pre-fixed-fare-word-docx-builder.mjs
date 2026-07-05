@@ -181,9 +181,10 @@ function scaleImageDimensions(width, height, maxWidth){
   };
 }
 
-function imageParagraph(buffer){
+function imageParagraph(buffer, options){
+  options = options || {};
   const dims = getPngDimensions(buffer);
-  const scaled = scaleImageDimensions(dims.width, dims.height);
+  const scaled = scaleImageDimensions(dims.width, dims.height, options.maxWidth || 520);
   return new Paragraph({
     alignment: AlignmentType.CENTER,
     spacing: { after: 120, before: 80 },
@@ -365,7 +366,8 @@ function buildScreenEvidenceChildren(data, imageMap){
     children.push(heading(screen.pageTitle || "", 2));
     const buffer = imageMap[screen.imageFile];
     if(buffer){
-      children.push(imageParagraph(buffer));
+      const maxWidth = screen.pageId === "meter-reservation-detail" ? 680 : 520;
+      children.push(imageParagraph(buffer, { maxWidth: maxWidth }));
     }else{
       children.push(paragraph("（画像ファイル未配置: " + (screen.imageFile || "") + "）"));
     }

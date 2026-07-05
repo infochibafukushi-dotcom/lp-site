@@ -222,21 +222,146 @@ async function exportAttachmentIndexPdf(browser, page, pageMap){
   return result;
 }
 
-async function ensureCandidateParts(browser, page, exportOptions){
-  const applicationPath = path.join(outputDir, CANDIDATE_SOURCES.application);
-  if(!fs.existsSync(applicationPath)){
-    console.log("Candidate application missing — run export-pre-fixed-fare-submission-set.mjs first");
-    throw new Error("候補版PDFが未生成です: " + applicationPath);
-  }
-  const required = Object.values(CANDIDATE_SOURCES);
-  required.forEach(function(filename){
-    assert(fs.existsSync(path.join(outputDir, filename)), "候補版PDFが未生成です: " + filename);
+async function extractPdfPageTexts(browser, filePath){
+  const page = await browser.newPage();
+  const pdfBase64 = fs.readFileSync(filePath).toString("base64");
+  const texts = await page.evaluate(async function(base64){
+    await new Promise(function(resolve, reject){
+      const script = document.createElement("script");
+      script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+    const pdfjsLib = window.pdfjsLib;
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for(let i = 0; i < binary.length; i++){
+      bytes[i] = binary.charCodeAt(i);
+    }
+    const doc = await pdfjsLib.getDocument({ data: bytes }).promise;
+    const pageTexts = [];
+    for(let pageNumber = 1; pageNumber <= doc.numPages; pageNumber++){
+      const pdfPage = await doc.getPage(pageNumber);
+      const textContent = await pdfPage.getTextContent();
+      pageTexts.push(textContent.items.map(function(item){ return item.str; }).join(""));
+    }
+    return pageTexts;
+  }, pdfBase64);
+  await page.close();
+  return texts;
+}
+
+async function exportApplicationPdf(browser, page){
+  const saved = JSON.parse(fs.readFileSync(path.join(rootDir, "data/pre-fixed-fare-application.json"), "utf8"));
+  const html = await page.evaluate(function(data){
+    return window.PreFixedFareApplicationPrint.buildPrintDocument(data, { autoPrint: false });
+  }, saved);
+  const filePath = path.join(outputDir, CANDIDATE_SOURCES.application);
+  const result = await exportPdfFromHtml(browser, html, filePath, { footer: false });
+  assert(result.pageCount === 1, "申請書が1ページではありません: " + result.pageCount);
+  return result;
+}
+
+async function exportScreenEvidencePdf(browser, page){
+  const built = await page.evaluate(async function(){
+    const reportData = window.PreFixedFareScreenEvidenceData.buildReportData();
+    const availability = await window.PreFixedFareScreenEvidencePdf.probeImages(
+      reportData.screens || [],
+      reportData.supplementPage
+    );
+    const reportHtml = window.PreFixedFareScreenEvidencePdf.buildReportHtml(reportData, availability);
+    const css = window.PreFixedFareScreenEvidencePdf.getEvidenceCss
+      ? window.PreFixedFareScreenEvidencePdf.getEvidenceCss()
+      : "";
+    return {
+      html: "<!DOCTYPE html><html lang='ja'><head><meta charset='UTF-8'><style>" + css + "</style></head><body>" + reportHtml + "</body></html>",
+      htmlText: reportHtml.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()
+    };
   });
-  const counts = {};
-  for(const [key, filename] of Object.entries(CANDIDATE_SOURCES)){
-    counts[key] = await getPdfPageCount(path.join(outputDir, filename));
-  }
-  return counts;
+  assert(built.html.includes("screen-evidence-shot--meter-detail"), "画面証跡HTMLに予約詳細拡大枠がありません");
+  const filePath = path.join(outputDir, CANDIDATE_SOURCES.screenEvidence);
+  const result = await exportPdfFromHtml(browser, built.html, filePath, { footer: false });
+  assert(result.pageCount === 7, "画面証跡PDFが7ページではありません: " + result.pageCount);
+  return result;
+}
+
+async function exportOperationsPdf(browser, page){
+  const html = await page.evaluate(function(){
+    const reportData = window.PreFixedFareOperationsSummaryData.buildReportData();
+    return window.PreFixedFareOperationsSummaryPdf.buildPrintDocument(reportData);
+  });
+  const filePath = path.join(outputDir, CANDIDATE_SOURCES.operations);
+  return exportPdfFromHtml(browser, html, filePath, { footer: true });
+}
+
+async function exportQaPdf(browser, page){
+  const html = await page.evaluate(function(){
+    const reportData = window.PreFixedFareQaData.buildReportData();
+    return window.PreFixedFareQaPdf.buildPrintDocument(reportData);
+  });
+  const filePath = path.join(outputDir, CANDIDATE_SOURCES.qa);
+  return exportPdfFromHtml(browser, html, filePath, { footer: false });
+}
+
+async function exportAppendixPdf(browser, page, exportOptions){
+  const built = await page.evaluate(function(exportOptions){
+    const result = window.PreFixedFareSubmissionAppendixWord.buildWordDocumentHtml("submission-appendix-set", exportOptions);
+    return { html: result.html };
+  }, Object.assign({}, exportOptions || {}, { appendixParts: CANDIDATE_APPENDIX_PARTS }));
+  const filePath = path.join(outputDir, CANDIDATE_SOURCES.appendix);
+  return exportPdfFromHtml(browser, built.html, filePath, { footer: false });
+}
+
+async function verifyFinalSetStructure(browser, filePath){
+  const pages = await extractPdfPageTexts(browser, filePath);
+  assert(pages.length >= 54 && pages.length <= 60, "final-candidateのページ数が想定外: " + pages.length);
+  const p1 = pages[0] || "";
+  const p2 = pages[1] || "";
+  const p3 = pages[2] || "";
+  const p4 = pages[3] || "";
+  const p5 = pages[4] || "";
+  const p12 = pages[11] || "";
+  assert(p1.includes("認可申請書") || p1.includes("申請書") || p1.includes("設定認可"), "P1に申請書がありません");
+  assert(p2.includes("審査確認ポイント") || p2.includes("申請様式"), "P2に審査確認ポイント一覧がありません");
+  assert(p4.includes("添付資料") || p4.includes("資料1"), "P4に添付資料一覧がありません");
+  assert(p5.includes("証跡") || p5.includes("EST-20260705") || p5.includes("28,000"), "P5に画面証跡表紙がありません");
+  const allText = pages.join("");
+  assert(allText.includes("認可審査要件への対応") || allText.includes("審査論点順"), "統合説明に審査向け10章構成がありません");
+  assert(allText.includes("第10章") || allText.includes("事前確定運賃の申請概要"), "統合説明に第10章がありません");
+  assert(!allText.includes("利用者向け見積シミュレーターの動作と判定ロジック"), "統合説明が旧6章構成のままです");
+  return { pageCount: pages.length, pages: pages };
+}
+
+async function ensureCandidateParts(browser, page, exportOptions){
+  console.log("Exporting application form...");
+  const application = await exportApplicationPdf(browser, page);
+  console.log("  OK application", application.pageCount, "pages");
+
+  console.log("Exporting screen evidence...");
+  const screenEvidence = await exportScreenEvidencePdf(browser, page);
+  console.log("  OK screen-evidence", screenEvidence.pageCount, "pages");
+
+  console.log("Exporting operations summary...");
+  const operations = await exportOperationsPdf(browser, page);
+  console.log("  OK operations", operations.pageCount, "pages");
+
+  console.log("Exporting Q&A...");
+  const qa = await exportQaPdf(browser, page);
+  console.log("  OK qa", qa.pageCount, "pages");
+
+  console.log("Exporting appendix set...");
+  const appendix = await exportAppendixPdf(browser, page, exportOptions);
+  console.log("  OK appendix", appendix.pageCount, "pages");
+
+  return {
+    application: application.pageCount,
+    screenEvidence: screenEvidence.pageCount,
+    operations: operations.pageCount,
+    qa: qa.pageCount,
+    appendix: appendix.pageCount
+  };
 }
 
 async function buildPageMap(partCounts, appendixMarkers, appendixStart){
@@ -496,6 +621,9 @@ async function main(){
     assert(joined.includes("添付資料") || joined.includes("資料1"), "一式に添付資料一覧がありません");
     assert(joined.includes("28") && joined.includes("000"), "一式に確定運賃がありません");
     assert(joined.includes("800"), "一式に迎車料800円がありません");
+
+    const structure = await verifyFinalSetStructure(browser, fullSet.outputPath);
+    console.log("Final set structure OK", structure.pageCount, "pages");
 
     console.log("SUMMARY", JSON.stringify({
       reviewChecklistPages: reviewChecklist.pageCount,
