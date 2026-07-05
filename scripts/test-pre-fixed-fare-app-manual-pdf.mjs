@@ -5,6 +5,7 @@ import puppeteer from "puppeteer";
 
 const rootDir = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const adminUrl = "file:///" + path.join(rootDir, "admin.html").replace(/\\/g, "/");
+const operationManualPath = path.join(rootDir, "manual", "pre-fixed-fare-operation.html");
 const DEFAULT_CHROME = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 
 const REQUIRED_PAGE_IDS = [
@@ -81,6 +82,9 @@ async function main(){
         pageIds: pageIdList,
         missing: missing,
         hasDemoNote: String(html || "").includes("審査用QRから操作した予約データ"),
+        hasDemoScreenNote: String(html || "").includes("審査用デモ画面です"),
+        hasEdition: String(html || "").includes("第1版") && String(html || "").includes("令和8年7月5日"),
+        hasQrReviewNote: String(html || "").includes("審査用QRからの操作は、実予約と区別して管理する想定です"),
         hasQrEstimate: String(html || "").includes("かんたん見積～予約実践"),
         hasQrOperation: String(html || "").includes("運行中のメーター操作"),
         hasChecklist: String(html || "").includes("認可説明チェックリスト"),
@@ -96,6 +100,10 @@ async function main(){
     assert(moduleCheck.pageCount === 16, "ページ数が不正: " + moduleCheck.pageCount);
     assert(moduleCheck.missing.length === 0, "不足ページ: " + moduleCheck.missing.join(", "));
     assert(moduleCheck.hasDemoNote, "デモ予約区別の文言がありません");
+    assert(moduleCheck.hasDemoScreenNote, "審査用デモ画面の説明がありません");
+    assert(moduleCheck.hasEdition, "作成日・版数がありません");
+    assert(moduleCheck.hasQrReviewNote, "QR①注記がありません");
+    assert(fs.existsSync(operationManualPath), "QR②リンク先 manual/pre-fixed-fare-operation.html がありません");
     assert(moduleCheck.hasQrEstimate, "QR①タイトルがありません");
     assert(moduleCheck.hasQrOperation, "QR②タイトルがありません");
     assert(moduleCheck.hasChecklist, "チェックリストがありません");

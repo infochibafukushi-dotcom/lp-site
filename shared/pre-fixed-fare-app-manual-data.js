@@ -13,6 +13,12 @@
     brand: "ちばケアタクシー"
   };
 
+  const DOCUMENT_INFO = {
+    createdDate: "令和8年7月5日",
+    edition: "第1版",
+    usage: "事前確定運賃 認可説明補足資料"
+  };
+
   const COVER = {
     titleLine1: "事前確定運賃",
     titleLine2: "予約・運行中アプリ操作マニュアル",
@@ -40,10 +46,12 @@
     paragraphs: [
       "本資料は、事前確定運賃の予約から運行、精算までのアプリ操作を説明するものです。",
       "利用者が乗車前に、乗車地・目的地・走行予定ルート・事前確定運賃額を確認し、同意したうえで予約できることを示します。",
-      "また、乗務員が予約内容、走行予定ルート、確定運賃額を確認し、運行開始から精算・領収書保存まで一貫して操作できることを示します。"
+      "また、乗務員が予約内容、走行予定ルート、確定運賃額を確認し、運行開始から精算・領収書保存まで一貫して操作できることを示します。",
+      "本資料内の画面は、事前確定運賃の予約・運行・精算の流れを説明するための審査用デモ画面です。実運用時も同一の導線により、乗車地・目的地、走行予定ルート、事前確定運賃額、旅客同意、運行開始、精算・記録保存を確認できる構成とします。"
     ],
     demoNote:
-      "審査用QRから操作した予約データは、本番予約と区別して管理する想定です（デモ予約・審査用ログとして保存）。"
+      "審査用QRから操作した予約データは、本番予約と区別して管理する想定です（デモ予約・審査用ログとして保存）。",
+    qrReviewNote: "審査用QRからの操作は、実予約と区別して管理する想定です。"
   };
 
   const OVERALL_FLOW = [
@@ -134,9 +142,9 @@
         imageFile: "estimate-step-01.png",
         placeholderLabel: "かんたん見積：トップ画面",
         annotations: [
-          { no: 1, x: 8, y: 12, w: 84, h: 8, text: "かんたん見積を開く" },
-          { no: 2, x: 8, y: 22, w: 40, h: 6, text: "事前確定運賃対象" },
-          { no: 3, x: 8, y: 42, w: 84, h: 8, text: "予約導線" }
+          { no: 1, x: 8, y: 10, w: 84, h: 8, text: "かんたん見積を開く" },
+          { no: 2, x: 8, y: 18, w: 40, h: 6, text: "事前確定運賃対象" },
+          { no: 3, x: 8, y: 38, w: 84, h: 8, text: "予約導線" }
         ],
         callouts: [
           { number: 1, text: "LPまたはQRからかんたん見積を開きます。" },
@@ -155,9 +163,9 @@
         imageFile: "estimate-step-02.png",
         placeholderLabel: "かんたん見積：乗車地・目的地入力画面",
         annotations: [
-          { no: 1, x: 8, y: 24, w: 84, h: 10, text: "乗車地を入力" },
-          { no: 2, x: 8, y: 38, w: 84, h: 10, text: "目的地を入力" },
-          { no: 3, x: 12, y: 72, w: 76, h: 8, text: "ルートを確認する" }
+          { no: 1, x: 8, y: 20, w: 84, h: 10, text: "乗車地を入力" },
+          { no: 2, x: 8, y: 34, w: 84, h: 10, text: "目的地を入力" },
+          { no: 3, x: 12, y: 66, w: 76, h: 8, text: "ルートを確認する" }
         ],
         callouts: [
           { number: 1, text: "乗車地を入力します。" },
@@ -423,10 +431,11 @@
       pdfFilename: PDF_FILENAME,
       expectedPageCount: EXPECTED_PAGE_COUNT,
       links: Object.assign({}, PRE_FIXED_FARE_MANUAL_LINKS),
+      documentInfo: Object.assign({}, DOCUMENT_INFO),
       meta: {
-        createdAt: createdAt,
+        createdAt: DOCUMENT_INFO.createdDate,
         createdBy: "管理画面",
-        documentType: "予約・運行中アプリ操作マニュアル（認可説明用）"
+        documentType: DOCUMENT_INFO.usage
       },
       cover: Object.assign({}, COVER, { company: Object.assign({}, COMPANY) }),
       qrItems: QR_ITEMS.map(function(item){
@@ -446,6 +455,7 @@
 
   global.PreFixedFareAppManualData = {
     PRE_FIXED_FARE_MANUAL_LINKS: PRE_FIXED_FARE_MANUAL_LINKS,
+    DOCUMENT_INFO: DOCUMENT_INFO,
     DEMO_DATA: DEMO_DATA,
     IMAGE_BASE: IMAGE_BASE,
     PDF_FILENAME: PDF_FILENAME,

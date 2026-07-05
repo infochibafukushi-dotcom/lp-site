@@ -146,6 +146,7 @@
   function buildCoverPage(data, qrDataUrls){
     const cover = data.cover || {};
     const company = cover.company || {};
+    const docInfo = data.documentInfo || {};
     const qrItems = Array.isArray(data.qrItems) ? data.qrItems : [];
     const qrBlocks = qrItems.map(function(item, index){
       const dataUrl = qrDataUrls[item.id] || "";
@@ -173,15 +174,12 @@
       "<p class='cover-company'>" + escapeHtml(company.name || "") + "<br>" + escapeHtml(company.brand || "") + "</p>" +
       "</div>" +
       "<div class='cover-qr-grid'>" + qrBlocks + "</div>" +
-      buildTable(
-        ["項目", "内容"],
-        [
-          ["作成日", data.meta?.createdAt || ""],
-          ["作成元", data.meta?.createdBy || ""],
-          ["資料区分", data.meta?.documentType || ""]
-        ],
-        { className: "table-meta", colWidths: ["28%", "72%"] }
-      )
+      "<p class='cover-qr-note'>" + escapeHtml(data.purpose?.qrReviewNote || "") + "</p>" +
+      "<div class='cover-document-meta'>" +
+      "<p><strong>作成日：</strong>" + escapeHtml(docInfo.createdDate || "") + "</p>" +
+      "<p><strong>版数：</strong>" + escapeHtml(docInfo.edition || "") + "</p>" +
+      "<p><strong>用途：</strong>" + escapeHtml(docInfo.usage || "") + "</p>" +
+      "</div>"
     ));
   }
 
@@ -193,7 +191,8 @@
       paragraphs.map(function(text){
         return "<p>" + escapeHtml(text) + "</p>";
       }).join("") +
-      "<p class='verification-note'>" + escapeHtml(purpose.demoNote || "") + "</p>"
+      "<p class='verification-note'>" + escapeHtml(purpose.demoNote || "") + "</p>" +
+      "<p class='verification-note verification-note--secondary'>" + escapeHtml(purpose.qrReviewNote || "") + "</p>"
     ));
   }
 
@@ -327,7 +326,7 @@
         ? global.PreFixedFareAppManualData.resolveManualUrl(item.urlKey)
         : (item.url || "");
       if(global.EstimateQr && typeof global.EstimateQr.toDataUrl === "function"){
-        result[item.id] = await global.EstimateQr.toDataUrl(url, 120);
+        result[item.id] = await global.EstimateQr.toDataUrl(url, 150);
       }else{
         result[item.id] = "";
       }
@@ -372,10 +371,13 @@
       SCOPE + " .cover-qr-item{border:1px solid #cbd5e1;padding:3mm;text-align:center;background:#f8fafc;}" +
       SCOPE + " .cover-qr-label{font-size:9pt;font-weight:700;margin:0 0 1mm;color:#1b3a6b;}" +
       SCOPE + " .cover-qr-title{font-size:10pt;font-weight:700;margin:0 0 2mm;color:#111827;}" +
-      SCOPE + " .cover-qr-image{display:block;width:28mm;height:28mm;margin:0 auto 2mm;object-fit:contain;}" +
-      SCOPE + " .cover-qr-image--missing{display:flex;align-items:center;justify-content:center;border:1px dashed #94a3b8;font-size:8pt;color:#64748b;background:#fff;}" +
+      SCOPE + " .cover-qr-image{display:block;width:34mm;height:34mm;margin:0 auto 2mm;object-fit:contain;}" +
+      SCOPE + " .cover-qr-image--missing{display:flex;align-items:center;justify-content:center;width:34mm;height:34mm;border:1px dashed #94a3b8;font-size:8pt;color:#64748b;background:#fff;}" +
       SCOPE + " .cover-qr-url{font-size:7.5pt;color:#64748b;margin:0 0 2mm;word-break:break-all;}" +
       SCOPE + " .cover-qr-desc{font-size:8.5pt;line-height:1.45;margin:0;color:#334155;text-align:left;}" +
+      SCOPE + " .cover-qr-note{margin:0 0 4mm;padding:3mm;background:#fff7ed;border-left:4px solid #c46a00;font-size:8.5pt;line-height:1.45;color:#7c2d12;}" +
+      SCOPE + " .cover-document-meta{margin-top:2mm;padding-top:3mm;border-top:1px solid #cbd5e1;font-size:9.5pt;line-height:1.55;color:#334155;}" +
+      SCOPE + " .cover-document-meta p{margin:0 0 1.5mm;}" +
       SCOPE + " .page-title{font-size:16pt;font-weight:700;margin:0 0 4mm;color:#1b3a6b;border-bottom:2px solid #1b3a6b;padding-bottom:2mm;}" +
       SCOPE + " .page-lead{margin:0 0 4mm;color:#334155;}" +
       SCOPE + " .step-label{font-size:10pt;font-weight:700;color:#c41e3a;margin:0 0 2mm;}" +
@@ -391,7 +393,9 @@
       SCOPE + " .manual-shot{margin:0 0 3mm;}" +
       SCOPE + " .manual-shot--image{border:2px solid #cbd5e1;padding:2mm;background:#fff;}" +
       SCOPE + " .manual-shot--annotated{position:relative;}" +
-      SCOPE + " .manual-shot--image img{display:block;width:100%;max-height:95mm;object-fit:contain;object-position:top center;}" +
+      SCOPE + " .manual-shot--image img{display:block;width:100%;max-height:82mm;object-fit:contain;object-position:top center;}" +
+      SCOPE + " .manual-page[data-page-id='route-change'] .manual-shot--image img," +
+      SCOPE + " .manual-page[data-page-id='reservation-save'] .manual-shot--image img{max-height:72mm;}" +
       SCOPE + " .manual-annotation{position:absolute;box-sizing:border-box;border:2px solid #dc2626;background:rgba(220,38,38,.04);pointer-events:none;}" +
       SCOPE + " .manual-annotation-marker{position:absolute;top:-3.2mm;left:-1mm;background:#fff;color:#dc2626;font-size:10pt;font-weight:800;line-height:1;padding:0 1mm;}" +
       SCOPE + " .manual-annotation-label{position:absolute;left:0;bottom:-4.5mm;max-width:120%;background:#fff;color:#b91c1c;font-size:7.5pt;font-weight:700;line-height:1.2;padding:0 1mm;white-space:nowrap;}" +
@@ -403,6 +407,8 @@
       SCOPE + " .callout-list li{display:flex;align-items:flex-start;gap:2mm;margin:0 0 2mm;font-size:9.5pt;line-height:1.45;}" +
       SCOPE + " .callout-marker{display:inline-flex;align-items:center;justify-content:center;min-width:5mm;color:#dc2626;font-weight:700;flex:0 0 auto;}" +
       SCOPE + " .verification-note{margin:4mm 0 0;padding:4mm;background:#eef5fb;border-left:4px solid #2f6fad;font-size:8.5pt;line-height:1.45;}" +
+      SCOPE + " .verification-note--secondary{background:#fff7ed;border-left-color:#c46a00;}" +
+      SCOPE + " .table-wrap{break-inside:avoid;page-break-inside:avoid;}" +
       SCOPE + " .table-checklist td:first-child{font-weight:600;}"
     );
   }

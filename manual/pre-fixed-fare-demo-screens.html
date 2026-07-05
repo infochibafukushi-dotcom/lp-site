@@ -24,15 +24,16 @@
     overflow:hidden;
   }
   .demo-badge{
-    display:inline-block;
-    margin:8px 12px 0;
-    padding:4px 8px;
+    display:block;
+    margin:10px 12px 4px;
+    padding:3px 8px;
     border-radius:999px;
-    background:#fff7ed;
-    border:1px solid #f59e0b;
-    color:#9a3412;
-    font-size:11px;
-    font-weight:700;
+    background:#f8fafc;
+    border:1px solid #cbd5e1;
+    color:#64748b;
+    font-size:10px;
+    font-weight:600;
+    text-align:center;
   }
   .demo-entry-card{
     margin:12px;
@@ -324,7 +325,11 @@
   }
 
   function badge(){
-    return '<div class="demo-badge">審査用デモ画面（画面例）</div>';
+    return "";
+  }
+
+  function badgeFooter(){
+    return '<p class="demo-badge">審査用デモ画面（画面例）</p>';
   }
 
   const screens = {
@@ -336,7 +341,7 @@
       '<p style="margin:0 0 12px;font-size:14px;line-height:1.6;color:#555;">LPまたはQRコードから、乗車地・目的地・走行予定ルート・事前確定運賃額を確認して予約できます。</p>' +
       '<button type="button" class="demo-primary-btn" data-marker="estimate-start">かんたん見積をはじめる</button>' +
       '<button type="button" class="demo-secondary-btn" data-marker="reservation-link">予約の流れを見る</button>' +
-      '</div>'
+      '</div>' + badgeFooter()
     ),
     "estimate-step-02": (
       badge() +
@@ -347,7 +352,7 @@
       '<div class="demo-field"><label for="origin">乗車地</label><input id="origin" data-marker="origin" value="' + D.origin + '"></div>' +
       '<div class="demo-field"><label for="destination">目的地</label><input id="destination" data-marker="destination" value="' + D.destination + '"></div>' +
       '<button type="button" class="demo-primary-btn" data-marker="route-search">ルートを確認する</button>' +
-      '</section></div>'
+      '</section></div>' + badgeFooter()
     ),
     "estimate-step-03": (
       badge() +
@@ -357,7 +362,7 @@
       '<div class="demo-route-cards">' +
       '<div class="demo-route-card is-selected" data-marker="route-a"><div class="demo-route-head"><span class="demo-route-badge a">A</span><span>時間優先ルート</span></div><div>12.4km / 28分</div><div class="demo-fare-emphasis">事前確定運賃 ' + D.preFixedFare + '</div></div>' +
       '<div class="demo-route-card" data-marker="route-b"><div class="demo-route-head"><span class="demo-route-badge b">B</span><span>一般道優先ルート</span></div><div>13.1km / 31分</div><div class="demo-fare-emphasis">事前確定運賃 ' + D.preFixedFare + '</div></div>' +
-      '</div></div>'
+      '</div></div>' + badgeFooter()
     ),
     "estimate-step-04": (
       badge() +
@@ -366,7 +371,7 @@
       '<div class="demo-consent-box" data-marker="notice">事前確定運賃は走行予定ルートに基づき算定します。事故・通行止め等による迂回は旅客同意のうえ事前確定運賃額で収受します。旅客都合の目的地変更は新たな運送として扱います。</div>' +
       '<label class="demo-check-row" data-marker="consent-check"><input type="checkbox" checked> 走行予定ルート・事前確定運賃額（' + D.preFixedFare + '）・注意事項に同意します。</label>' +
       '<button type="button" class="demo-primary-btn" data-marker="to-reservation">予約へ進む</button>' +
-      '</div>'
+      '</div>' + badgeFooter()
     ),
     "reservation-save": (
       badge() +
@@ -383,7 +388,7 @@
       '<tr><th>予約ステータス</th><td>受付済み</td></tr>' +
       '</table>' +
       '<button type="button" class="demo-primary-btn" data-marker="save-done">予約内容を保存しました</button>' +
-      '</div>'
+      '</div>' + badgeFooter()
     ),
     "driver-select": (
       badge() +
@@ -395,7 +400,7 @@
       '<div>' + D.origin + ' → ' + D.destination + '</div>' +
       '<div class="demo-fare-emphasis">確定運賃 ' + D.preFixedFare + '</div>' +
       '</div></div>' +
-      '<div class="driver-card"><button type="button" class="demo-primary-btn" data-marker="open-detail">予約詳細を開く</button></div>'
+      '<div class="driver-card"><button type="button" class="demo-primary-btn" data-marker="open-detail">予約詳細を開く</button></div>' + badgeFooter()
     ),
     "operation-start": (
       badge() +
@@ -408,7 +413,7 @@
       '<div><span>運行状態</span><strong><span class="driver-status">' + D.operationStatus + '</span></strong></div>' +
       '</div>' +
       '<button type="button" class="demo-primary-btn" data-marker="start-run">運行開始</button>' +
-      '</div>'
+      '</div>' + badgeFooter()
     ),
     "meter-operation": (
       badge() +
@@ -421,7 +426,7 @@
       '<button type="button" data-marker="assist">介助</button>' +
       '</div>' +
       '<div class="driver-actions-wide"><button type="button" class="primary" data-marker="to-settlement">精算へ進む</button></div>' +
-      '</div>'
+      '</div>' + badgeFooter()
     ),
     "route-change": (
       badge() +
@@ -430,7 +435,7 @@
       '<div class="driver-alert">事故・通行止めにより迂回が必要です。旅客同意を記録したうえで運行を継続します。</div>' +
       '<label class="demo-check-row"><input type="checkbox" checked data-marker="detour-consent"> 迂回ルートと収受方針（事前確定運賃 ' + D.preFixedFare + '）に同意済み</label>' +
       '<button type="button" class="demo-primary-btn" data-marker="continue-run">同意を記録して運行継続</button>' +
-      '</div>'
+      '</div>' + badgeFooter()
     ),
     "settlement": (
       badge() +
@@ -442,7 +447,7 @@
       '<div class="driver-settlement-row"><span>障害者割引</span><strong>0円</strong></div>' +
       '<div class="driver-settlement-row total"><span>合計</span><strong>' + D.total + '</strong></div>' +
       '<button type="button" class="demo-primary-btn" data-marker="confirm-settlement">精算確定</button>' +
-      '</div>'
+      '</div>' + badgeFooter()
     ),
     "receipt-pdf": (
       badge() +
@@ -453,7 +458,7 @@
       '<button type="button" class="primary" data-marker="receipt-pdf">領収書PDF保存</button>' +
       '<button type="button" class="secondary" data-marker="receipt-print">印刷</button>' +
       '<button type="button" class="secondary" data-marker="receipt-reissue">再発行</button>' +
-      '</div></div>'
+      '</div></div>' + badgeFooter()
     )
   };
 

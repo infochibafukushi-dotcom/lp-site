@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="事前確定運賃の運行中メーター操作を確認するための審査用説明ページです。">
+<title>運行中のメーター操作 | 事前確定運賃 審査用デモ</title>
+<style>
+  body{
+    margin:0;
+    background:#f3f4f6;
+    color:#111827;
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Yu Gothic","Meiryo",sans-serif;
+    line-height:1.55;
+  }
+  main{
+    max-width:720px;
+    margin:0 auto;
+    padding:24px 16px 48px;
+  }
+  h1{
+    margin:0 0 8px;
+    font-size:24px;
+    color:#1b3a6b;
+  }
+  .lead{
+    margin:0 0 16px;
+    color:#334155;
+    font-size:15px;
+  }
+  .badge{
+    display:inline-block;
+    margin-bottom:12px;
+    padding:4px 10px;
+    border-radius:999px;
+    background:#fff7ed;
+    border:1px solid #f59e0b;
+    color:#9a3412;
+    font-size:12px;
+    font-weight:700;
+  }
+  .section{
+    background:#fff;
+    border:1px solid #dbeafe;
+    border-radius:14px;
+    padding:16px;
+    margin-bottom:12px;
+    box-shadow:0 1px 3px rgba(15,23,42,.05);
+  }
+  .section h2{
+    margin:0 0 8px;
+    font-size:16px;
+    color:#1d4ed8;
+  }
+  .section p{
+    margin:0 0 10px;
+    font-size:14px;
+    color:#334155;
+  }
+  .section a{
+    display:inline-block;
+    padding:10px 14px;
+    border-radius:999px;
+    background:#2f6f4f;
+    color:#fff;
+    text-decoration:none;
+    font-size:14px;
+    font-weight:700;
+  }
+  .note{
+    margin-top:16px;
+    padding:12px;
+    border-left:4px solid #2f6fad;
+    background:#eef5fb;
+    font-size:13px;
+    color:#1e3a5f;
+  }
+</style>
+</head>
+<body>
+<main>
+  <span class="badge">審査用デモ導線（画面例）</span>
+  <h1>運行中のメーター操作</h1>
+  <p class="lead">乗務員が予約確認から運行開始、運行中操作、精算、領収書保存まで確認するための説明ページです。各項目から審査用デモ画面を開けます。</p>
+
+  <section class="section">
+    <h2>1. 予約選択</h2>
+    <p>事前確定運賃対象の予約を一覧から選択し、走行予定ルートと確定運賃額を確認します。</p>
+    <a href="./pre-fixed-fare-demo-screens.html?screen=driver-select">デモ画面を開く</a>
+  </section>
+
+  <section class="section">
+    <h2>2. 運行開始</h2>
+    <p>予約内容を確認したうえで運行を開始します。</p>
+    <a href="./pre-fixed-fare-demo-screens.html?screen=operation-start">デモ画面を開く</a>
+  </section>
+
+  <section class="section">
+    <h2>3. 運行中メーター</h2>
+    <p>走行、待機、介助などの状態を記録し、確定運賃額を確認します。</p>
+    <a href="./pre-fixed-fare-demo-screens.html?screen=meter-operation">デモ画面を開く</a>
+  </section>
+
+  <section class="section">
+    <h2>4. ルート変更・迂回</h2>
+    <p>事故・通行止め等による迂回時の旅客同意と収受方針を確認します。</p>
+    <a href="./pre-fixed-fare-demo-screens.html?screen=route-change">デモ画面を開く</a>
+  </section>
+
+  <section class="section">
+    <h2>5. 精算</h2>
+    <p>到着後、確定運賃・介助料金・待機料金等を区分して精算します。</p>
+    <a href="./pre-fixed-fare-demo-screens.html?screen=settlement">デモ画面を開く</a>
+  </section>
+
+  <section class="section">
+    <h2>6. 領収書・PDF保存</h2>
+    <p>精算後、領収書またはレシートPDFを保存・印刷・再発行します。</p>
+    <a href="./pre-fixed-fare-demo-screens.html?screen=receipt-pdf">デモ画面を開く</a>
+  </section>
+
+  <p class="note">審査用QRからの操作は、実予約と区別して管理する想定です。本ページおよびデモ画面は認可説明用であり、本番予約データは変更しません。</p>
+</main>
+</body>
+</html>
