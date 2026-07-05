@@ -7,23 +7,23 @@ function legRequiresRouteSelection(legPlan){
   return legPlan.routeSelectionConfirmed !== true;
 }
 
-function isOverallRouteSelectionMode(routePlan){
-  return Boolean(routePlan?.overallRouteSelection?.overallRouteCandidates?.length >= 2);
-}
-
 function hasOverallRouteSelected(routePlan){
   return Boolean(String(routePlan?.overallRouteSelection?.selectedOverallRouteId || "").trim());
+}
+
+function requiresOverallRouteSelection(routePlan){
+  return Boolean(routePlan?.overallRouteSelection?.overallRouteCandidates?.length >= 2);
 }
 
 function isRouteReviewComplete(routePlan){
   if(!routePlan){
     return false;
   }
-  if(isOverallRouteSelectionMode(routePlan)){
-    return hasOverallRouteSelected(routePlan);
-  }
   const outbound = routePlan.outboundRoutePlan || routePlan;
   if(legRequiresRouteSelection(outbound)){
+    return false;
+  }
+  if(requiresOverallRouteSelection(routePlan) && !hasOverallRouteSelected(routePlan)){
     return false;
   }
   const returnLeg = routePlan.returnRoutePlan;
@@ -52,12 +52,16 @@ const overallPlan = {
     overallRouteCandidates: [{ routeId: "overall_0" }, { routeId: "overall_1" }],
     selectedOverallRouteId: null
   },
-  outboundRoutePlan: { preFixedFareConfirmable: true, selectedRouteId: "route_0" }
+  outboundRoutePlan: {
+    preFixedFareConfirmable: true,
+    selectedRouteId: "route_0",
+    routeSelectionConfirmed: true
+  }
 };
 
-assert.equal(isRouteReviewComplete(overallPlan), false, "overall mode waits for overall selection");
+assert.equal(isRouteReviewComplete(overallPlan), false, "return_with_stop waits for auto overall selection");
 
 overallPlan.overallRouteSelection.selectedOverallRouteId = "overall_0";
-assert.equal(isRouteReviewComplete(overallPlan), true, "overall selection completes review");
+assert.equal(isRouteReviewComplete(overallPlan), true, "auto-selected overall completes review");
 
 console.log("route review complete tests passed");
