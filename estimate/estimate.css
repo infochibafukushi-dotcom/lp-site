@@ -2047,3 +2047,139 @@ body.estimate-has-mobile-reserve-bar .estimate-wrap{
     font-size:12px;
   }
 }
+
+.estimate-page.estimate-review-demo-active{
+  padding-top:88px;
+}
+.estimate-review-demo-banner{
+  position:fixed;
+  top:48px;
+  left:0;
+  right:0;
+  z-index:9400;
+  padding:6px 12px;
+  background:#fff7ed;
+  border-bottom:1px solid #fdba74;
+  color:#9a3412;
+  font-size:11px;
+  font-weight:700;
+  line-height:1.45;
+  text-align:center;
+}
+.estimate-review-demo-reservation{
+  margin-top:20px;
+  padding:16px;
+  border:1px solid #dbeafe;
+  border-radius:16px;
+  background:#f8fbff;
+}
+.estimate-review-demo-reservation--complete{
+  border-color:#86efac;
+  background:#f0fdf4;
+}
+.estimate-review-demo-title{
+  margin:0 0 8px;
+  font-size:18px;
+  color:#1b3a6b;
+}
+.estimate-review-demo-lead,
+.estimate-review-demo-complete-lead{
+  margin:0 0 12px;
+  font-size:13px;
+  line-height:1.55;
+  color:#334155;
+}
+.estimate-review-demo-block{
+  margin-bottom:14px;
+}
+.estimate-review-demo-subtitle{
+  margin:0 0 8px;
+  font-size:14px;
+  color:#1d4ed8;
+}
+.estimate-review-demo-slots{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:8px;
+}
+.estimate-review-demo-slot{
+  border:1px solid #cbd5e1;
+  border-radius:12px;
+  padding:12px;
+  background:#fff;
+  color:#111827;
+  font-size:14px;
+  font-weight:700;
+  text-align:left;
+  cursor:pointer;
+}
+.estimate-review-demo-slot.is-selected{
+  border-color:#2f6f4f;
+  box-shadow:0 0 0 2px rgba(47,111,79,.15);
+  background:#f8fff9;
+}
+.estimate-review-demo-note{
+  margin:8px 0 0;
+  font-size:11px;
+  color:#64748b;
+}
+.estimate-review-demo-notice{
+  padding:12px;
+  border-radius:12px;
+  background:#fff;
+  border:1px solid #e5e0d8;
+  font-size:13px;
+  line-height:1.55;
+}
+.estimate-review-demo-consent{
+  display:flex;
+  gap:8px;
+  align-items:flex-start;
+  margin-top:10px;
+  font-size:13px;
+  line-height:1.55;
+}
+.estimate-review-demo-consent input{
+  margin-top:3px;
+}
+.estimate-review-demo-summary-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+}
+.estimate-review-demo-summary-table th,
+.estimate-review-demo-summary-table td{
+  border:1px solid #dbeafe;
+  padding:8px;
+  text-align:left;
+  vertical-align:top;
+}
+.estimate-review-demo-summary-table th{
+  width:34%;
+  background:#eff6ff;
+  font-weight:700;
+}
+.estimate-review-demo-save-btn{
+  width:100%;
+  border:none;
+  border-radius:999px;
+  padding:14px 16px;
+  background:#2f6f4f;
+  color:#fff;
+  font-size:16px;
+  font-weight:800;
+  cursor:pointer;
+}
+.estimate-review-demo-save-btn:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+.estimate-review-demo-error{
+  margin:0 0 10px;
+  color:#b91c1c;
+  font-size:13px;
+  font-weight:700;
+}
+.estimate-cta-primary--review-demo{
+  background:#1b3a6b;
+}

@@ -150,6 +150,14 @@
   }
 
   async function registerQuoteFromHandoff(handoff){
+    if(global.PreFixedFareReviewDemo?.shouldSkipProductionIntegrations?.()){
+      return { ok: true, skipped: true, reason: "review_demo_mode" };
+    }
+    try{
+      if(new URLSearchParams(window.location.search).get("scenario") === "pre-fixed-fare-demo"){
+        return { ok: true, skipped: true, reason: "review_demo_mode" };
+      }
+    }catch(error){}
     const cfg = getConfig();
     if(cfg.REGISTER_ENABLED === false){
       return { ok: true, skipped: true, reason: "disabled" };

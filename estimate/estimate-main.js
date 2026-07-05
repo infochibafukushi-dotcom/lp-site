@@ -29,7 +29,12 @@
     selectionFingerprint: "",
     lastActiveStepId: "",
     quoteRegisterStatus: "",
-    quoteRegisterMessage: ""
+    quoteRegisterMessage: "",
+    reviewDemoMode: false,
+    reviewDemoSlotId: "",
+    reviewDemoConsent: false,
+    reviewDemoSavedRecord: null,
+    reviewDemoError: ""
   };
 
   let delegatedBound = false;
@@ -765,8 +770,20 @@
     state.lastActiveStepId = "";
     state.quoteRegisterStatus = "";
     state.quoteRegisterMessage = "";
+    state.reviewDemoSlotId = getReviewDemoDefaultSlotId();
+    state.reviewDemoConsent = false;
+    state.reviewDemoSavedRecord = null;
+    state.reviewDemoError = "";
     if(window.EstimateUrl?.clearUrlState){
-      window.EstimateUrl.clearUrlState();
+      if(isReviewDemoMode()){
+        try{
+          const url = new URL(window.location.href);
+          url.search = "?scenario=pre-fixed-fare-demo";
+          window.history.replaceState({}, "", url.pathname + url.search);
+        }catch(error){}
+      }else{
+        window.EstimateUrl.clearUrlState();
+      }
     }
     if(window.EstimateHandoff?.clearHandoffRecord){
       window.EstimateHandoff.clearHandoffRecord();
@@ -1174,6 +1191,102 @@
 
   function isPreFixedFareMode(){
     return getConfigFareMode() === "pre_fixed_fare";
+  }
+
+  function isReviewDemoMode(){
+    if(window.PreFixedFareReviewDemo && typeof window.PreFixedFareReviewDemo.isReviewDemoMode === "function"){
+      return window.PreFixedFareReviewDemo.isReviewDemoMode();
+    }
+    try{
+      return new URLSearchParams(window.location.search).get("scenario") === "pre-fixed-fare-demo";
+    }catch(error){
+      return false;
+    }
+  }
+
+  function getReviewDemoDefaultSlotId(){
+    return window.PreFixedFareReviewDemo?.CALENDAR_SLOTS?.[0]?.id || "slot-20260901-1000";
+  }
+
+  function syncReviewDemoPageClass(){
+    const page = document.querySelector(".estimate-page") || document.body;
+    if(!page){
+      return;
+    }
+    page.classList.toggle("estimate-review-demo-active", isReviewDemoMode());
+  }
+
+  function renderReviewDemoBannerHtml(){
+    if(!isReviewDemoMode() || !window.PreFixedFareReviewDemo){
+      return "";
+    }
+    return window.PreFixedFareReviewDemo.renderBanner(escapeHtml);
+  }
+
+  function renderReviewDemoReservationPanel(result){
+    if(!isReviewDemoMode() || !window.PreFixedFareReviewDemo){
+      return "";
+    }
+    if(!result || !(Number(result.total) > 0) || !state.routePlan){
+      return "";
+    }
+    if(isPreFixedFareMode() && !isRouteReviewComplete(state.routePlan)){
+      return "";
+    }
+    if(!state.reviewDemoSlotId){
+      state.reviewDemoSlotId = getReviewDemoDefaultSlotId();
+    }
+    return window.PreFixedFareReviewDemo.renderReservationPanel({
+      result: result,
+      origin: state.originAddress,
+      destination: state.destinationAddress,
+      estimateNumber: state.estimateNumber,
+      escapeHtml: escapeHtml,
+      escapeAttr: escapeAttr,
+      ui: {
+        selectedSlotId: state.reviewDemoSlotId,
+        consentChecked: state.reviewDemoConsent === true,
+        savedRecord: state.reviewDemoSavedRecord,
+        errorMessage: state.reviewDemoError
+      }
+    });
+  }
+
+  function scrollToReviewDemoReservation(){
+    const panel = document.getElementById("reviewDemoReservation");
+    if(!panel){
+      return;
+    }
+    const offset = getStickyChromeOffset() + (isReviewDemoMode() ? 28 : 0);
+    const absoluteTop = panel.getBoundingClientRect().top + (window.pageYOffset || window.scrollY || 0);
+    window.scrollTo({
+      top: Math.max(0, absoluteTop - offset),
+      behavior: "smooth"
+    });
+  }
+
+  function saveReviewDemoReservation(result){
+    if(!isReviewDemoMode() || !window.PreFixedFareReviewDemo){
+      return;
+    }
+    if(!state.reviewDemoConsent){
+      state.reviewDemoError = "同意チェックを入れてから保存してください。";
+      refreshResultSection(result);
+      return;
+    }
+    const slotId = state.reviewDemoSlotId || getReviewDemoDefaultSlotId();
+    const record = window.PreFixedFareReviewDemo.buildReservationRecord({
+      result: result,
+      slotId: slotId,
+      origin: state.originAddress,
+      destination: state.destinationAddress,
+      estimateNumber: state.estimateNumber
+    });
+    window.PreFixedFareReviewDemo.saveReservation(record);
+    state.reviewDemoSavedRecord = record;
+    state.reviewDemoError = "";
+    refreshResultSection(result);
+    scrollToReviewDemoReservation();
   }
 
   function isRouteUiDebugEnabled(){
@@ -1594,6 +1707,9 @@
   }
 
   function getReservationCtaLabel(){
+    if(isReviewDemoMode()){
+      return "審査用デモ予約へ進む";
+    }
     if(isPreFixedFareMode() && !isPreFixedFareConfirmable()){
       return "確認対応として予約へ進む";
     }
@@ -1630,7 +1746,7 @@
               '<span class="estimate-sticky-reserve-bar-label estimate-mobile-reserve-bar-label">事前確定運賃</span>' +
               '<span class="estimate-sticky-reserve-bar-value estimate-mobile-reserve-bar-value">' + escapeHtml(formatResultTotalAmount(result.total)) + "</span>" +
             "</div>" +
-            '<a class="estimate-sticky-reserve-bar-btn estimate-mobile-reserve-bar-btn" id="estimateMobileReserveBarBtn" href="' + escapeAttr(getReservationUrl()) + '" rel="noopener noreferrer">' +
+            '<a class="estimate-sticky-reserve-bar-btn estimate-mobile-reserve-bar-btn" id="estimateMobileReserveBarBtn" href="' + escapeAttr(getReservationUrl()) + '"' + (isReviewDemoMode() ? ' data-review-demo-scroll="1"' : ' rel="noopener noreferrer"') + ">" +
               escapeHtml(getReservationCtaLabel()) +
             "</a>" +
           "</div>" +
@@ -3384,6 +3500,9 @@
   }
 
   function getReservationUrl(){
+    if(isReviewDemoMode()){
+      return "#reviewDemoReservation";
+    }
     const base = state.ctaUrls.reservation || "#";
     let url = base;
     if(window.EstimateHandoff && state.estimateNumber){
@@ -3438,6 +3557,11 @@
     if(!window.EstimateHandoff || !state.estimateNumber) return;
     const handoff = buildHandoffRecord(result);
     window.EstimateHandoff.saveHandoffRecord(handoff);
+    if(isReviewDemoMode()){
+      state.quoteRegisterStatus = "ok";
+      state.quoteRegisterMessage = "";
+      return;
+    }
     state.quoteRegisterStatus = "pending";
     state.quoteRegisterMessage = "";
     if(!window.EstimateQuoteRegister || typeof window.EstimateQuoteRegister.registerQuoteFromHandoff !== "function"){
@@ -3581,11 +3705,14 @@
           </div>
         </div>
         <div class="estimate-cta-group estimate-cta-group--result" id="estimateResultReservationCta">
-          <a class="estimate-cta-primary" href="${escapeAttr(reservationUrl)}" rel="noopener noreferrer">${escapeHtml(getReservationCtaLabel())}</a>
-          ${getReservationReviewNotice()
-            ? '<p class="estimate-reservation-review-notice estimate-reservation-review-notice--result">' + escapeHtml(getReservationReviewNotice()) + "</p>"
-            : ""}
+          <a class="estimate-cta-primary${isReviewDemoMode() ? " estimate-cta-primary--review-demo" : ""}" href="${escapeAttr(reservationUrl)}"${isReviewDemoMode() ? ' data-review-demo-scroll="1"' : ' rel="noopener noreferrer"'}>${escapeHtml(getReservationCtaLabel())}</a>
+          ${isReviewDemoMode()
+            ? '<p class="estimate-reservation-review-notice estimate-reservation-review-notice--result">審査用QRからの操作は、実予約と区別して管理する想定です。</p>'
+            : (getReservationReviewNotice()
+              ? '<p class="estimate-reservation-review-notice estimate-reservation-review-notice--result">' + escapeHtml(getReservationReviewNotice()) + "</p>"
+              : "")}
         </div>
+        ${renderReviewDemoReservationPanel(result)}
         <div class="estimate-breakdown-groups">
           ${renderFareSections(result)}
         </div>
@@ -3668,6 +3795,7 @@
 
     root.innerHTML = `
       ${renderEstimateTopBar()}
+      ${renderReviewDemoBannerHtml()}
       <div class="estimate-wrap">
         <div class="estimate-header">
           <h1 class="estimate-title">${escapeHtml(getLpFareModeTitleText())}</h1>
@@ -3682,6 +3810,8 @@
     bindEvents();
     bindCopyUrlButton();
     bindMobileReserveBarVisibility();
+    bindReviewDemoEvents(result, allComplete);
+    syncReviewDemoPageClass();
 
     if(!allComplete){
       scrollToActiveStep(flow, activeIndex);
@@ -3693,6 +3823,44 @@
       syncHandoffForResult(result);
       renderRouteMapIfNeeded();
       console.log("PDF_DEBUG_1 ボタン描画");
+    }
+  }
+
+  function bindReviewDemoEvents(result, allComplete){
+    if(!isReviewDemoMode() || !allComplete){
+      return;
+    }
+    const root = getRoot();
+    if(!root){
+      return;
+    }
+    root.querySelectorAll("[data-review-demo-scroll]").forEach(function(link){
+      link.addEventListener("click", function(event){
+        event.preventDefault();
+        scrollToReviewDemoReservation();
+      });
+    });
+    root.querySelectorAll("[data-review-demo-slot]").forEach(function(button){
+      button.addEventListener("click", function(){
+        state.reviewDemoSlotId = button.getAttribute("data-review-demo-slot") || getReviewDemoDefaultSlotId();
+        state.reviewDemoError = "";
+        refreshResultSection(result);
+      });
+    });
+    const consentInput = root.querySelector("[data-review-demo-consent]");
+    if(consentInput){
+      consentInput.addEventListener("change", function(){
+        state.reviewDemoConsent = consentInput.checked === true;
+        state.reviewDemoError = "";
+        refreshResultSection(result);
+      });
+    }
+    const saveBtn = root.querySelector("[data-review-demo-save]");
+    if(saveBtn){
+      saveBtn.addEventListener("click", function(event){
+        event.preventDefault();
+        saveReviewDemoReservation(result);
+      });
     }
   }
 
@@ -3721,6 +3889,12 @@
       if(resetBtn){
         event.preventDefault();
         resetAll();
+        return;
+      }
+      const reviewDemoScroll = event.target.closest("[data-review-demo-scroll]");
+      if(reviewDemoScroll){
+        event.preventDefault();
+        scrollToReviewDemoReservation();
         return;
       }
       const pdfBtn = event.target.closest("#estimatePdfBtn");
@@ -3881,6 +4055,9 @@
     renderRouteMapIfNeeded();
     bindCopyUrlButton();
     bindMobileReserveBarVisibility();
+    if(isReviewDemoMode()){
+      bindReviewDemoEvents(result, true);
+    }
   }
 
   function buildShareUrl(){
@@ -4093,6 +4270,12 @@
       }
       bindDelegatedEvents();
       await loadCtaUrls();
+
+      state.reviewDemoMode = isReviewDemoMode();
+      if(state.reviewDemoMode){
+        state.reviewDemoSlotId = getReviewDemoDefaultSlotId();
+        console.info("[review-demo] 審査用デモモードを有効化しました。本番予約API・本番カレンダーには連動しません。");
+      }
 
       const urlState = window.EstimateUrl?.parseUrlState?.() || {};
       state.config = await window.EstimateConfigLoader.loadEstimateConfig();

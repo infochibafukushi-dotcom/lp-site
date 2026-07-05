@@ -1627,6 +1627,14 @@ body{
         <div class="preview" id="preFixedFareAppManualStatus">まだ出力していません。</div>
       </div>
       <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e5e5e5;">
+        <p class="note" style="margin-bottom:8px;"><strong>審査用デモ予約確認</strong><br>QR①（/estimate/?scenario=pre-fixed-fare-demo）から保存されたデモ予約のみを表示します。本番予約一覧とは分離され、同一ブラウザの localStorage に保存されます。</p>
+        <div class="actions">
+          <button type="button" id="preFixedFareReviewDemoRefreshBtn">審査用デモ予約を再読込</button>
+        </div>
+        <div id="preFixedFareReviewDemoLatest"></div>
+        <div id="preFixedFareReviewDemoList" class="preview" style="margin-top:12px;">読み込み中...</div>
+      </div>
+      <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e5e5e5;">
         <p class="note" style="margin-bottom:8px;"><strong>提出用 別紙・確認資料</strong><br>事前確定運賃認可の事前相談・提出時に、統合説明資料へ添付しやすい別紙・確認資料を出力します。正式な認可申請様式は関東運輸局の公式様式を使用し、本画面では記入補助・別紙・確認台紙を作成します。</p>
         <div class="actions" style="flex-wrap:wrap; gap:8px;">
           <button type="button" id="preFixedFareAppendixApplicationHelperBtn">事前確定運賃 認可申請様式リンク・記入補助シートを出力</button>
@@ -1744,6 +1752,8 @@ body{
 <script src="./shared/pre-fixed-fare-screen-evidence-pdf.js?v=20260705-meter-zoom"></script>
 <script src="./shared/pre-fixed-fare-app-manual-data.js?v=20260705-manual"></script>
 <script src="./shared/pre-fixed-fare-app-manual-pdf.js?v=20260705-manual"></script>
+<script src="./shared/pre-fixed-fare-review-demo.js?v=review-demo-01"></script>
+<script src="./admin-pre-fixed-fare-review-demo.js?v=review-demo-01"></script>
 <script src="./shared/pre-fixed-fare-submission-appendix-data.js?v=print08"></script>
 <script src="./shared/pre-fixed-fare-submission-appendix-word.js?v=print08"></script>
 <script src="./shared/pre-fixed-fare-submission-appendix-pdf.js?v=appendix02"></script>
