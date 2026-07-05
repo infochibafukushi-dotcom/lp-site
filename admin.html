@@ -147,6 +147,15 @@ button.linklike{
   gap:10px;
   flex-wrap:wrap;
 }
+.actions a.button-link{
+  display:inline-block;
+  padding:10px 16px;
+  background:#007bff;
+  color:#fff;
+  border-radius:8px;
+  text-decoration:none;
+  font-size:14px;
+}
 .note{
   font-size:13px;
   color:#666;
@@ -1623,14 +1632,20 @@ body{
         <p class="note" style="margin-bottom:8px;"><strong>予約・運行中アプリ操作マニュアル</strong><br>かんたん見積から予約、乗務員アプリでの運行・精算、領収書保存までの実践手順を、認可説明用の操作マニュアルPDFとして出力します。表紙に審査用QR（かんたん見積～予約実践／運行中メーター操作）を掲載します。</p>
         <div class="actions">
           <button type="button" id="preFixedFareAppManualExportBtn">予約・運行中アプリ操作マニュアルPDF</button>
+          <button type="button" id="preFixedFareAppManualPreviewBtn">操作マニュアルPDFプレビュー</button>
         </div>
         <div class="preview" id="preFixedFareAppManualStatus">まだ出力していません。</div>
+        <div id="preFixedFareAppManualPreview" class="preview" style="display:none; margin-top:12px; max-height:480px; overflow:auto; border:1px solid #dbeafe; background:#fff;"></div>
       </div>
       <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e5e5e5;">
         <p class="note" style="margin-bottom:8px;"><strong>審査用デモ予約確認</strong><br>QR①（/estimate/?scenario=pre-fixed-fare-demo）から保存されたデモ予約のみを表示します。本番予約一覧とは分離され、同一ブラウザの localStorage に保存されます。</p>
+        <p class="note" style="margin-bottom:8px;">QR①デモ予約を開き、かんたん見積から予約保存まで操作してください。保存後、この管理画面に戻り「保存済みデモ予約を再読込」を押すと、同じブラウザ内に保存されたデモ予約を確認できます。</p>
+        <p class="note" style="margin-bottom:8px;"><strong>操作手順</strong><br>1. 「QR①デモ予約を開く」を押す<br>2. かんたん見積から予約保存まで進める<br>3. この管理画面に戻る<br>4. 「保存済みデモ予約を再読込」を押す<br>5. 保存されたデモ予約を確認する</p>
         <div class="actions">
-          <button type="button" id="preFixedFareReviewDemoRefreshBtn">審査用デモ予約を再読込</button>
+          <a class="button-link" id="preFixedFareReviewDemoOpenBtn" href="./estimate/?scenario=pre-fixed-fare-demo" target="_blank" rel="noopener noreferrer">QR①デモ予約を開く</a>
+          <button type="button" id="preFixedFareReviewDemoRefreshBtn">保存済みデモ予約を再読込</button>
         </div>
+        <div class="preview" id="preFixedFareReviewDemoStatus" style="margin-top:8px;"></div>
         <div id="preFixedFareReviewDemoLatest"></div>
         <div id="preFixedFareReviewDemoList" class="preview" style="margin-top:12px;">読み込み中...</div>
       </div>
@@ -1750,15 +1765,15 @@ body{
 <script src="./shared/pre-fixed-fare-integrated-summary-word.js?v=39e326a1"></script>
 <script src="./shared/pre-fixed-fare-screen-evidence-data.js?v=20260705"></script>
 <script src="./shared/pre-fixed-fare-screen-evidence-pdf.js?v=20260705-meter-zoom"></script>
-<script src="./shared/pre-fixed-fare-app-manual-data.js?v=20260705-manual"></script>
-<script src="./shared/pre-fixed-fare-app-manual-pdf.js?v=20260705-manual"></script>
-<script src="./shared/pre-fixed-fare-review-demo.js?v=review-demo-01"></script>
-<script src="./admin-pre-fixed-fare-review-demo.js?v=review-demo-01"></script>
+<script src="./shared/pre-fixed-fare-app-manual-data.js?v=app-manual-fix-20260705"></script>
+<script src="./shared/pre-fixed-fare-app-manual-pdf.js?v=app-manual-fix-20260705"></script>
+<script src="./shared/pre-fixed-fare-review-demo.js?v=app-manual-fix-20260705"></script>
+<script src="./admin-pre-fixed-fare-review-demo.js?v=app-manual-fix-20260705"></script>
 <script src="./shared/pre-fixed-fare-submission-appendix-data.js?v=print08"></script>
 <script src="./shared/pre-fixed-fare-submission-appendix-word.js?v=print08"></script>
 <script src="./shared/pre-fixed-fare-submission-appendix-pdf.js?v=appendix02"></script>
 <script src="./admin-pre-fixed-fare-submission-appendix.js?v=appendix02"></script>
-<script src="./admin-pre-fixed-fare-report.js?v=print02"></script>
+<script src="./admin-pre-fixed-fare-report.js?v=app-manual-fix-20260705"></script>
 <script src="./shared/pre-fixed-fare-application-print.js?v=appform02"></script>
 <script src="./admin-pre-fixed-fare-application.js?v=appform01"></script>
 <script src="./admin-pre-fixed-fare-submission-set.js?v=finalset01"></script>

@@ -1,5 +1,6 @@
 (function(global){
   const STORAGE_KEY = global.PreFixedFareReviewDemo?.STORAGE_KEY || "preFixedFareReviewReservations";
+  const EMPTY_MESSAGE = "保存された審査用デモ予約はありません。先に「QR①デモ予約を開く」からデモ予約を保存してください。";
 
   function escapeHtml(text){
     return String(text ?? "")
@@ -7,6 +8,13 @@
       .replaceAll("<", "&lt;")
       .replaceAll(">", "&gt;")
       .replaceAll('"', "&quot;");
+  }
+
+  function setStatus(message, type){
+    const box = document.getElementById("preFixedFareReviewDemoStatus");
+    if(!box) return;
+    box.className = "preview" + (type ? " " + type : "");
+    box.textContent = message || "";
   }
 
   function readList(){
@@ -25,7 +33,7 @@
   function renderList(records){
     const list = Array.isArray(records) ? records : [];
     if(!list.length){
-      return '<p class="note">保存された審査用デモ予約はありません。QR①（/estimate/?scenario=pre-fixed-fare-demo）から操作してください。</p>';
+      return '<p class="note">' + escapeHtml(EMPTY_MESSAGE) + "</p>";
     }
     const rows = list.map(function(record){
       return (
@@ -61,7 +69,8 @@
       "目的地：" + escapeHtml(record.destination || "") + "<br>" +
       "予約日時：" + escapeHtml(record.reservationAtLabel || "") + "<br>" +
       "事前確定運賃：" + escapeHtml(record.preFixedFareLabel || "") + "<br>" +
-      "合計：" + escapeHtml(record.totalLabel || "") +
+      "合計：" + escapeHtml(record.totalLabel || "") + "<br>" +
+      "同意日時：" + escapeHtml(record.consentAtLabel || record.reservationAtLabel || "") +
       "</div>"
     );
   }
@@ -77,6 +86,11 @@
     if(detailBox){
       detailBox.innerHTML = renderLatestDetail(list[0] || null);
     }
+    if(!list.length){
+      setStatus(EMPTY_MESSAGE, "warn");
+      return;
+    }
+    setStatus("保存済みデモ予約を " + list.length + " 件読み込みました。", "success");
   }
 
   function bind(){

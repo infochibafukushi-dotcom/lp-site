@@ -461,8 +461,26 @@
       throw new Error("予約・運行中アプリ操作マニュアルPDFモジュールの読み込みに失敗しました。");
     }
     setAppManualStatus("PDFを作成しています...", "warn");
-    await global.PreFixedFareAppManualPdf.generatePreFixedFareAppManualPdf();
-    setAppManualStatus("PDFを保存しました。", "success");
+    const result = await global.PreFixedFareAppManualPdf.generatePreFixedFareAppManualPdf();
+    const pageCount = result?.pageCount || 0;
+    setAppManualStatus("PDFを保存しました。（" + pageCount + "ページ）", "success");
+    return result;
+  }
+
+  async function previewAppManualHtml(){
+    if(!global.PreFixedFareAppManualPdf || !global.PreFixedFareAppManualData){
+      throw new Error("予約・運行中アプリ操作マニュアルPDFモジュールの読み込みに失敗しました。");
+    }
+    const previewBox = document.getElementById("preFixedFareAppManualPreview");
+    if(!previewBox){
+      throw new Error("プレビュー表示先が見つかりません。");
+    }
+    setAppManualStatus("PDFプレビューを生成しています...", "warn");
+    previewBox.style.display = "block";
+    const reportData = global.PreFixedFareAppManualData.buildReportData({});
+    const result = await global.PreFixedFareAppManualPdf.previewReportHtml(reportData, previewBox);
+    setAppManualStatus("PDFプレビューを表示しました。（" + (result.pageCount || 0) + "ページ / HTML " + (result.htmlLength || 0) + "文字）", "success");
+    return result;
   }
 
   function bindAppManualButton(){
@@ -486,6 +504,20 @@
         }
       }finally{
         button.disabled = false;
+      }
+    });
+
+    const previewBtn = document.getElementById("preFixedFareAppManualPreviewBtn");
+    if(!previewBtn) return;
+    previewBtn.addEventListener("click", async function(){
+      previewBtn.disabled = true;
+      try{
+        await previewAppManualHtml();
+      }catch(error){
+        console.error(error);
+        setAppManualStatus(String(error?.message || "プレビュー生成に失敗しました。"), "error");
+      }finally{
+        previewBtn.disabled = false;
       }
     });
   }

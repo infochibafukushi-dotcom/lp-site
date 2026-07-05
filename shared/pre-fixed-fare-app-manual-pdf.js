@@ -4,6 +4,50 @@
   const EXPECTED_PAGE_COUNT = 17;
   const SCOPE = ".pre-fixed-fare-app-manual";
 
+  function resolvePublicUrl(relativePath){
+    const value = String(relativePath || "").trim();
+    if(!value){
+      return "";
+    }
+    if(/^data:|^https?:|^blob:/i.test(value)){
+      return value;
+    }
+    if(typeof window !== "undefined" && window.location && window.location.href){
+      try{
+        return new URL(value, window.location.href).href;
+      }catch(error){
+        return value;
+      }
+    }
+    return value;
+  }
+
+  function logPdfDebug(label, payload){
+    const prefix = "[PreFixedFareAppManualPdf]";
+    if(payload !== undefined){
+      console.log(prefix, label, payload);
+    }else{
+      console.log(prefix, label);
+    }
+  }
+
+  function absolutizeReportAssets(reportData){
+    const data = reportData || {};
+    function patchScreenshot(screenshot){
+      if(!screenshot || !screenshot.imageSrc){
+        return;
+      }
+      screenshot.imageSrc = resolvePublicUrl(screenshot.imageSrc);
+    }
+    (data.steps || []).forEach(function(step){
+      patchScreenshot(step.screenshot);
+    });
+    (data.contentPages || []).forEach(function(page){
+      patchScreenshot(page.screenshot);
+    });
+    return data;
+  }
+
   function escapeHtml(text){
     return String(text ?? "")
       .replaceAll("&", "&amp;")
@@ -305,10 +349,18 @@
 
   function probeImage(src){
     return new Promise(function(resolve){
+      const absoluteSrc = resolvePublicUrl(src);
+      if(!absoluteSrc){
+        resolve(false);
+        return;
+      }
       const img = new Image();
       img.onload = function(){ resolve(true); };
-      img.onerror = function(){ resolve(false); };
-      img.src = String(src || "") + "?" + Date.now();
+      img.onerror = function(){
+        console.warn("[PreFixedFareAppManualPdf] screenshot probe failed:", absoluteSrc);
+        resolve(false);
+      };
+      img.src = absoluteSrc + (absoluteSrc.includes("?") ? "&" : "?") + "_probe=" + Date.now();
     });
   }
 
@@ -342,7 +394,7 @@
   }
 
   function waitForImagesToLoad(container){
-    const images = Array.from(container.querySelectorAll(".manual-shot img, .cover-qr-image"));
+    const images = Array.from(container.querySelectorAll("img"));
     if(!images.length){
       return Promise.resolve();
     }
@@ -351,10 +403,78 @@
         return Promise.resolve();
       }
       return new Promise(function(resolve){
-        img.addEventListener("load", function(){ resolve(); }, { once: true });
-        img.addEventListener("error", function(){ resolve(); }, { once: true });
+        const timeoutId = setTimeout(function(){
+          console.warn("[PreFixedFareAppManualPdf] image load timeout:", img.getAttribute("src") || "");
+          resolve();
+        }, 12000);
+        img.addEventListener("load", function(){
+          clearTimeout(timeoutId);
+          resolve();
+        }, { once: true });
+        img.addEventListener("error", function(){
+          clearTimeout(timeoutId);
+          console.warn("[PreFixedFareAppManualPdf] image load failed:", img.getAttribute("src") || "");
+          resolve();
+        }, { once: true });
       });
     }));
+  }
+
+  function waitForLayout(){
+    return new Promise(function(resolve){
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          setTimeout(resolve, 300);
+        });
+      });
+    });
+  }
+
+  function mountPdfContainer(reportHtml){
+    const container = document.createElement("div");
+    container.setAttribute("data-pre-fixed-fare-app-manual-pdf-root", "1");
+    container.style.position = "fixed";
+    container.style.left = "0";
+    container.style.top = "0";
+    container.style.width = "210mm";
+    container.style.maxWidth = "210mm";
+    container.style.background = "#ffffff";
+    container.style.color = "#111827";
+    container.style.zIndex = "2147483646";
+    container.style.opacity = "0.01";
+    container.style.pointerEvents = "none";
+    container.style.overflow = "visible";
+    container.innerHTML = "<style>" + getManualCss() + "</style>" + reportHtml;
+    document.body.appendChild(container);
+
+    const reportElement = container.querySelector(SCOPE.trim());
+    if(reportElement){
+      reportElement.style.width = "210mm";
+      reportElement.style.maxWidth = "210mm";
+      reportElement.style.background = "#ffffff";
+    }
+    return { container: container, reportElement: reportElement };
+  }
+
+  async function buildPreparedReport(reportData){
+    const preparedData = absolutizeReportAssets(Object.assign({}, reportData));
+    const screenshots = collectScreenshots(preparedData);
+    const [imageAvailability, qrDataUrls] = await Promise.all([
+      probeImages(screenshots),
+      buildQrDataUrls(preparedData)
+    ]);
+    const reportHtml = buildReportHtml(preparedData, {
+      imageAvailability: imageAvailability,
+      qrDataUrls: qrDataUrls
+    });
+    if(!String(reportHtml || "").trim()){
+      throw new Error("生成対象HTMLが空です。");
+    }
+    return {
+      reportHtml: reportHtml,
+      imageAvailability: imageAvailability,
+      qrDataUrls: qrDataUrls
+    };
   }
 
   function getManualCss(){
@@ -449,45 +569,51 @@
 
   async function savePdf(reportData){
     await ensureHtml2Pdf();
-    const screenshots = collectScreenshots(reportData);
-    const [imageAvailability, qrDataUrls] = await Promise.all([
-      probeImages(screenshots),
-      buildQrDataUrls(reportData)
-    ]);
-    const reportHtml = buildReportHtml(reportData, { imageAvailability: imageAvailability, qrDataUrls: qrDataUrls });
-    if(!String(reportHtml || "").trim()){
+    const prepared = await buildPreparedReport(reportData);
+    const reportHtml = prepared.reportHtml;
+    const mounted = mountPdfContainer(reportHtml);
+    const container = mounted.container;
+    const reportElement = mounted.reportElement;
+
+    if(!reportElement){
+      container.remove();
       throw new Error("生成対象HTMLが空です。");
     }
 
-    const container = document.createElement("div");
-    container.style.position = "absolute";
-    container.style.left = "-9999px";
-    container.style.top = "0";
-    container.style.width = "auto";
-    container.style.background = "#ffffff";
-    container.innerHTML = "<style>" + getManualCss() + "</style>" + reportHtml;
-    document.body.appendChild(container);
-
-    const reportElement = container.querySelector(SCOPE.trim());
     const pageElements = reportElement.querySelectorAll(".manual-page");
     const pageCount = pageElements.length;
+    logPdfDebug("data pages:", pageCount);
+    logPdfDebug("root exists:", !!reportElement);
+    logPdfDebug("root html length:", reportElement.innerHTML.length);
+    logPdfDebug("html2pdf exists:", typeof html2pdf !== "undefined");
+    logPdfDebug("generator exists:", typeof generatePreFixedFareAppManualPdf === "function");
+
     if(pageCount !== EXPECTED_PAGE_COUNT){
       console.warn("[PreFixedFareAppManualPdf] unexpected page count:", pageCount, "expected:", EXPECTED_PAGE_COUNT);
     }
 
     try{
-      await waitForImagesToLoad(reportElement);
+      await waitForImagesToLoad(container);
+      await waitForLayout();
       await html2pdf().set({
         margin: [0, 0, 0, 0],
         filename: reportData.pdfFilename || PDF_FILENAME,
         image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollX: 0, scrollY: 0 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          allowTaint: false,
+          backgroundColor: "#ffffff",
+          scrollX: 0,
+          scrollY: 0,
+          logging: false
+        },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
         pagebreak: {
           mode: ["css", "legacy"],
           before: [".manual-page + .manual-page"],
           after: [],
-          avoid: [".manual-page"]
+          avoid: [".manual-table-block", ".manual-screenshot-block", ".table-wrap"]
         }
       }).from(reportElement).save();
     }finally{
@@ -496,8 +622,25 @@
 
     return {
       pageCount: pageCount,
-      imageAvailability: imageAvailability,
+      imageAvailability: prepared.imageAvailability,
       pageIds: Array.from(pageElements).map(function(el){ return el.getAttribute("data-page-id"); })
+    };
+  }
+
+  async function previewReportHtml(reportData, targetElement){
+    const target = targetElement || null;
+    if(!target){
+      throw new Error("プレビュー表示先が見つかりません。");
+    }
+    const prepared = await buildPreparedReport(reportData);
+    target.innerHTML = "<style>" + getManualCss() + "</style>" + prepared.reportHtml;
+    const root = target.querySelector(SCOPE.trim());
+    if(root){
+      await waitForImagesToLoad(target);
+    }
+    return {
+      pageCount: root ? root.querySelectorAll(".manual-page").length : 0,
+      htmlLength: root ? root.innerHTML.length : 0
     };
   }
 
@@ -515,12 +658,16 @@
     return savePdf(reportData);
   }
 
+  global.generatePreFixedFareAppManualPdf = generatePreFixedFareAppManualPdf;
+
   global.PreFixedFareAppManualPdf = {
     PDF_FILENAME: PDF_FILENAME,
     EXPECTED_PAGE_COUNT: EXPECTED_PAGE_COUNT,
     buildReportHtml: buildReportHtml,
+    buildPreparedReport: buildPreparedReport,
     getManualCss: getManualCss,
     probeImages: probeImages,
+    previewReportHtml: previewReportHtml,
     savePdf: savePdf,
     generatePreFixedFareAppManualPdf: generatePreFixedFareAppManualPdf
   };
