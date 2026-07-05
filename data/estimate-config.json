@@ -1,7 +1,7 @@
 {
   "enabled": true,
   "version": 1,
-  "updatedAt": "2026-07-03T09:49:36.598Z",
+  "updatedAt": "2026-07-05T12:01:18.950Z",
   "page": {
     "title": "かんたん料金確認",
     "description": "ご利用内容を選択すると料金の目安をご確認いただけます。\n実際の料金は運行ルートや介助内容等により変動する場合があります。",
@@ -49,7 +49,7 @@
     "patternA": {
       "initialDistanceKm": 1.06,
       "initialFare": 520,
-      "incrementDistanceKm": 0.212,
+      "incrementDistanceKm": 212,
       "incrementFare": 100
     },
     "patternB": {
