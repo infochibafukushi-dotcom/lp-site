@@ -250,21 +250,29 @@ if(abStopSegments.some(function(segment){ return segment.key === "return"; })){
   throw new Error("return_with_stop + AB outbound should not use return segment colors");
 }
 if(!abStopSegments.some(function(segment){
-  return segment.legRole === "return" && segment.key === "routeA";
+  return segment.key === "routeA" && segment.path.length >= outboundAPath.length;
 })){
-  throw new Error("return_with_stop + AB outbound should include strategy-colored return leg");
+  throw new Error("return_with_stop + AB outbound should merge outbound and return into routeA");
+}
+const abStopLegendHtml = display.buildLegendHtml(abStopSegments);
+if(/立ち寄り|復路|往路/.test(abStopLegendHtml)){
+  throw new Error("legend must not include leg-based line labels");
+}
+if(!abStopLegendHtml.includes("A 赤線")){
+  throw new Error("legend must include route A label");
+}
+if(!abStopLegendHtml.includes("B 青点線")){
+  throw new Error("legend must include route B label");
 }
 const abStopMarkers = display.buildRouteMapMarkers(abStopPlan, abStopSegments, { lat: 35.615, lng: 140.105 });
 if(!abStopMarkers.some(function(marker){ return marker.label === "寄"; })){
   throw new Error("return_with_stop + AB outbound should include waypoint marker");
 }
-const abReturnSegment = abStopSegments.find(function(segment){
-  return segment.legRole === "return";
-});
-if(abReturnSegment && !abReturnSegment.path.some(function(point){
+const abRouteA = abStopSegments.find(function(segment){ return segment.key === "routeA"; });
+if(abRouteA && !abRouteA.path.some(function(point){
   return Math.abs(point.lat - 35.615) < 0.0001 && Math.abs(point.lng - 140.105) < 0.0001;
 })){
-  throw new Error("return leg should pass through waypoint");
+  throw new Error("merged routeA should pass through waypoint");
 }
 
 const displayStopSegments = display.buildDisplayRouteMapSegments(stopPlan, { lat: 35.615, lng: 140.105 });

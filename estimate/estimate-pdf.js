@@ -735,7 +735,7 @@
         : display.buildRouteMapSegments(routePlan))
       : [];
     const legendHtml = hasMap && display && display.shouldShowLegend(segments)
-      ? display.buildLegendPdfHtml(segments, routePlan)
+      ? display.buildLegendPdfHtml(segments)
       : "";
     const mapImageHtml = hasMap
       ? (

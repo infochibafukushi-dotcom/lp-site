@@ -2593,7 +2593,7 @@
     if(!polyline || arrowIconIndex < 0 || prefersReducedMotion()){
       return;
     }
-    const cycleMs = 3200;
+    const cycleMs = 2800;
     let rafId = null;
     let startTime = null;
     const tick = function(now){
@@ -2673,9 +2673,8 @@
       : display.buildRouteMapSegments.bind(display);
     const segments = buildSegments(routePlan, waypointLatLng);
     const useAbSegments = segments.some(function(segment){
-      return segment.key === "routeA";
-    }) && segments.some(function(segment){
-      return segment.key === "routeB";
+      return segment.isAbRoute
+        && (segment.key === "routeA" || segment.key === "routeB" || segment.key === "routeC" || segment.key === "routeD");
     });
     const markers = display.buildRouteMapMarkers(routePlan, segments, waypointLatLng);
     const allPoints = display.getAllPathPoints(segments);
@@ -2745,7 +2744,7 @@
 
         if(display.shouldShowLegend(segments) && wrap){
           // MAP下に外出し（スマホでは重ねず、PCでもwrap直下に配置）
-          wrap.insertAdjacentHTML("afterend", display.buildLegendHtml(segments, routePlan));
+          wrap.insertAdjacentHTML("afterend", display.buildLegendHtml(segments));
         }
       });
     }catch(error){

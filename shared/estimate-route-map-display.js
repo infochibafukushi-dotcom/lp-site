@@ -297,6 +297,39 @@
     });
   }
 
+  function mergeSegmentsByStrategyKey(segments){
+    const orderedKeys = ["routeA", "routeB", "routeC", "routeD"];
+    const byKey = {};
+    (segments || []).forEach(function(segment){
+      if(!segment?.key || !segment.isAbRoute){
+        return;
+      }
+      if(!byKey[segment.key]){
+        byKey[segment.key] = Object.assign({}, segment, {
+          path: Array.isArray(segment.path) ? segment.path.slice() : []
+        });
+        return;
+      }
+      byKey[segment.key].path = concatLegPaths([byKey[segment.key].path, segment.path]);
+    });
+    return orderedKeys.map(function(key){
+      return byKey[key] || null;
+    }).filter(function(segment){
+      return segment && Array.isArray(segment.path) && segment.path.length >= 2;
+    });
+  }
+
+  function finalizeDisplaySegments(segments){
+    const abOnly = (segments || []).filter(function(segment){
+      return segment.isAbRoute
+        && (segment.key === "routeA" || segment.key === "routeB" || segment.key === "routeC" || segment.key === "routeD");
+    });
+    if(abOnly.length){
+      return mergeSegmentsByStrategyKey(abOnly);
+    }
+    return [];
+  }
+
   function getStrategyMetaForRoute(route){
     const strategy = getRouteStrategyKey(route);
     if(CANDIDATE_ROUTE_META[strategy]){
@@ -388,7 +421,7 @@
     const useAbOnReturn = hasReturnAbRouteMapSegments(routePlan);
 
     if(useAbOnOutbound && useAbOnReturn && abSegments.length){
-      return abSegments;
+      return finalizeDisplaySegments(abSegments);
     }
 
     if(useAbOnOutbound){
@@ -398,26 +431,26 @@
           ? filterAbSegmentsByLegRole(abSegments, "return")
           : buildReturnLegStrategySegments(routePlan);
         if(outboundSegments.length && returnSegments.length){
-          return outboundSegments.concat(returnSegments);
+          return finalizeDisplaySegments(outboundSegments.concat(returnSegments));
         }
       }
       if(outboundSegments.length){
-        return outboundSegments;
+        return finalizeDisplaySegments(outboundSegments);
       }
     }
 
     if(useAbOnReturn){
       const returnSegments = filterAbSegmentsByLegRole(abSegments, "return");
       if(returnSegments.length){
-        return returnSegments;
+        return finalizeDisplaySegments(returnSegments);
       }
     }
 
     const fallbackSegments = buildStrategyFallbackSegments(routePlan);
     if(fallbackSegments.length){
-      return fallbackSegments;
+      return finalizeDisplaySegments(fallbackSegments);
     }
-    return buildRouteMapSegments(routePlan, waypointLatLng);
+    return [];
   }
 
   function haversineMeters(a, b){
@@ -657,11 +690,10 @@
     const outboundLeg = routePlan.outboundRoutePlan;
     const returnLeg = routePlan.returnRoutePlan;
     const returnPlanType = String(routePlan.returnPlanType || "");
-    const outboundSegment = segments.find(function(segment){
-      return segment.key === "outbound"
-        || (segment.isAbRoute && segment.legRole === "outbound");
+    const primarySegment = (segments || []).find(function(segment){
+      return segment.isAbRoute && Array.isArray(segment.path) && segment.path.length >= 2;
     });
-    const outboundPath = outboundSegment?.path
+    const outboundPath = primarySegment?.path
       || (outboundLeg ? getLegPath(outboundLeg) : segments[0]?.path);
 
     if(outboundPath.length >= 2){
@@ -680,18 +712,22 @@
     }
 
     if(returnLeg && returnPlanType === "return_with_stop"){
-      const stopSegment = segments.find(function(segment){
-        return segment.key === "stop";
-      });
-      const returnSegment = segments.find(function(segment){
-        return segment.key === "return"
-          || (segment.isAbRoute && segment.legRole === "return");
-      });
-      const stopPosition = stopSegment?.path?.length
-        ? stopSegment.path[stopSegment.path.length - 1]
-        : (waypointLatLng
-          || normalizeLatLng(returnLeg.waypoint || returnLeg.intermediateWaypoint)
-          || (returnSegment?.path?.length >= 2 ? returnSegment.path[0] : null));
+      const stopPosition = waypointLatLng
+        || normalizeLatLng(returnLeg.waypoint || returnLeg.intermediateWaypoint)
+        || (function(){
+          const returnSegment = segments.find(function(segment){
+            return segment.isAbRoute;
+          });
+          const returnPath = returnSegment?.path || getLegPath(returnLeg);
+          if(!Array.isArray(returnPath) || returnPath.length < 2){
+            return null;
+          }
+          const waypoint = normalizeLatLng(returnLeg.waypoint || returnLeg.intermediateWaypoint);
+          if(waypoint){
+            return waypoint;
+          }
+          return returnPath.length >= 3 ? returnPath[Math.floor(returnPath.length / 2)] : null;
+        }());
       if(stopPosition){
         markers.push({
           position: stopPosition,
@@ -716,136 +752,56 @@
     return keys;
   }
 
-  function buildLegendHtml(segments, routePlan){
+  function buildAbLegendLineItems(segments){
     const keys = segmentKeysPresent(segments);
-    const lineItems = [];
-    const isAbLegend = keys.has("routeA") || keys.has("routeB") || keys.has("routeC") || keys.has("routeD");
-    if(isAbLegend){
-      const legendOrder = ["routeA", "routeB", "routeC", "routeD"];
-      const legendByKey = {};
-      (segments || []).forEach(function(segment){
-        if(!segment?.key || legendByKey[segment.key]){
-          return;
-        }
-        legendByKey[segment.key] = segment;
-      });
-      legendOrder.forEach(function(key){
-        if(!keys.has(key)){
-          return;
-        }
-        const segment = legendByKey[key];
-        const meta = Object.keys(CANDIDATE_ROUTE_META).map(function(strategy){
-          return CANDIDATE_ROUTE_META[strategy];
-        }).find(function(item){
-          return item.key === key;
-        });
-        const swatchClass = "estimate-route-map-legend-swatch estimate-route-map-legend-swatch--" +
-          (key === "routeA" ? "route-a"
-            : key === "routeB" ? "route-b estimate-route-map-legend-swatch--dashed"
-            : key === "routeC" ? "route-c"
-            : "route-d");
-        const label = segment?.legendLabel || meta?.legendLabel || segment?.label || key;
-        lineItems.push(
-          '<div class="estimate-route-map-legend-item">' +
-            '<span class="' + swatchClass + '" aria-hidden="true"></span>' +
-            "<span>" + label + "</span>" +
-          "</div>"
-        );
-      });
-    }
-    if(keys.has("outbound")){
-      lineItems.push(
-        '<div class="estimate-route-map-legend-item">' +
-          '<span class="estimate-route-map-legend-swatch estimate-route-map-legend-swatch--outbound" aria-hidden="true"></span>' +
-          "<span>往路</span>" +
-        "</div>"
-      );
-    }
-    if(keys.has("stop")){
-      lineItems.push(
-        '<div class="estimate-route-map-legend-item">' +
-          '<span class="estimate-route-map-legend-swatch estimate-route-map-legend-swatch--stop" aria-hidden="true"></span>' +
-          "<span>立ち寄り</span>" +
-        "</div>"
-      );
-    }
-    if(keys.has("return")){
-      lineItems.push(
-        '<div class="estimate-route-map-legend-item">' +
-          '<span class="estimate-route-map-legend-swatch estimate-route-map-legend-swatch--return" aria-hidden="true"></span>' +
-          "<span>復路</span>" +
-        "</div>"
-      );
-    }
-    if(isAbLegend){
-      const markerItems = [
-        '<div class="estimate-route-map-legend-item">' +
-          '<span class="estimate-route-map-legend-marker estimate-route-map-legend-marker--origin" aria-hidden="true">発</span>' +
-          "<span>出発地</span>" +
-        "</div>",
-        '<div class="estimate-route-map-legend-item">' +
-          '<span class="estimate-route-map-legend-marker estimate-route-map-legend-marker--destination" aria-hidden="true">着</span>' +
-          "<span>目的地</span>" +
-        "</div>"
-      ];
-      const showWaypointMarker = keys.has("stop")
-        || String(routePlan?.returnPlanType || "") === "return_with_stop";
-      if(showWaypointMarker){
-        markerItems.push(
-          '<div class="estimate-route-map-legend-item">' +
-            '<span class="estimate-route-map-legend-marker estimate-route-map-legend-marker--waypoint" aria-hidden="true">寄</span>' +
-            "<span>立ち寄り地点</span>" +
-          "</div>"
-        );
+    const legendOrder = ["routeA", "routeB", "routeC", "routeD"];
+    const legendByKey = {};
+    (segments || []).forEach(function(segment){
+      if(!segment?.key || legendByKey[segment.key]){
+        return;
       }
-      return (
-        '<div class="estimate-route-map-legend estimate-route-map-legend--ab" aria-label="ルート凡例">' +
-          '<div class="estimate-route-map-legend-section">' +
-            lineItems.join("") +
-          "</div>" +
-          '<div class="estimate-route-map-legend-divider" aria-hidden="true"></div>' +
-          '<div class="estimate-route-map-legend-section">' +
-            '<div class="estimate-route-map-legend-heading">マーカー</div>' +
-            markerItems.join("") +
-          "</div>" +
-        "</div>"
-      );
-    }
-
-    const markerItems = [
-      '<div class="estimate-route-map-legend-item">' +
-        '<span class="estimate-route-map-legend-marker estimate-route-map-legend-marker--origin" aria-hidden="true">発</span>' +
-        "<span>出発地</span>" +
-      "</div>",
-      '<div class="estimate-route-map-legend-item">' +
-        '<span class="estimate-route-map-legend-marker estimate-route-map-legend-marker--destination" aria-hidden="true">着</span>' +
-        "<span>目的地</span>" +
-      "</div>"
-    ];
-    if(keys.has("stop")){
-      markerItems.push(
+      legendByKey[segment.key] = segment;
+    });
+    const lineItems = [];
+    legendOrder.forEach(function(key){
+      if(!keys.has(key)){
+        return;
+      }
+      const segment = legendByKey[key];
+      const meta = Object.keys(CANDIDATE_ROUTE_META).map(function(strategy){
+        return CANDIDATE_ROUTE_META[strategy];
+      }).find(function(item){
+        return item.key === key;
+      });
+      const swatchClass = "estimate-route-map-legend-swatch estimate-route-map-legend-swatch--" +
+        (key === "routeA" ? "route-a"
+          : key === "routeB" ? "route-b estimate-route-map-legend-swatch--dashed"
+          : key === "routeC" ? "route-c"
+          : "route-d");
+      const label = meta?.legendLabel || segment?.legendLabel || segment?.label || key;
+      lineItems.push(
         '<div class="estimate-route-map-legend-item">' +
-          '<span class="estimate-route-map-legend-marker estimate-route-map-legend-marker--waypoint" aria-hidden="true">寄</span>' +
-          "<span>立ち寄り地点</span>" +
+          '<span class="' + swatchClass + '" aria-hidden="true"></span>' +
+          "<span>" + label + "</span>" +
         "</div>"
       );
+    });
+    return lineItems;
+  }
+
+  function buildLegendHtml(segments){
+    const lineItems = buildAbLegendLineItems(segments);
+    if(!lineItems.length){
+      return "";
     }
     return (
-      '<div class="estimate-route-map-legend" aria-label="ルート凡例">' +
-        '<div class="estimate-route-map-legend-section">' +
-          '<div class="estimate-route-map-legend-heading">線</div>' +
-          lineItems.join("") +
-        "</div>" +
-        '<div class="estimate-route-map-legend-divider" aria-hidden="true"></div>' +
-        '<div class="estimate-route-map-legend-section">' +
-          '<div class="estimate-route-map-legend-heading">マーカー</div>' +
-          markerItems.join("") +
-        "</div>" +
+      '<div class="estimate-route-map-legend estimate-route-map-legend--ab" aria-label="ルート凡例">' +
+        lineItems.join("") +
       "</div>"
     );
   }
 
-  function buildLegendPdfHtml(segments, routePlan){
+  function buildLegendPdfHtml(segments){
     const keys = segmentKeysPresent(segments);
     const rowStyle = "display:flex;align-items:center;gap:6px;";
     const swatch = function(color){
@@ -854,63 +810,39 @@
     const dashedSwatch = function(color){
       return '<span style="width:14px;height:4px;border-radius:2px;background:repeating-linear-gradient(90deg,' + color + ' 0,' + color + ' 4px,transparent 4px,transparent 7px);"></span>';
     };
-    const marker = function(label, bg, fg){
-      return '<span style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:' + bg + ";color:" + fg + ';font-size:8px;font-weight:700;line-height:1;">' + label + "</span>";
-    };
     const lineRows = [];
-    const isAbLegend = keys.has("routeA") || keys.has("routeB") || keys.has("routeC") || keys.has("routeD");
-    if(isAbLegend){
-      const legendOrder = ["routeA", "routeB", "routeC", "routeD"];
-      const legendByKey = {};
-      (segments || []).forEach(function(segment){
-        if(!segment?.key || legendByKey[segment.key]){
-          return;
-        }
-        legendByKey[segment.key] = segment;
+    const legendOrder = ["routeA", "routeB", "routeC", "routeD"];
+    const legendByKey = {};
+    (segments || []).forEach(function(segment){
+      if(!segment?.key || legendByKey[segment.key]){
+        return;
+      }
+      legendByKey[segment.key] = segment;
+    });
+    legendOrder.forEach(function(key){
+      if(!keys.has(key)){
+        return;
+      }
+      const segment = legendByKey[key];
+      const meta = Object.keys(CANDIDATE_ROUTE_META).map(function(strategy){
+        return CANDIDATE_ROUTE_META[strategy];
+      }).find(function(item){
+        return item.key === key;
       });
-      legendOrder.forEach(function(key){
-        if(!keys.has(key)){
-          return;
-        }
-        const segment = legendByKey[key];
-        const meta = Object.keys(CANDIDATE_ROUTE_META).map(function(strategy){
-          return CANDIDATE_ROUTE_META[strategy];
-        }).find(function(item){
-          return item.key === key;
-        });
-        const label = segment?.legendLabel || meta?.legendLabel || segment?.label || key;
-        const swatchHtml = key === "routeB"
-          ? dashedSwatch(ROUTE_COLORS.routeB)
-          : swatch(ROUTE_COLORS[key] || segment.color || "#666");
-        lineRows.push('<div style="' + rowStyle + '">' + swatchHtml + label + "</div>");
-      });
-    }else{
-      if(keys.has("outbound")){
-        lineRows.push('<div style="' + rowStyle + '">' + swatch("#1565C0") + "往路</div>");
-      }
-      if(keys.has("stop")){
-        lineRows.push('<div style="' + rowStyle + '">' + swatch("#2E7D32") + "立ち寄り</div>");
-      }
-      if(keys.has("return")){
-        lineRows.push('<div style="' + rowStyle + '">' + swatch("#C62828") + "復路</div>");
-      }
-    }
-    const markerRows = [
-      '<div style="' + rowStyle + '">' + marker("発", "#2E7D32", "#fff") + "出発地</div>",
-      '<div style="' + rowStyle + '">' + marker("着", "#C62828", "#fff") + "目的地</div>"
-    ];
-    if(keys.has("stop") || String(routePlan?.returnPlanType || "") === "return_with_stop"){
-      markerRows.push('<div style="' + rowStyle + '">' + marker("寄", "#F9A825", "#fff") + "立ち寄り地点</div>");
+      const label = meta?.legendLabel || segment?.legendLabel || segment?.label || key;
+      const swatchHtml = key === "routeB"
+        ? dashedSwatch(ROUTE_COLORS.routeB)
+        : swatch(ROUTE_COLORS[key] || segment.color || "#666");
+      lineRows.push('<div style="' + rowStyle + '">' + swatchHtml + label + "</div>");
+    });
+    if(!lineRows.length){
+      return "";
     }
     return (
       "<div style=\"position:absolute;right:8px;bottom:8px;display:flex;flex-direction:column;gap:5px;" +
       "padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.92);border:1px solid rgba(0,0,0,0.08);" +
       "font-size:9px;line-height:1.3;color:#333;\">" +
-        "<div style=\"font-size:8px;font-weight:700;color:#666;\">線</div>" +
         lineRows.join("") +
-        "<div style=\"height:1px;background:rgba(0,0,0,0.1);margin:2px 0;\"></div>" +
-        "<div style=\"font-size:8px;font-weight:700;color:#666;\">マーカー</div>" +
-        markerRows.join("") +
       "</div>"
     );
   }
