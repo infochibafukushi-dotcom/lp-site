@@ -243,15 +243,36 @@ if(!abStopSegments.some(function(segment){ return segment.key === "routeA"; })){
 if(!abStopSegments.some(function(segment){ return segment.key === "routeB"; })){
   throw new Error("return_with_stop + AB outbound should keep routeB");
 }
-if(!abStopSegments.some(function(segment){ return segment.key === "stop"; })){
-  throw new Error("return_with_stop + AB outbound should include stop segment");
+if(abStopSegments.some(function(segment){ return segment.key === "stop"; })){
+  throw new Error("return_with_stop + AB outbound should not use stop segment colors");
 }
-if(!abStopSegments.some(function(segment){ return segment.key === "return"; })){
-  throw new Error("return_with_stop + AB outbound should include return segment");
+if(abStopSegments.some(function(segment){ return segment.key === "return"; })){
+  throw new Error("return_with_stop + AB outbound should not use return segment colors");
+}
+if(!abStopSegments.some(function(segment){
+  return segment.legRole === "return" && segment.key === "routeA";
+})){
+  throw new Error("return_with_stop + AB outbound should include strategy-colored return leg");
 }
 const abStopMarkers = display.buildRouteMapMarkers(abStopPlan, abStopSegments, { lat: 35.615, lng: 140.105 });
 if(!abStopMarkers.some(function(marker){ return marker.label === "寄"; })){
   throw new Error("return_with_stop + AB outbound should include waypoint marker");
+}
+const abReturnSegment = abStopSegments.find(function(segment){
+  return segment.legRole === "return";
+});
+if(abReturnSegment && !abReturnSegment.path.some(function(point){
+  return Math.abs(point.lat - 35.615) < 0.0001 && Math.abs(point.lng - 140.105) < 0.0001;
+})){
+  throw new Error("return leg should pass through waypoint");
+}
+
+const displayStopSegments = display.buildDisplayRouteMapSegments(stopPlan, { lat: 35.615, lng: 140.105 });
+if(displayStopSegments.some(function(segment){ return segment.key === "stop" || segment.key === "return"; })){
+  throw new Error("display segments should use strategy colors instead of stop/return keys");
+}
+if(!displayStopSegments.some(function(segment){ return segment.key === "routeA"; })){
+  throw new Error("display stop plan should include routeA-colored path");
 }
 
 console.log("OK: route map display tests passed");

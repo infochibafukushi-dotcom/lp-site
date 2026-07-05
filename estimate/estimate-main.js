@@ -2525,8 +2525,12 @@
   }
 
   function stopRouteMapAnimations(){
-    routeMapAnimationTimers.forEach(function(timerId){
-      clearInterval(timerId);
+    routeMapAnimationTimers.forEach(function(cancel){
+      if(typeof cancel === "function"){
+        cancel();
+      }else{
+        clearInterval(cancel);
+      }
     });
     routeMapAnimationTimers = [];
   }
@@ -2589,22 +2593,30 @@
     if(!polyline || arrowIconIndex < 0 || prefersReducedMotion()){
       return;
     }
-    const cycleMs = 1800;
-    const stepMs = 60;
-    const stepPercent = 100 / (cycleMs / stepMs);
-    let offset = 0;
-    const timerId = setInterval(function(){
-      const icons = polyline.get("icons");
-      if(!Array.isArray(icons) || !icons[arrowIconIndex]){
-        return;
+    const cycleMs = 3200;
+    let rafId = null;
+    let startTime = null;
+    const tick = function(now){
+      if(startTime == null){
+        startTime = now;
       }
-      offset = (offset + stepPercent) % 100;
-      icons[arrowIconIndex] = Object.assign({}, icons[arrowIconIndex], {
-        offset: offset.toFixed(1) + "%"
-      });
-      polyline.set("icons", icons);
-    }, stepMs);
-    routeMapAnimationTimers.push(timerId);
+      const elapsed = (now - startTime) % cycleMs;
+      const offset = (elapsed / cycleMs) * 100;
+      const icons = polyline.get("icons");
+      if(Array.isArray(icons) && icons[arrowIconIndex]){
+        icons[arrowIconIndex] = Object.assign({}, icons[arrowIconIndex], {
+          offset: offset.toFixed(2) + "%"
+        });
+        polyline.set("icons", icons);
+      }
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
+    routeMapAnimationTimers.push(function(){
+      if(rafId != null){
+        cancelAnimationFrame(rafId);
+      }
+    });
   }
 
   function drawRouteSegmentPolyline(map, segment, useAbSegments){
@@ -2733,7 +2745,7 @@
 
         if(display.shouldShowLegend(segments) && wrap){
           // MAP下に外出し（スマホでは重ねず、PCでもwrap直下に配置）
-          wrap.insertAdjacentHTML("afterend", display.buildLegendHtml(segments));
+          wrap.insertAdjacentHTML("afterend", display.buildLegendHtml(segments, routePlan));
         }
       });
     }catch(error){

@@ -297,31 +297,127 @@
     });
   }
 
+  function getStrategyMetaForRoute(route){
+    const strategy = getRouteStrategyKey(route);
+    if(CANDIDATE_ROUTE_META[strategy]){
+      return CANDIDATE_ROUTE_META[strategy];
+    }
+    return CANDIDATE_ROUTE_META.time_priority;
+  }
+
+  function appendSelectedLegSegment(segments, leg, options){
+    const opts = options || {};
+    const route = getLegPrimaryRoute(leg);
+    if(!route){
+      return false;
+    }
+    const meta = getStrategyMetaForRoute(route);
+    const path = getLegPath(leg);
+    if(path.length < 2){
+      return false;
+    }
+    segments.push({
+      key: meta.key,
+      abLabel: meta.abLabel,
+      color: meta.color,
+      lineStyle: meta.lineStyle || "solid",
+      drawOrder: Number(meta.drawOrder) || 0,
+      legendLabel: meta.legendLabel || meta.oneWayLabel,
+      path: path,
+      label: opts.isRoundTrip ? meta.roundTripLabel : meta.oneWayLabel,
+      isAbRoute: true,
+      legRole: opts.legRole || "outbound"
+    });
+    return true;
+  }
+
+  function appendLegDisplaySegments(segments, leg, options){
+    const beforeLen = segments.length;
+    appendCandidateSegmentsForLeg(segments, leg, options);
+    if(segments.length === beforeLen){
+      appendSelectedLegSegment(segments, leg, options);
+    }
+  }
+
+  function buildReturnLegStrategySegments(routePlan){
+    const returnLeg = routePlan?.returnRoutePlan;
+    if(!returnLeg){
+      return [];
+    }
+    const segments = [];
+    if(hasReturnAbRouteMapSegments(routePlan)){
+      appendCandidateSegmentsForLeg(segments, returnLeg, {
+        isRoundTrip: true,
+        legRole: "return"
+      });
+      return segments;
+    }
+    appendSelectedLegSegment(segments, returnLeg, {
+      isRoundTrip: true,
+      legRole: "return"
+    });
+    return segments;
+  }
+
+  function buildStrategyFallbackSegments(routePlan){
+    const segments = [];
+    const outboundLeg = routePlan?.outboundRoutePlan;
+    const returnLeg = routePlan?.returnRoutePlan;
+    if(outboundLeg){
+      appendLegDisplaySegments(segments, outboundLeg, {
+        isRoundTrip: Boolean(returnLeg),
+        legRole: "outbound"
+      });
+    }
+    if(returnLeg){
+      segments.push.apply(segments, buildReturnLegStrategySegments(routePlan));
+    }
+    if(!outboundLeg && !returnLeg){
+      appendLegDisplaySegments(segments, routePlan, {
+        isRoundTrip: false,
+        legRole: "outbound"
+      });
+    }
+    return segments;
+  }
+
   function buildDisplayRouteMapSegments(routePlan, waypointLatLng){
     const returnPlanType = String(routePlan?.returnPlanType || "");
-    const standardSegments = buildRouteMapSegments(routePlan, waypointLatLng);
     const abSegments = buildAbRouteMapSegments(routePlan);
     const useAbOnOutbound = hasAbRouteMapSegments(routePlan);
     const useAbOnReturn = hasReturnAbRouteMapSegments(routePlan);
 
-    if(returnPlanType === "return_with_stop" && routePlan?.returnRoutePlan){
-      const returnSegments = filterSegmentsByKeys(standardSegments, ["stop", "return"]);
-      if(returnSegments.length){
-        const outboundSegments = useAbOnOutbound
-          ? filterAbSegmentsByLegRole(abSegments, "outbound")
-          : filterSegmentsByKeys(standardSegments, ["outbound"]);
-        if(outboundSegments.length){
+    if(useAbOnOutbound && useAbOnReturn && abSegments.length){
+      return abSegments;
+    }
+
+    if(useAbOnOutbound){
+      const outboundSegments = filterAbSegmentsByLegRole(abSegments, "outbound");
+      if(returnPlanType === "return_with_stop" && routePlan?.returnRoutePlan){
+        const returnSegments = useAbOnReturn
+          ? filterAbSegmentsByLegRole(abSegments, "return")
+          : buildReturnLegStrategySegments(routePlan);
+        if(outboundSegments.length && returnSegments.length){
           return outboundSegments.concat(returnSegments);
         }
       }
-    }
-
-    if(useAbOnOutbound || useAbOnReturn){
-      if(abSegments.length){
-        return abSegments;
+      if(outboundSegments.length){
+        return outboundSegments;
       }
     }
-    return standardSegments;
+
+    if(useAbOnReturn){
+      const returnSegments = filterAbSegmentsByLegRole(abSegments, "return");
+      if(returnSegments.length){
+        return returnSegments;
+      }
+    }
+
+    const fallbackSegments = buildStrategyFallbackSegments(routePlan);
+    if(fallbackSegments.length){
+      return fallbackSegments;
+    }
+    return buildRouteMapSegments(routePlan, waypointLatLng);
   }
 
   function haversineMeters(a, b){
@@ -562,9 +658,11 @@
     const returnLeg = routePlan.returnRoutePlan;
     const returnPlanType = String(routePlan.returnPlanType || "");
     const outboundSegment = segments.find(function(segment){
-      return segment.key === "outbound";
+      return segment.key === "outbound"
+        || (segment.isAbRoute && segment.legRole === "outbound");
     });
-    const outboundPath = outboundSegment?.path || (outboundLeg ? getLegPath(outboundLeg) : segments[0].path);
+    const outboundPath = outboundSegment?.path
+      || (outboundLeg ? getLegPath(outboundLeg) : segments[0]?.path);
 
     if(outboundPath.length >= 2){
       markers.push({
@@ -585,9 +683,15 @@
       const stopSegment = segments.find(function(segment){
         return segment.key === "stop";
       });
+      const returnSegment = segments.find(function(segment){
+        return segment.key === "return"
+          || (segment.isAbRoute && segment.legRole === "return");
+      });
       const stopPosition = stopSegment?.path?.length
         ? stopSegment.path[stopSegment.path.length - 1]
-        : (waypointLatLng || normalizeLatLng(returnLeg.waypoint || returnLeg.intermediateWaypoint));
+        : (waypointLatLng
+          || normalizeLatLng(returnLeg.waypoint || returnLeg.intermediateWaypoint)
+          || (returnSegment?.path?.length >= 2 ? returnSegment.path[0] : null));
       if(stopPosition){
         markers.push({
           position: stopPosition,
@@ -612,10 +716,10 @@
     return keys;
   }
 
-  function buildLegendHtml(segments){
+  function buildLegendHtml(segments, routePlan){
     const keys = segmentKeysPresent(segments);
     const lineItems = [];
-    const isAbLegend = keys.has("routeA") || keys.has("routeB");
+    const isAbLegend = keys.has("routeA") || keys.has("routeB") || keys.has("routeC") || keys.has("routeD");
     if(isAbLegend){
       const legendOrder = ["routeA", "routeB", "routeC", "routeD"];
       const legendByKey = {};
@@ -674,32 +778,6 @@
       );
     }
     if(isAbLegend){
-      if(keys.has("stop") || keys.has("return") || keys.has("outbound")){
-        if(keys.has("outbound")){
-          lineItems.push(
-            '<div class="estimate-route-map-legend-item">' +
-              '<span class="estimate-route-map-legend-swatch estimate-route-map-legend-swatch--outbound" aria-hidden="true"></span>' +
-              "<span>往路</span>" +
-            "</div>"
-          );
-        }
-        if(keys.has("stop")){
-          lineItems.push(
-            '<div class="estimate-route-map-legend-item">' +
-              '<span class="estimate-route-map-legend-swatch estimate-route-map-legend-swatch--stop" aria-hidden="true"></span>' +
-              "<span>立ち寄り</span>" +
-            "</div>"
-          );
-        }
-        if(keys.has("return")){
-          lineItems.push(
-            '<div class="estimate-route-map-legend-item">' +
-              '<span class="estimate-route-map-legend-swatch estimate-route-map-legend-swatch--return" aria-hidden="true"></span>' +
-              "<span>復路</span>" +
-            "</div>"
-          );
-        }
-      }
       const markerItems = [
         '<div class="estimate-route-map-legend-item">' +
           '<span class="estimate-route-map-legend-marker estimate-route-map-legend-marker--origin" aria-hidden="true">発</span>' +
@@ -710,7 +788,9 @@
           "<span>目的地</span>" +
         "</div>"
       ];
-      if(keys.has("stop")){
+      const showWaypointMarker = keys.has("stop")
+        || String(routePlan?.returnPlanType || "") === "return_with_stop";
+      if(showWaypointMarker){
         markerItems.push(
           '<div class="estimate-route-map-legend-item">' +
             '<span class="estimate-route-map-legend-marker estimate-route-map-legend-marker--waypoint" aria-hidden="true">寄</span>' +
@@ -718,21 +798,16 @@
           "</div>"
         );
       }
-      const showMarkerSection = keys.has("stop") || keys.has("return") || keys.has("outbound");
       return (
         '<div class="estimate-route-map-legend estimate-route-map-legend--ab" aria-label="ルート凡例">' +
           '<div class="estimate-route-map-legend-section">' +
             lineItems.join("") +
           "</div>" +
-          (showMarkerSection
-            ? (
-              '<div class="estimate-route-map-legend-divider" aria-hidden="true"></div>' +
-              '<div class="estimate-route-map-legend-section">' +
-                '<div class="estimate-route-map-legend-heading">マーカー</div>' +
-                markerItems.join("") +
-              "</div>"
-            )
-            : "") +
+          '<div class="estimate-route-map-legend-divider" aria-hidden="true"></div>' +
+          '<div class="estimate-route-map-legend-section">' +
+            '<div class="estimate-route-map-legend-heading">マーカー</div>' +
+            markerItems.join("") +
+          "</div>" +
         "</div>"
       );
     }
@@ -770,30 +845,61 @@
     );
   }
 
-  function buildLegendPdfHtml(segments){
+  function buildLegendPdfHtml(segments, routePlan){
     const keys = segmentKeysPresent(segments);
     const rowStyle = "display:flex;align-items:center;gap:6px;";
     const swatch = function(color){
       return '<span style="width:14px;height:4px;border-radius:2px;background:' + color + ';"></span>';
     };
+    const dashedSwatch = function(color){
+      return '<span style="width:14px;height:4px;border-radius:2px;background:repeating-linear-gradient(90deg,' + color + ' 0,' + color + ' 4px,transparent 4px,transparent 7px);"></span>';
+    };
     const marker = function(label, bg, fg){
       return '<span style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:' + bg + ";color:" + fg + ';font-size:8px;font-weight:700;line-height:1;">' + label + "</span>";
     };
     const lineRows = [];
-    if(keys.has("outbound")){
-      lineRows.push('<div style="' + rowStyle + '">' + swatch("#1565C0") + "往路</div>");
-    }
-    if(keys.has("stop")){
-      lineRows.push('<div style="' + rowStyle + '">' + swatch("#2E7D32") + "立ち寄り</div>");
-    }
-    if(keys.has("return")){
-      lineRows.push('<div style="' + rowStyle + '">' + swatch("#C62828") + "復路</div>");
+    const isAbLegend = keys.has("routeA") || keys.has("routeB") || keys.has("routeC") || keys.has("routeD");
+    if(isAbLegend){
+      const legendOrder = ["routeA", "routeB", "routeC", "routeD"];
+      const legendByKey = {};
+      (segments || []).forEach(function(segment){
+        if(!segment?.key || legendByKey[segment.key]){
+          return;
+        }
+        legendByKey[segment.key] = segment;
+      });
+      legendOrder.forEach(function(key){
+        if(!keys.has(key)){
+          return;
+        }
+        const segment = legendByKey[key];
+        const meta = Object.keys(CANDIDATE_ROUTE_META).map(function(strategy){
+          return CANDIDATE_ROUTE_META[strategy];
+        }).find(function(item){
+          return item.key === key;
+        });
+        const label = segment?.legendLabel || meta?.legendLabel || segment?.label || key;
+        const swatchHtml = key === "routeB"
+          ? dashedSwatch(ROUTE_COLORS.routeB)
+          : swatch(ROUTE_COLORS[key] || segment.color || "#666");
+        lineRows.push('<div style="' + rowStyle + '">' + swatchHtml + label + "</div>");
+      });
+    }else{
+      if(keys.has("outbound")){
+        lineRows.push('<div style="' + rowStyle + '">' + swatch("#1565C0") + "往路</div>");
+      }
+      if(keys.has("stop")){
+        lineRows.push('<div style="' + rowStyle + '">' + swatch("#2E7D32") + "立ち寄り</div>");
+      }
+      if(keys.has("return")){
+        lineRows.push('<div style="' + rowStyle + '">' + swatch("#C62828") + "復路</div>");
+      }
     }
     const markerRows = [
       '<div style="' + rowStyle + '">' + marker("発", "#2E7D32", "#fff") + "出発地</div>",
       '<div style="' + rowStyle + '">' + marker("着", "#C62828", "#fff") + "目的地</div>"
     ];
-    if(keys.has("stop")){
+    if(keys.has("stop") || String(routePlan?.returnPlanType || "") === "return_with_stop"){
       markerRows.push('<div style="' + rowStyle + '">' + marker("寄", "#F9A825", "#fff") + "立ち寄り地点</div>");
     }
     return (
