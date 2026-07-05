@@ -42,9 +42,10 @@
   let mobileReserveBarResizeTimer = null;
   let routeMapAnimationTimers = [];
   let routeMapAnimationLifecycleBound = false;
-  const ROUTE_ARROW_ANIMATION_MS = 4000;
+  const ROUTE_ARROW_ANIMATION_MS = 4500;
   // 初回表示・再読み込み時はページ上部から開始する（STEPカード途中への自動スクロールを抑止）
   let pageEntryScrollPending = true;
+  let pendingScrollToEstimateResult = false;
   let mobileReserveBarObserver = null;
 
   if("scrollRestoration" in history){
@@ -1838,6 +1839,7 @@
     state.distanceRouteReviewed = true;
     invalidateEstimateNumberIfChanged();
     state.lastActiveStepId = "result";
+    markPendingScrollToEstimateResult();
     renderPage();
   }
 
@@ -1959,15 +1961,19 @@
   }
 
   function getRouteSelectButtonLabel(isSelected){
-    return isSelected ? "合計金額を確認中" : "合計金額を確認";
+    return isSelected ? "空き状況・料金内訳を確認中" : "空き状況・料金内訳を確認";
   }
 
   function renderRouteSelectButtonLabel(isSelected){
     const fullLabel = getRouteSelectButtonLabel(isSelected);
-    const shortLabel = isSelected ? "確認中" : "合計確認";
+    const mobileLine1 = isSelected ? "確認中" : "空き状況を確認";
+    const mobileLine2 = isSelected ? "表示中" : "料金内訳を見る";
     return (
       '<span class="estimate-route-select-btn-label-full">' + escapeHtml(fullLabel) + "</span>" +
-      '<span class="estimate-route-select-btn-label-short">' + escapeHtml(shortLabel) + "</span>"
+      '<span class="estimate-route-select-btn-label-short">' +
+        '<span class="estimate-route-select-btn-label-short-line">' + escapeHtml(mobileLine1) + "</span>" +
+        '<span class="estimate-route-select-btn-label-short-line">' + escapeHtml(mobileLine2) + "</span>" +
+      "</span>"
     );
   }
 
@@ -2010,6 +2016,25 @@
         target.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     });
+  }
+
+  function scrollToEstimateResultTop(options){
+    const target = document.getElementById("estimateResultArea")
+      || document.querySelector(".estimate-result");
+    if(!target){
+      return;
+    }
+    const behavior = options?.behavior || "smooth";
+    const offset = getStickyChromeOffset();
+    const absoluteTop = target.getBoundingClientRect().top + (window.pageYOffset || window.scrollY || 0);
+    window.scrollTo({
+      top: Math.max(0, absoluteTop - offset),
+      behavior: behavior
+    });
+  }
+
+  function markPendingScrollToEstimateResult(){
+    pendingScrollToEstimateResult = true;
   }
 
   function buildRoundTripRoutePairs(routePlan){
@@ -2128,7 +2153,11 @@
     }
     invalidateEstimateNumberIfChanged();
     state.distanceRouteReviewed = isRouteReviewComplete(state.routePlan);
-    state.lastActiveStepId = isFlowComplete() ? "result" : "distance";
+    const flowComplete = isFlowComplete();
+    state.lastActiveStepId = flowComplete ? "result" : "distance";
+    if(flowComplete){
+      markPendingScrollToEstimateResult();
+    }
     renderPage();
   }
 
@@ -2148,7 +2177,11 @@
     syncStateFromRoutePlan(rebuildRoutePlanFromLegs(outboundLeg, returnLeg));
     invalidateEstimateNumberIfChanged();
     state.distanceRouteReviewed = isRouteReviewComplete(state.routePlan);
-    state.lastActiveStepId = isFlowComplete() ? "result" : "distance";
+    const flowComplete = isFlowComplete();
+    state.lastActiveStepId = flowComplete ? "result" : "distance";
+    if(flowComplete){
+      markPendingScrollToEstimateResult();
+    }
     renderPage();
   }
 
@@ -3644,7 +3677,7 @@
     ` : "";
 
     return `
-      <section class="estimate-result" aria-live="polite" aria-atomic="true">
+      <section class="estimate-result" id="estimateResultArea" aria-live="polite" aria-atomic="true">
         <h3>見積結果</h3>
         ${renderEstimateNumberBox()}
         ${renderRegisterWarningBox()}
@@ -3772,6 +3805,15 @@
       state.lastActiveStepId = "result";
       syncHandoffForResult(result);
       renderRouteMapIfNeeded();
+      if(pendingScrollToEstimateResult){
+        pendingScrollToEstimateResult = false;
+        requestAnimationFrame(function(){
+          requestAnimationFrame(function(){
+            const isMobile = window.matchMedia && window.matchMedia("(max-width: 767px)").matches;
+            scrollToEstimateResultTop({ behavior: isMobile ? "smooth" : "smooth" });
+          });
+        });
+      }
       console.log("PDF_DEBUG_1 ボタン描画");
     }
   }

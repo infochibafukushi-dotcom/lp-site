@@ -909,6 +909,13 @@
 .estimate-route-select-btn-label-short{
   display:none;
 }
+.estimate-route-select-btn-label-short-line{
+  display:block;
+  line-height:1.25;
+}
+.estimate-route-select-btn-label-short-line + .estimate-route-select-btn-label-short-line{
+  margin-top:2px;
+}
 .estimate-note-mobile{
   display:none;
 }
@@ -1134,6 +1141,10 @@ body.estimate-has-mobile-reserve-bar .estimate-wrap{
   font-size:14px;
   font-weight:700;
   line-height:1.3;
+  text-align:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   cursor:pointer;
   box-shadow:0 2px 0 rgba(30, 80, 40, 0.25);
 }
@@ -1587,6 +1598,10 @@ body.estimate-has-mobile-reserve-bar .estimate-wrap{
   color:#444;
 }
 @media (min-width:768px){
+  .estimate-route-card-list .estimate-route-select-btn-label-full,
+  .estimate-route-card-list--ab .estimate-route-select-btn-label-full{
+    white-space:nowrap;
+  }
   .estimate-help-overlay{
     align-items:center;
   }
@@ -1996,7 +2011,13 @@ body.estimate-has-mobile-reserve-bar .estimate-wrap{
 
   .estimate-route-card-list .estimate-route-select-btn-label-short,
   .estimate-route-card-list--ab .estimate-route-select-btn-label-short{
-    display:inline;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:2px;
+    line-height:1.25;
+    white-space:normal;
   }
 
   .estimate-note-pc,
