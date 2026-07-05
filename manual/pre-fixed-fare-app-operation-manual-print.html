@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="事前確定運賃 予約・運行中アプリ操作マニュアルをブラウザ印刷でPDF保存するためのページです。">
+<title>予約・運行中アプリ操作マニュアル PDF保存 | 事前確定運賃</title>
+<style id="preFixedFareAppManualPrintCss"></style>
+</head>
+<body>
+<div class="print-toolbar">
+  <p class="print-toolbar-title">事前確定運賃 予約・運行中アプリ操作マニュアル</p>
+  <div class="print-toolbar-actions">
+    <button type="button" class="print-toolbar-btn" id="preFixedFareAppManualPrintBtn">PDF保存・印刷</button>
+    <a class="print-toolbar-link" href="../admin.html">管理画面に戻る</a>
+  </div>
+</div>
+<div class="print-status" id="preFixedFareAppManualPrintStatus">操作マニュアルを読み込んでいます...</div>
+<div id="preFixedFareAppManualPrintRoot"></div>
+<script src="../shared/libs/qrcode.min.js?v=app-manual-print-20260705"></script>
+<script src="../shared/estimate-qr.js?v=app-manual-print-20260705"></script>
+<script src="../shared/pre-fixed-fare-print-layout-css.js?v=app-manual-print-20260705"></script>
+<script src="../shared/pre-fixed-fare-app-manual-data.js?v=app-manual-print-20260705"></script>
+<script src="../shared/pre-fixed-fare-app-manual-pdf.js?v=app-manual-print-20260705"></script>
+<script>
+(function(){
+  const cssNode = document.getElementById("preFixedFareAppManualPrintCss");
+  const root = document.getElementById("preFixedFareAppManualPrintRoot");
+  const statusBox = document.getElementById("preFixedFareAppManualPrintStatus");
+  const printBtn = document.getElementById("preFixedFareAppManualPrintBtn");
+
+  function setStatus(message, isError){
+    if(!statusBox) return;
+    statusBox.textContent = message || "";
+    statusBox.className = "print-status" + (isError ? " print-status--error" : "");
+  }
+
+  if(cssNode && window.PreFixedFareAppManualPdf && typeof window.PreFixedFareAppManualPdf.getPrintPageCss === "function"){
+    cssNode.textContent = window.PreFixedFareAppManualPdf.getPrintPageCss();
+  }
+
+  if(printBtn){
+    printBtn.addEventListener("click", function(){
+      window.print();
+    });
+  }
+
+  async function init(){
+    if(!window.PreFixedFareAppManualPdf || typeof window.PreFixedFareAppManualPdf.renderPrintPage !== "function"){
+      setStatus("操作マニュアルPDFモジュールの読み込みに失敗しました。", true);
+      return;
+    }
+    try{
+      const result = await window.PreFixedFareAppManualPdf.renderPrintPage(root);
+      setStatus("17ページの操作マニュアルを表示しました。「PDF保存・印刷」からブラウザの印刷画面を開き、「PDFに保存」を選択してください。（" + (result.pageCount || 0) + "ページ）");
+    }catch(error){
+      console.error(error);
+      setStatus(String(error && error.message ? error.message : "操作マニュアルの表示に失敗しました。"), true);
+    }
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

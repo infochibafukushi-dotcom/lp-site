@@ -2,6 +2,7 @@
   const HTML2PDF_CDN = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
   const PDF_FILENAME = "pre-fixed-fare-app-operation-manual.pdf";
   const EXPECTED_PAGE_COUNT = 17;
+  const PRINT_PAGE_RELATIVE_PATH = "./manual/pre-fixed-fare-app-operation-manual-print.html";
   const SCOPE = ".pre-fixed-fare-app-manual";
 
   function resolvePublicUrl(relativePath){
@@ -382,7 +383,7 @@
     const result = {};
     await Promise.all(qrItems.map(async function(item){
       const url = global.PreFixedFareAppManualData
-        ? global.PreFixedFareAppManualData.resolveManualUrl(item.urlKey)
+        ? global.PreFixedFareAppManualData.resolveManualUrl(item.urlKey, data?.links)
         : (item.url || "");
       if(global.EstimateQr && typeof global.EstimateQr.toDataUrl === "function"){
         result[item.id] = await global.EstimateQr.toDataUrl(url, 150);
@@ -758,16 +759,105 @@
     });
   }
 
+  function getPrintPageCss(){
+    return (
+      getManualCss() +
+      "@page{size:A4 portrait;margin:10mm;}" +
+      "body{margin:0;background:#fff;color:#111;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Yu Gothic','Meiryo',sans-serif;}" +
+      SCOPE + " .manual-page{width:190mm;min-height:277mm;box-sizing:border-box;page-break-after:always;break-after:page;background:#fff;padding:0;margin:0 auto;}" +
+      SCOPE + " .manual-page:last-child{page-break-after:auto;break-after:auto;}" +
+      SCOPE + " .manual-screenshot-block,.manual-table-block,.table-wrap,.callout-list,.manual-section{break-inside:avoid;page-break-inside:avoid;}" +
+      ".print-toolbar{position:sticky;top:0;z-index:1000;display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:12px 16px;background:#1b3a6b;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.15);}" +
+      ".print-toolbar-title{font-size:16px;font-weight:700;margin:0;flex:1 1 240px;}" +
+      ".print-toolbar-actions{display:flex;flex-wrap:wrap;gap:8px;}" +
+      ".print-toolbar-btn,.print-toolbar-link{display:inline-block;padding:10px 16px;border-radius:8px;border:none;background:#fff;color:#1b3a6b;font-size:14px;font-weight:700;text-decoration:none;cursor:pointer;}" +
+      ".print-toolbar-link{background:#eef5ff;}" +
+      ".print-status{padding:12px 16px;background:#fff7ed;color:#9a3412;font-size:13px;}" +
+      ".print-status--error{background:#fef2f2;color:#b91c1c;}" +
+      "@media screen{body{background:#eee;}" +
+      SCOPE + " .manual-page{margin:16px auto;box-shadow:0 0 8px rgba(0,0,0,.15);}}" +
+      "@media print{.print-toolbar,.print-status{display:none!important;}body{background:#fff;}" +
+      SCOPE + " .manual-page{margin:0;box-shadow:none;}}"
+    );
+  }
+
+  function getPrintPageDefaultOptions(){
+    return {
+      imageBase: "../assets/manual/pre-fixed-fare/",
+      manualLinks: {
+        estimateReservation: "../estimate/?scenario=pre-fixed-fare-demo",
+        operationManual: "./pre-fixed-fare-operation.html"
+      }
+    };
+  }
+
+  function getPrintPageUrl(){
+    const relative = PRINT_PAGE_RELATIVE_PATH;
+    if(typeof window !== "undefined" && window.location && window.location.href){
+      try{
+        return new URL(relative, window.location.href).href;
+      }catch(error){
+        return relative;
+      }
+    }
+    return relative;
+  }
+
+  function openPreFixedFareAppManualPrintPage(options){
+    options = options || {};
+    const url = getPrintPageUrl();
+    const target = options.target || "_blank";
+    const opened = window.open(url, target, "noopener,noreferrer");
+    if(!opened){
+      throw new Error("印刷用ページを開けませんでした。ポップアップブロックを解除してください。");
+    }
+    return url;
+  }
+
+  async function renderPrintPage(rootElement, options){
+    options = Object.assign({}, getPrintPageDefaultOptions(), options || {});
+    if(!rootElement){
+      throw new Error("印刷用ページの表示先が見つかりません。");
+    }
+    if(!global.PreFixedFareAppManualData){
+      throw new Error("予約・運行中アプリ操作マニュアルPDFデータモジュールの読み込みに失敗しました。");
+    }
+    const reportData = global.PreFixedFareAppManualData.buildReportData({
+      imageBase: options.imageBase,
+      manualLinks: options.manualLinks
+    });
+    const prepared = await buildPreparedReport(reportData);
+    rootElement.innerHTML = prepared.reportHtml;
+    await waitForImagesToLoad(rootElement);
+    await waitForLayout();
+    const pages = rootElement.querySelectorAll(".manual-page");
+    if(typeof document !== "undefined" && document.body){
+      document.body.setAttribute("data-print-ready", "1");
+    }
+    return {
+      pageCount: pages.length,
+      pageIds: Array.from(pages).map(function(el){ return el.getAttribute("data-page-id"); }),
+      imageAvailability: prepared.imageAvailability
+    };
+  }
+
   global.generatePreFixedFareAppManualPdf = generatePreFixedFareAppManualPdf;
+  global.openPreFixedFareAppManualPrintPage = openPreFixedFareAppManualPrintPage;
 
   global.PreFixedFareAppManualPdf = {
     PDF_FILENAME: PDF_FILENAME,
     EXPECTED_PAGE_COUNT: EXPECTED_PAGE_COUNT,
+    PRINT_PAGE_RELATIVE_PATH: PRINT_PAGE_RELATIVE_PATH,
     buildReportHtml: buildReportHtml,
     buildPreparedReport: buildPreparedReport,
     renderVisibleReportTarget: renderVisibleReportTarget,
     exportReportElementToPdf: exportReportElementToPdf,
     getManualCss: getManualCss,
+    getPrintPageCss: getPrintPageCss,
+    getPrintPageUrl: getPrintPageUrl,
+    getPrintPageDefaultOptions: getPrintPageDefaultOptions,
+    openPreFixedFareAppManualPrintPage: openPreFixedFareAppManualPrintPage,
+    renderPrintPage: renderPrintPage,
     probeImages: probeImages,
     previewReportHtml: previewReportHtml,
     savePdf: savePdf,

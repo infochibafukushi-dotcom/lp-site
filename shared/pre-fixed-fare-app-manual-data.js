@@ -392,9 +392,10 @@
     }
   ];
 
-  function resolveManualUrl(urlKey){
+  function resolveManualUrl(urlKey, linksOverride){
     const key = String(urlKey || "").trim();
-    const relative = PRE_FIXED_FARE_MANUAL_LINKS[key] || "";
+    const links = linksOverride || PRE_FIXED_FARE_MANUAL_LINKS;
+    const relative = links[key] || "";
     if(!relative){
       return "";
     }
@@ -408,13 +409,14 @@
     return relative;
   }
 
-  function buildScreenshotEntry(screenshot){
+  function buildScreenshotEntry(screenshot, imageBase){
     if(!screenshot){
       return null;
     }
+    const base = String(imageBase || IMAGE_BASE).trim();
     return {
       imageFile: screenshot.imageFile || "",
-      imageSrc: IMAGE_BASE + (screenshot.imageFile || ""),
+      imageSrc: base + (screenshot.imageFile || ""),
       placeholderLabel: screenshot.placeholderLabel || "",
       placeholderOnly: screenshot.placeholderOnly === true,
       screenshotType: screenshot.screenshotType === "desktop" ? "desktop" : "mobile",
@@ -425,15 +427,17 @@
 
   function buildReportData(options){
     options = options || {};
+    const imageBase = String(options.imageBase || IMAGE_BASE).trim();
+    const links = Object.assign({}, PRE_FIXED_FARE_MANUAL_LINKS, options.manualLinks || {});
     const createdAt = options.createdAt || new Date().toLocaleDateString("ja-JP");
     const steps = STEP_PAGES.map(function(page){
       return Object.assign({}, page, {
-        screenshot: buildScreenshotEntry(page.screenshot)
+        screenshot: buildScreenshotEntry(page.screenshot, imageBase)
       });
     });
     const contentPages = CONTENT_PAGES.map(function(page){
       return Object.assign({}, page, {
-        screenshot: buildScreenshotEntry(page.screenshot)
+        screenshot: buildScreenshotEntry(page.screenshot, imageBase)
       });
     });
 
@@ -441,7 +445,7 @@
       title: COVER.titleLine1 + " " + COVER.titleLine2,
       pdfFilename: PDF_FILENAME,
       expectedPageCount: EXPECTED_PAGE_COUNT,
-      links: Object.assign({}, PRE_FIXED_FARE_MANUAL_LINKS),
+      links: links,
       documentInfo: Object.assign({}, DOCUMENT_INFO),
       meta: {
         createdAt: DOCUMENT_INFO.createdDate,
@@ -451,7 +455,7 @@
       cover: Object.assign({}, COVER, { company: Object.assign({}, COMPANY) }),
       qrItems: QR_ITEMS.map(function(item){
         return Object.assign({}, item, {
-          url: PRE_FIXED_FARE_MANUAL_LINKS[item.urlKey] || ""
+          url: links[item.urlKey] || ""
         });
       }),
       purpose: Object.assign({}, PURPOSE),

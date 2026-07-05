@@ -456,17 +456,18 @@
     });
   }
 
-  async function exportAppManualPdf(){
-    if(!global.PreFixedFareAppManualPdf){
+  function openAppManualPrintPage(){
+    if(typeof global.openPreFixedFareAppManualPrintPage === "function"){
+      const url = global.openPreFixedFareAppManualPrintPage();
+      setAppManualStatus("印刷用ページを開きました。ブラウザの印刷画面から「PDFに保存」を選択してください。", "success");
+      return url;
+    }
+    if(!global.PreFixedFareAppManualPdf || typeof global.PreFixedFareAppManualPdf.openPreFixedFareAppManualPrintPage !== "function"){
       throw new Error("予約・運行中アプリ操作マニュアルPDFモジュールの読み込みに失敗しました。");
     }
-    setAppManualStatus("PDFを作成しています...", "warn");
-    const result = await global.PreFixedFareAppManualPdf.generatePreFixedFareAppManualPdf({
-      previewElement: document.getElementById("preFixedFareAppManualPreview")
-    });
-    const pageCount = result?.pageCount || 0;
-    setAppManualStatus("PDFを保存しました。（" + pageCount + "ページ）", "success");
-    return result;
+    const url = global.PreFixedFareAppManualPdf.openPreFixedFareAppManualPrintPage();
+    setAppManualStatus("印刷用ページを開きました。ブラウザの印刷画面から「PDFに保存」を選択してください。", "success");
+    return url;
   }
 
   async function previewAppManualHtml(){
@@ -488,21 +489,21 @@
   function bindAppManualButton(){
     const button = document.getElementById("preFixedFareAppManualExportBtn");
     if(!button) return;
-    button.addEventListener("click", async function(){
+    button.addEventListener("click", function(){
       button.disabled = true;
       try{
-        await exportAppManualPdf();
+        openAppManualPrintPage();
       }catch(error){
         console.error(error);
         const reason = String(error?.message || "");
         if(
-          reason.includes("生成対象HTMLが空")
+          reason.includes("印刷用ページを開けません")
           || reason.includes("組み立てに失敗")
           || reason.includes("読み込みに失敗")
         ){
           setAppManualStatus(reason, "error");
         }else{
-          setAppManualStatus("PDF作成に失敗しました。", "error");
+          setAppManualStatus("印刷用ページを開けませんでした。", "error");
         }
       }finally{
         button.disabled = false;
