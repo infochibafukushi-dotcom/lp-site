@@ -1679,10 +1679,12 @@ body{
         <div class="preview" id="preFixedFareSubmissionFullSetStatus">まだ作成していません。</div>
       </div>
       <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e5e5e5;">
-        <p class="note" style="margin-bottom:8px;"><strong>提出セットWord版</strong><br>提出候補PDFと同内容を、Word上で編集・手動調整できる .docx として提供します。PDFは提出候補版、Wordは印刷前確認・体裁調整用の原稿です。生成済みファイルを開くかダウンロードしてください。再生成は <code>node scripts/build-pre-fixed-fare-submission-word-set.mjs</code> で行います。</p>
+        <p class="note" style="margin-bottom:8px;"><strong>提出セットWord版</strong><br>提出候補PDFと同内容を、Word上で編集・手動調整できる .docx として提供します。旧candidate版と審査向け final-candidate 版の2種類があります。生成済みファイルを開くかダウンロードしてください。再生成は <code>node scripts/build-pre-fixed-fare-submission-word-set.mjs</code>（旧candidate）と <code>node scripts/build-pre-fixed-fare-submission-final-word-set.mjs</code>（final-candidate）で行います。</p>
         <div class="actions" style="flex-wrap:wrap; gap:8px;">
-          <button type="button" class="secondary" id="preFixedFareSubmissionWordOpenBtn">提出セットWord版を開く</button>
-          <button type="button" class="secondary" id="preFixedFareSubmissionWordDownloadBtn">提出セットWord版をダウンロード</button>
+          <button type="button" class="secondary" id="preFixedFareSubmissionWordOpenBtn">提出セットWord版を開く（旧candidate）</button>
+          <button type="button" class="secondary" id="preFixedFareSubmissionWordDownloadBtn">提出セットWord版をダウンロード（旧candidate）</button>
+          <button type="button" class="secondary" id="preFixedFareSubmissionFinalWordOpenBtn">審査向け final-candidate Wordを開く</button>
+          <button type="button" class="secondary" id="preFixedFareSubmissionFinalWordDownloadBtn">審査向け final-candidate Wordをダウンロード</button>
         </div>
         <div class="preview" id="preFixedFareSubmissionWordStatus">まだ開いていません。</div>
       </div>
@@ -1741,7 +1743,7 @@ body{
 <script src="./shared/pre-fixed-fare-application-print.js?v=appform02"></script>
 <script src="./admin-pre-fixed-fare-application.js?v=appform01"></script>
 <script src="./admin-pre-fixed-fare-submission-set.js?v=finalset01"></script>
-<script src="./admin-pre-fixed-fare-submission-word.js?v=wordset01"></script>
+<script src="./admin-pre-fixed-fare-submission-word.js?v=finalword01"></script>
 <script>
 const CONFIG_PATH = 'data/config.json';
 const SECTIONS_PATH = 'data/sections.json';
