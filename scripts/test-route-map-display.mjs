@@ -66,14 +66,11 @@ const roundTripPlan = {
 };
 
 const sameReturnSegments = display.buildRouteMapSegments(roundTripPlan);
-if(sameReturnSegments.length !== 2){
-  throw new Error("same return should have 2 segments, got " + sameReturnSegments.length);
+if(sameReturnSegments.length !== 1){
+  throw new Error("same return should merge into 1 route segment, got " + sameReturnSegments.length);
 }
-if(sameReturnSegments[0].key !== "outbound" || sameReturnSegments[0].color !== "#1565C0"){
-  throw new Error("outbound segment mismatch");
-}
-if(sameReturnSegments[1].key !== "return" || sameReturnSegments[1].color !== "#C62828"){
-  throw new Error("return segment mismatch");
+if(sameReturnSegments[0].key !== "routeA" || sameReturnSegments[0].color !== "#C62828"){
+  throw new Error("round trip should use routeA color, got " + sameReturnSegments[0].key);
 }
 
 const stopPlan = Object.assign({}, roundTripPlan, {
@@ -86,14 +83,14 @@ const stopPlan = Object.assign({}, roundTripPlan, {
   })
 });
 const stopSegments = display.buildRouteMapSegments(stopPlan, { lat: 35.615, lng: 140.105 });
-if(stopSegments.length !== 3){
-  throw new Error("stop return should have 3 segments, got " + stopSegments.length);
+if(stopSegments.length !== 1){
+  throw new Error("stop return should merge into 1 route segment, got " + stopSegments.length);
 }
-if(stopSegments[1].key !== "stop" || stopSegments[1].color !== "#2E7D32"){
-  throw new Error("stop segment mismatch");
+if(stopSegments[0].key !== "routeA" || stopSegments[0].color !== "#C62828"){
+  throw new Error("stop return should use routeA color");
 }
-if(stopSegments[2].key !== "return" || stopSegments[2].color !== "#C62828"){
-  throw new Error("return-after-stop segment mismatch");
+if(stopSegments.some(function(segment){ return segment.key === "stop" || segment.key === "return" || segment.key === "outbound"; })){
+  throw new Error("stop return must not use leg-type segment keys");
 }
 if(!display.shouldShowLegend(stopSegments)){
   throw new Error("legend should show for round trip");
@@ -104,11 +101,12 @@ if(!markers.some(function(marker){ return marker.label === "寄"; })){
   throw new Error("waypoint marker expected");
 }
 const stopMarker = markers.find(function(marker){ return marker.label === "寄"; });
-if(!stopSegments[1] || !stopSegments[1].path.some(function(point){
+const mergedStopPath = stopSegments[0]?.path || [];
+if(!mergedStopPath.some(function(point){
   return Math.abs(point.lat - stopMarker.position.lat) < 0.0001
     && Math.abs(point.lng - stopMarker.position.lng) < 0.0001;
 })){
-  throw new Error("waypoint marker should sit on green segment");
+  throw new Error("waypoint marker should sit on merged route path");
 }
 
 const legStopPath = [
@@ -136,14 +134,11 @@ const legStopPlan = Object.assign({}, roundTripPlan, {
   })
 });
 const legStopSegments = display.buildRouteMapSegments(legStopPlan);
-if(legStopSegments.length !== 3){
-  throw new Error("routeLegs stop return should have 3 segments, got " + legStopSegments.length);
+if(legStopSegments.length !== 1){
+  throw new Error("routeLegs stop return should merge into 1 segment, got " + legStopSegments.length);
 }
-if(legStopSegments[1].key !== "stop" || legStopSegments[1].color !== "#2E7D32"){
-  throw new Error("routeLegs stop segment mismatch");
-}
-if(legStopSegments[2].key !== "return" || legStopSegments[2].color !== "#C62828"){
-  throw new Error("routeLegs return segment mismatch");
+if(legStopSegments[0].key !== "routeA"){
+  throw new Error("routeLegs stop return should use routeA key");
 }
 
 const legJunctionPlan = Object.assign({}, roundTripPlan, {
@@ -162,11 +157,11 @@ const legJunctionPlan = Object.assign({}, roundTripPlan, {
   })
 });
 const legJunctionSegments = display.buildRouteMapSegments(legJunctionPlan);
-if(legJunctionSegments.length !== 3){
-  throw new Error("leg junction split should have 3 segments, got " + legJunctionSegments.length);
+if(legJunctionSegments.length !== 1){
+  throw new Error("leg junction split should merge into 1 segment, got " + legJunctionSegments.length);
 }
-if(legJunctionSegments[1].key !== "stop"){
-  throw new Error("leg junction stop segment mismatch");
+if(legJunctionSegments[0].key !== "routeA"){
+  throw new Error("leg junction should use routeA key");
 }
 
 function makeAbLeg(pathPoints, strategy, routeId){
@@ -281,6 +276,41 @@ if(displayStopSegments.some(function(segment){ return segment.key === "stop" || 
 }
 if(!displayStopSegments.some(function(segment){ return segment.key === "routeA"; })){
   throw new Error("display stop plan should include routeA-colored path");
+}
+
+const outboundCPath = [
+  { lat: 35.60, lng: 140.10 },
+  { lat: 35.605, lng: 140.105 },
+  { lat: 35.62, lng: 140.12 }
+];
+const abFullPlan = {
+  tripType: "round_trip",
+  returnPlanType: "same_return",
+  outboundRoutePlan: Object.assign(
+    makeAbLeg(outboundAPath, "time_priority", "route_a"),
+    {
+      routeCandidates: [
+        { routeId: "route_a", routeStrategy: "time_priority", encodedPolyline: encodePolyline(outboundAPath), distanceMeters: 1000 },
+        { routeId: "route_b", routeStrategy: "general_road_priority", encodedPolyline: encodePolyline(outboundBPath), distanceMeters: 1100 },
+        { routeId: "route_c", routeStrategy: "shorter_distance", encodedPolyline: encodePolyline(outboundCPath), distanceMeters: 900 }
+      ]
+    }
+  ),
+  returnRoutePlan: makeAbLeg(returnPath, "time_priority", "route_a")
+};
+const abFullSegments = display.buildDisplayRouteMapSegments(abFullPlan);
+if(!abFullSegments.some(function(segment){ return segment.key === "routeC"; })){
+  throw new Error("routeC segment expected when shorter_distance candidate exists");
+}
+if(!abFullSegments.some(function(segment){ return segment.key === "routeC" && segment.color === "#F9A825"; })){
+  throw new Error("routeC should use yellow color");
+}
+const abFullLegendHtml = display.buildLegendHtml(abFullSegments);
+if(!abFullLegendHtml.includes("C 黄線")){
+  throw new Error("legend must include route C label");
+}
+if(/立ち寄り|復路|往路/.test(abFullLegendHtml)){
+  throw new Error("legend must not include leg-based line labels");
 }
 
 console.log("OK: route map display tests passed");

@@ -42,6 +42,7 @@
   let mobileReserveBarResizeTimer = null;
   let routeMapAnimationTimers = [];
   let routeMapAnimationLifecycleBound = false;
+  const ROUTE_ARROW_ANIMATION_MS = 3750;
   // 初回表示・再読み込み時はページ上部から開始する（STEPカード途中への自動スクロールを抑止）
   let pageEntryScrollPending = true;
   let mobileReserveBarObserver = null;
@@ -2593,7 +2594,7 @@
     if(!polyline || arrowIconIndex < 0 || prefersReducedMotion()){
       return;
     }
-    const cycleMs = 2800;
+    const cycleMs = ROUTE_ARROW_ANIMATION_MS;
     let rafId = null;
     let startTime = null;
     const tick = function(now){
