@@ -102,6 +102,31 @@ async function main(){
     assert(moduleCheck.screenEvidenceBtn, "既存の画面証跡ボタンが壊れています");
     assert(moduleCheck.reportBtn, "既存の認可説明資料ボタンが壊れています");
 
+    const annotationCheck = await page.evaluate(async function(){
+      const data = window.PreFixedFareAppManualData.buildReportData();
+      const screenshots = [];
+      (data.steps || []).forEach(function(step){
+        if(step.screenshot && step.screenshot.imageSrc){
+          screenshots.push(step.screenshot);
+        }
+      });
+      (data.contentPages || []).forEach(function(pageItem){
+        if(pageItem.screenshot && pageItem.screenshot.imageSrc){
+          screenshots.push(pageItem.screenshot);
+        }
+      });
+      const availability = await window.PreFixedFareAppManualPdf.probeImages(screenshots);
+      const html = window.PreFixedFareAppManualPdf.buildReportHtml(data, { imageAvailability: availability });
+      const availableCount = Object.values(availability).filter(Boolean).length;
+      return {
+        hasAnnotations: html.includes("manual-annotation"),
+        availableCount: availableCount,
+        screenshotCount: screenshots.length
+      };
+    });
+    assert(annotationCheck.hasAnnotations, "赤枠 annotations がありません");
+    assert(annotationCheck.availableCount === annotationCheck.screenshotCount, "スクショ未配置: " + annotationCheck.availableCount + "/" + annotationCheck.screenshotCount);
+
     const consoleErrors = [];
     page.on("console", function(msg){
       if(msg.type() === "error"){

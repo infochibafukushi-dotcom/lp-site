@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>事前確定運賃 管理画面デモ</title>
+<style>
+  body{
+    margin:0;
+    background:#f3f4f6;
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Yu Gothic","Meiryo",sans-serif;
+    color:#111827;
+  }
+  #capture-root{
+    max-width:1180px;
+    margin:0 auto;
+    padding:24px;
+    box-sizing:border-box;
+  }
+  .admin-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:16px;
+  }
+  .admin-header h1{
+    margin:0;
+    font-size:24px;
+  }
+  .demo-badge{
+    display:inline-block;
+    padding:6px 10px;
+    border-radius:999px;
+    background:#fff7ed;
+    border:1px solid #f59e0b;
+    color:#9a3412;
+    font-size:12px;
+    font-weight:700;
+  }
+  .admin-layout{
+    display:grid;
+    grid-template-columns:320px 1fr;
+    gap:16px;
+  }
+  .card{
+    background:#fff;
+    border:1px solid #e5e7eb;
+    border-radius:12px;
+    padding:16px;
+    box-shadow:0 1px 3px rgba(0,0,0,.05);
+  }
+  .card h2{
+    margin:0 0 12px;
+    font-size:16px;
+    border-bottom:1px solid #e5e7eb;
+    padding-bottom:8px;
+  }
+  .reservation-item{
+    border:1px solid #dbeafe;
+    border-radius:10px;
+    padding:12px;
+    background:#f8fbff;
+    cursor:pointer;
+  }
+  .reservation-item.is-active{
+    border-color:#2563eb;
+    box-shadow:0 0 0 2px rgba(37,99,235,.12);
+  }
+  .reservation-item .id{font-size:12px;color:#64748b;}
+  .reservation-item .title{font-size:15px;font-weight:700;margin:4px 0;}
+  .detail-grid{
+    display:grid;
+    grid-template-columns:180px 1fr;
+    gap:8px 12px;
+    font-size:14px;
+  }
+  .detail-grid div:nth-child(odd){color:#64748b;font-weight:600;}
+  .flag{
+    display:inline-block;
+    padding:3px 8px;
+    border-radius:999px;
+    background:#ecfdf3;
+    color:#166534;
+    font-size:12px;
+    font-weight:700;
+  }
+  .flag.warn{background:#eff6ff;color:#1d4ed8;}
+</style>
+</head>
+<body>
+<div id="capture-root" data-capture-ready="0">
+  <div class="admin-header">
+    <h1>LP管理画面（画面例）— 事前確定運賃予約確認</h1>
+    <span class="demo-badge">審査用デモ画面</span>
+  </div>
+  <div class="admin-layout">
+    <section class="card" data-marker="reservation-list">
+      <h2>予約一覧</h2>
+      <div class="reservation-item is-active">
+        <div class="id">PF-REVIEW-001</div>
+        <div class="title">審査用デモ</div>
+        <div>千葉市中央区中央港1-1 → 千葉大学医学部附属病院</div>
+        <div style="margin-top:6px;"><span class="flag">事前確定運賃</span></div>
+      </div>
+    </section>
+    <section class="card" data-marker="reservation-detail">
+      <h2>予約詳細</h2>
+      <div class="detail-grid">
+        <div>予約ID</div><div>PF-REVIEW-001</div>
+        <div>利用者名</div><div>審査用デモ</div>
+        <div>乗車地</div><div>千葉市中央区中央港1-1</div>
+        <div>目的地</div><div>千葉大学医学部附属病院</div>
+        <div>走行予定ルート</div><div>A 時間優先（12.4km / 28分）</div>
+        <div>確定運賃額</div><div><strong>7,800円</strong></div>
+        <div>同意日時</div><div>令和8年9月1日 10:00</div>
+        <div>事前確定運賃</div><div><span class="flag">対象</span></div>
+        <div>同意状態</div><div><span class="flag warn">同意済み</span></div>
+        <div>予約ステータス</div><div>確認済み</div>
+      </div>
+    </section>
+  </div>
+</div>
+<script>
+document.getElementById("capture-root").setAttribute("data-capture-ready", "1");
+</script>
+</body>
+</html>

@@ -102,6 +102,27 @@
     ]
   };
 
+  const DEMO_DATA = {
+    reservationId: "PF-REVIEW-001",
+    customerName: "審査用デモ",
+    origin: "千葉市中央区中央港1-1",
+    destination: "千葉大学医学部附属病院",
+    preFixedFare: "7,800円",
+    assistanceFee: "1,100円",
+    waitingFee: "800円",
+    total: "9,700円",
+    consentAt: "令和8年9月1日 10:00",
+    operationStatus: "運行中"
+  };
+
+  function screenshotEntry(config){
+    return Object.assign({
+      placeholderOnly: false,
+      annotations: [],
+      callouts: []
+    }, config || {});
+  }
+
   const STEP_PAGES = [
     {
       pageId: "step-01",
@@ -109,15 +130,20 @@
       title: "かんたん見積を開く",
       description: "利用者はLPまたはQRコードから、かんたん見積画面を開きます。",
       highlights: ["かんたん見積ボタン", "予約導線", "事前確定運賃の対象であることがわかる表示"],
-      screenshot: {
+      screenshot: screenshotEntry({
         imageFile: "estimate-step-01.png",
         placeholderLabel: "かんたん見積：トップ画面",
+        annotations: [
+          { no: 1, x: 8, y: 12, w: 84, h: 8, text: "かんたん見積を開く" },
+          { no: 2, x: 8, y: 22, w: 40, h: 6, text: "事前確定運賃対象" },
+          { no: 3, x: 8, y: 42, w: 84, h: 8, text: "予約導線" }
+        ],
         callouts: [
           { number: 1, text: "LPまたはQRからかんたん見積を開きます。" },
           { number: 2, text: "事前確定運賃対象である表示を確認します。" },
           { number: 3, text: "予約導線へ進みます。" }
         ]
-      }
+      })
     },
     {
       pageId: "step-02",
@@ -125,15 +151,20 @@
       title: "乗車地・目的地を入力",
       description: "利用者は乗車地と目的地を入力します。この情報をもとに走行予定ルートと事前確定運賃額を算定します。",
       highlights: ["乗車地入力欄", "目的地入力欄", "ルート検索ボタン"],
-      screenshot: {
+      screenshot: screenshotEntry({
         imageFile: "estimate-step-02.png",
         placeholderLabel: "かんたん見積：乗車地・目的地入力画面",
+        annotations: [
+          { no: 1, x: 8, y: 24, w: 84, h: 10, text: "乗車地を入力" },
+          { no: 2, x: 8, y: 38, w: 84, h: 10, text: "目的地を入力" },
+          { no: 3, x: 12, y: 72, w: 76, h: 8, text: "ルートを確認する" }
+        ],
         callouts: [
           { number: 1, text: "乗車地を入力します。" },
           { number: 2, text: "目的地を入力します。" },
           { number: 3, text: "「ルートを確認する」を押します。" }
         ]
-      }
+      })
     },
     {
       pageId: "step-03",
@@ -141,15 +172,20 @@
       title: "走行予定ルートと運賃を確認",
       description: "入力された乗車地・目的地をもとに、走行予定ルートと事前確定運賃額を表示します。複数ルートがある場合は、利用者が比較できるようにします。",
       highlights: ["地図", "Aルート", "Bルート", "事前確定運賃額", "距離", "所要時間目安"],
-      screenshot: {
+      screenshot: screenshotEntry({
         imageFile: "estimate-step-03.png",
         placeholderLabel: "かんたん見積：ルート・運賃確認画面",
+        annotations: [
+          { no: 1, x: 6, y: 10, w: 88, h: 24, text: "地図でルート確認" },
+          { no: 2, x: 8, y: 38, w: 84, h: 14, text: "Aルートを比較" },
+          { no: 3, x: 8, y: 54, w: 84, h: 14, text: "事前確定運賃額" }
+        ],
         callouts: [
           { number: 1, text: "地図上で走行予定ルートを確認します。" },
           { number: 2, text: "Aルート・Bルート等を比較します。" },
           { number: 3, text: "事前確定運賃額・距離・所要時間を確認します。" }
         ]
-      }
+      })
     },
     {
       pageId: "step-04",
@@ -157,15 +193,20 @@
       title: "注意事項を確認し、同意する",
       description: "利用者は、走行予定ルート、事前確定運賃額、ルート変更時の取扱いを確認し、同意したうえで予約に進みます。",
       highlights: ["注意事項", "同意チェック", "予約へ進むボタン"],
-      screenshot: {
+      screenshot: screenshotEntry({
         imageFile: "estimate-step-04.png",
         placeholderLabel: "かんたん見積：同意確認画面",
+        annotations: [
+          { no: 1, x: 8, y: 12, w: 84, h: 18, text: "注意事項" },
+          { no: 2, x: 8, y: 34, w: 84, h: 8, text: "同意チェック" },
+          { no: 3, x: 12, y: 52, w: 76, h: 8, text: "予約へ進む" }
+        ],
         callouts: [
           { number: 1, text: "注意事項を確認します。" },
           { number: 2, text: "同意チェックを入れます。" },
           { number: 3, text: "「予約へ進む」を押します。" }
         ]
-      }
+      })
     }
   ];
 
@@ -175,75 +216,100 @@
       title: "予約内容の保存",
       description: "同意後、予約内容を保存します。保存される情報には、乗車地、目的地、走行予定ルート、事前確定運賃額、同意日時を含めます。",
       table: RESERVATION_SAVE_TABLE,
-      screenshot: {
+      screenshot: screenshotEntry({
         imageFile: "reservation-save.png",
         placeholderLabel: "予約保存：予約内容確認画面",
+        annotations: [
+          { no: 1, x: 6, y: 12, w: 88, h: 42, text: "保存内容確認" },
+          { no: 2, x: 58, y: 34, w: 34, h: 6, text: "確定運賃" },
+          { no: 3, x: 58, y: 42, w: 34, h: 6, text: "同意日時" }
+        ],
         callouts: [
           { number: 1, text: "保存される予約内容を確認します。" },
           { number: 2, text: "走行予定ルート・事前確定運賃額を確認します。" },
           { number: 3, text: "同意日時が記録されることを確認します。" }
         ]
-      }
+      })
     },
     {
       pageId: "admin-confirm",
       title: "管理画面で予約確認",
       description: "事業者は管理画面で、事前確定運賃予約の内容を確認します。予約内容、走行予定ルート、確定運賃額、利用者同意の有無を確認できます。",
       highlights: ["予約一覧", "予約詳細", "事前確定運賃フラグ", "走行予定ルート", "確定運賃額", "同意済み表示"],
-      screenshot: {
+      screenshot: screenshotEntry({
         imageFile: "admin-confirm.png",
         placeholderLabel: "管理画面：事前確定運賃予約詳細",
+        annotations: [
+          { no: 1, x: 4, y: 18, w: 28, h: 28, text: "予約一覧" },
+          { no: 2, x: 36, y: 28, w: 60, h: 34, text: "予約詳細" },
+          { no: 3, x: 36, y: 58, w: 24, h: 6, text: "同意済み" }
+        ],
         callouts: [
           { number: 1, text: "予約一覧から対象予約を選びます。" },
           { number: 2, text: "走行予定ルート・確定運賃額を確認します。" },
           { number: 3, text: "同意済み表示・事前確定運賃フラグを確認します。" }
         ]
-      }
+      })
     },
     {
       pageId: "driver-select",
       title: "乗務員アプリで予約選択",
       description: "乗務員はアプリで予約を選択し、乗車地、目的地、走行予定ルート、事前確定運賃額を確認します。",
       highlights: ["予約一覧", "予約詳細", "運行開始ボタン", "事前確定運賃対象表示"],
-      screenshot: {
+      screenshot: screenshotEntry({
         imageFile: "driver-select.png",
         placeholderLabel: "乗務員アプリ：予約選択画面",
+        annotations: [
+          { no: 1, x: 8, y: 18, w: 84, h: 22, text: "予約一覧" },
+          { no: 2, x: 12, y: 34, w: 76, h: 8, text: "確定運賃確認" },
+          { no: 3, x: 12, y: 58, w: 76, h: 8, text: "予約詳細を開く" }
+        ],
         callouts: [
           { number: 1, text: "予約一覧から対象予約を選びます。" },
           { number: 2, text: "走行予定ルート・事前確定運賃額を確認します。" },
           { number: 3, text: "運行開始ボタンへ進みます。" }
         ]
-      }
+      })
     },
     {
       pageId: "operation-start",
       title: "運行開始",
       description: "乗務員は予約内容を確認したうえで運行を開始します。運行開始後も、事前確定運賃額と走行予定ルートを確認できるようにします。",
       highlights: ["運行開始ボタン", "確定運賃額", "走行予定ルート", "運行ステータス"],
-      screenshot: {
+      screenshot: screenshotEntry({
         imageFile: "operation-start.png",
         placeholderLabel: "乗務員アプリ：運行開始画面",
+        annotations: [
+          { no: 1, x: 10, y: 34, w: 80, h: 8, text: "確定運賃額" },
+          { no: 2, x: 10, y: 24, w: 80, h: 8, text: "走行予定ルート" },
+          { no: 3, x: 12, y: 58, w: 76, h: 8, text: "運行開始" }
+        ],
         callouts: [
           { number: 1, text: "確定運賃額を確認します。" },
           { number: 2, text: "走行予定ルートを確認します。" },
           { number: 3, text: "「運行開始」を押します。" }
         ]
-      }
+      })
     },
     {
       pageId: "meter-operation",
       title: "運行中のメーター操作",
       description: "運行中は、走行、待機、介助などの状態を記録できます。事前確定運賃の運行では、乗車前に確定した運賃額を基準として精算します。",
       highlights: ["走行中", "待機", "介助", "精算へ進む", "確定運賃額表示"],
-      screenshot: {
+      screenshot: screenshotEntry({
         imageFile: "meter-operation.png",
         placeholderLabel: "乗務員アプリ：運行中メーター画面",
+        annotations: [
+          { no: 1, x: 8, y: 42, w: 84, h: 10, text: "走行・待機・介助" },
+          { no: 2, x: 10, y: 24, w: 80, h: 8, text: "確定運賃表示" },
+          { no: 3, x: 12, y: 58, w: 76, h: 8, text: "精算へ進む" }
+        ],
         callouts: [
           { number: 1, text: "走行中・待機・介助の状態を記録します。" },
           { number: 2, text: "確定運賃額表示を確認します。" },
           { number: 3, text: "到着後「精算へ進む」を押します。" }
         ]
-      }
+      })
     },
     {
       pageId: "route-change",
@@ -251,45 +317,60 @@
       description:
         "事故、通行止め、交通規制など外的要因によりルート変更が必要な場合は、旅客の同意を得たうえで迂回します。この場合、収受する運賃は原則として事前確定運賃額とします。\n\n旅客都合により目的地変更や大幅な経路変更が発生した場合は、事前確定運賃による運送を一度終了し、必要に応じて新たな運送として扱います。",
       table: ROUTE_CHANGE_TABLE,
-      screenshot: {
+      screenshot: screenshotEntry({
         imageFile: "route-change.png",
         placeholderLabel: "例外処理：ルート変更・迂回時の操作画面",
+        annotations: [
+          { no: 1, x: 8, y: 18, w: 84, h: 12, text: "変更理由" },
+          { no: 2, x: 8, y: 36, w: 84, h: 8, text: "旅客同意" },
+          { no: 3, x: 12, y: 52, w: 76, h: 8, text: "運行継続" }
+        ],
         callouts: [
           { number: 1, text: "ルート変更の理由を確認します。" },
           { number: 2, text: "旅客同意を記録します。" },
           { number: 3, text: "収受方針に沿って操作を継続します。" }
         ]
-      }
+      })
     },
     {
       pageId: "settlement",
       title: "到着・精算",
       description: "目的地到着後、精算画面で事前確定運賃額を確認します。運賃、介助料金、待機料金、その他料金を区分して表示します。",
       highlights: ["確定運賃額", "介助料金", "待機料金", "障害者割引", "合計金額", "精算確定ボタン"],
-      screenshot: {
+      screenshot: screenshotEntry({
         imageFile: "settlement.png",
         placeholderLabel: "乗務員アプリ：精算画面",
+        annotations: [
+          { no: 1, x: 8, y: 18, w: 84, h: 28, text: "各種料金" },
+          { no: 2, x: 10, y: 48, w: 80, h: 8, text: "合計金額" },
+          { no: 3, x: 12, y: 62, w: 76, h: 8, text: "精算確定" }
+        ],
         callouts: [
           { number: 1, text: "確定運賃額・各種料金を確認します。" },
           { number: 2, text: "割引・合計金額を確認します。" },
           { number: 3, text: "「精算確定」を押します。" }
         ]
-      }
+      })
     },
     {
       pageId: "receipt-pdf",
       title: "領収書・PDF保存",
       description: "精算後、領収書またはレシートPDFを保存できます。必要に応じて印刷・再発行できるようにします。",
       highlights: ["領収書PDF保存", "レシートPDF保存", "印刷ボタン", "再発行導線"],
-      screenshot: {
+      screenshot: screenshotEntry({
         imageFile: "receipt-pdf.png",
         placeholderLabel: "精算後：領収書・PDF保存画面",
+        annotations: [
+          { no: 1, x: 12, y: 42, w: 76, h: 8, text: "領収書PDF保存" },
+          { no: 2, x: 12, y: 54, w: 76, h: 8, text: "印刷" },
+          { no: 3, x: 12, y: 66, w: 76, h: 8, text: "再発行" }
+        ],
         callouts: [
           { number: 1, text: "領収書PDFまたはレシートPDFを保存します。" },
           { number: 2, text: "必要に応じて印刷します。" },
           { number: 3, text: "再発行導線から再出力できます。" }
         ]
-      }
+      })
     }
   ];
 
@@ -317,7 +398,8 @@
       imageFile: screenshot.imageFile || "",
       imageSrc: IMAGE_BASE + (screenshot.imageFile || ""),
       placeholderLabel: screenshot.placeholderLabel || "",
-      placeholderOnly: screenshot.placeholderOnly !== false,
+      placeholderOnly: screenshot.placeholderOnly === true,
+      annotations: Array.isArray(screenshot.annotations) ? screenshot.annotations.slice() : [],
       callouts: Array.isArray(screenshot.callouts) ? screenshot.callouts.slice() : []
     };
   }
@@ -364,6 +446,7 @@
 
   global.PreFixedFareAppManualData = {
     PRE_FIXED_FARE_MANUAL_LINKS: PRE_FIXED_FARE_MANUAL_LINKS,
+    DEMO_DATA: DEMO_DATA,
     IMAGE_BASE: IMAGE_BASE,
     PDF_FILENAME: PDF_FILENAME,
     EXPECTED_PAGE_COUNT: EXPECTED_PAGE_COUNT,

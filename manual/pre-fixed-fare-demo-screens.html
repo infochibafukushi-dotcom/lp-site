@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>事前確定運賃 操作マニュアル用デモ画面</title>
+<link rel="stylesheet" href="../estimate/estimate.css">
+<style>
+  body.demo-screen-page{
+    margin:0;
+    background:#f5f5f5;
+    color:#222;
+    min-height:100vh;
+  }
+  body.demo-screen-page--driver{
+    background:#eef2f7;
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Yu Gothic","Meiryo",sans-serif;
+  }
+  #capture-root{
+    max-width:390px;
+    margin:0 auto;
+    min-height:760px;
+    position:relative;
+    overflow:hidden;
+  }
+  .demo-badge{
+    display:inline-block;
+    margin:8px 12px 0;
+    padding:4px 8px;
+    border-radius:999px;
+    background:#fff7ed;
+    border:1px solid #f59e0b;
+    color:#9a3412;
+    font-size:11px;
+    font-weight:700;
+  }
+  .demo-entry-card{
+    margin:12px;
+    padding:16px;
+    border-radius:16px;
+    background:#fff;
+    border:1px solid #e5e0d8;
+    box-shadow:0 2px 8px rgba(45,42,38,.06);
+  }
+  .demo-entry-title{
+    font-size:22px;
+    font-weight:800;
+    margin:0 0 8px;
+    color:#2d2a26;
+  }
+  .demo-pill{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:999px;
+    background:#ecfdf3;
+    color:#166534;
+    border:1px solid #86efac;
+    font-size:12px;
+    font-weight:700;
+    margin-bottom:10px;
+  }
+  .demo-primary-btn,.demo-secondary-btn{
+    display:block;
+    width:100%;
+    box-sizing:border-box;
+    border:none;
+    border-radius:999px;
+    padding:14px 16px;
+    font-size:16px;
+    font-weight:800;
+    text-align:center;
+    margin-top:10px;
+  }
+  .demo-primary-btn{
+    background:#2f6f4f;
+    color:#fff;
+  }
+  .demo-secondary-btn{
+    background:#fff;
+    color:#9a6b16;
+    border:2px solid #d8cbb8;
+  }
+  .demo-field{
+    margin-bottom:12px;
+  }
+  .demo-field label{
+    display:block;
+    font-size:13px;
+    font-weight:700;
+    margin-bottom:6px;
+    color:#555;
+  }
+  .demo-field input,.demo-field textarea{
+    width:100%;
+    box-sizing:border-box;
+    border:1px solid #d8cbb8;
+    border-radius:12px;
+    padding:12px;
+    font-size:15px;
+    background:#fff;
+  }
+  .demo-map{
+    height:180px;
+    border-radius:12px;
+    background:linear-gradient(180deg,#dbeafe 0%,#eff6ff 55%,#e2e8f0 100%);
+    position:relative;
+    overflow:hidden;
+    border:1px solid #cbd5e1;
+  }
+  .demo-map svg{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+  }
+  .demo-route-cards{
+    display:grid;
+    gap:10px;
+    margin-top:12px;
+  }
+  .demo-route-card{
+    border:2px solid #d8cbb8;
+    border-radius:14px;
+    padding:12px;
+    background:#fff;
+  }
+  .demo-route-card.is-selected{
+    border-color:#2f6f4f;
+    box-shadow:0 0 0 2px rgba(47,111,79,.15);
+  }
+  .demo-route-head{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-weight:800;
+    margin-bottom:6px;
+  }
+  .demo-route-badge{
+    width:24px;
+    height:24px;
+    border-radius:50%;
+    color:#fff;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+    font-weight:800;
+  }
+  .demo-route-badge.a{background:#dc2626;}
+  .demo-route-badge.b{background:#2563eb;}
+  .demo-fare-emphasis{
+    color:#b45309;
+    font-size:18px;
+    font-weight:800;
+    margin-top:4px;
+  }
+  .demo-consent-box{
+    border:1px solid #d8cbb8;
+    border-radius:12px;
+    padding:12px;
+    background:#fffdf8;
+    font-size:13px;
+    line-height:1.55;
+  }
+  .demo-check-row{
+    display:flex;
+    gap:8px;
+    align-items:flex-start;
+    margin-top:10px;
+    font-size:13px;
+  }
+  .demo-check-row input{
+    margin-top:3px;
+  }
+  .demo-kv-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+  }
+  .demo-kv-table th,.demo-kv-table td{
+    border:1px solid #e5e0d8;
+    padding:8px;
+    text-align:left;
+    vertical-align:top;
+  }
+  .demo-kv-table th{
+    width:34%;
+    background:#faf8f5;
+    font-weight:700;
+  }
+  .driver-topbar{
+    background:#1b3a6b;
+    color:#fff;
+    padding:14px 16px;
+    font-size:14px;
+    font-weight:700;
+  }
+  .driver-card{
+    margin:12px;
+    padding:14px;
+    border-radius:14px;
+    background:#fff;
+    border:1px solid #dbeafe;
+    box-shadow:0 1px 4px rgba(15,23,42,.06);
+  }
+  .driver-card h2{
+    margin:0 0 10px;
+    font-size:13px;
+    color:#1d4ed8;
+    letter-spacing:.04em;
+  }
+  .driver-card h3{
+    margin:0 0 8px;
+    font-size:18px;
+    color:#111827;
+  }
+  .driver-kv{
+    display:grid;
+    gap:8px;
+    font-size:13px;
+  }
+  .driver-kv div{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    border-bottom:1px solid #eef2f7;
+    padding-bottom:6px;
+  }
+  .driver-kv span:first-child{color:#64748b;}
+  .driver-kv strong{color:#111827;}
+  .driver-status{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:999px;
+    background:#ecfdf3;
+    color:#166534;
+    font-size:12px;
+    font-weight:700;
+  }
+  .driver-actions{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+    margin-top:12px;
+  }
+  .driver-actions button{
+    border:none;
+    border-radius:12px;
+    padding:12px 8px;
+    font-size:12px;
+    font-weight:700;
+    background:#eff6ff;
+    color:#1d4ed8;
+  }
+  .driver-actions button.is-active{
+    background:#1d4ed8;
+    color:#fff;
+  }
+  .driver-actions-wide{
+    display:grid;
+    gap:8px;
+    margin-top:12px;
+  }
+  .driver-actions-wide button{
+    border:none;
+    border-radius:12px;
+    padding:14px;
+    font-size:14px;
+    font-weight:800;
+  }
+  .driver-actions-wide .primary{background:#2f6f4f;color:#fff;}
+  .driver-actions-wide .secondary{background:#fff;border:1px solid #cbd5e1;color:#334155;}
+  .driver-list-item{
+    border:2px solid #2f6f4f;
+    border-radius:14px;
+    padding:12px;
+    background:#f8fff9;
+  }
+  .driver-list-item .id{font-size:12px;color:#64748b;}
+  .driver-list-item .name{font-size:16px;font-weight:800;margin:4px 0;}
+  .driver-alert{
+    margin-top:10px;
+    padding:10px;
+    border-radius:10px;
+    background:#fff7ed;
+    border:1px solid #fdba74;
+    font-size:12px;
+    line-height:1.5;
+  }
+  .driver-settlement-row{
+    display:flex;
+    justify-content:space-between;
+    padding:8px 0;
+    border-bottom:1px solid #eef2f7;
+    font-size:14px;
+  }
+  .driver-settlement-row.total{
+    font-size:18px;
+    font-weight:800;
+    color:#111827;
+    border-bottom:none;
+    padding-top:12px;
+  }
+</style>
+</head>
+<body class="demo-screen-page">
+<div id="capture-root" data-capture-ready="0"></div>
+<script src="./pre-fixed-fare-demo-data.js"></script>
+<script>
+(function(){
+  const D = window.PreFixedFareManualDemoData;
+  const screen = new URLSearchParams(location.search).get("screen") || "estimate-step-01";
+  const root = document.getElementById("capture-root");
+  const driverScreens = [
+    "driver-select",
+    "operation-start",
+    "meter-operation",
+    "route-change",
+    "settlement",
+    "receipt-pdf"
+  ];
+  if(driverScreens.indexOf(screen) >= 0){
+    document.body.classList.add("demo-screen-page--driver");
+  }
+
+  function badge(){
+    return '<div class="demo-badge">審査用デモ画面（画面例）</div>';
+  }
+
+  const screens = {
+    "estimate-step-01": (
+      badge() +
+      '<div class="demo-entry-card">' +
+      '<div class="demo-pill">事前確定運賃 対象</div>' +
+      '<h1 class="demo-entry-title">かんたん料金確認</h1>' +
+      '<p style="margin:0 0 12px;font-size:14px;line-height:1.6;color:#555;">LPまたはQRコードから、乗車地・目的地・走行予定ルート・事前確定運賃額を確認して予約できます。</p>' +
+      '<button type="button" class="demo-primary-btn" data-marker="estimate-start">かんたん見積をはじめる</button>' +
+      '<button type="button" class="demo-secondary-btn" data-marker="reservation-link">予約の流れを見る</button>' +
+      '</div>'
+    ),
+    "estimate-step-02": (
+      badge() +
+      '<div class="estimate-wrap" style="padding-top:12px;">' +
+      '<div class="estimate-header"><h1 class="estimate-title">かんたん料金確認</h1></div>' +
+      '<section class="estimate-step estimate-step--active">' +
+      '<div class="estimate-step-head estimate-step-head--active"><div class="estimate-step-head-main"><div class="estimate-step-label">STEP4</div><h2 class="estimate-step-title">乗車地・目的地</h2></div></div>' +
+      '<div class="demo-field"><label for="origin">乗車地</label><input id="origin" data-marker="origin" value="' + D.origin + '"></div>' +
+      '<div class="demo-field"><label for="destination">目的地</label><input id="destination" data-marker="destination" value="' + D.destination + '"></div>' +
+      '<button type="button" class="demo-primary-btn" data-marker="route-search">ルートを確認する</button>' +
+      '</section></div>'
+    ),
+    "estimate-step-03": (
+      badge() +
+      '<div class="estimate-wrap" style="padding-top:12px;">' +
+      '<h2 style="font-size:18px;margin:0 0 8px;">走行予定ルートと運賃</h2>' +
+      '<div class="demo-map" data-marker="map"><svg viewBox="0 0 360 180" aria-hidden="true"><path d="M40 130 C90 40, 140 50, 190 80 S280 60, 320 40" fill="none" stroke="#dc2626" stroke-width="4"/><path d="M40 130 C110 90, 170 110, 250 70 S300 90, 320 110" fill="none" stroke="#2563eb" stroke-width="3" stroke-dasharray="8 6"/><circle cx="40" cy="130" r="8" fill="#dc2626"/><circle cx="320" cy="40" r="8" fill="#111"/></svg></div>' +
+      '<div class="demo-route-cards">' +
+      '<div class="demo-route-card is-selected" data-marker="route-a"><div class="demo-route-head"><span class="demo-route-badge a">A</span><span>時間優先ルート</span></div><div>12.4km / 28分</div><div class="demo-fare-emphasis">事前確定運賃 ' + D.preFixedFare + '</div></div>' +
+      '<div class="demo-route-card" data-marker="route-b"><div class="demo-route-head"><span class="demo-route-badge b">B</span><span>一般道優先ルート</span></div><div>13.1km / 31分</div><div class="demo-fare-emphasis">事前確定運賃 ' + D.preFixedFare + '</div></div>' +
+      '</div></div>'
+    ),
+    "estimate-step-04": (
+      badge() +
+      '<div class="estimate-wrap" style="padding-top:12px;">' +
+      '<h2 style="font-size:18px;margin:0 0 8px;">注意事項・同意確認</h2>' +
+      '<div class="demo-consent-box" data-marker="notice">事前確定運賃は走行予定ルートに基づき算定します。事故・通行止め等による迂回は旅客同意のうえ事前確定運賃額で収受します。旅客都合の目的地変更は新たな運送として扱います。</div>' +
+      '<label class="demo-check-row" data-marker="consent-check"><input type="checkbox" checked> 走行予定ルート・事前確定運賃額（' + D.preFixedFare + '）・注意事項に同意します。</label>' +
+      '<button type="button" class="demo-primary-btn" data-marker="to-reservation">予約へ進む</button>' +
+      '</div>'
+    ),
+    "reservation-save": (
+      badge() +
+      '<div class="estimate-wrap" style="padding-top:12px;">' +
+      '<h2 style="font-size:18px;margin:0 0 8px;">予約内容の保存</h2>' +
+      '<table class="demo-kv-table" data-marker="reservation-table">' +
+      '<tr><th>予約ID</th><td>' + D.reservationId + '</td></tr>' +
+      '<tr><th>利用者名</th><td>' + D.customerName + '</td></tr>' +
+      '<tr><th>乗車地</th><td>' + D.origin + '</td></tr>' +
+      '<tr><th>目的地</th><td>' + D.destination + '</td></tr>' +
+      '<tr><th>走行予定ルート</th><td>' + D.routeA + '</td></tr>' +
+      '<tr><th>事前確定運賃額</th><td>' + D.preFixedFare + '</td></tr>' +
+      '<tr><th>同意日時</th><td>' + D.consentAt + '</td></tr>' +
+      '<tr><th>予約ステータス</th><td>受付済み</td></tr>' +
+      '</table>' +
+      '<button type="button" class="demo-primary-btn" data-marker="save-done">予約内容を保存しました</button>' +
+      '</div>'
+    ),
+    "driver-select": (
+      badge() +
+      '<div class="driver-topbar">乗務員アプリ（画面例）</div>' +
+      '<div class="driver-card"><h2>RESERVATION LIST</h2><h3>予約一覧</h3>' +
+      '<div class="driver-list-item" data-marker="reservation-item">' +
+      '<div class="id">予約ID ' + D.reservationId + ' / 事前確定運賃</div>' +
+      '<div class="name">' + D.customerName + '</div>' +
+      '<div>' + D.origin + ' → ' + D.destination + '</div>' +
+      '<div class="demo-fare-emphasis">確定運賃 ' + D.preFixedFare + '</div>' +
+      '</div></div>' +
+      '<div class="driver-card"><button type="button" class="demo-primary-btn" data-marker="open-detail">予約詳細を開く</button></div>'
+    ),
+    "operation-start": (
+      badge() +
+      '<div class="driver-topbar">乗務員アプリ（画面例）</div>' +
+      '<div class="driver-card" data-marker="reservation-detail"><h2>RESERVATION DETAIL</h2><h3>予約詳細</h3>' +
+      '<div class="driver-kv">' +
+      '<div><span>予約ID</span><strong>' + D.reservationId + '</strong></div>' +
+      '<div><span>走行予定ルート</span><strong>' + D.routeA + '</strong></div>' +
+      '<div><span>事前確定運賃</span><strong>' + D.preFixedFare + '</strong></div>' +
+      '<div><span>運行状態</span><strong><span class="driver-status">' + D.operationStatus + '</span></strong></div>' +
+      '</div>' +
+      '<button type="button" class="demo-primary-btn" data-marker="start-run">運行開始</button>' +
+      '</div>'
+    ),
+    "meter-operation": (
+      badge() +
+      '<div class="driver-topbar">メーター（画面例）</div>' +
+      '<div class="driver-card" data-marker="meter-panel"><h2>METER</h2><h3>運行中</h3>' +
+      '<div class="driver-kv"><div><span>確定運賃</span><strong>' + D.preFixedFare + '</strong></div></div>' +
+      '<div class="driver-actions">' +
+      '<button type="button" class="is-active" data-marker="running">走行中</button>' +
+      '<button type="button" data-marker="waiting">待機</button>' +
+      '<button type="button" data-marker="assist">介助</button>' +
+      '</div>' +
+      '<div class="driver-actions-wide"><button type="button" class="primary" data-marker="to-settlement">精算へ進む</button></div>' +
+      '</div>'
+    ),
+    "route-change": (
+      badge() +
+      '<div class="driver-topbar">例外処理（画面例）</div>' +
+      '<div class="driver-card" data-marker="route-change"><h2>ROUTE CHANGE</h2><h3>ルート変更・迂回</h3>' +
+      '<div class="driver-alert">事故・通行止めにより迂回が必要です。旅客同意を記録したうえで運行を継続します。</div>' +
+      '<label class="demo-check-row"><input type="checkbox" checked data-marker="detour-consent"> 迂回ルートと収受方針（事前確定運賃 ' + D.preFixedFare + '）に同意済み</label>' +
+      '<button type="button" class="demo-primary-btn" data-marker="continue-run">同意を記録して運行継続</button>' +
+      '</div>'
+    ),
+    "settlement": (
+      badge() +
+      '<div class="driver-topbar">精算（画面例）</div>' +
+      '<div class="driver-card" data-marker="settlement"><h2>SETTLEMENT</h2><h3>到着・精算</h3>' +
+      '<div class="driver-settlement-row"><span>確定運賃</span><strong>' + D.preFixedFare + '</strong></div>' +
+      '<div class="driver-settlement-row"><span>介助料金</span><strong>' + D.assistanceFee + '</strong></div>' +
+      '<div class="driver-settlement-row"><span>待機料金</span><strong>' + D.waitingFee + '</strong></div>' +
+      '<div class="driver-settlement-row"><span>障害者割引</span><strong>0円</strong></div>' +
+      '<div class="driver-settlement-row total"><span>合計</span><strong>' + D.total + '</strong></div>' +
+      '<button type="button" class="demo-primary-btn" data-marker="confirm-settlement">精算確定</button>' +
+      '</div>'
+    ),
+    "receipt-pdf": (
+      badge() +
+      '<div class="driver-topbar">領収書（画面例）</div>' +
+      '<div class="driver-card" data-marker="receipt"><h2>RECEIPT</h2><h3>領収書・PDF保存</h3>' +
+      '<div class="driver-kv"><div><span>合計</span><strong>' + D.total + '</strong></div><div><span>支払方法</span><strong>現金</strong></div></div>' +
+      '<div class="driver-actions-wide">' +
+      '<button type="button" class="primary" data-marker="receipt-pdf">領収書PDF保存</button>' +
+      '<button type="button" class="secondary" data-marker="receipt-print">印刷</button>' +
+      '<button type="button" class="secondary" data-marker="receipt-reissue">再発行</button>' +
+      '</div></div>'
+    )
+  };
+
+  root.innerHTML = screens[screen] || ('<div class="demo-entry-card"><p>Unknown screen: ' + screen + '</p></div>');
+  root.setAttribute("data-capture-ready", "1");
+})();
+</script>
+</body>
+</html>

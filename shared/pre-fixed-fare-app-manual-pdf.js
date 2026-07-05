@@ -100,14 +100,37 @@
     );
   }
 
+  function buildAnnotationOverlays(annotations){
+    const list = Array.isArray(annotations) ? annotations : [];
+    if(!list.length){
+      return "";
+    }
+    return list.map(function(item){
+      const no = Number(item.no) || 0;
+      const circle = ["①", "②", "③", "④", "⑤"][no - 1] || String(no);
+      return (
+        "<div class='manual-annotation' style='" +
+        "left:" + escapeHtml(String(item.x ?? 0)) + "%;" +
+        "top:" + escapeHtml(String(item.y ?? 0)) + "%;" +
+        "width:" + escapeHtml(String(item.w ?? 0)) + "%;" +
+        "height:" + escapeHtml(String(item.h ?? 0)) + "%;" +
+        "'>" +
+        "<span class='manual-annotation-marker'>" + escapeHtml(circle) + "</span>" +
+        (item.text ? "<span class='manual-annotation-label'>" + escapeHtml(item.text) + "</span>" : "") +
+        "</div>"
+      );
+    }).join("");
+  }
+
   function buildScreenshotBlock(screenshot, imageAvailable){
     if(!screenshot){
       return "";
     }
     const shotInner = imageAvailable
       ? (
-        "<div class='manual-shot manual-shot--image'>" +
+        "<div class='manual-shot manual-shot--image manual-shot--annotated'>" +
         "<img src='" + escapeHtml(screenshot.imageSrc) + "' alt='" + escapeHtml(screenshot.placeholderLabel || "") + "' loading='eager'>" +
+        buildAnnotationOverlays(screenshot.annotations) +
         "</div>"
       )
       : buildMissingScreenshotBlock(screenshot);
@@ -366,8 +389,12 @@
       SCOPE + " .flow-card-text{font-size:9pt;line-height:1.45;color:#111827;}" +
       SCOPE + " .manual-shot-wrap{margin-top:4mm;}" +
       SCOPE + " .manual-shot{margin:0 0 3mm;}" +
-      SCOPE + " .manual-shot--image{border:2px solid #dc2626;padding:2mm;background:#fff;}" +
+      SCOPE + " .manual-shot--image{border:2px solid #cbd5e1;padding:2mm;background:#fff;}" +
+      SCOPE + " .manual-shot--annotated{position:relative;}" +
       SCOPE + " .manual-shot--image img{display:block;width:100%;max-height:95mm;object-fit:contain;object-position:top center;}" +
+      SCOPE + " .manual-annotation{position:absolute;box-sizing:border-box;border:2px solid #dc2626;background:rgba(220,38,38,.04);pointer-events:none;}" +
+      SCOPE + " .manual-annotation-marker{position:absolute;top:-3.2mm;left:-1mm;background:#fff;color:#dc2626;font-size:10pt;font-weight:800;line-height:1;padding:0 1mm;}" +
+      SCOPE + " .manual-annotation-label{position:absolute;left:0;bottom:-4.5mm;max-width:120%;background:#fff;color:#b91c1c;font-size:7.5pt;font-weight:700;line-height:1.2;padding:0 1mm;white-space:nowrap;}" +
       SCOPE + " .manual-shot--placeholder{border:2px dashed #dc2626;background:#fef2f2;min-height:55mm;padding:6mm;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;}" +
       SCOPE + " .manual-shot-placeholder-label{font-size:11pt;font-weight:700;color:#b91c1c;margin:0 0 2mm;}" +
       SCOPE + " .manual-shot-placeholder-text{font-size:10pt;color:#111827;margin:0 0 2mm;}" +
