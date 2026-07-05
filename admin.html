@@ -6,6 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
+<meta name="robots" content="noindex,nofollow,noarchive">
 <!-- admin-build-version: admin-github-settings-20260703 -->
 <title>管理画面</title>
 <style>
@@ -1310,10 +1311,6 @@ body{
             <span class="toggle-state">閉じています</span>
           </button>
           <div class="card-body js-card-body">
-            <div class="row">
-              <label>現在のパスワード</label>
-              <input type="text" id="passwordText">
-            </div>
             <div class="row">
               <label>下ベッター背景色</label>
               <div id="footerBgColorField"></div>
@@ -2650,7 +2647,6 @@ function buildConfigDraft(){
   const getChecked = (id) => document.getElementById(id)?.checked === true;
 
   return {
-    password: getText('passwordText'),
     logo: getText('logoText'),
     logoImage: getTrimmed('logoImage'),
     headerBgColor: getTrimmed('headerBgColorText') || '#ffffff',
@@ -3039,7 +3035,6 @@ async function loadConfig(){
   document.getElementById('footerPc3Image').value = config.footerPc[2].image || '';
   setFooterPreviewById('footerPc3Preview', config.footerPc[2].image || '');
 
-  document.getElementById('passwordText').value = config.password || '';
   renderPopupSettingsEditor(config);
 }
 

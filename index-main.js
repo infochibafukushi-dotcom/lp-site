@@ -1,5 +1,4 @@
 (function(){
-  let sitePassword = "95123";
   const POPUP_SESSION_KEY = "lp_popup_dismissed";
   const POPUP_IMAGE_BUST_KEY = Date.now();
 
@@ -251,7 +250,6 @@
 
     applyPcTopPhone(config);
 
-    sitePassword = config.password || "95123";
     return config;
   }
 

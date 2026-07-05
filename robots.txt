@@ -1,0 +1,6 @@
+# robots.txt は検索エンジン向けのクロール除外指定です。
+# URL を知っているユーザーからのアクセスを防ぐものではなく、認証の代替にはなりません。
+User-agent: *
+Disallow: /admin.html
+Disallow: /docs/submission/
+Disallow: /manual/pre-fixed-fare-app-operation-manual-print.html

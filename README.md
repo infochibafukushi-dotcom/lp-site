@@ -2,9 +2,13 @@
 介護タクシーLP
 
 ## 運用方針（セキュリティ）
-- 管理認証をフロント実装から除去し、`admin.html` へのアクセス制御はインフラ側で実施してください。
+- GitHub Pages は静的公開のため、`admin.html` を URL だけで完全には保護できません。
+- 管理認証をフロント実装から除去しており、`admin.html` へのアクセス制御は将来的に Cloudflare Access 等のインフラ側で実施してください。
 - 推奨: GitHub Pages + Cloudflare Access（メールドメイン制限 / One-time PIN / IDP連携）
 - `admin.html` を公開したまま運用しないでください。必ず Access ポリシー配下で保護してください。
+- `robots.txt` と `admin.html` の `noindex` は検索エンジン向けの除外指定であり、認証ではありません。
+- GitHub Personal Access Token（PAT）は共有PC・公共PCでは入力しないでください。
+- PAT は fine-grained token、最小権限（対象リポジトリのみ）、有効期限付きで運用してください。
 
 ## 編集手順
 1. `data/config.json` を編集（ヘッダー/フッター/ポップアップ）。

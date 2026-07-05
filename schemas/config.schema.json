@@ -1,9 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["password", "buttons", "footer", "popupSettings"],
+  "required": ["buttons", "footer", "popupSettings"],
   "properties": {
-    "password": {"type": "string"},
     "logo": {"type": "string"},
     "logoImage": {"type": "string"},
     "buttons": {"type": "array", "minItems": 3},
