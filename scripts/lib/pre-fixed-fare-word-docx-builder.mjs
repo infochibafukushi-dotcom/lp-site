@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import * as cheerio from "cheerio";
+import { normalizeDocxBuffer } from "./normalize-docx-package.mjs";
 import {
   AlignmentType,
   BorderStyle,
@@ -180,7 +181,7 @@ function scaleImageDimensions(width, height, maxWidth){
   };
 }
 
-function imageParagraph(buffer, altText){
+function imageParagraph(buffer){
   const dims = getPngDimensions(buffer);
   const scaled = scaleImageDimensions(dims.width, dims.height);
   return new Paragraph({
@@ -190,7 +191,6 @@ function imageParagraph(buffer, altText){
       new ImageRun({
         data: buffer,
         type: "png",
-        altText: { title: altText || "screen evidence", description: altText || "" },
         transformation: scaled
       })
     ]
@@ -365,7 +365,7 @@ function buildScreenEvidenceChildren(data, imageMap){
     children.push(heading(screen.pageTitle || "", 2));
     const buffer = imageMap[screen.imageFile];
     if(buffer){
-      children.push(imageParagraph(buffer, screen.pageTitle));
+      children.push(imageParagraph(buffer));
     }else{
       children.push(paragraph("（画像ファイル未配置: " + (screen.imageFile || "") + "）"));
     }
@@ -512,7 +512,8 @@ function createSubmissionDocument(sectionChildrenList){
 }
 
 async function writeDocxFile(doc, filePath){
-  const buffer = await Packer.toBuffer(doc);
+  const rawBuffer = await Packer.toBuffer(doc);
+  const buffer = await normalizeDocxBuffer(rawBuffer);
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, buffer);
   return { filePath: filePath, size: buffer.length };
