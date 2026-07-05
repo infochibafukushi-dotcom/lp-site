@@ -1,0 +1,62 @@
+{
+  "application": {
+    "start": 1,
+    "end": 1,
+    "pages": 1
+  },
+  "reviewChecklist": {
+    "start": 2,
+    "end": 3,
+    "pages": 2
+  },
+  "attachmentIndex": {
+    "start": 4,
+    "end": 4,
+    "pages": 1
+  },
+  "screenEvidence": {
+    "start": 5,
+    "end": 11,
+    "pages": 7
+  },
+  "integrated": {
+    "start": 12,
+    "end": 38,
+    "pages": 27
+  },
+  "operations": {
+    "start": 39,
+    "end": 47,
+    "pages": 9
+  },
+  "qa": {
+    "start": 48,
+    "end": 50,
+    "pages": 3
+  },
+  "appendix": {
+    "start": 51,
+    "end": 56,
+    "pages": 6
+  },
+  "integratedE2E": {
+    "start": 12,
+    "end": 38,
+    "pages": 27
+  },
+  "appendixHelper": {
+    "start": 51,
+    "end": 53,
+    "pages": 3
+  },
+  "appendix1": {
+    "start": 54,
+    "end": 54,
+    "pages": 1
+  },
+  "appendix2": {
+    "start": 55,
+    "end": 56,
+    "pages": 2
+  }
+}

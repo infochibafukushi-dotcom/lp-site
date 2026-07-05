@@ -2,7 +2,7 @@
   const DOCUMENT_TITLE = "一般乗用旅客自動車運送事業の運賃及び料金（事前確定運賃）設定認可申請書";
   const DEFAULT_COMPANY_NAME = "株式会社 千葉福祉サポート";
   const DEFAULT_DISPATCH_APP_NAME = "LP見積・予約連携システム";
-  const DEFAULT_OPERATING_AREA = "千葉交通圏";
+  const DEFAULT_OPERATING_AREA = "千葉県";
   const DEFAULT_ADDRESS = "千葉県千葉市中央区出洲港8-3-2";
 
   function escapeHtml(text){
@@ -61,9 +61,9 @@
   function formatRepresentativeStampLine(representativeName){
     const name = String(representativeName || "").trim();
     if(!name){
-      return "代表者氏名：　　　　　　　　　　　　　　　　印";
+      return "代表者氏名：<span class='rep-stamp'>印</span>";
     }
-    return "代表者氏名：" + name + "　　　　　　　　　　　　印";
+    return "代表者氏名：" + escapeHtml(name) + "<span class='rep-stamp'>印</span>";
   }
 
   function buildDefaults(options){
@@ -116,7 +116,8 @@
       ".section-title{font-weight:700;font-size:12pt;margin:0 0 1.5mm;}" +
       ".section-body{margin:0;padding-left:1.2em;font-size:10.5pt;}" +
       ".section-body p{margin:0 0 1.5mm;}" +
-      ".representative-stamp-line{letter-spacing:0.02em;}" +
+      ".representative-stamp-line{display:flex;justify-content:space-between;align-items:baseline;max-width:100%;}" +
+      ".representative-stamp-line .rep-stamp{flex:0 0 auto;min-width:42mm;text-align:right;letter-spacing:0;}" +
       ".attachments{margin-top:4mm;}" +
       ".attachments-title{font-weight:700;font-size:12pt;margin:0 0 1.5mm;}" +
       ".attachments ul{margin:0;padding-left:1.4em;font-size:10pt;}" +
@@ -154,7 +155,7 @@
           "<div class='section-body'>" +
             "<p>住所：" + escapeHtml(data.applicantAddress) + "</p>" +
             "<p>氏名又は名称：" + escapeHtml(data.applicantName) + "</p>" +
-            "<p class='representative-stamp-line'>" + escapeHtml(formatRepresentativeStampLine(data.representativeName)) + "</p>" +
+            "<p class='representative-stamp-line'>" + formatRepresentativeStampLine(data.representativeName) + "</p>" +
             "<p>連絡先：" + escapeHtml(data.contact) + "</p>" +
           "</div>" +
         "</section>" +

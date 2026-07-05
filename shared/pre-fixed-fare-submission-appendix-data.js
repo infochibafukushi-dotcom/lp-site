@@ -6,6 +6,9 @@
   const OPERATING_AREA_FILL = "申請書本体に記載の営業区域に合わせて記入";
   const TRAFFIC_ZONE_FILL = "申請書本体に記載の営業区域に対応する交通圏を記入";
   const COEFFICIENT_FILL = "申請対象交通圏について、関東運輸局公示の係数を転記";
+  const OPERATING_AREA_FINAL = "千葉県";
+  const TRAFFIC_ZONE_FINAL = "千葉交通圏";
+  const COEFFICIENT_FINAL = "千葉交通圏 1.18";
 
   const KANTO_UNCHIN_PAGE = "https://wwwtb.mlit.go.jp/kanto/jidou_koutu/tabi2/taxi_jigyoukaisi/unchin.html";
 
@@ -317,7 +320,7 @@
       ["運転者への同一ルートまたは主要経由地点の提示方法", "メーターアプリ予約詳細で迎車地・降車地・ルートID等を表示（地図描画は運用開始前確認）"],
       ["旅客都合変更時の途中終了運用", "事前確定運賃M運行中のみ途中終了操作・当初同意済み運賃額を収受・通常メーター新規運行導線"],
       ["保存証跡", "quoteSnapshot / snapshotHash / caseRecords / meter_fixed_fare_runs / completion_status 等"],
-      ["添付資料一覧", "統合説明資料、本別紙セット、E2E確認記録、申請予定または認可後の距離制運賃表"]
+      ["添付資料一覧", "統合説明資料、本別紙セット、E2E確認記録、別紙1距離制運賃表"]
     ];
   }
 
@@ -471,15 +474,20 @@
     }
   };
 
+  function isFinalSubmission(options){
+    return Boolean(options?.finalSubmission);
+  }
+
   function buildMeta(options){
     const config = options?.config || {};
     const estimateConfig = options?.estimateConfig || {};
+    const finalized = isFinalSubmission(options);
     return {
       companyName: detectCompanyName(config),
       tradeName: detectTradeName(config, estimateConfig),
-      operatingArea: OPERATING_AREA_FILL,
-      trafficZone: TRAFFIC_ZONE_FILL,
-      coefficientSummary: COEFFICIENT_FILL,
+      operatingArea: finalized ? OPERATING_AREA_FINAL : OPERATING_AREA_FILL,
+      trafficZone: finalized ? TRAFFIC_ZONE_FINAL : TRAFFIC_ZONE_FILL,
+      coefficientSummary: finalized ? COEFFICIENT_FINAL : COEFFICIENT_FILL,
       coefficientReferenceRows: buildCoefficientReferenceRows(estimateConfig),
       createdAt: todayJst(),
       createdBy: "管理画面",
@@ -505,8 +513,12 @@
     };
 
     if(documentId === "application-helper"){
+      const finalized = isFinalSubmission(options);
       return Object.assign(base, {
-        intro: [
+        intro: finalized ? [
+          "正式な申請様式は、関東運輸局の「事前確定運賃認可申請様式（Word）」を使用する。",
+          "本シートは、公式様式へ転記するための記入補助資料である。"
+        ] : [
           "正式な申請様式は、関東運輸局の「事前確定運賃認可申請様式（Word）」を使用する。",
           "本シートは、公式様式へ転記するための記入補助資料である。",
           "最終的な様式の記入・押印・添付書類確認は申請担当者が行う。"
@@ -519,8 +531,12 @@
     }
 
     if(documentId === "distance-fare-table"){
+      const finalized = isFinalSubmission(options);
       return Object.assign(base, {
-        intro: [
+        intro: finalized ? [
+          "本別紙は、事前確定運賃の算定元となる距離制運賃表を示すものである。",
+          "本システムの距離制運賃マスターは、本表の初乗運賃、加算運賃、時間距離併用運賃及び時間制運賃を基準として設定する。"
+        ] : [
           "本別紙は、事前確定運賃の算定元となる距離制運賃表を示すものである。",
           "実際の申請時には、申請予定または認可後の距離制運賃表に基づき、初乗運賃・加算運賃・時間距離併用運賃等を記入する。"
         ],
@@ -587,8 +603,11 @@
       const parts = Array.isArray(options?.appendixParts) && options.appendixParts.length
         ? options.appendixParts
         : defaultParts;
+      const finalized = isFinalSubmission(options);
       return Object.assign(base, {
-        intro: [
+        intro: finalized ? [
+          "本別紙セットは、事前確定運賃の算定根拠、係数、距離制運賃表及び各種料金表を整理した添付資料である。"
+        ] : [
           "事前確定運賃認可の事前相談・提出時に、統合説明資料へ添付しやすい別紙・確認資料の一式である。",
           "各別紙はWord上で改ページ・余白・表を手動調整して使用する。"
         ],

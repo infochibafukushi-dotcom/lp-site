@@ -129,7 +129,7 @@
       ) +
       section("5. 千葉県の平準化係数",
         buildTable(
-          ["営業区域", "係数", "根拠", "適用日"],
+          ["交通圏", "係数", "根拠", "適用日"],
           coefficientRows,
           { className: "table-coefficients", colWidths: ["20%", "12%", "38%", "30%"] }
         ) +

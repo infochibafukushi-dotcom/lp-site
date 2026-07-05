@@ -321,10 +321,14 @@ function buildApplicationChildren(formData){
     heading("1. 申請者の氏名又は名称及び住所並びに法人にあっては、その代表者の氏名", 3),
     paragraph("住所：" + (data.applicantAddress || "")),
     paragraph("氏名又は名称：" + (data.applicantName || "")),
-    paragraph("代表者氏名：" + (data.representativeName || "") + "　　　　　　　　　　　　印"),
+    paragraph([
+      textRun("代表者氏名：" + (data.representativeName || "")),
+      textRun("\t"),
+      textRun("印")
+    ]),
     paragraph("連絡先：" + (data.contact || "")),
     heading("2. 設定しようとする運賃及び料金を適用する営業区域", 3),
-    paragraph(data.operatingArea || "千葉交通圏"),
+    paragraph(data.operatingArea || "千葉県"),
     heading("3. 設定しようとする運賃及び料金の種類、額及び適用方法", 3),
     paragraph("・平成14年1月17日付け関東運輸局長公示「一般乗用旅客自動車運送事業の運賃及び料金に関する制度について」1.（1）ニの事前確定運賃を設定する。"),
     paragraph("・運賃額は、平成31年4月26日付け関東運輸局長公示「一般乗用旅客自動車運送事業の事前確定運賃に関する認可申請の取扱いについて」（以下「事前確定運賃公示」という。）3.（2）により関東運輸局長が令和7年7月18日付けで公示した千葉交通圏の係数を用いて、事前確定運賃公示1.（1）の方法により算定する額とする。"),
@@ -523,7 +527,7 @@ function buildAttachmentIndexChildren(data){
       data.rows || [],
       { colWidths: [12, 22, 34, 14, 18], labelCols: [0], amountCols: [3] }
     ),
-    paragraph("※掲載ページは一式提出候補PDF（final-candidate）のページ番号です。再出力時に実ページへ更新されます。", { size: FONT_NOTE })
+    paragraph("※掲載ページは一式提出書類のページ番号です。", { size: FONT_NOTE })
   ];
 }
 

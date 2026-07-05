@@ -312,7 +312,7 @@
       tamperProtection: global.PreFixedFareApprovalAppendixData
         ? global.PreFixedFareApprovalAppendixData.buildTamperProtection()
         : null,
-      footerNote: "本資料は運輸局提出用の運用・監査説明資料です。最終的な申請書類への転記・体裁調整は、申請担当者が行ってください。"
+      footerNote: "本資料は運輸局提出用の運用・監査説明資料です。"
     };
   }
 

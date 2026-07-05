@@ -309,7 +309,7 @@ async function exportAppendixPdf(browser, page, exportOptions){
   const built = await page.evaluate(function(exportOptions){
     const result = window.PreFixedFareSubmissionAppendixWord.buildWordDocumentHtml("submission-appendix-set", exportOptions);
     return { html: result.html };
-  }, Object.assign({}, exportOptions || {}, { appendixParts: CANDIDATE_APPENDIX_PARTS }));
+  }, Object.assign({}, exportOptions || {}, { appendixParts: CANDIDATE_APPENDIX_PARTS, finalSubmission: true }));
   const filePath = path.join(outputDir, CANDIDATE_SOURCES.appendix);
   return exportPdfFromHtml(browser, built.html, filePath, { footer: false });
 }
@@ -431,6 +431,7 @@ function buildAttachmentRowsFromMap(pageMap){
     ["資料4", "システム概要・公示要件対応表", "算定式、公示要件対応、ルート提示、同意、監査証跡の統合説明", range("integrated"), "統合説明資料（審査向け章構成）"],
     ["資料5", "運用・監査説明資料", "運行フロー、旅客都合変更、E2E、保存・照合の運用説明", range("operations"), ""],
     ["資料6", "Q&A", "想定質問と回答、運輸局説明用の短答", range("qa"), ""],
+    ["別紙", "記入補助・係数参考", "申請様式リンク、記入補助項目、平準化係数参考", range("appendixHelper") || range("appendix"), "別紙セット内"],
     ["別紙1", "距離制運賃表", "初乗運賃、加算運賃、深夜早朝割増、障害者割引、端数処理、適用開始予定日", range("appendix1") || range("appendix"), "別紙セット内"],
     ["別紙2", "各種料金表", "迎車料、介助料、待機料、付き添い料、有料道路代、駐車場代等", range("appendix2") || range("appendix"), "別紙セット内"],
     [
@@ -540,20 +541,46 @@ async function main(){
     });
     let provisionalMap = windowLikeComputePageMap(provisionalParts);
     const appendixPath = path.join(outputDir, CANDIDATE_SOURCES.appendix);
-    const appendixMarkers = await findPdfPageMarkers(browser, appendixPath, ["別紙1", "別紙2", "距離制運賃表", "各種料金表"]);
+    const appendixMarkers = await findPdfPageMarkers(browser, appendixPath, [
+      "別紙1　距離制運賃表",
+      "別紙1 距離制運賃表",
+      "別紙2　各種料金表",
+      "別紙2 各種料金表",
+      "別紙2 各種",
+      "認可申請様式リンク",
+      "補助シート"
+    ]);
     const appendixPart = provisionalParts.find(function(p){ return p.key === "appendix"; });
-    if(appendixMarkers["別紙1"] && appendixPart){
+    if((appendixMarkers["別紙1　距離制運賃表"] || appendixMarkers["別紙1 距離制運賃表"]) && appendixPart){
       const offset = appendixPart.start - 1;
-      provisionalMap.appendix1 = {
-        start: offset + appendixMarkers["別紙1"],
-        end: appendixMarkers["別紙2"] ? offset + appendixMarkers["別紙2"] - 1 : appendixPart.end,
-        pages: appendixMarkers["別紙2"] ? appendixMarkers["別紙2"] - appendixMarkers["別紙1"] : 2
-      };
-      provisionalMap.appendix2 = {
-        start: offset + (appendixMarkers["別紙2"] || appendixMarkers["別紙1"]),
-        end: appendixPart.end,
-        pages: appendixPart.end - (offset + (appendixMarkers["別紙2"] || appendixMarkers["別紙1"])) + 1
-      };
+      const helperMarker = appendixMarkers["認可申請様式リンク"] || appendixMarkers["補助シート"];
+      const a1Marker = appendixMarkers["別紙1　距離制運賃表"] || appendixMarkers["別紙1 距離制運賃表"];
+      const a2Marker = appendixMarkers["別紙2　各種料金表"] || appendixMarkers["別紙2 各種料金表"] || appendixMarkers["別紙2 各種"];
+      if(helperMarker && a1Marker && helperMarker < a1Marker){
+        provisionalMap.appendixHelper = {
+          start: offset + helperMarker,
+          end: offset + a1Marker - 1,
+          pages: a1Marker - helperMarker
+        };
+      }
+      if(a2Marker && a2Marker > a1Marker){
+        provisionalMap.appendix1 = {
+          start: offset + a1Marker,
+          end: offset + a2Marker - 1,
+          pages: a2Marker - a1Marker
+        };
+        provisionalMap.appendix2 = {
+          start: offset + a2Marker,
+          end: appendixPart.end,
+          pages: appendixPart.end - (offset + a2Marker) + 1
+        };
+      }else{
+        provisionalMap.appendix1 = {
+          start: offset + a1Marker,
+          end: appendixPart.end,
+          pages: appendixPart.end - (offset + a1Marker) + 1
+        };
+      }
     }
 
     console.log("Exporting attachment index (provisional page map)...");
@@ -569,13 +596,21 @@ async function main(){
       runningPage += pages;
     });
     const finalMap = windowLikeComputePageMap(finalParts);
-    if(appendixMarkers["別紙1"] || appendixMarkers["距離制運賃表"]){
+    if(appendixMarkers["別紙1　距離制運賃表"] || appendixMarkers["別紙1 距離制運賃表"]){
       const appendixPartFinal = finalParts.find(function(p){ return p.key === "appendix"; });
       const offset = appendixPartFinal.start - 1;
-      const a1Page = appendixMarkers["距離制運賃表"] || appendixMarkers["別紙1"];
-      const a2Page = appendixMarkers["各種料金表"] || appendixMarkers["別紙2"];
+      const helperMarker = appendixMarkers["認可申請様式リンク"] || appendixMarkers["補助シート"];
+      const a1Page = appendixMarkers["別紙1　距離制運賃表"] || appendixMarkers["別紙1 距離制運賃表"];
+      const a2Page = appendixMarkers["別紙2　各種料金表"] || appendixMarkers["別紙2 各種料金表"] || appendixMarkers["別紙2 各種"];
       const a1 = offset + a1Page;
       const a2 = a2Page ? offset + a2Page : null;
+      if(helperMarker && helperMarker < a1Page){
+        finalMap.appendixHelper = {
+          start: offset + helperMarker,
+          end: a1 - 1,
+          pages: a1 - (offset + helperMarker)
+        };
+      }
       if(a2 && a2 > a1){
         finalMap.appendix1 = { start: a1, end: a2 - 1, pages: a2 - a1 };
         finalMap.appendix2 = { start: a2, end: appendixPartFinal.end, pages: appendixPartFinal.end - a2 + 1 };
@@ -621,6 +656,18 @@ async function main(){
     assert(joined.includes("添付資料") || joined.includes("資料1"), "一式に添付資料一覧がありません");
     assert(joined.includes("28") && joined.includes("000"), "一式に確定運賃がありません");
     assert(joined.includes("800"), "一式に迎車料800円がありません");
+    const forbiddenTerms = [
+      "手動調整用",
+      "差し替え可能",
+      "final-candidate",
+      "再出力時",
+      "申請予定または認可後",
+      "記入する"
+    ];
+    forbiddenTerms.forEach(function(term){
+      assert(!joined.includes(term), "一式に内部用語が残っています: " + term);
+    });
+    assert(joined.includes("千葉県"), "一式に営業区域（千葉県）がありません");
 
     const structure = await verifyFinalSetStructure(browser, fullSet.outputPath);
     console.log("Final set structure OK", structure.pageCount, "pages");

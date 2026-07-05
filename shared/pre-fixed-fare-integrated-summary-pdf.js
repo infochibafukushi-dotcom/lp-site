@@ -132,7 +132,7 @@
       subsection("平準化係数",
         "<p>" + escapeHtml(regulatory.coefficientPolicy || "") + "</p>" +
         buildTable(
-          ["営業区域", "係数", "根拠", "適用日"],
+          ["交通圏", "係数", "根拠", "適用日"],
           coefficientRows,
           { className: "table-coefficients", colWidths: ["20%", "12%", "38%", "30%"] }
         ),
@@ -497,11 +497,7 @@
           { className: "table-verified-checks", colWidths: ["74%", "26%"] }
         )
       ) +
-      subsection(preLaunchTitle,
-        "<p>" + escapeHtml(data.preLaunchCheckIntro || "") + "</p>" +
-        buildList(preLaunchChecks) +
-        (data.preLaunchCheckSwapNote ? "<p class='prelaunch-swap-note'>" + escapeHtml(data.preLaunchCheckSwapNote) + "</p>" : "")
-      ) +
+      subsection(preLaunchTitle, buildPreLaunchChecksSection(data)) +
       subsection("根拠資料・確認資料一覧", buildList(data.referenceMaterials)) +
       "<p class='footer-note'>" + escapeHtml(data.footerNote || "") + "</p>"
     );
@@ -542,10 +538,14 @@
     return (
       subsection("申請目的", buildList(regulatory.purpose)) +
       subsection("使用する配車アプリ名称",
-        "<p>ちばケアタクシー LP見積シミュレーター / 予約システム（reservation-v4） / メーターアプリ（care-taxi-meter）</p>" +
-        "<p>対象：" + escapeHtml(meta.target || "") + "</p>"
+        "<p>ちばケアタクシー 事前確定運賃システム</p>" +
+        "<p>（LP見積シミュレーター、予約システム、乗務員端末メーターアプリの総称）</p>"
       ) +
-      subsection("対象営業区域", "<p>千葉交通圏（申請書・別紙1参照）</p>") +
+      subsection("対象営業区域",
+        "<p>営業区域：千葉県（申請書・別紙1参照）</p>" +
+        "<p>適用交通圏：千葉交通圏</p>" +
+        "<p>平準化係数：千葉交通圏 1.18</p>"
+      ) +
       subsection("適用する運賃・料金の種類",
         buildList([
           "事前確定運賃本体（距離制運賃 × 平準化係数）",
@@ -613,7 +613,7 @@
       subsection("平準化係数",
         "<p>" + escapeHtml(regulatory.coefficientPolicy || "") + "</p>" +
         buildTable(
-          ["営業区域", "係数", "根拠", "適用日"],
+          ["交通圏", "係数", "根拠", "適用日"],
           coefficientRows,
           { className: "table-coefficients", colWidths: ["20%", "12%", "38%", "30%"] }
         ),
@@ -759,9 +759,25 @@
     );
   }
 
+  function buildPreLaunchChecksSection(data){
+    const verified = Array.isArray(data.integratedPreLaunchChecksVerified) ? data.integratedPreLaunchChecksVerified : [];
+    const pending = Array.isArray(data.integratedPreLaunchChecksPending) ? data.integratedPreLaunchChecksPending : [];
+    const legacy = Array.isArray(data.integratedPreLaunchChecks) ? data.integratedPreLaunchChecks : [];
+    if(verified.length || pending.length){
+      return (
+        "<p>" + escapeHtml(data.preLaunchCheckIntro || "") + "</p>" +
+        "<h4>コード・API・DB上で動作確認済み</h4>" + buildList(verified) +
+        "<h4>運用開始前に実機目視確認を行う項目</h4>" + buildList(pending)
+      );
+    }
+    return (
+      "<p>" + escapeHtml(data.preLaunchCheckIntro || "") + "</p>" +
+      buildList(legacy)
+    );
+  }
+
   function buildChapterReview10Supplement(data, operations){
     const preLaunchTitle = data.preLaunchChecksSectionTitle || "運用開始前確認項目";
-    const preLaunchChecks = Array.isArray(data.integratedPreLaunchChecks) ? data.integratedPreLaunchChecks : [];
     const tokenCaveats = operations.tokenSecurity?.caveats || [];
     const driverNote = data?.driverRouteDisplay?.visualCheckNote || "";
     const futureItems = (data.regulatory?.snapshotUnconfirmed || []).concat([
@@ -772,11 +788,7 @@
     ]);
 
     return (
-      subsection(preLaunchTitle,
-        "<p>" + escapeHtml(data.preLaunchCheckIntro || "") + "</p>" +
-        buildList(preLaunchChecks) +
-        (data.preLaunchCheckSwapNote ? "<p class='prelaunch-swap-note'>" + escapeHtml(data.preLaunchCheckSwapNote) + "</p>" : "")
-      ) +
+      subsection(preLaunchTitle, buildPreLaunchChecksSection(data)) +
       (driverNote ? subsection("運転者向けルート表示の最終確認", "<p>" + escapeHtml(driverNote) + "</p>") : "") +
       subsection("将来強化候補", buildList(futureItems)) +
       (tokenCaveats.length ? subsection("認証・セキュリティの今後対応", buildList(tokenCaveats)) : "") +
@@ -803,7 +815,7 @@
       });
     });
     return (
-      "<h2 class='toc-heading'>一式提出候補 目次（審査論点順）</h2>" +
+      "<h2 class='toc-heading'>一式提出書類 目次（審査論点順）</h2>" +
       buildTable(["No", "項目", ""], rows, { className: "table-fullset-toc", colWidths: ["12%", "68%", "20%"] })
     );
   }

@@ -76,7 +76,7 @@ async function extractSubmissionData(page, pageMap){
       console.warn("config fetch fallback", error);
     }
 
-    const exportOptions = { config: config, estimateConfig: estimateConfig };
+    const exportOptions = { config: config, estimateConfig: estimateConfig, finalSubmission: true };
     let applicationSaved = {};
     try{
       const appRes = await fetch("./data/pre-fixed-fare-application.json?" + Date.now(), { cache: "no-store" });
@@ -190,6 +190,8 @@ async function main(){
     assert((data.attachmentIndex.rows || []).length >= 8, "添付資料一覧の行数が不足");
     assert(data.integratedHtml.includes("認可審査要件への対応"), "Word統合説明に審査向け章がありません");
     assert(data.integratedHtml.includes("運用開始前確認項目"), "Word統合説明に運用開始前確認項目がありません");
+    assert(!data.integratedHtml.includes("手動調整用"), "Wordに手動調整用文言が残っています");
+    assert(data.integratedHtml.includes("ちばケアタクシー 事前確定運賃システム"), "Word統合説明に正式システム名がありません");
 
     const feePayload = (data.appendixPayloads || []).find(function(p){ return p.documentId === "service-fee-table"; });
     const feeText = JSON.stringify(feePayload || {});

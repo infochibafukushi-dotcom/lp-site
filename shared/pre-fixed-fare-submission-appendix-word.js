@@ -219,7 +219,9 @@
     const payload = global.PreFixedFareSubmissionAppendixData.buildDocumentPayload(documentId, options || {});
     payload._options = options || {};
     const bodyHtml = renderDocumentBody(payload);
-    const editNote = "本ファイルは提出前の手動調整用です。改ページ・表・余白は Microsoft Word 上で編集してください。正式申請様式は関東運輸局の公式Word様式を使用してください。";
+    const editNote = options?.finalSubmission
+      ? null
+      : "本ファイルは提出前の手動調整用です。改ページ・表・余白は Microsoft Word 上で編集してください。正式申請様式は関東運輸局の公式Word様式を使用してください。";
     return {
       html: wrapWordDocument(payload.title, bodyHtml, editNote),
       payload: payload

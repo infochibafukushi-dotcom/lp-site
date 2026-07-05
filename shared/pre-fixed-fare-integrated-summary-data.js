@@ -101,6 +101,18 @@
       note: "quotes テーブルで active / consumed / expired / canceled と有効期限を管理。最終目視確認は第10章に整理。"
     });
 
+    if(regulatory.notices){
+      next.notices = Object.assign({}, regulatory.notices);
+      if(Array.isArray(next.notices.formulas)){
+        next.notices.formulas = next.notices.formulas.map(function(formula){
+          if(String(formula).includes("申請予定または認可後")){
+            return "距離制運賃表（別紙1）に基づく";
+          }
+          return formula;
+        });
+      }
+    }
+
     return next;
   }
 
@@ -127,10 +139,10 @@
       meta: {
         subtitle: "関東運輸局提出・説明用",
         businessName: resolvedBusinessName,
-        target: "介護タクシーLP / 見積シミュレーター / 予約システム / メーターアプリ",
+        target: "ちばケアタクシー 事前確定運賃システム",
         createdAt: regulatory.meta?.createdAt || operations.meta?.createdAt || "",
         createdBy: "管理画面",
-        documentType: "運輸局への提出用説明資料案。最終的な申請書類への転記・体裁調整は申請担当者が行う。"
+        documentType: "運輸局への提出用説明資料"
       },
       toc: [
         { chapter: 1, title: "システム基本方針と公示要件対応" },
@@ -199,7 +211,7 @@
       approval: approval,
       operations: operations,
       e2eReservationNote: "※上記予約IDは本番相当環境におけるE2E確認（スモークテスト）時の検証IDである。確認完了後、予約データ整理により本番D1上の当該テスト予約は削除済み。確認結果は開発記録および本資料上の実施記録として保持している。",
-      fareTableAppendixNote: "実際の申請時には、申請予定または認可後の距離制運賃表を別紙として添付し、本システムの距離制運賃マスターが当該運賃表に基づくことを示す。",
+      fareTableAppendixNote: "本システムの距離制運賃マスターは、別紙1の距離制運賃表（初乗運賃、加算運賃、時間距離併用運賃及び時間制運賃）を基準として設定する。",
       fareFeeDisplayNote: "迎車料金・予約料金・介助料等については、事前確定運賃とは区分し、明細上も別行で表示する。",
       driverRouteDisplay: {
         status: "主要経由地点・予約情報の読取確認済み",
@@ -222,11 +234,11 @@
         "事前確定運賃システム 追加資料（データ保存・画面キャプチャ・E2E・改ざん防止）",
         "本番D1 migration 0005 適用確認",
         "本番D1予約データ整理記録",
-        "申請予定または認可後の距離制運賃表"
+        "別紙1 距離制運賃表"
       ],
       preLaunchChecksSectionTitle: "運用開始前確認項目",
-      preLaunchCheckIntro: "以下は、コード・API・DB上の動作確認後、提出前または運用開始前に運用者が画面上で最終目視確認を行う項目である。",
-      preLaunchCheckSwapNote: "提出直前に確認完了した場合は、見出しを「運用開始前確認結果」に変更し、各項目末尾を「確認済み」に差し替え可能です。",
+      preLaunchCheckIntro: "以下は、コード・API・DB上で動作確認済みの項目と、運用開始前に実機目視確認を行う項目を区分して記載する。",
+      preLaunchCheckSwapNote: "",
       passengerChangeMeterNote: "事前確定運賃Mの旅客都合途中終了操作は、事前確定運賃Mの運行中のみ表示され、GPSM・時間M・OBDM等の通常メーター運行には表示されない。",
       integratedMeterAppFlow: [
         "事前確定運賃Mの運行中のみ「旅客都合変更で途中終了」ボタンを表示する",
@@ -236,6 +248,19 @@
         "決済端末等で当初同意済みの事前確定運賃額を収受する",
         "精算完了後、「通常メーターで新規運行を開始」ボタンを表示する",
         "ボタン押下で /case/start へ進み、通常メーター等の別案件を開始する"
+      ],
+      integratedPreLaunchChecksVerified: [
+        "本番相当環境E2E確認（見積登録・予約作成・メーター読取・運行開始・精算完了）— 確認済み",
+        "snapshotHash照合（見積登録時とメーター読取時の整合性）— 確認済み",
+        "confirmedFareMatchesSnapshot（当初同意済み運賃額と読取運賃の一致）— 確認済み"
+      ],
+      integratedPreLaunchChecksPending: [
+        "管理画面予約詳細の実機目視確認",
+        "メーターアプリ案件詳細の実機目視確認",
+        "運転者画面における同一ルートまたは主要経由地点の実機目視確認",
+        "通常メーター新規運行導線の実機目視確認",
+        "事前確定運賃M以外の通常メーターモード基本動作の実機目視確認",
+        "精算時の障害者割引・福祉タクシー券処理の実機目視確認"
       ],
       integratedPreLaunchChecks: [
         "管理画面予約詳細の目視確認",
@@ -248,7 +273,7 @@
       appendix: global.PreFixedFareApprovalAppendixData
         ? global.PreFixedFareApprovalAppendixData.buildReportData()
         : null,
-      footerNote: "本資料は運輸局への提出用説明資料案です。公示要件に沿った運用が説明可能な状態を示すものであり、最終的な申請書類への転記・体裁調整は申請担当者が行ってください。"
+      footerNote: "本資料は運輸局への提出用説明資料です。公示要件に沿った運用が説明可能な状態を示すものです。"
     };
   }
 
