@@ -813,16 +813,17 @@
           amount: Number(row.amount) || 0
         };
       }).filter(function(row){
-        return row.amount > 0 && row.key !== "specialVehicleFee";
+        return row.amount > 0;
       })
       : [];
     const careServiceRows = Array.isArray(snapshot.serviceFees)
       ? snapshot.serviceFees.map(function(row){
         return {
           label: row.label || row.key || "",
-          amount: Number(row.amount) || 0
+          amount: Number(row.amount) || 0,
+          key: row.key || ""
         };
-      }).filter(function(row){ return row.amount > 0; })
+      }).filter(function(row){ return row.amount > 0 && row.key !== "specialVehicleFee"; })
       : [];
     const expenseRows = Array.isArray(snapshot.expenses)
       ? snapshot.expenses.map(function(row){
@@ -1612,7 +1613,10 @@
       overallRouteSelection: overallRouteSelection,
       returnWithStopSplitContext: splitContext
     });
-    return applySelectedOverallToRoutePlan(routePlan);
+    if(requiresOverallRouteSelection(routePlan)){
+      routePlan = applySelectedOverallToRoutePlan(routePlan);
+    }
+    return routePlan;
   }
 
   function syncStateFromRoutePlan(routePlan){

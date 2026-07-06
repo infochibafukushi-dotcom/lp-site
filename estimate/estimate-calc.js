@@ -1116,8 +1116,11 @@
       });
       const overall = structured.overallRouteSelection || state?.routePlan?.overallRouteSelection || null;
       const selectedOverallId = String(overall?.selectedOverallRouteId || "").trim();
-      if(selectedOverallId){
-        const overallCandidate = (overall?.overallRouteCandidates || []).find(function(candidate){
+      const overallCandidates = Array.isArray(overall?.overallRouteCandidates) ? overall.overallRouteCandidates : [];
+      const useOverallTotals = String(structured.returnPlanType || "") === "return_with_stop"
+        && overallCandidates.length >= 2;
+      if(useOverallTotals && selectedOverallId){
+        const overallCandidate = overallCandidates.find(function(candidate){
           return String(candidate?.routeId || "") === selectedOverallId;
         });
         if(overallCandidate){
