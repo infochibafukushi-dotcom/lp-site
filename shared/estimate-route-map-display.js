@@ -64,6 +64,9 @@
     "shorter_distance",
     "toll_allowed"
   ];
+  const MIN_DISPLAY_ROUTE_CANDIDATES = 2;
+  const MAX_DISPLAY_ROUTE_CANDIDATES = 4;
+  const MAP_RENDER_STRATEGIES = CANDIDATE_STRATEGY_ORDER.slice();
 
   // 後方互換
   const AB_ROUTE_META = CANDIDATE_ROUTE_META;
@@ -186,6 +189,37 @@
     }) || null;
   }
 
+  function isMapRenderableRoute(route){
+    return getRouteStrategyKey(route) !== "confirmation_fallback"
+      && route?.isConfirmationFallback !== true;
+  }
+
+  function getDisplayRouteCandidates(legOrPlan){
+    const all = getLegRouteCandidates(legOrPlan);
+    if(!all.length){
+      return [];
+    }
+    const ordered = [];
+    MAP_RENDER_STRATEGIES.forEach(function(strategy){
+      const route = findCandidateByStrategy(legOrPlan, strategy);
+      if(route){
+        ordered.push(route);
+      }
+    });
+    all.forEach(function(route){
+      if(getRouteStrategyKey(route) === "confirmation_fallback"
+        && !ordered.some(function(item){
+          return String(item?.routeId || "") === String(route?.routeId || "");
+        })){
+        ordered.push(route);
+      }
+    });
+    if(ordered.length){
+      return ordered.slice(0, MAX_DISPLAY_ROUTE_CANDIDATES);
+    }
+    return all.slice(0, MAX_DISPLAY_ROUTE_CANDIDATES);
+  }
+
   function pathFromRoute(route){
     return decodePolyline(route?.encodedPolyline || "");
   }
@@ -221,7 +255,7 @@
     CANDIDATE_STRATEGY_ORDER.forEach(function(strategy){
       const meta = CANDIDATE_ROUTE_META[strategy];
       const route = findCandidateByStrategy(leg, strategy);
-      if(!meta || !route){
+      if(!meta || !route || !isMapRenderableRoute(route)){
         return;
       }
       pushAbSegment(segments, meta, route, {
@@ -790,7 +824,14 @@
     ROUTE_COLOR_HEX: ROUTE_COLOR_HEX,
     AB_ROUTE_META: AB_ROUTE_META,
     CANDIDATE_ROUTE_META: CANDIDATE_ROUTE_META,
+    CANDIDATE_STRATEGY_ORDER: CANDIDATE_STRATEGY_ORDER,
+    MIN_DISPLAY_ROUTE_CANDIDATES: MIN_DISPLAY_ROUTE_CANDIDATES,
+    MAX_DISPLAY_ROUTE_CANDIDATES: MAX_DISPLAY_ROUTE_CANDIDATES,
     decodePolyline: decodePolyline,
+    getLegRouteCandidates: getLegRouteCandidates,
+    getDisplayRouteCandidates: getDisplayRouteCandidates,
+    isMapRenderableRoute: isMapRenderableRoute,
+    findCandidateByStrategy: findCandidateByStrategy,
     getLegPrimaryRoute: getLegPrimaryRoute,
     getLegPath: getLegPath,
     getRouteStrategyKey: getRouteStrategyKey,

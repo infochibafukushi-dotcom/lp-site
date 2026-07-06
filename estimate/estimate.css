@@ -929,6 +929,9 @@
   gap:8px;
   width:100%;
 }
+.estimate-route-card-list--four{
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+}
 .estimate-route-card-list--ab .estimate-route-card{
   display:flex;
   flex-direction:column;

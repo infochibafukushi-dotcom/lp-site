@@ -1857,21 +1857,54 @@
     }) || null;
   }
 
-  function getRoundTripPairStrategies(){
-    return [
-      {
-        strategy: "time_priority",
-        abLabel: "A",
+  function getRouteMapDisplay(){
+    return window.EstimateRouteMapDisplay || null;
+  }
+
+  function getDisplayRouteCandidatesFromLeg(legPlan){
+    const display = getRouteMapDisplay();
+    if(display && typeof display.getDisplayRouteCandidates === "function"){
+      return display.getDisplayRouteCandidates(legPlan);
+    }
+    return getRouteCandidatesFromLeg(legPlan);
+  }
+
+  function getRoundTripPairStrategyDefinitions(){
+    const display = getRouteMapDisplay();
+    const strategies = Array.isArray(display?.CANDIDATE_STRATEGY_ORDER)
+      ? display.CANDIDATE_STRATEGY_ORDER
+      : ["time_priority", "general_road_priority", "shorter_distance", "toll_allowed"];
+    const labels = {
+      time_priority: {
         label: "時間優先の往復ルート",
         shortLabel: "時間優先の往復"
       },
-      {
-        strategy: "general_road_priority",
-        abLabel: "B",
+      general_road_priority: {
         label: "一般道優先の往復ルート",
         shortLabel: "一般道優先の往復"
+      },
+      shorter_distance: {
+        label: "距離優先の往復ルート",
+        shortLabel: "距離優先の往復"
+      },
+      toll_allowed: {
+        label: "高速道路の往復ルート",
+        shortLabel: "高速道路の往復"
       }
-    ];
+    };
+    return strategies.map(function(strategy){
+      const abInfo = getRouteAbInfo(strategy, { roundTrip: true });
+      const text = labels[strategy] || {
+        label: (abInfo?.fullLabel || strategy),
+        shortLabel: (abInfo?.shortLabel || strategy)
+      };
+      return {
+        strategy: strategy,
+        abLabel: abInfo?.abLabel || "",
+        label: text.label,
+        shortLabel: text.shortLabel
+      };
+    });
   }
 
   function getRouteAbInfo(strategyOrRoute, options){
@@ -1913,6 +1946,15 @@
         fullLabel: isRoundTrip ? "高速道路の往復ルート" : "高速道路ルート",
         shortLabel: "高速道路",
         colorClass: "d"
+      };
+    }
+    if(strategy === "confirmation_fallback"){
+      return {
+        abLabel: "B",
+        strategy: strategy,
+        fullLabel: isRoundTrip ? "確認対応の往復ルート" : "確認対応ルート",
+        shortLabel: "確認対応",
+        colorClass: "b"
       };
     }
     return null;
@@ -1977,17 +2019,22 @@
     );
   }
 
-  function renderRouteCardFareLine(routeResult){
+  function isConfirmationFallbackRoute(route){
+    return getRouteStrategyKey(route) === "confirmation_fallback"
+      || route?.isConfirmationFallback === true;
+  }
+
+  function renderRouteCardFareLine(routeResult, route){
     if(!routeResult){
       return "";
     }
     const snapshot = routeResult.quoteSnapshot || {};
-    // 運賃目安: ルート運賃部分（介助料等を含まない）
     const routeFare = Number(snapshot.adjustedDistanceFareAmount) || Number(snapshot.fixedFareTotal) || 0;
-    // 概算合計: そのルート選択時の見積総額（有料道路実費は含まない）
     const estimateTotal = Number(routeResult.total) || 0;
     const routeFareText = routeFare > 0 ? formatYen(routeFare) : "算定中";
-    const totalText = estimateTotal > 0 ? formatYen(estimateTotal) : "算定中";
+    const totalText = isConfirmationFallbackRoute(route)
+      ? "Aルートと同額"
+      : (estimateTotal > 0 ? formatYen(estimateTotal) : "算定中");
     return (
       '<div class="estimate-route-card-fare-block">' +
         '<div class="estimate-route-card-fare-line estimate-route-card-fare-line--route">運賃目安：' + escapeHtml(routeFareText) + "</div>" +
@@ -2043,7 +2090,20 @@
     if(!outboundLeg || !returnLeg){
       return [];
     }
-    return getRoundTripPairStrategies().map(function(pair){
+    const strategyDefs = getRoundTripPairStrategyDefinitions();
+    if(findRouteCandidateByStrategy(outboundLeg, "confirmation_fallback")
+      && findRouteCandidateByStrategy(returnLeg, "confirmation_fallback")
+      && !strategyDefs.some(function(item){
+        return item.strategy === "confirmation_fallback";
+      })){
+      strategyDefs.push({
+        strategy: "confirmation_fallback",
+        abLabel: "B",
+        label: "確認対応の往復ルート",
+        shortLabel: "確認対応の往復"
+      });
+    }
+    return strategyDefs.map(function(pair){
       const outboundRoute = findRouteCandidateByStrategy(outboundLeg, pair.strategy);
       const returnRoute = findRouteCandidateByStrategy(returnLeg, pair.strategy);
       if(!outboundRoute || !returnRoute){
@@ -2083,11 +2143,7 @@
     if(getActiveReturnPlanType() === "return_pending"){
       return false;
     }
-    if(!isLegPreFixedFareConfirmable(routePlan.outboundRoutePlan)
-      || !isLegPreFixedFareConfirmable(routePlan.returnRoutePlan)){
-      return false;
-    }
-    return buildRoundTripRoutePairs(routePlan).length > 0;
+    return buildRoundTripRoutePairs(routePlan).length >= 2;
   }
 
   function getSelectedRoundTripPairStrategy(routePlan){
@@ -2211,11 +2267,19 @@
     const selectedStrategy = getSelectedRoundTripPairStrategy(routePlan);
     const compact = options?.compact === true;
     const stepReviewPending = compact && isPreFixedFareMode() && !state.distanceRouteReviewed;
-    const notice = buildResponsiveNote(
-      "往復の走行予定ルートを1つ選択してください。選択した往復ルートの合計距離で事前確定運賃を算定します。",
-      "往復ルートを選択してください。"
-    );
-    const useAbLayout = pairs.length === 2 && pairs.every(function(pair){
+    const hasConfirmationFallback = pairs.some(function(pair){
+      return pair.strategy === "confirmation_fallback";
+    });
+    const notice = hasConfirmationFallback
+      ? '<p class="estimate-route-selection-warning">' + escapeHtml(
+        window.PreFixedFareStatus?.getSingleCandidateNotice?.()
+          || "ルート候補が1件のみのため、予約受付後に確認してご連絡します。"
+      ) + "</p>"
+      : buildResponsiveNote(
+        "往復の走行予定ルートを1つ選択してください。選択した往復ルートの合計距離で事前確定運賃を算定します。",
+        "往復ルートを選択してください。"
+      );
+    const useAbLayout = pairs.length >= 2 && pairs.every(function(pair){
       return Boolean(getRouteAbInfo(pair.strategy, { roundTrip: true }));
     });
     const hasTollNote = pairs.some(function(pair){
@@ -2231,7 +2295,10 @@
       const totalDistanceLabel = formatRouteDistanceMeters(pair.totalDistanceMeters);
       const totalDurationLabel = formatRouteDurationSeconds(pair.totalDurationSeconds);
       const pairResult = computeResultForRoundTripPair(pair);
-      const fareLineHtml = renderRouteCardFareLine(pairResult);
+      const fareLineHtml = renderRouteCardFareLine(
+        pairResult,
+        pair.strategy === "confirmation_fallback" ? { isConfirmationFallback: true } : pair.outboundRoute
+      );
       const showAsSelected = !stepReviewPending && isSelected;
       const selectDisabled = showAsSelected;
       const titleHtml = renderRouteCardTitle(abInfo, pair.label);
@@ -2276,14 +2343,15 @@
   }
 
   function renderRouteSelectionCards(legPlan, legKey, sectionTitle, options){
-    const routes = getRouteCandidatesFromLeg(legPlan);
+    const routes = getDisplayRouteCandidatesFromLeg(legPlan);
     if(!routes.length){
       return "";
     }
-    const confirmable = isLegPreFixedFareConfirmable(legPlan);
+    const hasConfirmationFallback = routes.some(isConfirmationFallbackRoute);
+    const confirmable = isLegPreFixedFareConfirmable(legPlan) && !hasConfirmationFallback;
     const selectedId = String(legPlan.selectedRouteId || routes[0]?.routeId || "");
     const singleCandidateNotice = window.PreFixedFareStatus?.getSingleCandidateNotice?.()
-      || "ルート候補が1件のみのため、事前確定運賃としては確定せず、予約後に確認対応となります。";
+      || "ルート候補が1件のみのため、予約受付後に確認してご連絡します。";
     const notice = confirmable
       ? buildResponsiveNote(
         "2件以上の走行予定ルートから1つを選択してください。選択したルートの距離で事前確定運賃を算定します。",
@@ -2304,11 +2372,13 @@
       const routeId = String(route.routeId || "");
       const isSelected = routeId === selectedId || (!selectedId && index === 0);
       const routeResult = computeResultForRoute(route, legKey);
-      const fareLineHtml = renderRouteCardFareLine(routeResult);
+      const fareLineHtml = renderRouteCardFareLine(routeResult, route);
       const distanceLabel = formatRouteDistanceMeters(route.distanceMeters);
       const durationLabel = formatRouteDurationSeconds(route.durationSeconds);
       const summary = getRouteDisplayLabel(route, index);
-      const description = getRouteDisplayDescription(route);
+      const description = isConfirmationFallbackRoute(route)
+        ? "予約受付後に、道路状況を確認して最適なルートをご案内します。"
+        : getRouteDisplayDescription(route);
       const roadTypeLabel = getRoadTypeLabel(route.roadType || legPlan.roadType || state.roadType);
       const abInfo = getRouteAbInfo(route);
       const tollNote = !useAbLayout && (route.usesToll === true || route.routeStrategy === "toll_allowed" || route.routeStrategy === "time_priority")

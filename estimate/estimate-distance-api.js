@@ -16,6 +16,7 @@
     "routes.legs.endLocation.latLng"
   ].join(",");
   const MAX_ROUTE_CANDIDATES = 4;
+  const MIN_ROUTE_CANDIDATES = 2;
 
   function applyRoutePresentation(route, strategy){
     if(global.PreFixedFareRoutePresentation && typeof global.PreFixedFareRoutePresentation.resolveRoutePresentation === "function"){
@@ -197,6 +198,116 @@
   }
 
   function routeUsesToll(route){
+    const tollInfo = route?.tollInfo;
+    if(!tollInfo){
+      return false;
+    }
+    if(tollInfo.estimatedPrice){
+      return true;
+    }
+    if(Array.isArray(tollInfo.tollInfos) && tollInfo.tollInfos.length){
+      return true;
+    }
+    return false;
+  }
+
+  function routeUsesHighways(route){
+    if(route?.avoidHighways === true){
+      return false;
+    }
+    if(route?.roadType === "toll" || routeUsesToll(route)){
+      return true;
+    }
+    const strategy = String(route?.routeStrategy || "").trim();
+    return strategy === "time_priority" || strategy === "toll_allowed";
+  }
+
+  function buildConfirmationFallbackRoute(primaryRoute){
+    const primary = applyRoutePresentation(Object.assign({}, primaryRoute, {
+      routeStrategy: "time_priority",
+      generationReason: primaryRoute?.generationReason || "time_priority_route"
+    }), "time_priority");
+    const fallback = applyRoutePresentation(Object.assign({}, primary, {
+      routeStrategy: "confirmation_fallback",
+      generationReason: "confirmation_fallback_route",
+      isConfirmationFallback: true,
+      routeLabel: "確認対応ルート",
+      routeDescription: "予約受付後に、道路状況を確認して最適なルートをご案内します。",
+      routeSummary: "確認対応ルート"
+    }), "confirmation_fallback");
+    return fallback;
+  }
+
+  async function fetchAlternateRouteForMinimum(options, primaryRoute){
+    const userAvoidTolls = options?.roadType === "general";
+    if(routeUsesHighways(primaryRoute)){
+      const generalRoute = await fetchGeneralRoadPriorityRoute(options);
+      if(generalRoute && !isDuplicateRoute(primaryRoute, generalRoute)){
+        return generalRoute;
+      }
+    }
+    if(primaryRoute?.avoidHighways === true || primaryRoute?.avoidTolls === true){
+      const timeRoute = await fetchTimePriorityRoute(options, userAvoidTolls);
+      if(timeRoute && !isDuplicateRoute(primaryRoute, timeRoute)){
+        return timeRoute;
+      }
+    }else{
+      const generalRoute = await fetchGeneralRoadPriorityRoute(options);
+      if(generalRoute && !isDuplicateRoute(primaryRoute, generalRoute)){
+        return generalRoute;
+      }
+      const tollRoute = await fetchTollAllowedRoute(options, primaryRoute);
+      if(tollRoute && !isDuplicateRoute(primaryRoute, tollRoute)){
+        return tollRoute;
+      }
+    }
+    return null;
+  }
+
+  async function ensureMinimumRouteCandidates(routes, options){
+    const initial = Array.isArray(routes) ? routes.slice(0, MAX_ROUTE_CANDIDATES) : [];
+    const distinctRouteCount = initial.length;
+    if(initial.length >= MIN_ROUTE_CANDIDATES){
+      return {
+        routes: assignRouteIds(initial),
+        distinctRouteCount: distinctRouteCount,
+        preFixedFareConfirmable: distinctRouteCount >= MIN_ROUTE_CANDIDATES,
+        fallbackReason: null
+      };
+    }
+    if(!initial.length){
+      return {
+        routes: [],
+        distinctRouteCount: 0,
+        preFixedFareConfirmable: false,
+        fallbackReason: "only_one_distinct_route"
+      };
+    }
+
+    const primary = applyRoutePresentation(Object.assign({}, initial[0], {
+      routeStrategy: initial[0]?.routeStrategy || "time_priority"
+    }), initial[0]?.routeStrategy || "time_priority");
+    const alternate = await fetchAlternateRouteForMinimum(options, primary);
+    if(alternate){
+      const merged = dedupeRoutes([primary, alternate]);
+      if(merged.length >= MIN_ROUTE_CANDIDATES){
+        return {
+          routes: assignRouteIds(merged.slice(0, MAX_ROUTE_CANDIDATES)),
+          distinctRouteCount: merged.length,
+          preFixedFareConfirmable: true,
+          fallbackReason: null
+        };
+      }
+    }
+
+    return {
+      routes: assignRouteIds([primary, buildConfirmationFallbackRoute(primary)]),
+      distinctRouteCount: 1,
+      preFixedFareConfirmable: false,
+      fallbackReason: "only_one_distinct_route"
+    };
+  }
+
     const tollInfo = route?.tollInfo;
     if(!tollInfo){
       return false;
@@ -685,8 +796,10 @@
     ].filter(Boolean);
 
     const deduped = assignRouteIds(dedupeRoutes(assembled)).slice(0, MAX_ROUTE_CANDIDATES);
-    const preFixedFareConfirmable = deduped.length >= 2;
-    const primary = deduped[0] || timePriorityRoute || generalRoadPriorityRoute || recommendedRoute;
+    const ensured = await ensureMinimumRouteCandidates(deduped, options);
+    const finalRoutes = ensured.routes;
+    const preFixedFareConfirmable = ensured.preFixedFareConfirmable === true;
+    const primary = finalRoutes[0] || timePriorityRoute || generalRoadPriorityRoute || recommendedRoute;
 
     return {
       distanceKm: primary.distanceKm,
@@ -694,17 +807,17 @@
       distanceMeters: primary.distanceMeters,
       durationSeconds: primary.durationSeconds,
       selectedRouteId: primary.routeId,
-      routes: deduped,
-      routeCandidates: deduped,
-      routeCandidateCount: deduped.length,
-      distinctRouteCount: deduped.length,
-      alternativeRouteCount: deduped.length,
+      routes: finalRoutes,
+      routeCandidates: finalRoutes,
+      routeCandidateCount: finalRoutes.length,
+      distinctRouteCount: ensured.distinctRouteCount,
+      alternativeRouteCount: finalRoutes.length,
       multipleRoutesAvailable: preFixedFareConfirmable,
       preFixedFareConfirmable: preFixedFareConfirmable,
       routeDedupedCount: deduped.length,
       routeGenerationStrategies: routeGenerationStrategies,
       rawRouteCount: recommendedPool.length,
-      fallbackReason: preFixedFareConfirmable ? null : "only_one_distinct_route"
+      fallbackReason: ensured.fallbackReason
     };
   }
 
@@ -859,33 +972,34 @@
         throw new Error("ルートが見つかりませんでした。住所を確認してください。");
       }
       const route = applyRoutePresentation(normalizeRawRoute(rawRoutes[0], {
-        routeStrategy: "recommended",
+        routeStrategy: "time_priority",
         avoidTolls: userAvoidTolls,
         avoidHighways: userAvoidTolls,
         roadType: userAvoidTolls ? "general" : "toll",
         intermediateAddress: intermediateAddress,
         rawRouteIndex: 0
-      }), "recommended");
-      const deduped = assignRouteIds([route]);
-      const preFixedFareConfirmable = deduped.length >= 2;
-      const primary = deduped[0];
+      }), "time_priority");
+      const ensured = await ensureMinimumRouteCandidates([route], options);
+      const finalRoutes = ensured.routes;
+      const preFixedFareConfirmable = ensured.preFixedFareConfirmable === true;
+      const primary = finalRoutes[0];
       return {
         distanceKm: primary.distanceKm,
         durationMinutes: primary.durationMinutes,
         distanceMeters: primary.distanceMeters,
         durationSeconds: primary.durationSeconds,
         selectedRouteId: primary.routeId,
-        routes: deduped,
-        routeCandidates: deduped,
-        routeCandidateCount: deduped.length,
-        distinctRouteCount: deduped.length,
-        alternativeRouteCount: deduped.length,
+        routes: finalRoutes,
+        routeCandidates: finalRoutes,
+        routeCandidateCount: finalRoutes.length,
+        distinctRouteCount: ensured.distinctRouteCount,
+        alternativeRouteCount: finalRoutes.length,
         multipleRoutesAvailable: preFixedFareConfirmable,
         preFixedFareConfirmable: preFixedFareConfirmable,
-        routeDedupedCount: deduped.length,
-        routeGenerationStrategies: ["recommended"],
+        routeDedupedCount: 1,
+        routeGenerationStrategies: ["time_priority"],
         rawRouteCount: rawRoutes.length,
-        fallbackReason: preFixedFareConfirmable ? null : "only_one_distinct_route"
+        fallbackReason: ensured.fallbackReason
       };
     }
 
@@ -1001,6 +1115,7 @@
     computePreFixedFareRouteCandidates: computePreFixedFareRouteCandidates,
     computeReturnWithStopOverallRouteSelection: computeReturnWithStopOverallRouteSelection,
     assembleOverallRouteSelection: assembleOverallRouteSelection,
+    ensureMinimumRouteCandidates: ensureMinimumRouteCandidates,
     geocodeAddress: geocodeAddress
   };
 })(typeof window !== "undefined" ? window : globalThis);

@@ -57,7 +57,7 @@
   }
 
   function getSingleCandidateNotice(){
-    return "ルート候補が1件のみのため、事前確定運賃としては確定せず、予約後に確認対応となります。";
+    return "ルート候補が1件のみのため、予約受付後に確認してご連絡します。";
   }
 
   function isOverallRouteSelectionConfirmable(routePlan){
