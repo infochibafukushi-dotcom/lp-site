@@ -2162,7 +2162,8 @@
   function scrollToRouteResultArea(){
     requestAnimationFrame(function(){
       requestAnimationFrame(function(){
-        const target = document.querySelector(".estimate-route-preview--inline")
+        const target = document.querySelector(".estimate-route-map-block .estimate-route-map")
+          || document.querySelector(".estimate-route-preview--inline")
           || document.querySelector("#estimateRouteResultArea")
           || document.querySelector(".estimate-route-result")
           || document.querySelector(".estimate-route-selection");
@@ -3211,6 +3212,128 @@
     );
   }
 
+  function getSelectedRoutePreviewTitle(routePlan){
+    const plan = routePlan || state.routePlan;
+    if(!plan){
+      return "予定ルート";
+    }
+    const strategy = getActiveRouteMapStrategy(plan);
+    const abInfo = getRouteAbInfo(strategy, { roundTrip: canUseRoundTripPairSelection(plan) });
+    if(abInfo?.abLabel){
+      return abInfo.abLabel + " 予定ルート";
+    }
+    return "予定ルート";
+  }
+
+  function renderRoutePreviewStatusNote(routePlan){
+    if(!routePlan){
+      return "";
+    }
+    const strategy = getActiveRouteMapStrategy(routePlan);
+    const abInfo = getRouteAbInfo(strategy, { roundTrip: canUseRoundTripPairSelection(routePlan) });
+    if(abInfo?.abLabel){
+      return '<p class="estimate-route-preview-note">選択中のルートです。</p>';
+    }
+    if(isPreFixedFareMode() && window.PreFixedFareStatus){
+      return window.PreFixedFareStatus.buildStatusHtml(routePlan, {
+        escapeHtml: escapeHtml,
+        compact: true,
+        returnPlanType: getActiveReturnPlanType() || null,
+        outboundRoutePlan: routePlan.outboundRoutePlan || null,
+        returnRoutePlan: routePlan.returnRoutePlan || null
+      });
+    }
+    return "";
+  }
+
+  function renderRouteMapBlock(){
+    return (
+      '<section class="estimate-route-map-block" aria-label="ルート地図">' +
+        '<div class="estimate-route-map-wrap">' +
+          '<div class="estimate-route-map" role="img" aria-label="走行予定ルート地図"></div>' +
+        "</div>" +
+      "</section>"
+    );
+  }
+
+  function renderRouteDetailsBlock(routePlan){
+    if(!routePlan){
+      return "";
+    }
+    const primaryRoute = getRoutePlanPrimaryRoute(routePlan);
+    const outboundLeg = routePlan.outboundRoutePlan || null;
+    const returnLeg = routePlan.returnRoutePlan || null;
+    const outboundRoute = outboundLeg
+      ? getRoutePlanPrimaryRoute({
+        routes: outboundLeg.routes,
+        selectedRouteId: outboundLeg.selectedRouteId,
+        distanceMeters: outboundLeg.distanceMeters,
+        durationSeconds: outboundLeg.durationSeconds,
+        encodedPolyline: outboundLeg.encodedPolyline
+      })
+      : primaryRoute;
+    const returnRoute = returnLeg
+      ? getRoutePlanPrimaryRoute({
+        routes: returnLeg.routes,
+        selectedRouteId: returnLeg.selectedRouteId,
+        distanceMeters: returnLeg.distanceMeters,
+        durationSeconds: returnLeg.durationSeconds,
+        encodedPolyline: returnLeg.encodedPolyline
+      })
+      : null;
+    const plannedDistance = formatRouteDistanceMeters(routePlan.totalDistanceMeters || primaryRoute?.distanceMeters || routePlan.distanceMeters || 0);
+    const plannedDuration = formatRouteDurationSeconds(routePlan.totalDurationSeconds || primaryRoute?.durationSeconds || routePlan.durationSeconds || 0);
+    const roadTypeLabel = getRoadTypeLabel(routePlan.roadType || state.roadType);
+    const previewTitle = getSelectedRoutePreviewTitle(routePlan);
+
+    return (
+      '<section class="estimate-route-details" aria-label="' + escapeAttr(previewTitle) + '">' +
+        '<h4 class="estimate-route-details-title">' + escapeHtml(previewTitle) + "</h4>" +
+        renderRoutePreviewStatusNote(routePlan) +
+        '<dl class="estimate-route-info-list">' +
+          '<div class="estimate-route-info-row">' +
+            "<dt>出発地</dt>" +
+            "<dd>" + escapeHtml(routePlan.pickup?.address || outboundLeg?.origin?.address || state.originAddress || "-") + "</dd>" +
+          "</div>" +
+          '<div class="estimate-route-info-row">' +
+            "<dt>目的地</dt>" +
+            "<dd>" + escapeHtml(routePlan.destination?.address || outboundLeg?.destination?.address || state.destinationAddress || "-") + "</dd>" +
+          "</div>" +
+          (outboundRoute ? (
+            '<div class="estimate-route-info-row">' +
+              "<dt>往路距離</dt>" +
+              "<dd>" + escapeHtml(formatRouteDistanceMeters(outboundRoute.distanceMeters) || "-") + "</dd>" +
+            "</div>"
+          ) : "") +
+          (returnRoute ? (
+            '<div class="estimate-route-info-row">' +
+              "<dt>復路距離</dt>" +
+              "<dd>" + escapeHtml(formatRouteDistanceMeters(returnRoute.distanceMeters) || "-") + "</dd>" +
+            "</div>"
+          ) : "") +
+          (getActiveReturnPlanType() === "return_pending" && isRoundTripActive() ? (
+            '<div class="estimate-route-info-row">' +
+              "<dt>復路</dt>" +
+              "<dd>帰り未定のため確認対応</dd>" +
+            "</div>"
+          ) : "") +
+          '<div class="estimate-route-info-row">' +
+            "<dt>道路設定</dt>" +
+            "<dd>" + escapeHtml(roadTypeLabel) + "</dd>" +
+          "</div>" +
+          '<div class="estimate-route-info-row">' +
+            "<dt>" + (isRoundTripActive() ? "合計予定距離" : "予定距離") + "</dt>" +
+            "<dd>" + escapeHtml(plannedDistance || formatRouteDistance(state.distanceKm) || "-") + "</dd>" +
+          "</div>" +
+          '<div class="estimate-route-info-row">' +
+            "<dt>予定時間</dt>" +
+            "<dd>" + escapeHtml(plannedDuration || formatRouteDuration(state.routeCalcResult?.durationMinutes || 0) || "-") + "</dd>" +
+          "</div>" +
+        "</dl>" +
+      "</section>"
+    );
+  }
+
   function renderDistanceStep(stepNum, step){
     const label = step.title;
     const note = isRoundTripActive()
@@ -3284,13 +3407,9 @@
     const routeResultArea = state.routePlan
       ? (
         '<div id="estimateRouteResultArea" class="estimate-route-result-area">' +
-          '<section class="estimate-route-preview estimate-route-preview--inline" aria-label="走行予定ルート">' +
-            '<h4 class="estimate-route-preview-title">走行予定ルート</h4>' +
-            '<div class="estimate-route-map-wrap">' +
-              '<div class="estimate-route-map" role="img" aria-label="走行予定ルート地図"></div>' +
-            "</div>" +
-          "</section>" +
           renderStepRouteSelection() +
+          renderRouteMapBlock() +
+          renderRouteDetailsBlock(state.routePlan) +
           '<p class="estimate-route-mobile-summary-note">距離・時間は目安です。実際の運行状況により変わる場合があります。</p>' +
         "</div>"
       )
@@ -3817,71 +3936,13 @@
     const phoneUrl = state.ctaUrls.phone || "#";
 
     const routePlan = state.routePlan;
-    const primaryRoute = getRoutePlanPrimaryRoute(routePlan);
-    const outboundLeg = routePlan?.outboundRoutePlan || null;
-    const returnLeg = routePlan?.returnRoutePlan || null;
-    const outboundRoute = outboundLeg ? getRoutePlanPrimaryRoute({ routes: outboundLeg.routes, selectedRouteId: outboundLeg.selectedRouteId, distanceMeters: outboundLeg.distanceMeters, durationSeconds: outboundLeg.durationSeconds, encodedPolyline: outboundLeg.encodedPolyline }) : primaryRoute;
-    const returnRoute = returnLeg ? getRoutePlanPrimaryRoute({ routes: returnLeg.routes, selectedRouteId: returnLeg.selectedRouteId, distanceMeters: returnLeg.distanceMeters, durationSeconds: returnLeg.durationSeconds, encodedPolyline: returnLeg.encodedPolyline }) : null;
-    const plannedDistance = formatRouteDistanceMeters(routePlan?.totalDistanceMeters || primaryRoute?.distanceMeters || routePlan?.distanceMeters || 0);
-    const plannedDuration = formatRouteDurationSeconds(routePlan?.totalDurationSeconds || primaryRoute?.durationSeconds || routePlan?.durationSeconds || 0);
-    const roadTypeLabel = getRoadTypeLabel(routePlan?.roadType || state.roadType);
-    const roundTripStatusHtml = isPreFixedFareMode() && routePlan && window.PreFixedFareStatus
-      ? window.PreFixedFareStatus.buildStatusHtml(routePlan, {
-        escapeHtml: escapeHtml,
-        returnPlanType: getActiveReturnPlanType() || result?.quoteSnapshot?.returnPlanType || null,
-        outboundRoutePlan: result?.quoteSnapshot?.outboundRoutePlan || routePlan?.outboundRoutePlan || null,
-        returnRoutePlan: result?.quoteSnapshot?.returnRoutePlan || routePlan?.returnRoutePlan || null
-      })
+    const routeBlockHtml = routePlan
+      ? (
+        renderRouteSelectionSection(result) +
+        renderRouteMapBlock() +
+        renderRouteDetailsBlock(routePlan)
+      )
       : "";
-    const routeCardHtml = routePlan ? `
-      <section class="estimate-route-preview" aria-label="走行予定ルート">
-        <h4 class="estimate-route-preview-title">走行予定ルート（選択中）</h4>
-        ${roundTripStatusHtml}
-        <div class="estimate-route-map-wrap">
-          <div class="estimate-route-map" role="img" aria-label="走行予定ルート地図"></div>
-        </div>
-        <dl class="estimate-route-info-list">
-          <div class="estimate-route-info-row">
-            <dt>出発地</dt>
-            <dd>${escapeHtml(routePlan?.pickup?.address || outboundLeg?.origin?.address || state.originAddress || "-")}</dd>
-          </div>
-          <div class="estimate-route-info-row">
-            <dt>目的地</dt>
-            <dd>${escapeHtml(routePlan?.destination?.address || outboundLeg?.destination?.address || state.destinationAddress || "-")}</dd>
-          </div>
-          ${outboundRoute ? `
-            <div class="estimate-route-info-row">
-              <dt>往路距離</dt>
-              <dd>${escapeHtml(formatRouteDistanceMeters(outboundRoute.distanceMeters) || "-")}</dd>
-            </div>
-          ` : ""}
-          ${returnRoute ? `
-            <div class="estimate-route-info-row">
-              <dt>復路距離</dt>
-              <dd>${escapeHtml(formatRouteDistanceMeters(returnRoute.distanceMeters) || "-")}</dd>
-            </div>
-          ` : ""}
-          ${getActiveReturnPlanType() === "return_pending" && isRoundTripActive() ? `
-            <div class="estimate-route-info-row">
-              <dt>復路</dt>
-              <dd>帰り未定のため確認対応</dd>
-            </div>
-          ` : ""}
-          <div class="estimate-route-info-row">
-            <dt>道路設定</dt>
-            <dd>${escapeHtml(roadTypeLabel)}</dd>
-          </div>
-          <div class="estimate-route-info-row">
-            <dt>${isRoundTripActive() ? "合計予定距離" : "予定距離"}</dt>
-            <dd>${escapeHtml(plannedDistance || formatRouteDistance(state.distanceKm) || "-")}</dd>
-          </div>
-          <div class="estimate-route-info-row">
-            <dt>予定時間</dt>
-            <dd>${escapeHtml(plannedDuration || formatRouteDuration(state.routeCalcResult?.durationMinutes || 0) || "-")}</dd>
-          </div>
-        </dl>
-      </section>
-    ` : "";
 
     return `
       <section class="estimate-result" id="estimateResultArea" aria-live="polite" aria-atomic="true">
@@ -3894,6 +3955,15 @@
             <div class="estimate-total-amount">${escapeHtml(formatResultTotalAmount(result.total))}</div>
           </div>
         </div>
+        <div class="estimate-result-route-block">
+          ${routeBlockHtml}
+        </div>
+        <div class="estimate-breakdown-groups">
+          ${renderFareSections(result)}
+        </div>
+        ${renderUsageSummary(result)}
+        ${renderFareBasis(result)}
+        ${renderCalculationBasis(result)}
         <div class="estimate-cta-group estimate-cta-group--result" id="estimateResultReservationCta">
           <a class="estimate-cta-primary${isReviewDemoMode() ? " estimate-cta-primary--review-demo" : ""}" href="${escapeAttr(reservationUrl)}"${isReviewDemoMode() ? ' data-review-demo-scroll="1"' : ' rel="noopener noreferrer"'}>${escapeHtml(getReservationCtaLabel())}</a>
           ${isReviewDemoMode()
@@ -3903,16 +3973,6 @@
               : "")}
         </div>
         ${renderReviewDemoReservationPanel(result)}
-        <div class="estimate-breakdown-groups">
-          ${renderFareSections(result)}
-        </div>
-        ${renderUsageSummary(result)}
-        ${renderFareBasis(result)}
-        ${renderCalculationBasis(result)}
-        <div class="estimate-result-route-block">
-          ${renderRouteSelectionSection(result)}
-          ${routeCardHtml}
-        </div>
         ${renderResultPolicyNotice()}
         <div class="estimate-result-actions">
           <button type="button" class="estimate-pdf-btn" id="estimatePdfBtn">見積書PDFを保存</button>

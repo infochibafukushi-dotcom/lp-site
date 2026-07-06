@@ -180,6 +180,17 @@
     const escapeHtml = typeof opts.escapeHtml === "function"
       ? opts.escapeHtml
       : function(text){ return String(text ?? ""); };
+    if(opts.compact){
+      const messages = buildStatusMessages(routePlan, opts);
+      if(!messages.length){
+        return "";
+      }
+      return (
+        "<div class=\"estimate-round-trip-status estimate-round-trip-status--compact\">" +
+        "<p class=\"estimate-route-preview-note\">選択中のルートです。</p>" +
+        "</div>"
+      );
+    }
     const messages = buildStatusMessages(routePlan, opts);
     if(!messages.length){
       return "";

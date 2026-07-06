@@ -642,6 +642,31 @@
 .estimate-route-preview--inline{
   margin-top:14px;
 }
+.estimate-route-map-block{
+  margin:10px 0 0;
+}
+.estimate-route-details{
+  margin:10px 0 0;
+}
+.estimate-route-details-title{
+  margin:0 0 6px;
+  font-size:15px;
+  font-weight:700;
+  color:#2d2a26;
+  line-height:1.3;
+}
+.estimate-route-preview-note{
+  margin:0 0 8px;
+  font-size:12px;
+  line-height:1.5;
+  color:#666;
+}
+.estimate-round-trip-status--compact{
+  margin:0 0 8px;
+}
+.estimate-round-trip-status--compact .estimate-route-preview-note{
+  margin:0;
+}
 .estimate-route-map-legend{
   display:flex;
   flex-direction:column;
@@ -1724,12 +1749,20 @@ body.estimate-has-mobile-reserve-bar .estimate-wrap{
   }
   .estimate-page.estimate-has-sticky-reserve-bar .estimate-route-result-area,
   .estimate-page.estimate-has-mobile-reserve-bar .estimate-route-result-area,
+  .estimate-page.estimate-has-sticky-reserve-bar .estimate-route-map-block,
+  .estimate-page.estimate-has-mobile-reserve-bar .estimate-route-map-block,
+  .estimate-page.estimate-has-sticky-reserve-bar .estimate-route-details,
+  .estimate-page.estimate-has-mobile-reserve-bar .estimate-route-details,
   .estimate-page.estimate-has-sticky-reserve-bar .estimate-route-preview--inline,
   .estimate-page.estimate-has-mobile-reserve-bar .estimate-route-preview--inline,
   .estimate-page.estimate-has-sticky-reserve-bar .estimate-route-selection,
   .estimate-page.estimate-has-mobile-reserve-bar .estimate-route-selection,
   body.estimate-has-sticky-reserve-bar .estimate-route-result-area,
   body.estimate-has-mobile-reserve-bar .estimate-route-result-area,
+  body.estimate-has-sticky-reserve-bar .estimate-route-map-block,
+  body.estimate-has-mobile-reserve-bar .estimate-route-map-block,
+  body.estimate-has-sticky-reserve-bar .estimate-route-details,
+  body.estimate-has-mobile-reserve-bar .estimate-route-details,
   body.estimate-has-sticky-reserve-bar .estimate-route-preview--inline,
   body.estimate-has-mobile-reserve-bar .estimate-route-preview--inline,
   body.estimate-has-sticky-reserve-bar .estimate-route-selection,
@@ -1843,8 +1876,12 @@ body.estimate-has-mobile-reserve-bar .estimate-wrap{
   }
 
   .estimate-route-result-area .estimate-route-preview--inline,
+  .estimate-route-result-area .estimate-route-map-block,
+  .estimate-route-result-area .estimate-route-details,
   .estimate-route-result-area .estimate-route-selection,
   .estimate-result-route-block .estimate-route-preview,
+  .estimate-result-route-block .estimate-route-map-block,
+  .estimate-result-route-block .estimate-route-details,
   .estimate-result-route-block .estimate-route-selection{
     margin:0;
     padding:0;
@@ -1857,13 +1894,40 @@ body.estimate-has-mobile-reserve-bar .estimate-wrap{
   }
 
   .estimate-route-result-area .estimate-route-preview-title,
-  .estimate-result-route-block .estimate-route-preview-title{
-    padding:0 4px;
+  .estimate-result-route-block .estimate-route-preview-title,
+  .estimate-route-result-area .estimate-route-details-title,
+  .estimate-result-route-block .estimate-route-details-title{
+    padding:0 10px;
+    margin:8px 0 6px;
+    font-size:15px;
+    color:#2d2a26;
+  }
+
+  .estimate-route-result-area .estimate-route-preview-note,
+  .estimate-result-route-block .estimate-route-preview-note,
+  .estimate-route-result-area .estimate-round-trip-status--compact,
+  .estimate-result-route-block .estimate-round-trip-status--compact{
+    padding:0 10px;
     margin:0 0 6px;
   }
 
+  .estimate-route-result-area .estimate-route-info-list,
+  .estimate-result-route-block .estimate-route-info-list{
+    margin:0;
+    padding:0 10px 8px;
+  }
+
+  .estimate-route-result-area .estimate-route-info-row,
+  .estimate-result-route-block .estimate-route-info-row{
+    padding:8px 0;
+    border-bottom-color:#ece7df;
+    font-size:13px;
+  }
+
   .estimate-route-result-area .estimate-route-map,
-  .estimate-result-route-block .estimate-route-map{
+  .estimate-result-route-block .estimate-route-map,
+  .estimate-route-result-area .estimate-route-map-block .estimate-route-map,
+  .estimate-result-route-block .estimate-route-map-block .estimate-route-map{
     width:100%;
     border-radius:0;
     height:min(52vw, 280px);
@@ -1871,18 +1935,22 @@ body.estimate-has-mobile-reserve-bar .estimate-wrap{
   }
 
   .estimate-route-result-area .estimate-route-map-wrap,
-  .estimate-result-route-block .estimate-route-map-wrap{
+  .estimate-result-route-block .estimate-route-map-wrap,
+  .estimate-route-result-area .estimate-route-map-block .estimate-route-map-wrap,
+  .estimate-result-route-block .estimate-route-map-block .estimate-route-map-wrap{
     width:100%;
     margin:0;
     overflow:visible;
   }
 
   .estimate-route-result-area .estimate-route-map-legend,
-  .estimate-result-route-block .estimate-route-map-legend{
+  .estimate-result-route-block .estimate-route-map-legend,
+  .estimate-route-result-area .estimate-route-map-block + .estimate-route-map-legend,
+  .estimate-result-route-block .estimate-route-map-block .estimate-route-map-legend{
     position:static;
-    width:100%;
-    max-width:100%;
-    margin:4px 0 8px;
+    width:calc(100% - 20px);
+    max-width:calc(100% - 20px);
+    margin:4px 10px 8px;
     padding:6px 8px;
     border-radius:6px;
     border:1px solid #e8e8e8;
@@ -2041,7 +2109,7 @@ body.estimate-has-mobile-reserve-bar .estimate-wrap{
     width:100%;
     max-width:100%;
     margin:8px 0 0;
-    padding:0 8px;
+    padding:0 10px;
     font-size:12px;
     line-height:1.55;
     color:#888;
@@ -2050,6 +2118,34 @@ body.estimate-has-mobile-reserve-bar .estimate-wrap{
     text-overflow:clip;
     word-break:break-word;
     box-sizing:border-box;
+  }
+
+  .estimate-route-result-area .estimate-route-map-block,
+  .estimate-result-route-block .estimate-route-map-block{
+    margin-top:8px;
+  }
+
+  .estimate-result .estimate-breakdown-groups,
+  .estimate-result .estimate-fare-basis,
+  .estimate-result .estimate-calc-basis,
+  .estimate-result .estimate-usage-summary{
+    width:calc(100% + 32px);
+    max-width:none;
+    margin-left:-16px;
+    margin-right:-16px;
+    padding-left:10px;
+    padding-right:10px;
+    box-sizing:border-box;
+  }
+
+  .estimate-result .estimate-breakdown-section,
+  .estimate-result .estimate-fare-basis,
+  .estimate-result .estimate-calc-basis-panel{
+    border-radius:0;
+  }
+
+  .estimate-result .estimate-cta-group--result{
+    margin-top:16px;
   }
 }
 
