@@ -628,13 +628,13 @@
 }
 .estimate-route-map-wrap{
   position:relative;
-  transition:opacity 0.7s ease;
+  transition:opacity 2.8s ease;
 }
 .estimate-route-map-wrap--switching{
   opacity:0.45;
 }
 .estimate-route-card{
-  transition:box-shadow 0.7s ease, border-color 0.7s ease;
+  transition:box-shadow 2.8s ease, border-color 2.8s ease;
 }
 .estimate-route-map-wrap .estimate-route-map{
   display:block;

@@ -43,8 +43,8 @@
   let routeMapAnimationTimers = [];
   let routeMapAnimationLifecycleBound = false;
   const ROUTE_ARROW_ANIMATION_MS = 4500;
-  const ROUTE_UI_TRANSITION_MS = 700;
-  const SCROLL_ANIMATION_MS = 700;
+  const ROUTE_UI_TRANSITION_MS = 2800;
+  const SCROLL_ANIMATION_MS = 2800;
   // 初回表示・再読み込み時はページ上部から開始する（STEPカード途中への自動スクロールを抑止）
   let pageEntryScrollPending = true;
   let pendingScrollToEstimateResult = false;
@@ -1712,6 +1712,12 @@
     if(!routePlan || !isPreFixedFareMode()){
       return false;
     }
+    if(canUseRoundTripPairSelection(routePlan)){
+      return false;
+    }
+    if(anyLegRequiresRouteSelection(routePlan)){
+      return false;
+    }
     return isRouteReviewComplete(routePlan);
   }
 
@@ -1868,9 +1874,14 @@
       return "time_priority";
     }
     if(canUseRoundTripPairSelection(routePlan)){
-      const selectedStrategy = getSelectedRoundTripPairStrategy(routePlan);
-      if(selectedStrategy){
-        return selectedStrategy;
+      const outboundLeg = routePlan.outboundRoutePlan;
+      const returnLeg = routePlan.returnRoutePlan;
+      if(outboundLeg && returnLeg){
+        const outboundStrategy = getRouteStrategyKey(window.EstimateCalc.getLegPrimaryRoute(outboundLeg));
+        const returnStrategy = getRouteStrategyKey(window.EstimateCalc.getLegPrimaryRoute(returnLeg));
+        if(outboundStrategy && outboundStrategy === returnStrategy){
+          return outboundStrategy;
+        }
       }
       const pairs = buildRoundTripRoutePairs(routePlan);
       return pairs[0]?.strategy || "time_priority";
@@ -2082,15 +2093,30 @@
     );
   }
 
-  function getRouteSelectButtonLabel(isSelected){
-    return isSelected ? "ルート表示中" : "ルート確認";
+  function getRouteSelectButtonLabel(isMapActive){
+    return isMapActive ? "料金確認へ" : "地図で見る";
   }
 
-  function renderRouteSelectButtonLabel(isSelected){
-    const fullLabel = getRouteSelectButtonLabel(isSelected);
+  function renderRouteSelectButton(isMapActive, attrs){
+    const attrHtml = Object.keys(attrs || {}).map(function(key){
+      return key + '="' + escapeAttr(attrs[key]) + '"';
+    }).join(" ");
+    const fullLabel = getRouteSelectButtonLabel(isMapActive);
+    const shortLabel = isMapActive ? "料金確認へ" : "地図で見る";
+    return (
+      '<button type="button" class="estimate-route-select-btn' + (isMapActive ? " is-selected" : "") + '" ' + attrHtml + ">" +
+        '<span class="estimate-route-select-btn-label-full">' + escapeHtml(fullLabel) + "</span>" +
+        '<span class="estimate-route-select-btn-label-short">' + escapeHtml(shortLabel) + "</span>" +
+      "</button>"
+    );
+  }
+
+  function renderRouteSelectButtonLabel(isMapActive){
+    const fullLabel = getRouteSelectButtonLabel(isMapActive);
+    const shortLabel = isMapActive ? "料金確認へ" : "地図で見る";
     return (
       '<span class="estimate-route-select-btn-label-full">' + escapeHtml(fullLabel) + "</span>" +
-      '<span class="estimate-route-select-btn-label-short">' + escapeHtml(fullLabel) + "</span>"
+      '<span class="estimate-route-select-btn-label-short">' + escapeHtml(shortLabel) + "</span>"
     );
   }
 
@@ -2136,10 +2162,16 @@
           || document.querySelector("#estimateRouteResultArea")
           || document.querySelector(".estimate-route-result")
           || document.querySelector(".estimate-route-selection");
-        if(!target || typeof target.scrollIntoView !== "function"){
+        if(!target){
           return;
         }
-        target.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
+        if(prefersReducedMotion()){
+          target.scrollIntoView({ behavior: "auto", block: "start" });
+          return;
+        }
+        const offset = getStickyChromeOffset();
+        const absoluteTop = target.getBoundingClientRect().top + (window.pageYOffset || window.scrollY || 0);
+        smoothScrollToY(Math.max(0, absoluteTop - offset), SCROLL_ANIMATION_MS);
       });
     });
   }
@@ -2242,23 +2274,59 @@
     }
   }
 
-  function selectRoute(routeId, legKey){
+  function applyRoundTripRoutePair(strategy){
+    if(!state.routePlan || !canUseRoundTripPairSelection(state.routePlan)){
+      return false;
+    }
+    const pair = buildRoundTripRoutePairs(state.routePlan).find(function(item){
+      return item.strategy === strategy;
+    });
+    if(!pair){
+      return false;
+    }
+    applyRoadTypeFromRoute(pair.outboundRoute);
+    const outboundLeg = applyRouteToLegPlan(state.routePlan.outboundRoutePlan, pair.outboundRoute);
+    const returnLeg = applyRouteToLegPlan(state.routePlan.returnRoutePlan, pair.returnRoute);
+    syncStateFromRoutePlan(rebuildRoutePlanFromLegs(outboundLeg, returnLeg));
+    invalidateEstimateNumberIfChanged();
+    return true;
+  }
+
+  function previewRoundTripRouteOnMap(strategy){
+    if(!applyRoundTripRoutePair(strategy)){
+      return;
+    }
+    state.lastActiveStepId = "distance";
+    renderPage();
+  }
+
+  function confirmRoundTripRouteFare(strategy){
+    if(!applyRoundTripRoutePair(strategy)){
+      return;
+    }
+    state.distanceRouteReviewed = true;
+    state.lastActiveStepId = "result";
+    markPendingScrollToEstimateResult();
+    renderPage();
+  }
+
+  function applyLegRoutePreview(routeId, legKey){
     const key = legKey === "return" ? "return" : "outbound";
     const legPlan = key === "return"
       ? state.routePlan?.returnRoutePlan
       : (state.routePlan?.outboundRoutePlan || state.routePlan);
     if(!legPlan){
-      return;
+      return false;
     }
     if(!legAllowsRouteSelection(legPlan)){
-      return;
+      return false;
     }
     const routes = getDisplayRouteCandidatesFromLeg(legPlan);
     const route = routes.find(function(item){
       return String(item?.routeId || "") === String(routeId || "");
     });
     if(!route || !state.routePlan){
-      return;
+      return false;
     }
     applyRoadTypeFromRoute(route);
     if(state.routePlan.outboundRoutePlan){
@@ -2279,37 +2347,33 @@
       };
     }
     invalidateEstimateNumberIfChanged();
-    state.distanceRouteReviewed = isRouteReviewComplete(state.routePlan);
-    const flowComplete = isFlowComplete();
-    state.lastActiveStepId = flowComplete ? "result" : "distance";
-    if(flowComplete){
-      markPendingScrollToEstimateResult();
+    return true;
+  }
+
+  function previewRouteOnMap(routeId, legKey){
+    if(!applyLegRoutePreview(routeId, legKey)){
+      return;
     }
+    state.lastActiveStepId = "distance";
     renderPage();
   }
 
-  function selectRoundTripRoutePair(strategy){
-    if(!state.routePlan || !canUseRoundTripPairSelection(state.routePlan)){
+  function confirmRouteFare(routeId, legKey){
+    if(!applyLegRoutePreview(routeId, legKey)){
       return;
     }
-    const pair = buildRoundTripRoutePairs(state.routePlan).find(function(item){
-      return item.strategy === strategy;
-    });
-    if(!pair){
-      return;
-    }
-    applyRoadTypeFromRoute(pair.outboundRoute);
-    const outboundLeg = applyRouteToLegPlan(state.routePlan.outboundRoutePlan, pair.outboundRoute);
-    const returnLeg = applyRouteToLegPlan(state.routePlan.returnRoutePlan, pair.returnRoute);
-    syncStateFromRoutePlan(rebuildRoutePlanFromLegs(outboundLeg, returnLeg));
-    invalidateEstimateNumberIfChanged();
-    state.distanceRouteReviewed = isRouteReviewComplete(state.routePlan);
-    const flowComplete = isFlowComplete();
-    state.lastActiveStepId = flowComplete ? "result" : "distance";
-    if(flowComplete){
-      markPendingScrollToEstimateResult();
-    }
+    state.distanceRouteReviewed = true;
+    state.lastActiveStepId = "result";
+    markPendingScrollToEstimateResult();
     renderPage();
+  }
+
+  function selectRoute(routeId, legKey){
+    previewRouteOnMap(routeId, legKey);
+  }
+
+  function selectRoundTripRoutePair(strategy){
+    previewRoundTripRouteOnMap(strategy);
   }
 
   function computeResultForRoundTripPair(pair){
@@ -2335,9 +2399,8 @@
     if(!pairs.length){
       return "";
     }
-    const selectedStrategy = getSelectedRoundTripPairStrategy(routePlan);
+    const activeMapStrategy = getActiveRouteMapStrategy(routePlan);
     const compact = options?.compact === true;
-    const stepReviewPending = compact && isPreFixedFareMode() && !state.distanceRouteReviewed;
     const notice = buildResponsiveNote(
       "往復の走行予定ルートを1つ選択してください。選択した往復ルートの合計距離で事前確定運賃を算定します。",
       "往復ルートを選択してください。"
@@ -2349,7 +2412,7 @@
       return pair.usesToll === true;
     });
     const cards = pairs.map(function(pair){
-      const isSelected = pair.strategy === selectedStrategy;
+      const isMapActive = pair.strategy === activeMapStrategy;
       const abInfo = getRouteAbInfo(pair.strategy, { roundTrip: true });
       const outboundDistanceLabel = formatRouteDistanceMeters(pair.outboundDistanceMeters);
       const outboundDurationLabel = formatRouteDurationSeconds(pair.outboundDurationSeconds);
@@ -2359,9 +2422,12 @@
       const totalDurationLabel = formatRouteDurationSeconds(pair.totalDurationSeconds);
       const pairResult = computeResultForRoundTripPair(pair);
       const fareLineHtml = renderRouteCardFareLine(pairResult);
-      const showAsSelected = !stepReviewPending && isSelected;
       const titleHtml = renderRouteCardTitle(abInfo, pair.label);
-      const buttonLabelHtml = renderRouteSelectButtonLabel(showAsSelected);
+      const routeAction = isMapActive ? "confirm-fare" : "preview-map";
+      const buttonHtml = renderRouteSelectButton(isMapActive, {
+        "data-select-roundtrip-pair": pair.strategy,
+        "data-route-action": routeAction
+      });
       const metaHtml = (
         '<div class="estimate-roundtrip-pair-meta">' +
           "<div>行き " + escapeHtml(outboundDistanceLabel || "-") + " " + escapeHtml(outboundDurationLabel || "-") + "</div>" +
@@ -2372,21 +2438,21 @@
 
       if(compact){
         return (
-          '<article class="estimate-route-card estimate-route-card--compact estimate-roundtrip-pair-card' + (isSelected ? " is-selected" : "") + (abInfo ? " estimate-route-card--ab-" + abInfo.colorClass : "") + '" data-route-card-strategy="' + escapeAttr(pair.strategy) + '">' +
+          '<article class="estimate-route-card estimate-route-card--compact estimate-roundtrip-pair-card' + (isMapActive ? " is-selected" : "") + (abInfo ? " estimate-route-card--ab-" + abInfo.colorClass : "") + '" data-route-card-strategy="' + escapeAttr(pair.strategy) + '">' +
             titleHtml +
             metaHtml +
             fareLineHtml +
-            '<button type="button" class="estimate-route-select-btn' + (showAsSelected ? " is-selected" : "") + '" data-select-roundtrip-pair="' + escapeAttr(pair.strategy) + '">' + buttonLabelHtml + "</button>" +
+            buttonHtml +
           "</article>"
         );
       }
 
       return (
-        '<article class="estimate-route-card estimate-roundtrip-pair-card' + (isSelected ? " is-selected" : "") + (abInfo ? " estimate-route-card--ab-" + abInfo.colorClass : "") + '" data-route-card-strategy="' + escapeAttr(pair.strategy) + '">' +
+        '<article class="estimate-route-card estimate-roundtrip-pair-card' + (isMapActive ? " is-selected" : "") + (abInfo ? " estimate-route-card--ab-" + abInfo.colorClass : "") + '" data-route-card-strategy="' + escapeAttr(pair.strategy) + '">' +
           titleHtml +
           metaHtml +
           fareLineHtml +
-          '<button type="button" class="estimate-route-select-btn' + (isSelected ? " is-selected" : "") + '" data-select-roundtrip-pair="' + escapeAttr(pair.strategy) + '">' + renderRouteSelectButtonLabel(isSelected) + "</button>" +
+          buttonHtml +
         "</article>"
       );
     }).join("");
@@ -2421,10 +2487,14 @@
     });
 
     const compact = options?.compact === true;
-    const stepReviewPending = compact && isPreFixedFareMode() && !state.distanceRouteReviewed;
+    const activeMapStrategy = state.routePlan ? getActiveRouteMapStrategy(state.routePlan) : "";
     const cards = routes.map(function(route, index){
       const routeId = String(route.routeId || "");
       const isSelected = routeId === selectedId || (!selectedId && index === 0);
+      const routeStrategy = getRouteStrategyKey(route);
+      const isMapActive = routeStrategy && activeMapStrategy
+        ? routeStrategy === activeMapStrategy
+        : isSelected;
       const routeResult = computeResultForRoute(route, legKey);
       const fareLineHtml = renderRouteCardFareLine(routeResult);
       const distanceLabel = formatRouteDistanceMeters(route.distanceMeters);
@@ -2439,12 +2509,18 @@
       const waypointLabel = route.intermediateWaypoint?.waypointLabel
         ? String(route.intermediateWaypoint.waypointLabel)
         : "";
-      const showAsSelected = !stepReviewPending && isSelected;
       const titleHtml = renderRouteCardTitle(abInfo, summary);
-      const buttonLabelHtml = renderRouteSelectButtonLabel(showAsSelected);
+      const routeAction = isMapActive ? "confirm-fare" : "preview-map";
+      const buttonHtml = showSelection
+        ? renderRouteSelectButton(isMapActive, {
+          "data-select-route-id": routeId,
+          "data-select-route-leg": legKey,
+          "data-route-action": routeAction
+        })
+        : "";
       const cardClass = "estimate-route-card"
         + (compact ? " estimate-route-card--compact" : "")
-        + (isSelected ? " is-selected" : "")
+        + (isMapActive ? " is-selected" : "")
         + (abInfo ? " estimate-route-card--ab-" + abInfo.colorClass : "");
 
       if(compact){
@@ -2458,9 +2534,7 @@
               escapeHtml(distanceLabel || "-") + " / " + escapeHtml(durationLabel || "-") +
             "</div>" +
             fareLineHtml +
-            (showSelection
-              ? '<button type="button" class="estimate-route-select-btn' + (showAsSelected ? " is-selected" : "") + '" data-select-route-id="' + escapeAttr(routeId) + '" data-select-route-leg="' + escapeAttr(legKey) + '">' + buttonLabelHtml + "</button>"
-              : "") +
+            buttonHtml +
           "</article>"
         );
       }
@@ -2483,9 +2557,7 @@
               : "") +
           "</dl>" +
           fareLineHtml +
-          (showSelection
-            ? '<button type="button" class="estimate-route-select-btn' + (isSelected ? " is-selected" : "") + '" data-select-route-id="' + escapeAttr(routeId) + '" data-select-route-leg="' + escapeAttr(legKey) + '">' + renderRouteSelectButtonLabel(isSelected) + "</button>"
-            : "") +
+          buttonHtml +
         "</article>"
       );
     }).join("");
@@ -2577,7 +2649,7 @@
       return "";
     }
     if(anyLegRequiresRouteSelection(state.routePlan)){
-      return '<p class="estimate-route-selection-note estimate-note-pc-only">ルート候補を選択すると見積結果へ進みます。</p>';
+      return '<p class="estimate-route-selection-note estimate-note-pc-only">「料金確認へ」を押すと見積結果へ進みます。</p>';
     }
     const reviewNotice = getReservationReviewNotice();
     return (
@@ -4043,7 +4115,15 @@
         event.preventDefault();
         const routeId = routeSelectBtn.getAttribute("data-select-route-id");
         const legKey = routeSelectBtn.getAttribute("data-select-route-leg") || "outbound";
-        if(routeId) selectRoute(routeId, legKey);
+        const routeAction = routeSelectBtn.getAttribute("data-route-action") || "preview-map";
+        if(!routeId){
+          return;
+        }
+        if(routeAction === "confirm-fare"){
+          confirmRouteFare(routeId, legKey);
+        }else{
+          previewRouteOnMap(routeId, legKey);
+        }
         return;
       }
       const routeCard = event.target.closest("[data-route-card-id]");
@@ -4051,21 +4131,29 @@
         event.preventDefault();
         const routeId = routeCard.getAttribute("data-route-card-id");
         const legKey = routeCard.getAttribute("data-route-card-leg") || "outbound";
-        if(routeId) selectRoute(routeId, legKey);
+        if(routeId) previewRouteOnMap(routeId, legKey);
         return;
       }
       const roundTripPairBtn = event.target.closest("[data-select-roundtrip-pair]");
       if(roundTripPairBtn){
         event.preventDefault();
         const pairStrategy = roundTripPairBtn.getAttribute("data-select-roundtrip-pair");
-        if(pairStrategy) selectRoundTripRoutePair(pairStrategy);
+        const routeAction = roundTripPairBtn.getAttribute("data-route-action") || "preview-map";
+        if(!pairStrategy){
+          return;
+        }
+        if(routeAction === "confirm-fare"){
+          confirmRoundTripRouteFare(pairStrategy);
+        }else{
+          previewRoundTripRouteOnMap(pairStrategy);
+        }
         return;
       }
       const roundTripCard = event.target.closest("[data-route-card-strategy]");
       if(roundTripCard && !event.target.closest("[data-select-roundtrip-pair]")){
         event.preventDefault();
         const pairStrategy = roundTripCard.getAttribute("data-route-card-strategy");
-        if(pairStrategy) selectRoundTripRoutePair(pairStrategy);
+        if(pairStrategy) previewRoundTripRouteOnMap(pairStrategy);
         return;
       }
       const routeAckBtn = event.target.closest("[data-distance-route-acknowledge]");

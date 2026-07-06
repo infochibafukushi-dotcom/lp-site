@@ -208,6 +208,24 @@
   }
 
   function pathFromRoute(route){
+    const routeLegs = Array.isArray(route?.routeLegs) ? route.routeLegs : [];
+    if(routeLegs.length >= 2){
+      const legPaths = routeLegs.map(function(routeLeg){
+        return decodePolyline(routeLeg?.encodedPolyline || "");
+      }).filter(function(path){
+        return path.length >= 2;
+      });
+      const combined = concatLegPaths(legPaths);
+      if(combined.length >= 2){
+        return combined;
+      }
+    }
+    if(routeLegs.length === 1){
+      const singlePath = decodePolyline(routeLegs[0]?.encodedPolyline || "");
+      if(singlePath.length >= 2){
+        return singlePath;
+      }
+    }
     return decodePolyline(route?.encodedPolyline || "");
   }
 

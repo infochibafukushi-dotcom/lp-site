@@ -313,4 +313,98 @@ if(/立ち寄り|復路|往路/.test(abFullLegendHtml)){
   throw new Error("legend must not include leg-based line labels");
 }
 
+function makeReturnLegWithStrategyCandidates(){
+  const returnCommonPath = [
+    { lat: 35.62, lng: 140.12 },
+    { lat: 35.615, lng: 140.105 }
+  ];
+  const returnBPath = [
+    { lat: 35.615, lng: 140.105 },
+    { lat: 35.602, lng: 140.108 },
+    { lat: 35.60, lng: 140.10 }
+  ];
+  const returnCPath = [
+    { lat: 35.615, lng: 140.105 },
+    { lat: 35.601, lng: 140.102 },
+    { lat: 35.60, lng: 140.10 }
+  ];
+  const makeReturnRoute = function(strategy, routeId, selectablePath){
+    return {
+      routeId: routeId,
+      routeStrategy: strategy,
+      encodedPolyline: encodePolyline(selectablePath),
+      distanceMeters: 1500,
+      routeLegs: [
+        { encodedPolyline: encodePolyline(returnCommonPath), endLatLng: { lat: 35.615, lng: 140.105 } },
+        { encodedPolyline: encodePolyline(selectablePath), startLatLng: { lat: 35.615, lng: 140.105 } }
+      ]
+    };
+  };
+  return {
+    selectedRouteId: "route_b",
+    encodedPolyline: encodePolyline(returnBPath),
+    routes: [
+      makeReturnRoute("time_priority", "route_a", returnBPath),
+      makeReturnRoute("general_road_priority", "route_b", returnBPath),
+      makeReturnRoute("shorter_distance", "route_c", returnCPath),
+      makeReturnRoute("toll_allowed", "route_d", returnCPath)
+    ],
+    routeCandidates: [
+      makeReturnRoute("time_priority", "route_a", returnBPath),
+      makeReturnRoute("general_road_priority", "route_b", returnBPath),
+      makeReturnRoute("shorter_distance", "route_c", returnCPath),
+      makeReturnRoute("toll_allowed", "route_d", returnCPath)
+    ],
+    waypoint: {
+      waypointAddress: "立ち寄り先",
+      waypointLatLng: { latitude: 35.615, longitude: 140.105 }
+    }
+  };
+}
+
+const abReturnStopFullPlan = {
+  tripType: "round_trip",
+  returnPlanType: "return_with_stop",
+  outboundRoutePlan: Object.assign(
+    makeAbLeg(outboundAPath, "time_priority", "route_a"),
+    {
+      routeCandidates: [
+        { routeId: "route_a", routeStrategy: "time_priority", encodedPolyline: encodePolyline(outboundAPath), distanceMeters: 1000 },
+        { routeId: "route_b", routeStrategy: "general_road_priority", encodedPolyline: encodePolyline(outboundBPath), distanceMeters: 1100 },
+        { routeId: "route_c", routeStrategy: "shorter_distance", encodedPolyline: encodePolyline(outboundCPath), distanceMeters: 900 },
+        { routeId: "route_d", routeStrategy: "toll_allowed", encodedPolyline: encodePolyline(outboundCPath), distanceMeters: 950 }
+      ]
+    }
+  ),
+  returnRoutePlan: makeReturnLegWithStrategyCandidates()
+};
+const strategyKeys = ["time_priority", "general_road_priority", "shorter_distance", "toll_allowed"];
+strategyKeys.forEach(function(strategy){
+  const mapKey = strategy === "time_priority" ? "routeA"
+    : strategy === "general_road_priority" ? "routeB"
+    : strategy === "shorter_distance" ? "routeC"
+    : "routeD";
+  const segments = display.buildDisplayRouteMapSegments(abReturnStopFullPlan, { lat: 35.615, lng: 140.105 }, {
+    activeStrategy: strategy
+  });
+  if(segments.length !== 1 || segments[0].key !== mapKey){
+    throw new Error(strategy + " active map should render one merged " + mapKey + " segment");
+  }
+  const path = segments[0].path || [];
+  if(path.length < outboundAPath.length + 2){
+    throw new Error(strategy + " merged path should include outbound and both return legs");
+  }
+  if(!path.some(function(point){
+    return Math.abs(point.lat - 35.615) < 0.0001 && Math.abs(point.lng - 140.105) < 0.0001;
+  })){
+    throw new Error(strategy + " merged path should pass through waypoint");
+  }
+  if(Math.abs(path[0].lat - outboundAPath[0].lat) > 0.0001 || Math.abs(path[0].lng - outboundAPath[0].lng) > 0.0001){
+    throw new Error(strategy + " merged path should start at outbound origin");
+  }
+  if(Math.abs(path[path.length - 1].lat - 35.60) > 0.0001 || Math.abs(path[path.length - 1].lng - 140.10) > 0.0001){
+    throw new Error(strategy + " merged path should end at home");
+  }
+});
+
 console.log("OK: route map display tests passed");
