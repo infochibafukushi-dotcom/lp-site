@@ -493,11 +493,6 @@
     const candidates = Array.isArray(overall.overallRouteCandidates) ? overall.overallRouteCandidates : [];
     const selectedCandidate = getSelectedOverallRouteCandidate(overall);
     const showSelectedRoute = Boolean(selectedCandidate);
-    const showReviewNotice = !showSelectedRoute
-      || candidates.length <= 1
-      || overall.fallbackReason === "only_one_distinct_route";
-    const reviewNotice = global.PreFixedFareStatus?.getSingleCandidateNotice?.()
-      || "ルート候補が1件のみのため、事前確定運賃としては確定せず、予約後に確認対応となります。";
 
     const parts = [];
     parts.push(
@@ -523,10 +518,6 @@
       const selectableLine = String(selectable.label || (selectable.originAddress + " → " + selectable.destinationAddress)).trim();
       parts.push(buildOverallRoutePdfParagraph("選択区間：", layout, { color: "#333", weight: "700", marginBottom: 2 }));
       parts.push(buildOverallRoutePdfParagraph("・" + selectableLine, layout, { marginBottom: gap }));
-    }
-
-    if(showReviewNotice){
-      parts.push(buildOverallRoutePdfParagraph(reviewNotice, layout, { color: "#8a6010", weight: "700" }));
     }
 
     if(showSelectedRoute){

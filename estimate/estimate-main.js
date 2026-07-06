@@ -2057,7 +2057,7 @@
         '<div class="estimate-route-card-head">' +
           renderRouteAbBadge(abInfo) +
           '<div class="estimate-route-card-titles">' +
-            '<div class="estimate-route-card-title-full">' + escapeHtml(abInfo.abLabel + " " + abInfo.fullLabel) + "</div>" +
+            '<div class="estimate-route-card-title-full">' + escapeHtml(abInfo.abLabel + " " + abInfo.shortLabel) + "</div>" +
             '<div class="estimate-route-card-title-short">' + escapeHtml(abInfo.abLabel + " " + abInfo.shortLabel) + "</div>" +
           "</div>" +
         "</div>"
@@ -2092,6 +2092,17 @@
       '<span class="estimate-route-select-btn-label-full">' + escapeHtml(fullLabel) + "</span>" +
       '<span class="estimate-route-select-btn-label-short">' + escapeHtml(fullLabel) + "</span>"
     );
+  }
+
+  function getRouteCardListClassName(routeCount, useAbLayout){
+    let className = "estimate-route-card-list";
+    if(useAbLayout){
+      className += " estimate-route-card-list--ab";
+      if(Number(routeCount) >= 4){
+        className += " estimate-route-card-list--four";
+      }
+    }
+    return className;
   }
 
   function renderRouteCardFareLine(routeResult){
@@ -2384,7 +2395,7 @@
       '<section class="estimate-route-selection estimate-roundtrip-pair-selection' + (useAbLayout ? " estimate-route-selection--ab" : "") + '" aria-label="往復ルートの選択">' +
         '<h4 class="estimate-route-selection-title">往復ルートの選択</h4>' +
         notice +
-        '<div class="estimate-route-card-list' + (useAbLayout ? " estimate-route-card-list--ab" : "") + '">' + cards + "</div>" +
+        '<div class="' + getRouteCardListClassName(pairs.length, useAbLayout) + '">' + cards + "</div>" +
         (useAbLayout ? renderSharedTollNote(hasTollNote) : "") +
       "</section>"
     );
@@ -2483,7 +2494,7 @@
       '<section class="estimate-route-selection' + (useAbLayout ? " estimate-route-selection--ab" : "") + '" aria-label="' + escapeAttr(sectionTitle) + '">' +
         '<h4 class="estimate-route-selection-title">' + escapeHtml(sectionTitle) + "</h4>" +
         notice +
-        '<div class="estimate-route-card-list' + (useAbLayout ? " estimate-route-card-list--ab" : "") + '">' + cards + "</div>" +
+        '<div class="' + getRouteCardListClassName(routes.length, useAbLayout) + '">' + cards + "</div>" +
         (useAbLayout ? renderSharedTollNote(hasTollNote) : "") +
       "</section>"
     );

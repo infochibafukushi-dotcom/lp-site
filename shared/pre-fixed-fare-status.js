@@ -73,24 +73,8 @@
     return candidates.length >= 2 && Boolean(selectedId);
   }
 
-  function shouldShowSingleCandidateNotice(routePlan, options){
-    if(!routePlan){
-      return false;
-    }
-    if(isOverallRouteSelectionConfirmable(routePlan)){
-      return false;
-    }
-    const outbound = getOutboundLeg(routePlan, options);
-    const returnPlanType = resolveReturnPlanType(routePlan, options);
-    const returnLeg = getReturnLeg(routePlan, options);
-    if(legNeedsReviewNotice(outbound)){
-      return true;
-    }
-    if(returnPlanType !== RETURN_PLAN_PENDING && legNeedsReviewNotice(returnLeg)){
-      return true;
-    }
-    return routePlan.preFixedFareConfirmable === false
-      && (legNeedsReviewNotice(outbound) || (returnPlanType !== RETURN_PLAN_PENDING && legNeedsReviewNotice(returnLeg)));
+  function shouldShowSingleCandidateNotice(){
+    return false;
   }
 
   function getReturnStopoverRouteStructureExplanation(){
@@ -101,18 +85,7 @@
     if(resolveReturnPlanType(routePlan, options) !== RETURN_WITH_STOP){
       return "";
     }
-    const returnLeg = getReturnLeg(routePlan, options);
-    const routeStructure = getReturnStopoverRouteStructureExplanation();
-    if(isOverallRouteSelectionConfirmable(routePlan)){
-      return routeStructure;
-    }
-    if(returnLeg && hasSingleNonConfirmableCandidate(returnLeg)){
-      return routeStructure + "ルート候補が1件のみのため、事前確定運賃としては確定せず、予約後に確認対応となります。";
-    }
-    if(returnLeg && !isLegConfirmable(returnLeg)){
-      return routeStructure + getSingleCandidateNotice();
-    }
-    return routeStructure;
+    return getReturnStopoverRouteStructureExplanation();
   }
 
   function getOverallRoutePathLabel(routePlan){
