@@ -628,6 +628,13 @@
 }
 .estimate-route-map-wrap{
   position:relative;
+  transition:opacity 0.7s ease;
+}
+.estimate-route-map-wrap--switching{
+  opacity:0.45;
+}
+.estimate-route-card{
+  transition:box-shadow 0.7s ease, border-color 0.7s ease;
 }
 .estimate-route-map-wrap .estimate-route-map{
   display:block;
@@ -2014,11 +2021,7 @@ body.estimate-has-mobile-reserve-bar .estimate-wrap{
 
   .estimate-route-card-list .estimate-route-select-btn-label-short,
   .estimate-route-card-list--ab .estimate-route-select-btn-label-short{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:2px;
+    display:block;
     line-height:1.25;
     white-space:normal;
   }

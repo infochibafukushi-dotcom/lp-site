@@ -12,10 +12,10 @@ const display = sandbox.window.EstimateRouteMapDisplay;
 
 const legPlan = {
   routeCandidates: [
-    { routeId: "route_0", routeStrategy: "time_priority", distanceMeters: 10000 },
-    { routeId: "route_1", routeStrategy: "general_road_priority", distanceMeters: 11000 },
-    { routeId: "route_2", routeStrategy: "shorter_distance", distanceMeters: 9000 },
-    { routeId: "route_3", routeStrategy: "toll_allowed", distanceMeters: 8000 }
+    { routeId: "route_0", routeStrategy: "time_priority", distanceMeters: 10000, encodedPolyline: "abcd" },
+    { routeId: "route_1", routeStrategy: "general_road_priority", distanceMeters: 11000, encodedPolyline: "efgh" },
+    { routeId: "route_2", routeStrategy: "shorter_distance", distanceMeters: 9000, encodedPolyline: "ijkl" },
+    { routeId: "route_3", routeStrategy: "toll_allowed", distanceMeters: 8000, encodedPolyline: "mnop" }
   ]
 };
 
@@ -32,19 +32,21 @@ if(strategies.join(",") !== "time_priority,general_road_priority,shorter_distanc
 const fallbackLeg = {
   routeCandidates: [
     { routeId: "route_0", routeStrategy: "time_priority", distanceMeters: 10000 },
-    { routeId: "route_1", routeStrategy: "confirmation_fallback", isConfirmationFallback: true, distanceMeters: 10000 }
+    { routeId: "route_1", routeStrategy: "general_road_priority", distanceMeters: 10000, isSyntheticRoute: true }
   ]
 };
 const fallbackRoutes = display.getDisplayRouteCandidates(fallbackLeg);
 if(fallbackRoutes.length !== 2){
-  throw new Error("Expected 2 routes with confirmation fallback, got " + fallbackRoutes.length + " (" + fallbackRoutes.map((r) => r.routeStrategy).join(",") + ")");
+  throw new Error("Expected 2 routes with synthetic B, got " + fallbackRoutes.length);
 }
-const fallbackRoute = fallbackRoutes.find((route) => route.routeStrategy === "confirmation_fallback");
-if(!fallbackRoute){
-  throw new Error("Missing confirmation fallback route in display list");
-}
-if(display.isMapRenderableRoute(fallbackRoute)){
-  throw new Error("Confirmation fallback should not be map-renderable");
+
+const allSegments = [
+  { key: "routeA", isAbRoute: true, path: [{ lat: 1, lng: 1 }, { lat: 2, lng: 2 }] },
+  { key: "routeB", isAbRoute: true, path: [{ lat: 1, lng: 1 }, { lat: 2, lng: 2 }] }
+];
+const filtered = display.filterSegmentsByActiveStrategy(allSegments, "time_priority");
+if(filtered.length !== 1 || filtered[0].key !== "routeA"){
+  throw new Error("Expected only routeA segment when filtering by time_priority");
 }
 
 console.log("display route candidate tests passed");

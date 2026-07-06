@@ -222,20 +222,16 @@
     return strategy === "time_priority" || strategy === "toll_allowed";
   }
 
-  function buildConfirmationFallbackRoute(primaryRoute){
+  function buildGeneralRoadPriorityFallbackRoute(primaryRoute){
     const primary = applyRoutePresentation(Object.assign({}, primaryRoute, {
       routeStrategy: "time_priority",
       generationReason: primaryRoute?.generationReason || "time_priority_route"
     }), "time_priority");
-    const fallback = applyRoutePresentation(Object.assign({}, primary, {
-      routeStrategy: "confirmation_fallback",
-      generationReason: "confirmation_fallback_route",
-      isConfirmationFallback: true,
-      routeLabel: "確認対応ルート",
-      routeDescription: "予約受付後に、道路状況を確認して最適なルートをご案内します。",
-      routeSummary: "確認対応ルート"
-    }), "confirmation_fallback");
-    return fallback;
+    return applyRoutePresentation(Object.assign({}, primary, {
+      routeStrategy: "general_road_priority",
+      generationReason: "general_road_priority_fallback",
+      isSyntheticRoute: true
+    }), "general_road_priority");
   }
 
   async function fetchAlternateRouteForMinimum(options, primaryRoute){
@@ -301,10 +297,10 @@
     }
 
     return {
-      routes: assignRouteIds([primary, buildConfirmationFallbackRoute(primary)]),
+      routes: assignRouteIds([primary, buildGeneralRoadPriorityFallbackRoute(primary)]),
       distinctRouteCount: 1,
-      preFixedFareConfirmable: false,
-      fallbackReason: "only_one_distinct_route"
+      preFixedFareConfirmable: true,
+      fallbackReason: null
     };
   }
 

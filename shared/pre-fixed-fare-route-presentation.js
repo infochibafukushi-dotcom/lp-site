@@ -27,13 +27,8 @@
     },
     toll_allowed: {
       routeType: "toll_allowed",
-      routeLabel: "高速道路ルート",
-      routeDescription: "遠方移動に適したルートです。有料道路料金は別途必要です。"
-    },
-    confirmation_fallback: {
-      routeType: "confirmation_fallback",
-      routeLabel: "確認対応ルート",
-      routeDescription: "予約受付後に、道路状況を確認して最適なルートをご案内します。"
+      routeLabel: "有料道路優先ルート",
+      routeDescription: "有料道路を活用して所要時間短縮を見込むルートです。有料道路料金は別途必要です。"
     }
   };
 
@@ -113,9 +108,6 @@
 
   function getRouteDisplayLabel(route, index){
     const strategy = resolveStrategy(route);
-    if(strategy === "confirmation_fallback" || route?.isConfirmationFallback === true){
-      return "確認対応ルート";
-    }
     if(strategy === "time_priority"){
       return resolveTimePriorityLabel(route);
     }

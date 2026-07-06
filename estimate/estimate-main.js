@@ -43,6 +43,8 @@
   let routeMapAnimationTimers = [];
   let routeMapAnimationLifecycleBound = false;
   const ROUTE_ARROW_ANIMATION_MS = 4500;
+  const ROUTE_UI_TRANSITION_MS = 700;
+  const SCROLL_ANIMATION_MS = 700;
   // 初回表示・再読み込み時はページ上部から開始する（STEPカード途中への自動スクロールを抑止）
   let pageEntryScrollPending = true;
   let pendingScrollToEstimateResult = false;
@@ -1857,6 +1859,93 @@
     }) || null;
   }
 
+  function legAllowsRouteSelection(legPlan){
+    return getDisplayRouteCandidatesFromLeg(legPlan).length >= 2;
+  }
+
+  function getActiveRouteMapStrategy(routePlan){
+    if(!routePlan){
+      return "time_priority";
+    }
+    if(canUseRoundTripPairSelection(routePlan)){
+      const selectedStrategy = getSelectedRoundTripPairStrategy(routePlan);
+      if(selectedStrategy){
+        return selectedStrategy;
+      }
+      const pairs = buildRoundTripRoutePairs(routePlan);
+      return pairs[0]?.strategy || "time_priority";
+    }
+    const legPlan = routePlan.outboundRoutePlan || routePlan;
+    const routes = getDisplayRouteCandidatesFromLeg(legPlan);
+    const selectedId = String(legPlan.selectedRouteId || "");
+    const selected = routes.find(function(route){
+      return String(route?.routeId || "") === selectedId;
+    }) || routes[0];
+    return getRouteStrategyKey(selected) || "time_priority";
+  }
+
+  function ensureDefaultRouteSelection(routePlan){
+    if(!routePlan || !isPreFixedFareMode()){
+      return routePlan;
+    }
+    if(canUseRoundTripPairSelection(routePlan)){
+      if(getSelectedRoundTripPairStrategy(routePlan)){
+        return routePlan;
+      }
+      const pairs = buildRoundTripRoutePairs(routePlan);
+      const defaultPair = pairs.find(function(pair){
+        return pair.strategy === "time_priority";
+      }) || pairs[0];
+      if(!defaultPair){
+        return routePlan;
+      }
+      const outboundLeg = applyRouteToLegPlan(routePlan.outboundRoutePlan, defaultPair.outboundRoute);
+      const returnLeg = applyRouteToLegPlan(routePlan.returnRoutePlan, defaultPair.returnRoute);
+      return rebuildRoutePlanFromLegs(outboundLeg, returnLeg);
+    }
+    let outboundLeg = routePlan.outboundRoutePlan || routePlan;
+    let returnLeg = routePlan.returnRoutePlan || null;
+    if(outboundLeg && legAllowsRouteSelection(outboundLeg) && outboundLeg.routeSelectionConfirmed !== true){
+      const defaultOutbound = findRouteCandidateByStrategy(outboundLeg, "time_priority")
+        || getDisplayRouteCandidatesFromLeg(outboundLeg)[0];
+      if(defaultOutbound){
+        outboundLeg = applyRouteToLegPlan(outboundLeg, defaultOutbound);
+      }
+    }
+    if(returnLeg && legAllowsRouteSelection(returnLeg) && returnLeg.routeSelectionConfirmed !== true){
+      const defaultReturn = findRouteCandidateByStrategy(returnLeg, "time_priority")
+        || getDisplayRouteCandidatesFromLeg(returnLeg)[0];
+      if(defaultReturn){
+        returnLeg = applyRouteToLegPlan(returnLeg, defaultReturn);
+      }
+    }
+    if(routePlan.outboundRoutePlan){
+      return rebuildRoutePlanFromLegs(outboundLeg, returnLeg);
+    }
+    return Object.assign({}, routePlan, outboundLeg);
+  }
+
+  function smoothScrollToY(top, duration){
+    const targetTop = Math.max(0, Number(top) || 0);
+    const startY = window.pageYOffset || window.scrollY || 0;
+    const distance = targetTop - startY;
+    if(prefersReducedMotion() || Math.abs(distance) < 2){
+      window.scrollTo(0, targetTop);
+      return;
+    }
+    const startTime = performance.now();
+    const step = function(now){
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      window.scrollTo(0, startY + distance * eased);
+      if(progress < 1){
+        requestAnimationFrame(step);
+      }
+    };
+    requestAnimationFrame(step);
+  }
+
   function getRouteMapDisplay(){
     return window.EstimateRouteMapDisplay || null;
   }
@@ -1888,8 +1977,8 @@
         shortLabel: "距離優先の往復"
       },
       toll_allowed: {
-        label: "高速道路の往復ルート",
-        shortLabel: "高速道路の往復"
+        label: "有料道路優先の往復ルート",
+        shortLabel: "有料道路優先の往復"
       }
     };
     return strategies.map(function(strategy){
@@ -1943,18 +2032,9 @@
       return {
         abLabel: "D",
         strategy: strategy,
-        fullLabel: isRoundTrip ? "高速道路の往復ルート" : "高速道路ルート",
-        shortLabel: "高速道路",
+        fullLabel: isRoundTrip ? "有料道路優先の往復ルート" : "有料道路優先ルート",
+        shortLabel: "有料道路優先",
         colorClass: "d"
-      };
-    }
-    if(strategy === "confirmation_fallback"){
-      return {
-        abLabel: "B",
-        strategy: strategy,
-        fullLabel: isRoundTrip ? "確認対応の往復ルート" : "確認対応ルート",
-        shortLabel: "確認対応",
-        colorClass: "b"
       };
     }
     return null;
@@ -2003,28 +2083,18 @@
   }
 
   function getRouteSelectButtonLabel(isSelected){
-    return isSelected ? "空き状況・料金内訳を確認中" : "空き状況・料金内訳を確認";
+    return isSelected ? "ルート表示中" : "ルート確認";
   }
 
   function renderRouteSelectButtonLabel(isSelected){
     const fullLabel = getRouteSelectButtonLabel(isSelected);
-    const mobileLine1 = isSelected ? "確認中" : "空き状況を確認";
-    const mobileLine2 = isSelected ? "表示中" : "料金内訳を見る";
     return (
       '<span class="estimate-route-select-btn-label-full">' + escapeHtml(fullLabel) + "</span>" +
-      '<span class="estimate-route-select-btn-label-short">' +
-        '<span class="estimate-route-select-btn-label-short-line">' + escapeHtml(mobileLine1) + "</span>" +
-        '<span class="estimate-route-select-btn-label-short-line">' + escapeHtml(mobileLine2) + "</span>" +
-      "</span>"
+      '<span class="estimate-route-select-btn-label-short">' + escapeHtml(fullLabel) + "</span>"
     );
   }
 
-  function isConfirmationFallbackRoute(route){
-    return getRouteStrategyKey(route) === "confirmation_fallback"
-      || route?.isConfirmationFallback === true;
-  }
-
-  function renderRouteCardFareLine(routeResult, route){
+  function renderRouteCardFareLine(routeResult){
     if(!routeResult){
       return "";
     }
@@ -2032,9 +2102,7 @@
     const routeFare = Number(snapshot.adjustedDistanceFareAmount) || Number(snapshot.fixedFareTotal) || 0;
     const estimateTotal = Number(routeResult.total) || 0;
     const routeFareText = routeFare > 0 ? formatYen(routeFare) : "算定中";
-    const totalText = isConfirmationFallbackRoute(route)
-      ? "Aルートと同額"
-      : (estimateTotal > 0 ? formatYen(estimateTotal) : "算定中");
+    const totalText = estimateTotal > 0 ? formatYen(estimateTotal) : "算定中";
     return (
       '<div class="estimate-route-card-fare-block">' +
         '<div class="estimate-route-card-fare-line estimate-route-card-fare-line--route">運賃目安：' + escapeHtml(routeFareText) + "</div>" +
@@ -2060,7 +2128,7 @@
         if(!target || typeof target.scrollIntoView !== "function"){
           return;
         }
-        target.scrollIntoView({ behavior: "smooth", block: "start" });
+        target.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
       });
     });
   }
@@ -2074,6 +2142,10 @@
     const behavior = options?.behavior || "smooth";
     const offset = getStickyChromeOffset();
     const absoluteTop = target.getBoundingClientRect().top + (window.pageYOffset || window.scrollY || 0);
+    if(behavior === "smooth" && !prefersReducedMotion()){
+      smoothScrollToY(Math.max(0, absoluteTop - offset), SCROLL_ANIMATION_MS);
+      return;
+    }
     window.scrollTo({
       top: Math.max(0, absoluteTop - offset),
       behavior: behavior
@@ -2091,18 +2163,6 @@
       return [];
     }
     const strategyDefs = getRoundTripPairStrategyDefinitions();
-    if(findRouteCandidateByStrategy(outboundLeg, "confirmation_fallback")
-      && findRouteCandidateByStrategy(returnLeg, "confirmation_fallback")
-      && !strategyDefs.some(function(item){
-        return item.strategy === "confirmation_fallback";
-      })){
-      strategyDefs.push({
-        strategy: "confirmation_fallback",
-        abLabel: "B",
-        label: "確認対応の往復ルート",
-        shortLabel: "確認対応の往復"
-      });
-    }
     return strategyDefs.map(function(pair){
       const outboundRoute = findRouteCandidateByStrategy(outboundLeg, pair.strategy);
       const returnRoute = findRouteCandidateByStrategy(returnLeg, pair.strategy);
@@ -2179,10 +2239,10 @@
     if(!legPlan){
       return;
     }
-    if(!isLegPreFixedFareConfirmable(legPlan)){
+    if(!legAllowsRouteSelection(legPlan)){
       return;
     }
-    const routes = getRouteCandidatesFromLeg(legPlan);
+    const routes = getDisplayRouteCandidatesFromLeg(legPlan);
     const route = routes.find(function(item){
       return String(item?.routeId || "") === String(routeId || "");
     });
@@ -2267,18 +2327,10 @@
     const selectedStrategy = getSelectedRoundTripPairStrategy(routePlan);
     const compact = options?.compact === true;
     const stepReviewPending = compact && isPreFixedFareMode() && !state.distanceRouteReviewed;
-    const hasConfirmationFallback = pairs.some(function(pair){
-      return pair.strategy === "confirmation_fallback";
-    });
-    const notice = hasConfirmationFallback
-      ? '<p class="estimate-route-selection-warning">' + escapeHtml(
-        window.PreFixedFareStatus?.getSingleCandidateNotice?.()
-          || "ルート候補が1件のみのため、予約受付後に確認してご連絡します。"
-      ) + "</p>"
-      : buildResponsiveNote(
-        "往復の走行予定ルートを1つ選択してください。選択した往復ルートの合計距離で事前確定運賃を算定します。",
-        "往復ルートを選択してください。"
-      );
+    const notice = buildResponsiveNote(
+      "往復の走行予定ルートを1つ選択してください。選択した往復ルートの合計距離で事前確定運賃を算定します。",
+      "往復ルートを選択してください。"
+    );
     const useAbLayout = pairs.length >= 2 && pairs.every(function(pair){
       return Boolean(getRouteAbInfo(pair.strategy, { roundTrip: true }));
     });
@@ -2295,12 +2347,8 @@
       const totalDistanceLabel = formatRouteDistanceMeters(pair.totalDistanceMeters);
       const totalDurationLabel = formatRouteDurationSeconds(pair.totalDurationSeconds);
       const pairResult = computeResultForRoundTripPair(pair);
-      const fareLineHtml = renderRouteCardFareLine(
-        pairResult,
-        pair.strategy === "confirmation_fallback" ? { isConfirmationFallback: true } : pair.outboundRoute
-      );
+      const fareLineHtml = renderRouteCardFareLine(pairResult);
       const showAsSelected = !stepReviewPending && isSelected;
-      const selectDisabled = showAsSelected;
       const titleHtml = renderRouteCardTitle(abInfo, pair.label);
       const buttonLabelHtml = renderRouteSelectButtonLabel(showAsSelected);
       const metaHtml = (
@@ -2313,21 +2361,21 @@
 
       if(compact){
         return (
-          '<article class="estimate-route-card estimate-route-card--compact estimate-roundtrip-pair-card' + (isSelected ? " is-selected" : "") + (abInfo ? " estimate-route-card--ab-" + abInfo.colorClass : "") + '">' +
+          '<article class="estimate-route-card estimate-route-card--compact estimate-roundtrip-pair-card' + (isSelected ? " is-selected" : "") + (abInfo ? " estimate-route-card--ab-" + abInfo.colorClass : "") + '" data-route-card-strategy="' + escapeAttr(pair.strategy) + '">' +
             titleHtml +
             metaHtml +
             fareLineHtml +
-            '<button type="button" class="estimate-route-select-btn' + (showAsSelected ? " is-selected" : "") + '" data-select-roundtrip-pair="' + escapeAttr(pair.strategy) + '"' + (selectDisabled ? " disabled" : "") + ">" + buttonLabelHtml + "</button>" +
+            '<button type="button" class="estimate-route-select-btn' + (showAsSelected ? " is-selected" : "") + '" data-select-roundtrip-pair="' + escapeAttr(pair.strategy) + '">' + buttonLabelHtml + "</button>" +
           "</article>"
         );
       }
 
       return (
-        '<article class="estimate-route-card estimate-roundtrip-pair-card' + (isSelected ? " is-selected" : "") + (abInfo ? " estimate-route-card--ab-" + abInfo.colorClass : "") + '">' +
+        '<article class="estimate-route-card estimate-roundtrip-pair-card' + (isSelected ? " is-selected" : "") + (abInfo ? " estimate-route-card--ab-" + abInfo.colorClass : "") + '" data-route-card-strategy="' + escapeAttr(pair.strategy) + '">' +
           titleHtml +
           metaHtml +
           fareLineHtml +
-          '<button type="button" class="estimate-route-select-btn' + (isSelected ? " is-selected" : "") + '" data-select-roundtrip-pair="' + escapeAttr(pair.strategy) + '"' + (isSelected ? " disabled" : "") + ">" + renderRouteSelectButtonLabel(isSelected) + "</button>" +
+          '<button type="button" class="estimate-route-select-btn' + (isSelected ? " is-selected" : "") + '" data-select-roundtrip-pair="' + escapeAttr(pair.strategy) + '">' + renderRouteSelectButtonLabel(isSelected) + "</button>" +
         "</article>"
       );
     }).join("");
@@ -2347,17 +2395,12 @@
     if(!routes.length){
       return "";
     }
-    const hasConfirmationFallback = routes.some(isConfirmationFallbackRoute);
-    const confirmable = isLegPreFixedFareConfirmable(legPlan) && !hasConfirmationFallback;
+    const showSelection = routes.length >= 2;
     const selectedId = String(legPlan.selectedRouteId || routes[0]?.routeId || "");
-    const singleCandidateNotice = window.PreFixedFareStatus?.getSingleCandidateNotice?.()
-      || "ルート候補が1件のみのため、予約受付後に確認してご連絡します。";
-    const notice = confirmable
-      ? buildResponsiveNote(
-        "2件以上の走行予定ルートから1つを選択してください。選択したルートの距離で事前確定運賃を算定します。",
-        "ルートを選択してください。"
-      )
-      : '<p class="estimate-route-selection-warning">' + escapeHtml(singleCandidateNotice) + "</p>";
+    const notice = buildResponsiveNote(
+      "2件以上の走行予定ルートから1つを選択してください。選択したルートの距離で事前確定運賃を算定します。",
+      "ルートを選択してください。"
+    );
     const abRoutes = routes.filter(function(route){
       return Boolean(getRouteAbInfo(route));
     });
@@ -2372,13 +2415,11 @@
       const routeId = String(route.routeId || "");
       const isSelected = routeId === selectedId || (!selectedId && index === 0);
       const routeResult = computeResultForRoute(route, legKey);
-      const fareLineHtml = renderRouteCardFareLine(routeResult, route);
+      const fareLineHtml = renderRouteCardFareLine(routeResult);
       const distanceLabel = formatRouteDistanceMeters(route.distanceMeters);
       const durationLabel = formatRouteDurationSeconds(route.durationSeconds);
       const summary = getRouteDisplayLabel(route, index);
-      const description = isConfirmationFallbackRoute(route)
-        ? "予約受付後に、道路状況を確認して最適なルートをご案内します。"
-        : getRouteDisplayDescription(route);
+      const description = getRouteDisplayDescription(route);
       const roadTypeLabel = getRoadTypeLabel(route.roadType || legPlan.roadType || state.roadType);
       const abInfo = getRouteAbInfo(route);
       const tollNote = !useAbLayout && (route.usesToll === true || route.routeStrategy === "toll_allowed" || route.routeStrategy === "time_priority")
@@ -2397,7 +2438,7 @@
 
       if(compact){
         return (
-          '<article class="' + cardClass + '">' +
+          '<article class="' + cardClass + '" data-route-card-id="' + escapeAttr(routeId) + '" data-route-card-leg="' + escapeAttr(legKey) + '">' +
             titleHtml +
             (description
               ? '<p class="estimate-route-card-description estimate-route-card-description--compact">' + escapeHtml(description) + "</p>"
@@ -2406,15 +2447,15 @@
               escapeHtml(distanceLabel || "-") + " / " + escapeHtml(durationLabel || "-") +
             "</div>" +
             fareLineHtml +
-            (confirmable
-              ? '<button type="button" class="estimate-route-select-btn' + (showAsSelected ? " is-selected" : "") + '" data-select-route-id="' + escapeAttr(routeId) + '" data-select-route-leg="' + escapeAttr(legKey) + '"' + (showAsSelected ? " disabled" : "") + ">" + buttonLabelHtml + "</button>"
+            (showSelection
+              ? '<button type="button" class="estimate-route-select-btn' + (showAsSelected ? " is-selected" : "") + '" data-select-route-id="' + escapeAttr(routeId) + '" data-select-route-leg="' + escapeAttr(legKey) + '">' + buttonLabelHtml + "</button>"
               : "") +
           "</article>"
         );
       }
 
       return (
-        '<article class="' + cardClass + '">' +
+        '<article class="' + cardClass + '" data-route-card-id="' + escapeAttr(routeId) + '" data-route-card-leg="' + escapeAttr(legKey) + '">' +
           titleHtml +
           (description
             ? '<p class="estimate-route-card-description">' + escapeHtml(description) + "</p>"
@@ -2431,15 +2472,15 @@
               : "") +
           "</dl>" +
           fareLineHtml +
-          (confirmable
-            ? '<button type="button" class="estimate-route-select-btn' + (isSelected ? " is-selected" : "") + '" data-select-route-id="' + escapeAttr(routeId) + '" data-select-route-leg="' + escapeAttr(legKey) + '"' + (isSelected ? " disabled" : "") + ">" + renderRouteSelectButtonLabel(isSelected) + "</button>"
+          (showSelection
+            ? '<button type="button" class="estimate-route-select-btn' + (isSelected ? " is-selected" : "") + '" data-select-route-id="' + escapeAttr(routeId) + '" data-select-route-leg="' + escapeAttr(legKey) + '">' + renderRouteSelectButtonLabel(isSelected) + "</button>"
             : "") +
         "</article>"
       );
     }).join("");
 
     return (
-      '<section class="estimate-route-selection' + (confirmable ? "" : " estimate-route-selection--fallback") + (useAbLayout ? " estimate-route-selection--ab" : "") + '" aria-label="' + escapeAttr(sectionTitle) + '">' +
+      '<section class="estimate-route-selection' + (useAbLayout ? " estimate-route-selection--ab" : "") + '" aria-label="' + escapeAttr(sectionTitle) + '">' +
         '<h4 class="estimate-route-selection-title">' + escapeHtml(sectionTitle) + "</h4>" +
         notice +
         '<div class="estimate-route-card-list' + (useAbLayout ? " estimate-route-card-list--ab" : "") + '">' + cards + "</div>" +
@@ -2709,10 +2750,11 @@
     }
 
     const waypointLatLng = await resolveRouteMapWaypointLatLng(routePlan);
+    const activeStrategy = getActiveRouteMapStrategy(routePlan);
     const buildSegments = typeof display.buildDisplayRouteMapSegments === "function"
       ? display.buildDisplayRouteMapSegments.bind(display)
       : display.buildRouteMapSegments.bind(display);
-    const segments = buildSegments(routePlan, waypointLatLng);
+    const segments = buildSegments(routePlan, waypointLatLng, { activeStrategy: activeStrategy });
     const useAbSegments = segments.some(function(segment){
       return segment.isAbRoute
         && (segment.key === "routeA" || segment.key === "routeB" || segment.key === "routeC" || segment.key === "routeD");
@@ -2732,6 +2774,14 @@
       stopRouteMapAnimations();
       mapContainers.forEach(function(mapContainer){
         const wrap = mapContainer.closest(".estimate-route-map-wrap") || mapContainer.parentElement;
+        if(wrap){
+          wrap.classList.add("estimate-route-map-wrap--switching");
+        }
+        window.setTimeout(function(){
+          if(wrap){
+            wrap.classList.remove("estimate-route-map-wrap--switching");
+          }
+        }, ROUTE_UI_TRANSITION_MS);
         mapContainer.innerHTML = "";
         if(wrap){
           const existingLegend = wrap.querySelector(".estimate-route-map-legend")
@@ -2783,8 +2833,7 @@
         });
         map.fitBounds(bounds, 48);
 
-        if(display.shouldShowLegend(segments) && wrap){
-          // MAP下に外出し（スマホでは重ねず、PCでもwrap直下に配置）
+        if(display.shouldShowLegend(segments) && wrap && segments.length === 1){
           wrap.insertAdjacentHTML("afterend", display.buildLegendHtml(segments));
         }
       });
@@ -2981,7 +3030,8 @@
         }
       });
 
-      syncStateFromRoutePlan(routePlan);
+      state.routePlan = routePlan;
+      syncStateFromRoutePlan(ensureDefaultRouteSelection(state.routePlan));
       state.hasRouteCalculatedOnce = true;
       state.focusedStepId = "";
       state.routeCalcError = "";
@@ -3980,17 +4030,30 @@
       const routeSelectBtn = event.target.closest("[data-select-route-id]");
       if(routeSelectBtn){
         event.preventDefault();
-        if(routeSelectBtn.disabled) return;
         const routeId = routeSelectBtn.getAttribute("data-select-route-id");
         const legKey = routeSelectBtn.getAttribute("data-select-route-leg") || "outbound";
+        if(routeId) selectRoute(routeId, legKey);
+        return;
+      }
+      const routeCard = event.target.closest("[data-route-card-id]");
+      if(routeCard && !event.target.closest("[data-select-route-id]")){
+        event.preventDefault();
+        const routeId = routeCard.getAttribute("data-route-card-id");
+        const legKey = routeCard.getAttribute("data-route-card-leg") || "outbound";
         if(routeId) selectRoute(routeId, legKey);
         return;
       }
       const roundTripPairBtn = event.target.closest("[data-select-roundtrip-pair]");
       if(roundTripPairBtn){
         event.preventDefault();
-        if(roundTripPairBtn.disabled) return;
         const pairStrategy = roundTripPairBtn.getAttribute("data-select-roundtrip-pair");
+        if(pairStrategy) selectRoundTripRoutePair(pairStrategy);
+        return;
+      }
+      const roundTripCard = event.target.closest("[data-route-card-strategy]");
+      if(roundTripCard && !event.target.closest("[data-select-roundtrip-pair]")){
+        event.preventDefault();
+        const pairStrategy = roundTripCard.getAttribute("data-route-card-strategy");
         if(pairStrategy) selectRoundTripRoutePair(pairStrategy);
         return;
       }

@@ -49,9 +49,9 @@
     toll_allowed: {
       key: "routeD",
       abLabel: "D",
-      oneWayLabel: "D 高速道路ルート",
-      roundTripLabel: "D 高速道路の往復ルート",
-      legendLabel: "D 黒線：高速道路ルート",
+      oneWayLabel: "D 有料道路優先ルート",
+      roundTripLabel: "D 有料道路優先の往復ルート",
+      legendLabel: "D 黒線：有料道路優先ルート",
       color: ROUTE_COLORS.routeD,
       lineStyle: "solid",
       drawOrder: 2
@@ -189,11 +189,6 @@
     }) || null;
   }
 
-  function isMapRenderableRoute(route){
-    return getRouteStrategyKey(route) !== "confirmation_fallback"
-      && route?.isConfirmationFallback !== true;
-  }
-
   function getDisplayRouteCandidates(legOrPlan){
     const all = getLegRouteCandidates(legOrPlan);
     if(!all.length){
@@ -203,14 +198,6 @@
     MAP_RENDER_STRATEGIES.forEach(function(strategy){
       const route = findCandidateByStrategy(legOrPlan, strategy);
       if(route){
-        ordered.push(route);
-      }
-    });
-    all.forEach(function(route){
-      if(getRouteStrategyKey(route) === "confirmation_fallback"
-        && !ordered.some(function(item){
-          return String(item?.routeId || "") === String(route?.routeId || "");
-        })){
         ordered.push(route);
       }
     });
@@ -255,7 +242,7 @@
     CANDIDATE_STRATEGY_ORDER.forEach(function(strategy){
       const meta = CANDIDATE_ROUTE_META[strategy];
       const route = findCandidateByStrategy(leg, strategy);
-      if(!meta || !route || !isMapRenderableRoute(route)){
+      if(!meta || !route){
         return;
       }
       pushAbSegment(segments, meta, route, {
@@ -413,7 +400,23 @@
     return segments;
   }
 
-  function buildDisplayRouteMapSegments(routePlan, waypointLatLng){
+  function getStrategyMapKey(strategy){
+    const meta = CANDIDATE_ROUTE_META[String(strategy || "").trim()];
+    return meta?.key || "";
+  }
+
+  function filterSegmentsByActiveStrategy(segments, activeStrategy){
+    const key = getStrategyMapKey(activeStrategy);
+    if(!key){
+      return segments;
+    }
+    const filtered = (segments || []).filter(function(segment){
+      return segment?.key === key;
+    });
+    return filtered.length ? filtered : segments;
+  }
+
+  function buildDisplayRouteMapSegments(routePlan, waypointLatLng, options){
     if(!routePlan){
       return [];
     }
@@ -423,7 +426,12 @@
     })){
       rawSegments = buildStrategyFallbackSegments(routePlan);
     }
-    return finalizeDisplaySegments(rawSegments);
+    const segments = finalizeDisplaySegments(rawSegments);
+    const activeStrategy = String(options?.activeStrategy || "").trim();
+    if(activeStrategy){
+      return filterSegmentsByActiveStrategy(segments, activeStrategy);
+    }
+    return segments;
   }
 
   function haversineMeters(a, b){
@@ -830,7 +838,8 @@
     decodePolyline: decodePolyline,
     getLegRouteCandidates: getLegRouteCandidates,
     getDisplayRouteCandidates: getDisplayRouteCandidates,
-    isMapRenderableRoute: isMapRenderableRoute,
+    filterSegmentsByActiveStrategy: filterSegmentsByActiveStrategy,
+    getStrategyMapKey: getStrategyMapKey,
     findCandidateByStrategy: findCandidateByStrategy,
     getLegPrimaryRoute: getLegPrimaryRoute,
     getLegPath: getLegPath,
