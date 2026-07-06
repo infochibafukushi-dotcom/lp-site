@@ -308,19 +308,6 @@
     };
   }
 
-    const tollInfo = route?.tollInfo;
-    if(!tollInfo){
-      return false;
-    }
-    if(tollInfo.estimatedPrice){
-      return true;
-    }
-    if(Array.isArray(tollInfo.tollInfos) && tollInfo.tollInfos.length){
-      return true;
-    }
-    return false;
-  }
-
   async function fetchRoutesRequest(options, requestBody){
     const apiKey = String(options?.apiKey || "").trim();
     const response = await fetch(ROUTES_URL, {
