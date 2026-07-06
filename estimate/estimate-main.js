@@ -48,6 +48,7 @@
   // 初回表示・再読み込み時はページ上部から開始する（STEPカード途中への自動スクロールを抑止）
   let pageEntryScrollPending = true;
   let pendingScrollToEstimateResult = false;
+  let pendingRouteSelectionScrollAnchor = false;
   let mobileReserveBarObserver = null;
 
   if("scrollRestoration" in history){
@@ -2098,7 +2099,7 @@
   }
 
   function getRouteSelectButtonLabel(isMapActive){
-    return isMapActive ? "料金確認へ" : "地図で見る";
+    return isMapActive ? "料金確認へ" : "ルート確認";
   }
 
   function renderRouteSelectButton(isMapActive, attrs){
@@ -2106,7 +2107,7 @@
       return key + '="' + escapeAttr(attrs[key]) + '"';
     }).join(" ");
     const fullLabel = getRouteSelectButtonLabel(isMapActive);
-    const shortLabel = isMapActive ? "料金確認へ" : "地図で見る";
+    const shortLabel = isMapActive ? "料金確認へ" : "ルート確認";
     return (
       '<button type="button" class="estimate-route-select-btn' + (isMapActive ? " is-selected" : "") + '" ' + attrHtml + ">" +
         '<span class="estimate-route-select-btn-label-full">' + escapeHtml(fullLabel) + "</span>" +
@@ -2117,7 +2118,7 @@
 
   function renderRouteSelectButtonLabel(isMapActive){
     const fullLabel = getRouteSelectButtonLabel(isMapActive);
-    const shortLabel = isMapActive ? "料金確認へ" : "地図で見る";
+    const shortLabel = isMapActive ? "料金確認へ" : "ルート確認";
     return (
       '<span class="estimate-route-select-btn-label-full">' + escapeHtml(fullLabel) + "</span>" +
       '<span class="estimate-route-select-btn-label-short">' + escapeHtml(shortLabel) + "</span>"
@@ -2159,26 +2160,61 @@
     return '<p class="estimate-route-selection-toll-note">有料道路料金は見積料金に含まれず、別途必要です。</p>';
   }
 
-  function scrollToRouteResultArea(){
+  function getRouteSelectionScrollTarget(){
+    const area = document.getElementById("estimateRouteResultArea")
+      || document.querySelector(".estimate-result-route-block")
+      || document.getElementById("estimateResultArea");
+    if(!area){
+      return null;
+    }
+    const title = area.querySelector(".estimate-route-selection-title");
+    if(title){
+      return title;
+    }
+    return area.querySelector(".estimate-route-selection")
+      || area.querySelector(".estimate-route-card-list");
+  }
+
+  function markPendingRouteSelectionScrollAnchor(){
+    pendingRouteSelectionScrollAnchor = true;
+  }
+
+  function consumePendingRouteSelectionScrollAnchor(){
+    if(!pendingRouteSelectionScrollAnchor){
+      return;
+    }
+    pendingRouteSelectionScrollAnchor = false;
+    scrollToRouteSelectionArea({ behavior: "none" });
+  }
+
+  function scrollToRouteSelectionArea(options){
+    const opts = options || {};
     requestAnimationFrame(function(){
       requestAnimationFrame(function(){
-        const target = document.querySelector(".estimate-route-map-block .estimate-route-map")
-          || document.querySelector(".estimate-route-preview--inline")
-          || document.querySelector("#estimateRouteResultArea")
-          || document.querySelector(".estimate-route-result")
-          || document.querySelector(".estimate-route-selection");
+        const target = getRouteSelectionScrollTarget();
         if(!target){
-          return;
-        }
-        if(prefersReducedMotion()){
-          target.scrollIntoView({ behavior: "auto", block: "start" });
           return;
         }
         const offset = getStickyChromeOffset();
         const absoluteTop = target.getBoundingClientRect().top + (window.pageYOffset || window.scrollY || 0);
-        smoothScrollToY(Math.max(0, absoluteTop - offset), SCROLL_ANIMATION_MS);
+        const top = Math.max(0, absoluteTop - offset);
+        const behavior = opts.behavior === "none" || prefersReducedMotion()
+          ? "auto"
+          : (opts.behavior || "smooth");
+        if(behavior === "smooth" && !prefersReducedMotion()){
+          smoothScrollToY(top, opts.duration || SCROLL_ANIMATION_MS);
+          return;
+        }
+        window.scrollTo({
+          top: top,
+          behavior: "auto"
+        });
       });
     });
+  }
+
+  function scrollToRouteResultArea(){
+    scrollToRouteSelectionArea();
   }
 
   function scrollToEstimateResultTop(options){
@@ -2302,6 +2338,7 @@
       return;
     }
     state.lastActiveStepId = "distance";
+    markPendingRouteSelectionScrollAnchor();
     renderPage();
   }
 
@@ -2360,6 +2397,7 @@
       return;
     }
     state.lastActiveStepId = "distance";
+    markPendingRouteSelectionScrollAnchor();
     renderPage();
   }
 
@@ -3136,8 +3174,8 @@
     }
 
     if(shouldRenderPage){
+      markPendingRouteSelectionScrollAnchor();
       renderPage();
-      scrollToRouteResultArea();
     }else{
       updateRouteCalcFeedback();
     }
@@ -4066,12 +4104,25 @@
     if(!allComplete){
       scrollToActiveStep(flow, activeIndex);
       if(state.routePlan){
-        renderRouteMapIfNeeded();
+        if(pendingRouteSelectionScrollAnchor){
+          scrollToRouteSelectionArea();
+        }
+        void renderRouteMapIfNeeded().finally(function(){
+          consumePendingRouteSelectionScrollAnchor();
+        });
+      }else if(pendingRouteSelectionScrollAnchor){
+        consumePendingRouteSelectionScrollAnchor();
       }
     }else{
       state.lastActiveStepId = "result";
       syncHandoffForResult(result);
-      renderRouteMapIfNeeded();
+      if(state.routePlan){
+        void renderRouteMapIfNeeded().finally(function(){
+          consumePendingRouteSelectionScrollAnchor();
+        });
+      }else{
+        consumePendingRouteSelectionScrollAnchor();
+      }
       if(pendingScrollToEstimateResult){
         pendingScrollToEstimateResult = false;
         requestAnimationFrame(function(){
