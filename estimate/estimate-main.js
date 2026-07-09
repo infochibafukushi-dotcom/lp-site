@@ -34,7 +34,9 @@
     reviewDemoSlotId: "",
     reviewDemoConsent: false,
     reviewDemoSavedRecord: null,
-    reviewDemoError: ""
+    reviewDemoError: "",
+    prelaunchSettings: {},
+    testMode: { active: false, key: "" }
   };
 
   let delegatedBound = false;
@@ -1210,6 +1212,76 @@
     }
   }
 
+  function parseEstimateTestModeFromUrl(){
+    try{
+      const params = new URLSearchParams(window.location.search);
+      return {
+        active: params.get("test") === "1",
+        key: String(params.get("key") || "").trim()
+      };
+    }catch(error){
+      return { active: false, key: "" };
+    }
+  }
+
+  function isTruthyPrelaunchSetting(value){
+    return String(value ?? "").trim().toLowerCase() === "true";
+  }
+
+  function isEstimateTestModeActive(){
+    const parsed = parseEstimateTestModeFromUrl();
+    if(!parsed.active || !parsed.key){
+      return false;
+    }
+    const settings = state.prelaunchSettings || {};
+    const expected = String(settings.prelaunch_test_key || "").trim();
+    return isTruthyPrelaunchSetting(settings.test_reservation_enabled) && expected && parsed.key === expected;
+  }
+
+  function getEstimateTestMode(){
+    if(!isEstimateTestModeActive()){
+      return { active: false, key: "" };
+    }
+    const parsed = parseEstimateTestModeFromUrl();
+    return { active: true, key: parsed.key };
+  }
+
+  async function loadPrelaunchSettingsForEstimate(){
+    const apiBase = String(window.EstimateQuoteConfig?.API_BASE || "").trim();
+    if(!apiBase){
+      return {};
+    }
+    try{
+      const res = await fetch(apiBase + "/api/bootstrap", { cache: "no-store" });
+      if(!res.ok){
+        return {};
+      }
+      const data = await res.json();
+      return data?.settings && typeof data.settings === "object" ? data.settings : {};
+    }catch(error){
+      return {};
+    }
+  }
+
+  function syncEstimateTestModePageClass(){
+    const page = document.querySelector(".estimate-page") || document.body;
+    if(!page){
+      return;
+    }
+    page.classList.toggle("estimate-test-mode-active", isEstimateTestModeActive());
+  }
+
+  function renderEstimateTestBannerHtml(){
+    if(!isEstimateTestModeActive()){
+      return "";
+    }
+    return (
+      '<div class="estimate-test-mode-banner" role="status">' +
+      "テストモード中です。この見積・予約は本番予約ではありません。" +
+      "</div>"
+    );
+  }
+
   function getReviewDemoDefaultSlotId(){
     return window.PreFixedFareReviewDemo?.CALENDAR_SLOTS?.[0]?.id || "slot-20260901-1000";
   }
@@ -1744,6 +1816,9 @@
   function getReservationCtaLabel(){
     if(isReviewDemoMode()){
       return "審査用デモ予約へ進む";
+    }
+    if(isEstimateTestModeActive()){
+      return "テスト予約へ進む";
     }
     if(isPreFixedFareMode() && !isPreFixedFareConfirmable()){
       return "確認対応として予約へ進む";
@@ -3854,7 +3929,7 @@
     let url = base;
     if(window.EstimateHandoff && state.estimateNumber){
       if(typeof window.EstimateHandoff.buildReservationHandoffUrl === "function"){
-        url = window.EstimateHandoff.buildReservationHandoffUrl(base, state.estimateNumber);
+        url = window.EstimateHandoff.buildReservationHandoffUrl(base, state.estimateNumber, getEstimateTestMode());
       }else{
         url = window.EstimateHandoff.appendEstimateNoToUrl(base, state.estimateNumber);
       }
@@ -4084,6 +4159,7 @@
     root.innerHTML = `
       ${renderEstimateTopBar()}
       ${renderReviewDemoBannerHtml()}
+      ${renderEstimateTestBannerHtml()}
       <div class="estimate-wrap">
         <div class="estimate-header">
           <h1 class="estimate-title">${escapeHtml(getLpFareModeTitleText())}</h1>
@@ -4100,6 +4176,7 @@
     bindMobileReserveBarVisibility();
     bindReviewDemoEvents(result, allComplete);
     syncReviewDemoPageClass();
+    syncEstimateTestModePageClass();
 
     if(!allComplete){
       scrollToActiveStep(flow, activeIndex);
@@ -4611,6 +4688,8 @@
       }
       bindDelegatedEvents();
       await loadCtaUrls();
+      state.prelaunchSettings = await loadPrelaunchSettingsForEstimate();
+      state.testMode = getEstimateTestMode();
 
       state.reviewDemoMode = isReviewDemoMode();
       if(state.reviewDemoMode){

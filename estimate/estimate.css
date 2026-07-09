@@ -2261,6 +2261,24 @@ body.estimate-has-mobile-reserve-bar .estimate-wrap{
 .estimate-page.estimate-review-demo-active{
   padding-top:88px;
 }
+.estimate-page.estimate-test-mode-active{
+  padding-top:88px;
+}
+.estimate-test-mode-banner{
+  position:fixed;
+  top:48px;
+  left:0;
+  right:0;
+  z-index:9390;
+  padding:8px 12px;
+  background:#fde8e8;
+  border-bottom:1px solid #f1aaaa;
+  color:#9b1c1c;
+  font-size:12px;
+  font-weight:900;
+  line-height:1.5;
+  text-align:center;
+}
 .estimate-review-demo-banner{
   position:fixed;
   top:48px;
