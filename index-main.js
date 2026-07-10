@@ -291,6 +291,32 @@
     document.head.appendChild(script);
   }
 
+  function hydratePricingSectionFromFareMaster(sections, pricingTable){
+    if(!Array.isArray(sections) || !Array.isArray(pricingTable) || !pricingTable.length) return sections;
+    return sections.map(function(section){
+      if(section.sectionId !== "pricing" || section.type !== "menu-list") return section;
+      const next = Object.assign({}, section);
+      next.menuGroups = [{
+        title: "料金表",
+        items: pricingTable.map(function(row){
+          return { name: row.name, price: row.price, description: "" };
+        }),
+      }];
+      return next;
+    });
+  }
+
+  async function loadPricingTableFromFareMaster(){
+    const apiBase = window.EstimateQuoteConfig?.API_BASE || "";
+    if(!apiBase || !window.FareMasterClient?.fetchDisplayPricing) return null;
+    try{
+      const data = await window.FareMasterClient.fetchDisplayPricing(apiBase);
+      return data?.pricingTable || null;
+    }catch{
+      return null;
+    }
+  }
+
   async function loadSections(config){
     const container = document.getElementById("sectionsContainer");
     if(!container) return;
@@ -315,6 +341,11 @@
 
       if(faqData && window.IndexUtils && typeof window.IndexUtils.hydrateFaqSections === "function"){
         sections = window.IndexUtils.hydrateFaqSections(sections, faqData);
+      }
+
+      const pricingTable = await loadPricingTableFromFareMaster();
+      if(pricingTable){
+        sections = hydratePricingSectionFromFareMaster(sections, pricingTable);
       }
 
       container.innerHTML = sections.map((section, idx) => window.IndexRenderers.renderSection(section, idx, config)).join("");

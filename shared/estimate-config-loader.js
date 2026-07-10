@@ -106,8 +106,19 @@
   }
 
   async function loadEstimateConfig(){
-    const raw = await fetchJsonWithFallback(PATHS);
-    return normalizeConfig(raw);
+    const staticConfig = normalizeConfig(await fetchJsonWithFallback(PATHS));
+    const apiBase = global.EstimateQuoteConfig?.API_BASE || global.API_BASE || "";
+    if(global.FareMasterClient?.loadEstimateConfigWithFareMaster){
+      const loaded = await global.FareMasterClient.loadEstimateConfigWithFareMaster({
+        apiBase,
+        staticLoader: async () => staticConfig,
+      });
+      if(!loaded.config){
+        throw new Error("料金情報を取得できませんでした");
+      }
+      return loaded.config;
+    }
+    return staticConfig;
   }
 
   global.EstimateConfigLoader = {
