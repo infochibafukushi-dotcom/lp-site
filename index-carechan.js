@@ -61,6 +61,7 @@
   async function fetchCarechanJson(){
     const urls = ["./data/carechan.json", "data/carechan.json"];
     let lastError = null;
+    let raw = null;
     for(const rawUrl of urls){
       try{
         const url = rawUrl + (rawUrl.includes("?") ? "&" : "?") + "_ts=" + Date.now();
@@ -68,12 +69,22 @@
         if(!res.ok) throw new Error("HTTP " + res.status);
         const text = await res.text();
         if(!text || !text.trim()) throw new Error("empty");
-        return JSON.parse(text);
+        raw = JSON.parse(text);
+        break;
       }catch(error){
         lastError = error;
       }
     }
-    throw lastError || new Error("carechan.json fetch failed");
+    if(!raw) throw lastError || new Error("carechan.json fetch failed");
+    if(window.FareFaqSync && window.EstimateQuoteConfig?.API_BASE){
+      try{
+        const amounts = await window.FareFaqSync.loadFaqAmounts(window.EstimateQuoteConfig.API_BASE);
+        return window.FareFaqSync.hydrateCarechanPricing(raw, amounts);
+      }catch(error){
+        console.warn("carechan fare sync skipped", error);
+      }
+    }
+    return raw;
   }
 
   function normalizeCtas(ctas, prefix){
