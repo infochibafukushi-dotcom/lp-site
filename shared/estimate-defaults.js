@@ -137,7 +137,7 @@
       },
       trafficZones: createDefaultTrafficZones(),
       preFixedFare: {
-        trafficZoneId: "keiyo"
+        trafficZoneId: "chiba"
       },
       fareMode: "time",
       fareModeOptions: [

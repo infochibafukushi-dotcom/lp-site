@@ -1,5 +1,6 @@
 /**
- * distance_time と pre_fixed_fare の料金計算が完全一致することを検証する。
+ * distance_time と pre_fixed_fare が同一の正式認可エンジンを使うことを検証する。
+ * 根拠: pre-fixed-fare-report-data.js（距離制×平準化係数1.18・1円四捨五入）
  * Run: node scripts/test-fare-mode-parity.mjs
  */
 import { readFileSync } from "node:fs";
@@ -54,7 +55,9 @@ function extractFareParts(result){
     timeFare: getBreakdownAmount(breakdown, "timeAdjustment"),
     pickupFee: getBreakdownAmount(breakdown, "pickupFee"),
     specialVehicleFee: getBreakdownAmount(breakdown, "specialVehicleFee"),
-    serviceTotal: getServiceTotal(snapshot)
+    serviceTotal: getServiceTotal(snapshot),
+    preFixedFareAmount: Number(snapshot.preFixedFareAmount) || 0,
+    coefficient: snapshot.trafficZoneCoefficient
   };
 }
 
@@ -78,18 +81,10 @@ function compareModes(config, state, label){
   assertEqual(pf.pickupFee, dt.pickupFee, label + " pickupFee");
   assertEqual(pf.specialVehicleFee, dt.specialVehicleFee, label + " specialVehicleFee");
   assertEqual(pf.serviceTotal, dt.serviceTotal, label + " serviceTotal");
-
-  const dtSnapshot = distanceTimeResult.quoteSnapshot || {};
-  const pfSnapshot = preFixedResult.quoteSnapshot || {};
-  if(pfSnapshot.trafficZoneCoefficient != null){
-    throw new Error(label + ": pre_fixed_fare quoteSnapshot should not include trafficZoneCoefficient");
-  }
-  if(pfSnapshot.adjustedDistanceFareAmount != null){
-    throw new Error(label + ": pre_fixed_fare quoteSnapshot should not include adjustedDistanceFareAmount");
-  }
-  if(dtSnapshot.trafficZoneCoefficient != null){
-    throw new Error(label + ": distance_time quoteSnapshot should not include trafficZoneCoefficient");
-  }
+  assertEqual(pf.preFixedFareAmount, dt.preFixedFareAmount, label + " preFixedFareAmount");
+  assertEqual(pf.coefficient, 1.18, label + " coefficient 1.18");
+  assertEqual(dt.coefficient, 1.18, label + " distance_time coefficient 1.18");
+  assertEqual(pf.timeFare, 0, label + " scheduledDurationSurcharge not charged");
 
   return { distanceTimeResult, preFixedResult, dt, pf };
 }
@@ -127,26 +122,31 @@ function baseState(overrides){
 }
 
 console.log("=== Test A: same input, mode only differs ===");
-const testA = compareModes(config, baseState(), "testA");
+compareModes(config, baseState(), "testA");
 
-console.log("=== Test B: traffic zone settings do not change fare ===");
+console.log("=== Test B: keiyo/unknown settings do not override authorized chiba 1.18 ===");
 const zoneCases = [
-  { name: "coefficient 1.0", zone: { id: "test", label: "Test", coefficient: 1.0 } },
-  { name: "coefficient 1.2", zone: { id: "test", label: "Test", coefficient: 1.2 } },
-  { name: "coefficient 1.5", zone: { id: "test", label: "Test", coefficient: 1.5 } },
-  { name: "fallback keiyo", preFixedFare: { trafficZoneId: "keiyo" } },
-  { name: "unknown zone", preFixedFare: { trafficZoneId: "unknown-zone" } }
+  { name: "coefficient 1.0 decoy", zone: { id: "test", label: "Test", coefficient: 1.0 } },
+  { name: "coefficient 1.2 decoy", zone: { id: "test", label: "Test", coefficient: 1.2 } },
+  { name: "fallback keiyo ignored", preFixedFare: { trafficZoneId: "keiyo" } },
+  { name: "unknown zone ignored", preFixedFare: { trafficZoneId: "unknown-zone" } }
 ];
 
 zoneCases.forEach(function(zoneCase){
   const zoneConfig = JSON.parse(JSON.stringify(config));
   if(zoneCase.zone){
-    zoneConfig.trafficZones = { items: [zoneCase.zone] };
+    zoneConfig.trafficZones = {
+      items: [
+        { id: "chiba", label: "千葉交通圏", coefficient: 1.18 },
+        zoneCase.zone
+      ]
+    };
     zoneConfig.preFixedFare = { trafficZoneId: zoneCase.zone.id };
   }else if(zoneCase.preFixedFare){
     zoneConfig.preFixedFare = zoneCase.preFixedFare;
   }
-  compareModes(zoneConfig, baseState(), "testB:" + zoneCase.name);
+  const result = compareModes(zoneConfig, baseState(), "testB:" + zoneCase.name);
+  assertEqual(result.pf.total, 7762, "testB:" + zoneCase.name + " authorized total");
 });
 
 console.log("=== Test C: multiple conditions ===");
@@ -184,28 +184,28 @@ const scenarios = [
     })
   },
   {
-    name: "no time adjustment (<=20min)",
+    name: "duration 10min same fare",
     state: baseState({
-      routeCalcResult: { durationMinutes: 18 },
+      routeCalcResult: { durationMinutes: 10 },
       routePlan: {
         provider: "google_routes",
         distanceMeters: 8500,
-        durationSeconds: 1080,
+        durationSeconds: 600,
         selectedRouteId: "route_0",
-        routes: [{ routeId: "route_0", distanceMeters: 8500, durationSeconds: 1080 }]
+        routes: [{ routeId: "route_0", distanceMeters: 8500, durationSeconds: 600 }]
       }
     })
   },
   {
-    name: "time adjustment (>25min)",
+    name: "duration 120min same fare",
     state: baseState({
-      routeCalcResult: { durationMinutes: 28 },
+      routeCalcResult: { durationMinutes: 120 },
       routePlan: {
         provider: "google_routes",
         distanceMeters: 8500,
-        durationSeconds: 1680,
+        durationSeconds: 7200,
         selectedRouteId: "route_0",
-        routes: [{ routeId: "route_0", distanceMeters: 8500, durationSeconds: 1680 }]
+        routes: [{ routeId: "route_0", distanceMeters: 8500, durationSeconds: 7200 }]
       }
     })
   },
@@ -250,7 +250,7 @@ scenarios.forEach(function(scenario){
   compareModes(config, scenario.state, "testC:" + scenario.name);
 });
 
-console.log("=== 8.5km distance fare verification ===");
+console.log("=== 8.5km authorized fare verification (report-data 1.18) ===");
 const verifyState = baseState();
 const billedKm = EstimateCalc.getEffectiveBilledDistanceKm(config, verifyState);
 const rawDistanceFare = EstimateCalc.calcDistanceFare(billedKm, config.distancePricing);
@@ -260,10 +260,14 @@ const incrementKm = FareConstants.resolveIncrementDistanceKm(pattern);
 const excess = 8.5 - Number(pattern.initialDistanceKm || 0);
 const increments = excess > 0 && incrementKm > 0 ? Math.ceil(excess / incrementKm) : 0;
 
+assertEqual(rawDistanceFare, 4120, "base distance 4120");
+assertEqual(verifyResult.pf.distanceFare, 4862, "adjusted distance 4862");
+assertEqual(verifyResult.pf.total, 7762, "authorized total 7762");
+assertEqual(verifyResult.dt.total, 7762, "distance_time total 7762");
+
 console.log({
   stateDistanceKm: verifyState.distanceKm,
   getEffectiveBilledDistanceKm: billedKm,
-  calcDistanceFareInputKm: billedKm,
   incrementDistanceMetersInConfig: pattern.incrementDistanceMeters,
   incrementDistanceKmResolved: incrementKm,
   excessKm: excess,
@@ -271,6 +275,7 @@ console.log({
   calcDistanceFareResult: rawDistanceFare,
   distanceFareInBreakdown: verifyResult.dt.distanceFare,
   timeFare: verifyResult.dt.timeFare,
+  preFixedFareAmount: verifyResult.pf.preFixedFareAmount,
   fareTotal: verifyResult.dt.fareTotal,
   serviceTotal: verifyResult.dt.serviceTotal,
   finalTotal: verifyResult.dt.total,

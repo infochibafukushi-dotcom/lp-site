@@ -193,7 +193,7 @@
     ]
   },
   "preFixedFare": {
-    "trafficZoneId": "keiyo"
+    "trafficZoneId": "chiba"
   },
   "fareMode": "pre_fixed_fare",
   "fareModeOptions": [

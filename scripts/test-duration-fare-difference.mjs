@@ -1,3 +1,8 @@
+/**
+ * 正式認可計算では予定時間を変えても金額が変わらないことを検証する。
+ * 根拠: 申請資料 — 予定時間加算は事前確定運賃本体に含めない。
+ * Run: node scripts/test-duration-fare-difference.mjs
+ */
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 
@@ -87,12 +92,16 @@ const specialRow = (result69.quoteSnapshot.fixedFareBreakdown || []).find((row) 
 
 let failed = 0;
 
-if(result69.total === result72.total){
-  console.error("FAIL: totals should differ for 69 vs 72 minute routes, got", result69.total);
+if(result69.total !== result72.total){
+  console.error("FAIL: authorized totals must be equal for 69 vs 72 minute routes", result69.total, result72.total);
   failed++;
 }
-if(!timeRow69 || !timeRow72 || timeRow72.amount <= timeRow69.amount){
-  console.error("FAIL: timeAdjustment should increase with duration", { timeRow69, timeRow72 });
+if((Number(timeRow69?.amount) || 0) !== 0 || (Number(timeRow72?.amount) || 0) !== 0){
+  console.error("FAIL: timeAdjustment must remain 0", { timeRow69, timeRow72 });
+  failed++;
+}
+if(Number(result69.quoteSnapshot?.scheduledDurationSurcharge) !== 0){
+  console.error("FAIL: scheduledDurationSurcharge must be 0", result69.quoteSnapshot?.scheduledDurationSurcharge);
   failed++;
 }
 if(!specialRow || specialRow.amount !== 1000){
@@ -109,11 +118,12 @@ if(failed){
   process.exit(1);
 }
 
-console.log("Duration fare difference test passed.");
+console.log("Duration independence (authorized fare) test passed.");
 console.log({
   total69: result69.total,
   total72: result72.total,
-  timeAdjustment69: timeRow69.amount,
-  timeAdjustment72: timeRow72.amount,
-  specialVehicleFee: specialRow.amount
+  timeAdjustment69: Number(timeRow69?.amount) || 0,
+  timeAdjustment72: Number(timeRow72?.amount) || 0,
+  specialVehicleFee: specialRow.amount,
+  preFixedFareAmount: result69.quoteSnapshot?.preFixedFareAmount
 });

@@ -99,8 +99,9 @@ const result85 = compareModes(config, state85, "8.5km");
 const snapshot = result85.distanceTimeResult.quoteSnapshot || {};
 const distanceFare = getBreakdownAmount(snapshot.fixedFareBreakdown, "distanceFare");
 const timeFare = getBreakdownAmount(snapshot.fixedFareBreakdown, "timeAdjustment");
-assertEqual(distanceFare, 4120, "8.5km distance fare in estimate");
-assertEqual(result85.distanceTimeResult.total, 7320, "8.5km final total");
+assertEqual(distanceFare, 4862, "8.5km adjusted distance fare (4120*1.18)");
+assertEqual(timeFare, 0, "8.5km scheduledDurationSurcharge=0");
+assertEqual(result85.distanceTimeResult.total, 7762, "8.5km authorized total 7762");
 
 const excess = 8.5 - 1.06;
 const incrementKm = FareConstants.resolveIncrementDistanceKm(pricing.patternA);

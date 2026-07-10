@@ -40,10 +40,10 @@ const cases = [
     expectedZoneId: "keiyo",
     expectedMethod: "auto_address"
   },
-  {
+    {
     name: "判定できない住所",
     originAddress: "不明な場所ABC",
-    expectedZoneId: "keiyo",
+    expectedZoneId: "chiba",
     expectedMethod: "fallback_config"
   }
 ];

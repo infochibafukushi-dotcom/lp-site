@@ -12,6 +12,20 @@
     return Math.floor(Math.max(Number(amountYen) || 0, 0) / 10) * 10;
   }
 
+  function isAuthorizedFareMode(fareMode){
+    const mode = String(fareMode || "").trim();
+    return mode === "distance_time" || mode === "pre_fixed_fare";
+  }
+
+  function normalizeFixedFareTotal(snapshot){
+    const amount = Number(snapshot?.fixedFareTotal) || 0;
+    // 申請資料: 認可モードは1円単位を維持（10円未満切捨て禁止）
+    if(isAuthorizedFareMode(snapshot?.fareMode)){
+      return Math.max(0, Math.round(amount));
+    }
+    return roundDownToTenYen(amount);
+  }
+
   function sumServiceFees(serviceFees){
     return (Array.isArray(serviceFees) ? serviceFees : []).reduce(function(sum, row){
       if(String(row?.key || "") === "specialVehicleFee"){
@@ -64,7 +78,7 @@
     const routePlan = cloneJson(handoff?.routePlan);
     const usageSummary = cloneJson(handoff?.usageSummary);
 
-    snapshot.fixedFareTotal = roundDownToTenYen(snapshot.fixedFareTotal);
+    snapshot.fixedFareTotal = normalizeFixedFareTotal(snapshot);
     const derivedTotal = snapshot.fixedFareTotal + sumServiceFees(snapshot.serviceFees);
     const handoffTotal = Math.round(Number(handoff?.total) || 0);
     const total = derivedTotal > 0 ? derivedTotal : handoffTotal;

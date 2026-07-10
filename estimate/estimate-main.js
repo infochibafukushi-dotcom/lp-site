@@ -803,22 +803,52 @@
     const labels = state.config.resultLabels || {};
     const snapshot = result.quoteSnapshot || {};
     const fareMode = snapshot.fareMode || state.config.fareMode || "";
+    const isAuthorized = fareMode === "distance_time" || fareMode === "pre_fixed_fare";
     const fixedFareTitle = window.EstimateFareDisplay
       ? window.EstimateFareDisplay.getFixedFareSectionTitle(fareMode, labels)
       : (fareMode === "pre_fixed_fare"
         ? (labels.fixedFareSection || "事前確定運賃")
         : (labels.estimatedFareSection || "概算料金内訳"));
-    const fixedFareRows = Array.isArray(snapshot.fixedFareBreakdown)
-      ? snapshot.fixedFareBreakdown.map(function(row){
-        return {
-          key: row.key || "",
-          label: row.label || row.key || "",
-          amount: Number(row.amount) || 0
-        };
-      }).filter(function(row){
-        return row.amount > 0;
-      })
-      : [];
+
+    let fixedFareRows = [];
+    let otherFareRows = [];
+    if(isAuthorized){
+      const bodyAmount = Number(snapshot.preFixedFareAmount)
+        || Number(snapshot.adjustedDistanceFareAmount)
+        || 0;
+      if(bodyAmount > 0){
+        fixedFareRows.push({
+          key: "preFixedFareAmount",
+          label: labels.preFixedFareBody || "事前確定運賃本体",
+          amount: bodyAmount
+        });
+      }
+      (Array.isArray(snapshot.fixedFareBreakdown) ? snapshot.fixedFareBreakdown : []).forEach(function(row){
+        const key = String(row?.key || "");
+        const amount = Number(row?.amount) || 0;
+        if(!(amount > 0) || key === "distanceFare" || key === "timeAdjustment"){
+          return;
+        }
+        otherFareRows.push({
+          key: key,
+          label: row.label || key,
+          amount: amount
+        });
+      });
+    }else{
+      fixedFareRows = Array.isArray(snapshot.fixedFareBreakdown)
+        ? snapshot.fixedFareBreakdown.map(function(row){
+          return {
+            key: row.key || "",
+            label: row.label || row.key || "",
+            amount: Number(row.amount) || 0
+          };
+        }).filter(function(row){
+          return row.amount > 0;
+        })
+        : [];
+    }
+
     const careServiceRows = Array.isArray(snapshot.serviceFees)
       ? snapshot.serviceFees.map(function(row){
         return {
@@ -837,15 +867,24 @@
       })
       : [];
 
-    return [
+    const sections = [
       {
         key: "fixedFare",
-        title: fixedFareTitle,
+        title: isAuthorized ? (labels.preFixedFareBodySection || "事前確定運賃本体") : fixedFareTitle,
         rows: fixedFareRows
-      },
+      }
+    ];
+    if(isAuthorized && otherFareRows.length){
+      sections.push({
+        key: "otherFare",
+        title: labels.otherFareSection || "その他料金",
+        rows: otherFareRows
+      });
+    }
+    sections.push(
       {
         key: "careService",
-        title: labels.careServiceSection || "介助・サービス料金",
+        title: labels.careServiceSection || (isAuthorized ? "サービス料金" : "介助・サービス料金"),
         rows: careServiceRows
       },
       {
@@ -853,7 +892,8 @@
         title: labels.expenseSection || "実費・別途費用",
         rows: expenseRows
       }
-    ];
+    );
+    return sections;
   }
 
   function renderTripStep(stepNum, step){
@@ -3634,6 +3674,10 @@
   }
 
   function getResultTotalLabel(){
+    const fareMode = String(state.config?.fareMode || "");
+    if(fareMode === "pre_fixed_fare" || fareMode === "distance_time"){
+      return state.config.resultLabels?.paymentTotalSection || "お支払い合計";
+    }
     if(isPreFixedFareMode()){
       return state.config.resultLabels?.fixedFareSection || "事前確定運賃込み合計";
     }
@@ -3768,12 +3812,22 @@
     ];
 
     const fareRows = (snapshot.fixedFareBreakdown || []).map(function(row){
+      const key = String(row.key || "");
+      if(key === "distanceFare" && Number(snapshot.preFixedFareAmount) > 0){
+        return ["事前確定運賃本体", formatCalcBasisYen(snapshot.preFixedFareAmount)];
+      }
+      if(key === "timeAdjustment"){
+        return null;
+      }
       return [row.label || row.key || "", formatCalcBasisYen(row.amount)];
-    });
+    }).filter(Boolean);
 
     const serviceRows = [];
+    const specialInFareRows = (snapshot.fixedFareBreakdown || []).some(function(row){
+      return String(row?.key || "") === "specialVehicleFee" && Number(row?.amount) > 0;
+    });
     const specialVehicleFee = Number(breakdown.specialVehicleFee) || Number(snapshot.specialVehicleFeeAmount) || 0;
-    if(specialVehicleFee > 0){
+    if(specialVehicleFee > 0 && !specialInFareRows){
       serviceRows.push(["特殊車両使用料", formatCalcBasisYen(specialVehicleFee)]);
     }
     serviceRows.push(
@@ -3793,7 +3847,8 @@
     const basisNotes = [
       "※本見積は出発地・目的地から算出した推計ルートに基づいています。",
       "※道路状況、交通規制、利用者様のご要望等により実際の運行内容が変更となる場合があります。",
-      "※有料道路料金、駐車料金等の実費は別途ご負担となる場合があります。"
+      "※有料道路料金、駐車料金等の実費は別途ご負担となる場合があります。",
+      "※事前確定運賃本体は距離制運賃×千葉交通圏平準化係数1.18（1円単位四捨五入）です。予定時間は本体に加算しません。"
     ];
     if(snapshot.preFixedFareMode){
       basisNotes.push("※事前確定運賃は、提示した走行予定ルートに基づき算出しています。");
@@ -3807,9 +3862,9 @@
       "<div class=\"estimate-calc-basis-panel\" id=\"estimateCalcBasisPanel\" hidden>" +
       "<h4 class=\"estimate-calc-basis-title\">" + escapeHtml(basisTitle) + "</h4>" +
       renderCalcBasisSection("ルート算出情報", routeRows) +
-      renderCalcBasisSection("運賃計算情報", fareRows) +
+      renderCalcBasisSection("事前確定運賃本体・その他料金", fareRows) +
       renderCalcBasisSection("サービス料金", serviceRows) +
-      renderCalcBasisSection("合計", [["見積金額", formatCalcBasisYen(result.total)]]) +
+      renderCalcBasisSection("お支払い合計", [["お支払い合計", formatCalcBasisYen(result.total)]]) +
       "<div class=\"estimate-calc-basis-notes\">" +
       basisNotes.map(function(note){
         return "<p>" + escapeHtml(note) + "</p>";
