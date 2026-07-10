@@ -146,7 +146,7 @@ zoneCases.forEach(function(zoneCase){
     zoneConfig.preFixedFare = zoneCase.preFixedFare;
   }
   const result = compareModes(zoneConfig, baseState(), "testB:" + zoneCase.name);
-  assertEqual(result.pf.total, 7762, "testB:" + zoneCase.name + " authorized total");
+  assertEqual(result.pf.total, 7760, "testB:" + zoneCase.name + " authorized total");
 });
 
 console.log("=== Test C: multiple conditions ===");
@@ -261,9 +261,9 @@ const excess = 8.5 - Number(pattern.initialDistanceKm || 0);
 const increments = excess > 0 && incrementKm > 0 ? Math.ceil(excess / incrementKm) : 0;
 
 assertEqual(rawDistanceFare, 4120, "base distance 4120");
-assertEqual(verifyResult.pf.distanceFare, 4862, "adjusted distance 4862");
-assertEqual(verifyResult.pf.total, 7762, "authorized total 7762");
-assertEqual(verifyResult.dt.total, 7762, "distance_time total 7762");
+assertEqual(verifyResult.pf.distanceFare, 4860, "adjusted distance 4860");
+assertEqual(verifyResult.pf.total, 7760, "authorized total 7760");
+assertEqual(verifyResult.dt.total, 7760, "distance_time total 7760");
 
 console.log({
   stateDistanceKm: verifyState.distanceKm,

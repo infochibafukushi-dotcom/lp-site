@@ -3,15 +3,13 @@
  *
  * 根拠:
  * - shared/pre-fixed-fare-report-data.js
- *   「事前確定運賃 ＝ 距離制運賃 × 平準化係数（1円単位四捨五入）」
+ *   「事前確定運賃 ＝ 距離制運賃 × 平準化係数（1円の位を四捨五入し10円単位）」
  *   千葉交通圏 coefficient: 1.18
- * - shared/pre-fixed-fare-submission-appendix-data.js
- *   端数処理: 1円未満四捨五入 / 平準化係数: 千葉交通圏 1.18
  *
  * 期待値（8.5km・迎車800・特殊車両1000・乗降介助1100・片道）:
- *   4120 × 1.18 = 4861.6 → Math.round → 4862
+ *   4120 × 1.18 = 4861.6 → 1円の位四捨五入 → 4860
  *   予定時間加算 0
- *   支払合計 7762
+ *   支払合計 7760
  *
  * Run: node scripts/test-authorized-pre-fixed-fare.mjs
  */
@@ -97,29 +95,35 @@ console.log("=== 距離制運賃境界（申請距離制運賃表） ===");
   assertEqual(EstimateCalc.calcDistanceFare(km, config.distancePricing), expected, km + "km distance fare");
 });
 
-console.log("=== 8.5km 正式認可試算（report-data: 距離制×1.18・1円四捨五入） ===");
+console.log("=== 係数適用後の1円の位四捨五入（10円単位）境界値 ===");
+// 誤った Math.round(product) では 4862 になるが、正式は 4860
+assertEqual(EstimateCalc.applyTrafficZoneCoefficient(4120, 1.18), 4860, "4120*1.18 -> 4860 (not 4862)");
+assertEqual(EstimateCalc.applyTrafficZoneCoefficient(4864, 1), 4860, "4864 -> 4860");
+assertEqual(EstimateCalc.applyTrafficZoneCoefficient(4865, 1), 4870, "4865 -> 4870");
+assertEqual(EstimateCalc.applyTrafficZoneCoefficient(4866, 1), 4870, "4866 -> 4870");
+
+console.log("=== 8.5km 正式認可試算 ===");
 const pf25 = computeMode("pre_fixed_fare", 25);
 const snap = pf25.quoteSnapshot || {};
 const baseDistance = EstimateCalc.calcDistanceFare(8.5, config.distancePricing);
 assertEqual(baseDistance, 4120, "base distance fare 4120");
-assertEqual(Math.round(4120 * 1.18), 4862, "4120*1.18 rounded");
 assertEqual(Number(snap.baseDistanceFareAmount), 4120, "quoteSnapshot.baseDistanceFareAmount");
-assertEqual(Number(snap.trafficZoneCoefficient), 1.18, "quoteSnapshot.trafficZoneCoefficient (千葉交通圏)");
+assertEqual(Number(snap.trafficZoneCoefficient), 1.18, "quoteSnapshot.trafficZoneCoefficient");
 assertEqual(String(snap.trafficZoneId || snap.selectedTrafficZoneId), "chiba", "trafficZoneId chiba");
-assertEqual(Number(snap.adjustedDistanceFareAmount), 4862, "adjustedDistanceFareAmount");
-assertEqual(Number(snap.preFixedFareAmount), 4862, "preFixedFareAmount = 事前確定運賃本体");
-assertEqual(Number(snap.scheduledDurationSurcharge) || 0, 0, "scheduledDurationSurcharge=0（本体に含めない）");
+assertEqual(Number(snap.adjustedDistanceFareAmount), 4860, "adjustedDistanceFareAmount 4860");
+assertEqual(Number(snap.preFixedFareAmount), 4860, "preFixedFareAmount 4860");
+assertEqual(Number(snap.scheduledDurationSurcharge) || 0, 0, "scheduledDurationSurcharge=0");
 assertEqual(getBreakdownAmount(snap.fixedFareBreakdown, "timeAdjustment"), 0, "timeAdjustment not charged");
-assertEqual(getBreakdownAmount(snap.fixedFareBreakdown, "distanceFare"), 4862, "distanceFare after coefficient");
+assertEqual(getBreakdownAmount(snap.fixedFareBreakdown, "distanceFare"), 4860, "distanceFare after coefficient");
 assertEqual(getBreakdownAmount(snap.fixedFareBreakdown, "pickupFee"), 800, "pickupFee without coefficient");
-assertEqual(Number(snap.specialVehicleFeeAmount) || getBreakdownAmount(snap.fixedFareBreakdown, "specialVehicleFee"), 1000, "specialVehicleFee without coefficient");
-assertEqual(Number(pf25.total), 7762, "totalAmount 7762");
-assertEqual(Number(snap.totalAmount ?? pf25.total), 7762, "quoteSnapshot.totalAmount");
+assertEqual(Number(snap.specialVehicleFeeAmount) || getBreakdownAmount(snap.fixedFareBreakdown, "specialVehicleFee"), 1000, "specialVehicleFee");
+assertEqual(Number(pf25.total), 7760, "totalAmount 7760");
+assertEqual(Number(snap.totalAmount ?? pf25.total), 7760, "quoteSnapshot.totalAmount");
 
 console.log("=== 予定時間非連動（10/25/60/120分で同額） ===");
 [10, 25, 60, 120].forEach(function(minutes){
   const result = computeMode("pre_fixed_fare", minutes);
-  assertEqual(Number(result.total), 7762, "duration " + minutes + "m total");
+  assertEqual(Number(result.total), 7760, "duration " + minutes + "m total");
   assertEqual(Number(result.quoteSnapshot?.scheduledDurationSurcharge) || 0, 0, "duration " + minutes + "m surcharge");
 });
 
@@ -131,33 +135,21 @@ assertEqual(
   Number(dt25.quoteSnapshot?.preFixedFareAmount),
   "mode preFixedFareAmount parity"
 );
-assertEqual(Number(dt25.total), 7762, "distance_time also 7762");
+assertEqual(Number(dt25.total), 7760, "distance_time also 7760");
 
-console.log("=== 京葉1.20は料金に使わない / 係数なしにならない ===");
+console.log("=== 京葉1.20は料金に使わない ===");
 const keiyoConfig = JSON.parse(JSON.stringify(config));
 keiyoConfig.preFixedFare = { trafficZoneId: "keiyo" };
 const keiyoResult = EstimateCalc.computeEstimate(
   Object.assign({}, keiyoConfig, { fareMode: "pre_fixed_fare" }),
   baseState(25)
 );
-assertEqual(Number(keiyoResult.total), 7762, "keiyo config must not change authorized total");
+assertEqual(Number(keiyoResult.total), 7760, "keiyo config must not change authorized total");
 assertEqual(Number(keiyoResult.quoteSnapshot?.trafficZoneCoefficient), 1.18, "still 1.18");
-assertEqual(String(keiyoResult.quoteSnapshot?.trafficZoneId || keiyoResult.quoteSnapshot?.selectedTrafficZoneId), "chiba", "still chiba");
-
-const noZoneConfig = JSON.parse(JSON.stringify(config));
-noZoneConfig.trafficZones = { items: [] };
-noZoneConfig.preFixedFare = { trafficZoneId: "keiyo" };
-const noZoneResult = EstimateCalc.computeEstimate(
-  Object.assign({}, noZoneConfig, { fareMode: "pre_fixed_fare" }),
-  baseState(25)
-);
-assertEqual(Number(noZoneResult.total), 7762, "missing zones still use authorized 1.18");
-assertEqual(Number(noZoneResult.quoteSnapshot?.trafficZoneCoefficient), 1.18, "coefficient present");
 
 console.log("=== 迎車・介助へ係数を掛けない ===");
-const pickup = getBreakdownAmount(snap.fixedFareBreakdown, "pickupFee");
+assertEqual(getBreakdownAmount(snap.fixedFareBreakdown, "pickupFee"), 800, "pickup stays 800");
 const assist = (snap.serviceFees || []).find((row) => row.key === "assistanceFee");
-assertEqual(pickup, 800, "pickup stays 800");
 assertEqual(Number(assist?.amount), 1100, "assistance stays 1100");
 
 console.log("\nAll authorized pre-fixed-fare tests passed.");

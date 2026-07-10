@@ -624,7 +624,7 @@
         buildList(regulatory.notices?.formulas) +
         "<p><strong>" + escapeHtml(regulatory.notices?.formulaText || "") + "</strong></p>"
       ) +
-      subsection("四捨五入", "<p>事前確定運賃算定時は1円未満の端数を四捨五入する（別紙1参照）。</p>")
+      subsection("四捨五入", "<p>事前確定運賃算定時は1円の位を四捨五入し、10円単位とする（例: 4,861.6円→4,860円。別紙1参照）。</p>")
     );
   }
 

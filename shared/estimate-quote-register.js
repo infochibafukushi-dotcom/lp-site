@@ -19,7 +19,7 @@
 
   function normalizeFixedFareTotal(snapshot){
     const amount = Number(snapshot?.fixedFareTotal) || 0;
-    // 申請資料: 認可モードは1円単位を維持（10円未満切捨て禁止）
+    // 認可モード: 係数適用後は10円単位。登録時に再切捨てしない
     if(isAuthorizedFareMode(snapshot?.fareMode)){
       return Math.max(0, Math.round(amount));
     }
