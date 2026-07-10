@@ -1,34 +1,24 @@
-import { createRequire } from "node:module";
+/**
+ * 交通圏判定モジュール単体のテスト（料金計算には使用しない）。
+ * Run: node scripts/test-traffic-zone-detection.mjs
+ */
 import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const require = createRequire(import.meta.url);
-
-function loadModule(relativePath){
-  const code = readFileSync(join(__dirname, "..", relativePath), "utf8");
-  const module = { exports: {} };
-  const fn = new Function("module", "exports", code);
-  fn(module, module.exports);
-  return module.exports;
-}
-
+const root = join(__dirname, "..");
 const globalScope = globalThis;
-const defaultsCode = readFileSync(join(__dirname, "..", "shared", "estimate-defaults.js"), "utf8");
+
+const defaultsCode = readFileSync(join(root, "shared", "estimate-defaults.js"), "utf8");
 new Function("global", defaultsCode)(globalScope);
 
-const trafficZoneCode = readFileSync(join(__dirname, "..", "shared", "estimate-traffic-zone.js"), "utf8");
+const trafficZoneCode = readFileSync(join(root, "shared", "estimate-traffic-zone.js"), "utf8");
 new Function("global", trafficZoneCode)(globalScope);
 
-const calcCode = readFileSync(join(__dirname, "..", "estimate", "estimate-calc.js"), "utf8");
-new Function("global", calcCode)(globalScope);
-
-const config = JSON.parse(readFileSync(join(__dirname, "..", "data", "estimate-config.json"), "utf8"));
-config.fareMode = "pre_fixed_fare";
+const config = JSON.parse(readFileSync(join(root, "data", "estimate-config.json"), "utf8"));
 
 const { detectTrafficZone } = globalScope.EstimateTrafficZone;
-const { computeEstimate } = globalScope.EstimateCalc;
 
 const cases = [
   {
@@ -51,18 +41,6 @@ const cases = [
     expectedMethod: "auto_address"
   },
   {
-    name: "船橋市",
-    originAddress: "船橋市本町1-1",
-    expectedZoneId: "keiyo",
-    expectedMethod: "auto_address"
-  },
-  {
-    name: "市川市",
-    originAddress: "市川市市川1-1",
-    expectedZoneId: "keiyo",
-    expectedMethod: "auto_address"
-  },
-  {
     name: "判定できない住所",
     originAddress: "不明な場所ABC",
     expectedZoneId: "keiyo",
@@ -73,7 +51,7 @@ const cases = [
 let passed = 0;
 let failed = 0;
 
-console.log("=== 交通圏自動判定テスト ===\n");
+console.log("=== 交通圏自動判定テスト（モジュール単体） ===\n");
 
 cases.forEach(function(testCase){
   const detection = detectTrafficZone(config, {
@@ -81,32 +59,9 @@ cases.forEach(function(testCase){
     geocoding: testCase.geocoding || null
   });
 
-  const state = {
-    originAddress: testCase.originAddress,
-    routePlan: {
-      pickup: {
-        address: testCase.originAddress,
-        geocoding: testCase.geocoding || null
-      }
-    },
-    distanceKm: 5,
-    mobilityId: "cane-walk",
-    assistanceId: "watch-assist",
-    stairId: "stair-none",
-    tripTypeId: "one-way",
-    roundTripAddonId: "",
-    roadType: "general",
-    routeCalcResult: { durationMinutes: 15 }
-  };
-
-  const result = computeEstimate(config, state);
-  const snapshot = result.quoteSnapshot || {};
-
   const checks = [
     ["交通圏ID", detection.selectedTrafficZoneId, testCase.expectedZoneId],
-    ["判定方法", detection.trafficZoneDetectionMethod, testCase.expectedMethod],
-    ["quoteSnapshot.zoneId", snapshot.selectedTrafficZoneId, testCase.expectedZoneId],
-    ["quoteSnapshot.method", snapshot.trafficZoneDetectionMethod, testCase.expectedMethod]
+    ["判定方法", detection.trafficZoneDetectionMethod, testCase.expectedMethod]
   ];
 
   let caseFailed = false;

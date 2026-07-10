@@ -186,7 +186,7 @@
     distance: "出発地・目的地間の距離を基に算出します",
     time: "予定所要時間を基に算出します",
     distance_time: "距離運賃に加え、ルート予定時間に基づく概算加算を行います（認可メーターの低速走行加算とは異なります）",
-    pre_fixed_fare: "認可距離制運賃に交通圏平準化係数を適用します。介助料・待機料・実費には係数を適用しません"
+    pre_fixed_fare: "距離運賃に加え、ルート予定時間に基づく概算加算を行います。出発前に運賃を確定する案内を表示します（料金計算は距離＋予定時間加算（概算）と同一です）"
   };
 
   function findTimeBlockComponent(components, key){
@@ -221,11 +221,16 @@
 
   function renderDistancePatternAFields(){
     const patternA = estimateDraft.distancePricing?.patternA || {};
+    const incrementMeters = window.FareConstants?.resolveIncrementDistanceMeters
+      ? window.FareConstants.resolveIncrementDistanceMeters(patternA)
+      : (Number(patternA.incrementDistanceMeters) || (Number(patternA.incrementDistanceKm) >= 1
+        ? Number(patternA.incrementDistanceKm)
+        : Math.round((Number(patternA.incrementDistanceKm) || 0) * 1000)));
     return `
       <div class="grid2">
         <div class="row"><label>初乗距離（km）</label><input type="number" min="0" step="0.001" id="estimateInitialDistanceKm" value="${escapeAttr(patternA.initialDistanceKm ?? 0)}"></div>
         <div class="row"><label>初乗運賃（円）</label><input type="number" min="0" step="1" id="estimateInitialFare" value="${escapeAttr(patternA.initialFare ?? 0)}"></div>
-        <div class="row"><label>加算距離（km）</label><input type="number" min="0" step="0.001" id="estimateIncrementDistanceKm" value="${escapeAttr(patternA.incrementDistanceKm ?? 0)}"></div>
+        <div class="row"><label>加算距離（m）</label><input type="number" min="0" step="1" id="estimateIncrementDistanceMeters" value="${escapeAttr(incrementMeters)}"></div>
         <div class="row"><label>加算運賃（円）</label><input type="number" min="0" step="1" id="estimateIncrementFare" value="${escapeAttr(patternA.incrementFare ?? 0)}"></div>
       </div>
     `;
@@ -421,7 +426,7 @@
       })}
 
       <h3>交通圏係数</h3>
-      <p class="note">運輸局公示の平準化係数です。事前確定運賃モードの距離運賃にのみ適用されます。</p>
+      <p class="note">運輸局公示の平準化係数の参照設定です。LPかんたん見積の料金計算には使用しません。</p>
       ${renderTrafficZoneItems()}
       ${renderPreFixedFareSettings()}
 
@@ -539,12 +544,17 @@
 
     draft.distancePricing = draft.distancePricing || {};
     draft.distancePricing.mode = estimateDraft.distancePricing?.mode || "patternA";
-    draft.distancePricing.patternA = {
+    const incrementDistanceMeters = Number(document.getElementById("estimateIncrementDistanceMeters")?.value) || 0;
+    const patternA = {
       initialDistanceKm: Number(document.getElementById("estimateInitialDistanceKm")?.value) || 0,
       initialFare: Number(document.getElementById("estimateInitialFare")?.value) || 0,
-      incrementDistanceKm: Number(document.getElementById("estimateIncrementDistanceKm")?.value) || 0,
+      incrementDistanceMeters: incrementDistanceMeters,
+      incrementDistanceKm: incrementDistanceMeters > 0 ? incrementDistanceMeters / 1000 : 0,
       incrementFare: Number(document.getElementById("estimateIncrementFare")?.value) || 0
     };
+    draft.distancePricing.patternA = window.FareConstants?.normalizeDistancePricingPatternA
+      ? window.FareConstants.normalizeDistancePricingPatternA(patternA)
+      : patternA;
     draft.distancePricing.patternB = deepClone(estimateDraft.distancePricing?.patternB || { perKmRate: 0 });
 
     const selectedFareMode = document.getElementById("estimateFareMode")?.value || "time";
@@ -748,6 +758,11 @@
     ensureTrafficZones(draft);
     if(defaults.preFixedFare){
       draft.preFixedFare = Object.assign({}, defaults.preFixedFare, draft.preFixedFare || {});
+    }
+    if(draft.distancePricing?.patternA && window.FareConstants?.normalizeDistancePricingPatternA){
+      draft.distancePricing.patternA = window.FareConstants.normalizeDistancePricingPatternA(
+        draft.distancePricing.patternA
+      );
     }
     if(defaults.basicFees){
       draft.basicFees = Object.assign({}, defaults.basicFees, draft.basicFees || {});

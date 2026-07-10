@@ -7,6 +7,9 @@
     "check:links": "node scripts/check-links.mjs",
     "quality": "npm run validate:json && npm run check:links",
     "test:traffic-zone": "node scripts/test-traffic-zone-detection.mjs",
-    "test:special-vehicle-fee": "node scripts/test-special-vehicle-fee.mjs"
+    "test:fare-mode-parity": "node scripts/test-fare-mode-parity.mjs",
+    "test:increment-distance-units": "node scripts/test-increment-distance-units.mjs",
+    "test:special-vehicle-fee": "node scripts/test-special-vehicle-fee.mjs",
+    "test:estimate": "node scripts/test-fare-mode-parity.mjs && node scripts/test-increment-distance-units.mjs && node scripts/test-duration-fare-difference.mjs && node scripts/test-special-vehicle-fee.mjs && node scripts/test-traffic-zone-detection.mjs"
   }
 }

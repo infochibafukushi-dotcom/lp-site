@@ -16,13 +16,55 @@
   const FARE_LABEL = FARE_AREA + " " + FARE_VEHICLE_CLASS + FARE_PLAN;
   const FARE_LABEL_WITH_NOTICE = FARE_NOTICE + " " + FARE_LABEL;
 
-  function getDistancePricingPatternA(){
+  function resolveIncrementDistanceKm(pattern){
+    const patternObj = pattern || {};
+    const meters = Number(patternObj.incrementDistanceMeters);
+    if(meters > 0){
+      return meters / 1000;
+    }
+    const raw = Number(patternObj.incrementDistanceKm) || 0;
+    if(!(raw > 0)){
+      return 0;
+    }
+    // 旧 lp-site 設定では incrementDistanceKm にメートル値（例: 212）が入っていた。
+    if(raw >= 1){
+      return raw / 1000;
+    }
+    return raw;
+  }
+
+  function resolveIncrementDistanceMeters(pattern){
+    const patternObj = pattern || {};
+    const explicitMeters = Number(patternObj.incrementDistanceMeters);
+    if(explicitMeters > 0){
+      return explicitMeters;
+    }
+    const km = resolveIncrementDistanceKm(patternObj);
+    return km > 0 ? Math.round(km * 1000) : 0;
+  }
+
+  function normalizeDistancePricingPatternA(pattern){
+    const src = pattern || {};
+    const incrementDistanceMeters = resolveIncrementDistanceMeters(src);
+    const incrementDistanceKm = incrementDistanceMeters > 0
+      ? incrementDistanceMeters / 1000
+      : resolveIncrementDistanceKm(src);
     return {
+      initialDistanceKm: Number(src.initialDistanceKm) || 0,
+      initialFare: Number(src.initialFare) || 0,
+      incrementDistanceMeters: incrementDistanceMeters,
+      incrementDistanceKm: incrementDistanceKm,
+      incrementFare: Number(src.incrementFare) || 0
+    };
+  }
+
+  function getDistancePricingPatternA(){
+    return normalizeDistancePricingPatternA({
       initialDistanceKm: INITIAL_DISTANCE_KM,
       initialFare: INITIAL_FARE_YEN,
-      incrementDistanceKm: ADDITIONAL_DISTANCE_KM,
+      incrementDistanceMeters: ADDITIONAL_DISTANCE_M,
       incrementFare: ADDITIONAL_FARE_YEN
-    };
+    });
   }
 
   function getCharterTimeBlockParams(){
@@ -51,6 +93,9 @@
     CHARTER_UNIT_MINUTES: CHARTER_UNIT_MINUTES,
     CHARTER_UNIT_FARE_YEN: CHARTER_UNIT_FARE_YEN,
     getDistancePricingPatternA: getDistancePricingPatternA,
-    getCharterTimeBlockParams: getCharterTimeBlockParams
+    getCharterTimeBlockParams: getCharterTimeBlockParams,
+    resolveIncrementDistanceKm: resolveIncrementDistanceKm,
+    resolveIncrementDistanceMeters: resolveIncrementDistanceMeters,
+    normalizeDistancePricingPatternA: normalizeDistancePricingPatternA
   };
 })(typeof window !== "undefined" ? window : globalThis);

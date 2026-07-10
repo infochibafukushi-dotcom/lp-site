@@ -2216,7 +2216,7 @@
       return "";
     }
     const snapshot = routeResult.quoteSnapshot || {};
-    const routeFare = Number(snapshot.adjustedDistanceFareAmount) || Number(snapshot.fixedFareTotal) || 0;
+    const routeFare = Number(snapshot.fixedFareTotal) || 0;
     const estimateTotal = Number(routeResult.total) || 0;
     const routeFareText = routeFare > 0 ? formatYen(routeFare) : "算定中";
     const totalText = estimateTotal > 0 ? formatYen(estimateTotal) : "算定中";
@@ -3767,45 +3767,9 @@
       ["有料道路", getTollRoadUsageLabel(snapshot.roadType || state.roadType)]
     ];
 
-    const fareRows = [];
-    const trafficZoneRows = [];
-    if(snapshot.preFixedFareMode){
-      if(snapshot.baseDistanceFareAmount != null){
-        fareRows.push(["認可距離制運賃", formatCalcBasisYen(snapshot.baseDistanceFareAmount)]);
-      }
-      if(snapshot.detectedMunicipality){
-        trafficZoneRows.push(["判定市区町村", snapshot.detectedMunicipality]);
-      }
-      if(snapshot.selectedTrafficZoneLabel){
-        trafficZoneRows.push(["適用交通圏", snapshot.selectedTrafficZoneLabel]);
-      }
-      if(snapshot.trafficZoneCoefficient != null){
-        const coefficientLabel = window.EstimateTrafficZone
-          ? window.EstimateTrafficZone.formatTrafficZoneCoefficient(snapshot.trafficZoneCoefficient)
-          : String(snapshot.trafficZoneCoefficient);
-        trafficZoneRows.push(["平準化係数", coefficientLabel]);
-      }
-      if(snapshot.trafficZoneDetectionMethod){
-        const methodLabel = window.EstimateTrafficZone
-          ? window.EstimateTrafficZone.getTrafficZoneDetectionMethodLabel(snapshot.trafficZoneDetectionMethod)
-          : snapshot.trafficZoneDetectionMethod;
-        trafficZoneRows.push(["判定方法", methodLabel]);
-      }
-      if(snapshot.adjustedDistanceFareAmount != null){
-        fareRows.push(["事前確定運賃", formatCalcBasisYen(snapshot.adjustedDistanceFareAmount)]);
-      }
-      (snapshot.fixedFareBreakdown || []).forEach(function(row){
-        if(row.key === "pickupFee"){
-          fareRows.push([row.label || "迎車料金", formatCalcBasisYen(row.amount)]);
-        }else if(row.key === "timeAdjustment"){
-          fareRows.push([row.label || "予定時間加算", formatCalcBasisYen(row.amount)]);
-        }
-      });
-    }else{
-      (snapshot.fixedFareBreakdown || []).forEach(function(row){
-        fareRows.push([row.label || row.key || "", formatCalcBasisYen(row.amount)]);
-      });
-    }
+    const fareRows = (snapshot.fixedFareBreakdown || []).map(function(row){
+      return [row.label || row.key || "", formatCalcBasisYen(row.amount)];
+    });
 
     const serviceRows = [];
     const specialVehicleFee = Number(breakdown.specialVehicleFee) || Number(snapshot.specialVehicleFeeAmount) || 0;
@@ -3832,7 +3796,7 @@
       "※有料道路料金、駐車料金等の実費は別途ご負担となる場合があります。"
     ];
     if(snapshot.preFixedFareMode){
-      basisNotes.push("※事前確定運賃は認可運賃および適用係数に基づき算出しています。");
+      basisNotes.push("※事前確定運賃は、提示した走行予定ルートに基づき算出しています。");
     }
 
     return (
@@ -3843,7 +3807,6 @@
       "<div class=\"estimate-calc-basis-panel\" id=\"estimateCalcBasisPanel\" hidden>" +
       "<h4 class=\"estimate-calc-basis-title\">" + escapeHtml(basisTitle) + "</h4>" +
       renderCalcBasisSection("ルート算出情報", routeRows) +
-      (trafficZoneRows.length ? renderCalcBasisSection("交通圏情報", trafficZoneRows) : "") +
       renderCalcBasisSection("運賃計算情報", fareRows) +
       renderCalcBasisSection("サービス料金", serviceRows) +
       renderCalcBasisSection("合計", [["見積金額", formatCalcBasisYen(result.total)]]) +

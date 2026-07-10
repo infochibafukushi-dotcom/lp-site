@@ -102,6 +102,11 @@
     const modes = ["time", "distance", "distance_time", "pre_fixed_fare"];
     const modeExists = modes.includes(String(data.fareMode || ""));
     data.fareMode = modeExists ? String(data.fareMode) : String(defaults.fareMode || "time");
+    if(data.distancePricing?.patternA && global.FareConstants?.normalizeDistancePricingPatternA){
+      data.distancePricing.patternA = global.FareConstants.normalizeDistancePricingPatternA(
+        data.distancePricing.patternA
+      );
+    }
     return data;
   }
 
