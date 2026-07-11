@@ -95,6 +95,52 @@ const distinctDistance = {
   distanceMeters: 8500,
   durationSeconds: 1500
 };
+// Production near-distance regression: distinct polyline but longer than A/B.
+const longerDistinctDistance = {
+  routeStrategy: "shorter_distance",
+  avoidHighways: false,
+  avoidTolls: true,
+  routingPreference: "TRAFFIC_UNAWARE",
+  encodedPolyline: "poly-c-long",
+  distanceMeters: 3648,
+  durationSeconds: 666
+};
+const nearTimeRoute = Object.assign({}, timeRoute, {
+  distanceMeters: 3297,
+  durationSeconds: 647
+});
+const nearGeneralRoute = Object.assign({}, generalRoute, {
+  distanceMeters: 3297,
+  durationSeconds: 647
+});
+const equalDistinctDistance = {
+  routeStrategy: "shorter_distance",
+  avoidHighways: false,
+  avoidTolls: true,
+  routingPreference: "TRAFFIC_UNAWARE",
+  encodedPolyline: "poly-c-equal",
+  distanceMeters: 10000,
+  durationSeconds: 1100
+};
+const longTripTimeRoute = Object.assign({}, timeRoute, {
+  encodedPolyline: "poly-long-a",
+  distanceMeters: 41709,
+  durationSeconds: 4976
+});
+const longTripGeneralRoute = Object.assign({}, generalRoute, {
+  encodedPolyline: "poly-long-a",
+  distanceMeters: 41709,
+  durationSeconds: 4976
+});
+const longTripShorterDistance = {
+  routeStrategy: "shorter_distance",
+  avoidHighways: false,
+  avoidTolls: true,
+  routingPreference: "TRAFFIC_UNAWARE",
+  encodedPolyline: "poly-long-c",
+  distanceMeters: 39250,
+  durationSeconds: 5582
+};
 
 assert.equal(
   api.isDuplicateRoute(timeRoute, samePathDifferentFingerprint),
@@ -132,6 +178,32 @@ assert.equal(
 assert.ok(slotsAbOnlyCrossFingerprint.time_priority);
 assert.ok(slotsAbOnlyCrossFingerprint.general_road_priority);
 
+const slotsLongerDistinct = api.assembleStrategySlotRoutes({
+  time_priority: nearTimeRoute,
+  general_road_priority: nearGeneralRoute,
+  shorter_distance: longerDistinctDistance,
+  toll_allowed: fakeToll
+});
+assert.equal(
+  slotsLongerDistinct.shorter_distance,
+  undefined,
+  "distinct polyline that is longer than A/B must not become C"
+);
+assert.ok(slotsLongerDistinct.time_priority);
+assert.ok(slotsLongerDistinct.general_road_priority);
+
+const slotsEqualDistinct = api.assembleStrategySlotRoutes({
+  time_priority: timeRoute,
+  general_road_priority: generalRoute,
+  shorter_distance: equalDistinctDistance,
+  toll_allowed: fakeToll
+});
+assert.equal(
+  slotsEqualDistinct.shorter_distance,
+  undefined,
+  "distinct polyline with equal distance to A/B must not become C"
+);
+
 const slotsWithCd = api.assembleStrategySlotRoutes({
   time_priority: timeRoute,
   general_road_priority: generalRoute,
@@ -140,6 +212,19 @@ const slotsWithCd = api.assembleStrategySlotRoutes({
 });
 assert.equal(Object.keys(slotsWithCd).sort().join(","), "general_road_priority,shorter_distance,time_priority,toll_allowed");
 assert.equal(slotsWithCd.toll_allowed.usesToll, true);
+assert.ok(slotsWithCd.shorter_distance, "strictly shorter distinct C must remain visible");
+
+const slotsLongTripShorter = api.assembleStrategySlotRoutes({
+  time_priority: longTripTimeRoute,
+  general_road_priority: longTripGeneralRoute,
+  shorter_distance: longTripShorterDistance,
+  toll_allowed: realToll
+});
+assert.ok(
+  slotsLongTripShorter.shorter_distance,
+  "genuinely shorter long-distance C must remain visible"
+);
+assert.equal(slotsLongTripShorter.shorter_distance.distanceMeters, 39250);
 
 const noTollPresentation = presentation.resolveRoutePresentation({
   routeStrategy: "toll_allowed",

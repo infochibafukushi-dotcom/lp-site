@@ -205,6 +205,61 @@
     return strategy === "time_priority" || strategy === "general_road_priority";
   }
 
+  function findKeptCoreRoute(kept, strategy){
+    const target = String(strategy || "").trim();
+    return (kept || []).find(function(route){
+      return String(route?.routeStrategy || "") === target;
+    }) || null;
+  }
+
+  // C must beat both A and B on raw meters. Equal or longer never qualifies,
+  // even when the polyline differs from A/B.
+  function isStrictlyShorterThanCoreRoutes(route, kept){
+    const distance = Number(route?.distanceMeters) || 0;
+    if(!(distance > 0)){
+      return false;
+    }
+    const timeRoute = findKeptCoreRoute(kept, "time_priority");
+    const generalRoute = findKeptCoreRoute(kept, "general_road_priority");
+    if(!timeRoute || !generalRoute){
+      return false;
+    }
+    const timeMeters = Number(timeRoute.distanceMeters) || 0;
+    const generalMeters = Number(generalRoute.distanceMeters) || 0;
+    if(!(timeMeters > 0) || !(generalMeters > 0)){
+      return false;
+    }
+    return distance < timeMeters && distance < generalMeters;
+  }
+
+  function filterRoundTripPairsByShorterDistance(pairs){
+    const list = Array.isArray(pairs) ? pairs.slice() : [];
+    const timePair = list.find(function(pair){
+      return pair?.strategy === "time_priority";
+    });
+    const generalPair = list.find(function(pair){
+      return pair?.strategy === "general_road_priority";
+    });
+    const shorterPair = list.find(function(pair){
+      return pair?.strategy === "shorter_distance";
+    });
+    if(!shorterPair){
+      return list;
+    }
+    const timeMeters = Number(timePair?.totalDistanceMeters) || 0;
+    const generalMeters = Number(generalPair?.totalDistanceMeters) || 0;
+    const shorterMeters = Number(shorterPair?.totalDistanceMeters) || 0;
+    if(!timePair || !generalPair
+      || !(shorterMeters > 0)
+      || !(shorterMeters < timeMeters)
+      || !(shorterMeters < generalMeters)){
+      return list.filter(function(pair){
+        return pair?.strategy !== "shorter_distance";
+      });
+    }
+    return list;
+  }
+
   function canAssignStrategySlot(strategy, route, kept){
     if(!route){
       return false;
@@ -217,6 +272,11 @@
         return false;
       }
       if(isDuplicateOfAny(route, kept)){
+        return false;
+      }
+      // Distinct polyline alone is not enough: C must be strictly shorter
+      // than both A and B using raw distanceMeters.
+      if(!isStrictlyShorterThanCoreRoutes(route, kept)){
         return false;
       }
       return true;
@@ -1281,6 +1341,8 @@
     DISPLAY_STRATEGY_ORDER: DISPLAY_STRATEGY_ORDER.slice(),
     isDuplicateRoute: isDuplicateRoute,
     isSameEncodedPath: isSameEncodedPath,
+    isStrictlyShorterThanCoreRoutes: isStrictlyShorterThanCoreRoutes,
+    filterRoundTripPairsByShorterDistance: filterRoundTripPairsByShorterDistance,
     geocodeAddress: geocodeAddress
   };
 })(typeof window !== "undefined" ? window : globalThis);

@@ -2012,16 +2012,17 @@
       return "time_priority";
     }
     if(canUseRoundTripPairSelection(routePlan)){
+      const pairs = buildRoundTripRoutePairs(routePlan);
       const outboundLeg = routePlan.outboundRoutePlan;
       const returnLeg = routePlan.returnRoutePlan;
       if(outboundLeg && returnLeg){
         const outboundStrategy = getRouteStrategyKey(window.EstimateCalc.getLegPrimaryRoute(outboundLeg));
         const returnStrategy = getRouteStrategyKey(window.EstimateCalc.getLegPrimaryRoute(returnLeg));
-        if(outboundStrategy && outboundStrategy === returnStrategy){
+        if(outboundStrategy && outboundStrategy === returnStrategy
+          && pairs.some(function(pair){ return pair.strategy === outboundStrategy; })){
           return outboundStrategy;
         }
       }
-      const pairs = buildRoundTripRoutePairs(routePlan);
       return pairs[0]?.strategy || "time_priority";
     }
     const legPlan = routePlan.outboundRoutePlan || routePlan;
@@ -2037,26 +2038,28 @@
     if(!routePlan || !isPreFixedFareMode()){
       return routePlan;
     }
-    if(canUseRoundTripPairSelection(routePlan)){
-      const pairs = buildRoundTripRoutePairs(routePlan);
-      const selectedStrategy = getSelectedRoundTripPairStrategy(routePlan);
+    let nextPlan = pruneInvalidRoundTripShorterDistance(routePlan);
+    if(canUseRoundTripPairSelection(nextPlan)){
+      const pairs = buildRoundTripRoutePairs(nextPlan);
+      const selectedStrategy = getSelectedRoundTripPairStrategy(nextPlan);
       const selectedStillValid = selectedStrategy
         && pairs.some(function(pair){ return pair.strategy === selectedStrategy; });
       if(selectedStillValid){
-        return routePlan;
+        return nextPlan;
       }
+      // C may have been removed by the distance gate; always prefer A.
       const defaultPair = pairs.find(function(pair){
         return pair.strategy === "time_priority";
       }) || pairs[0];
       if(!defaultPair){
-        return routePlan;
+        return nextPlan;
       }
-      const outboundLeg = applyRouteToLegPlan(routePlan.outboundRoutePlan, defaultPair.outboundRoute);
-      const returnLeg = applyRouteToLegPlan(routePlan.returnRoutePlan, defaultPair.returnRoute);
+      const outboundLeg = applyRouteToLegPlan(nextPlan.outboundRoutePlan, defaultPair.outboundRoute);
+      const returnLeg = applyRouteToLegPlan(nextPlan.returnRoutePlan, defaultPair.returnRoute);
       return rebuildRoutePlanFromLegs(outboundLeg, returnLeg);
     }
-    let outboundLeg = routePlan.outboundRoutePlan || routePlan;
-    let returnLeg = routePlan.returnRoutePlan || null;
+    let outboundLeg = nextPlan.outboundRoutePlan || nextPlan;
+    let returnLeg = nextPlan.returnRoutePlan || null;
     if(outboundLeg && legAllowsRouteSelection(outboundLeg)){
       const outboundRoutes = getDisplayRouteCandidatesFromLeg(outboundLeg);
       const selectedOutboundId = String(outboundLeg.selectedRouteId || "");
@@ -2087,10 +2090,10 @@
         }
       }
     }
-    if(routePlan.outboundRoutePlan){
+    if(nextPlan.outboundRoutePlan){
       return rebuildRoutePlanFromLegs(outboundLeg, returnLeg);
     }
-    return Object.assign({}, routePlan, outboundLeg);
+    return Object.assign({}, nextPlan, outboundLeg);
   }
 
   function smoothScrollToY(top, duration){
@@ -2423,7 +2426,7 @@
       return [];
     }
     const strategyDefs = getRoundTripPairStrategyDefinitions();
-    return strategyDefs.map(function(pair){
+    const pairs = strategyDefs.map(function(pair){
       const outboundRoute = findRouteCandidateByStrategy(outboundLeg, pair.strategy);
       const returnRoute = findRouteCandidateByStrategy(returnLeg, pair.strategy);
       if(!outboundRoute || !returnRoute){
@@ -2450,6 +2453,63 @@
           || routeActuallyUsesToll(outboundRoute) || routeActuallyUsesToll(returnRoute)
       };
     }).filter(Boolean);
+    const filterPairs = window.EstimateDistanceApi
+      && typeof window.EstimateDistanceApi.filterRoundTripPairsByShorterDistance === "function"
+      ? window.EstimateDistanceApi.filterRoundTripPairsByShorterDistance
+      : null;
+    return filterPairs ? filterPairs(pairs) : pairs;
+  }
+
+  function stripStrategyFromLegPlan(legPlan, strategy){
+    if(!legPlan){
+      return legPlan;
+    }
+    const target = String(strategy || "").trim();
+    if(!target){
+      return legPlan;
+    }
+    const filterRoutes = function(routes){
+      return (Array.isArray(routes) ? routes : []).filter(function(route){
+        return getRouteStrategyKey(route) !== target;
+      });
+    };
+    const nextRoutes = filterRoutes(legPlan.routes);
+    const nextCandidates = filterRoutes(legPlan.routeCandidates);
+    return Object.assign({}, legPlan, {
+      routes: nextRoutes,
+      routeCandidates: nextCandidates.length ? nextCandidates : nextRoutes,
+      routeCandidateCount: nextRoutes.length,
+      distinctRouteCount: nextRoutes.length,
+      alternativeRouteCount: nextRoutes.length
+    });
+  }
+
+  function pruneInvalidRoundTripShorterDistance(routePlan){
+    if(!routePlan?.outboundRoutePlan || !routePlan?.returnRoutePlan){
+      return routePlan;
+    }
+    if(!isRoundTripActive() || isOverallRouteSelectionMode(routePlan)){
+      return routePlan;
+    }
+    if(getActiveReturnPlanType() === "return_pending"){
+      return routePlan;
+    }
+    const pairs = buildRoundTripRoutePairs(routePlan);
+    const hasShorterPair = pairs.some(function(pair){
+      return pair.strategy === "shorter_distance";
+    });
+    if(hasShorterPair){
+      return routePlan;
+    }
+    const outboundHasC = Boolean(findRouteCandidateByStrategy(routePlan.outboundRoutePlan, "shorter_distance"));
+    const returnHasC = Boolean(findRouteCandidateByStrategy(routePlan.returnRoutePlan, "shorter_distance"));
+    if(!outboundHasC && !returnHasC){
+      return routePlan;
+    }
+    return rebuildRoutePlanFromLegs(
+      stripStrategyFromLegPlan(routePlan.outboundRoutePlan, "shorter_distance"),
+      stripStrategyFromLegPlan(routePlan.returnRoutePlan, "shorter_distance")
+    );
   }
 
   function canUseRoundTripPairSelection(routePlan){
