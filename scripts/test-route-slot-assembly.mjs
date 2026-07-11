@@ -61,6 +61,17 @@ const sameAsTime = {
   distanceMeters: 10000,
   durationSeconds: 1200
 };
+// Production near-distance case: C often shares A's polyline but uses a
+// different request fingerprint (TRAFFIC_UNAWARE) and a different duration.
+const samePathDifferentFingerprint = {
+  routeStrategy: "shorter_distance",
+  avoidHighways: true,
+  avoidTolls: true,
+  routingPreference: "TRAFFIC_UNAWARE",
+  encodedPolyline: "poly-a",
+  distanceMeters: 10000,
+  durationSeconds: 1100
+};
 const fakeToll = {
   routeStrategy: "toll_allowed",
   avoidHighways: false,
@@ -85,6 +96,16 @@ const distinctDistance = {
   durationSeconds: 1500
 };
 
+assert.equal(
+  api.isDuplicateRoute(timeRoute, samePathDifferentFingerprint),
+  true,
+  "same polyline must dedupe across routing fingerprints"
+);
+assert.equal(
+  api.isSameEncodedPath(timeRoute, samePathDifferentFingerprint),
+  true
+);
+
 const slotsAbOnly = api.assembleStrategySlotRoutes({
   time_priority: timeRoute,
   general_road_priority: generalRoute,
@@ -96,6 +117,20 @@ assert.ok(slotsAbOnly.time_priority);
 assert.ok(slotsAbOnly.general_road_priority);
 assert.equal(slotsAbOnly.shorter_distance, undefined, "duplicate C must not be forced");
 assert.equal(slotsAbOnly.toll_allowed, undefined, "D without toll evidence must not be shown");
+
+const slotsAbOnlyCrossFingerprint = api.assembleStrategySlotRoutes({
+  time_priority: timeRoute,
+  general_road_priority: generalRoute,
+  shorter_distance: samePathDifferentFingerprint,
+  toll_allowed: fakeToll
+});
+assert.equal(
+  slotsAbOnlyCrossFingerprint.shorter_distance,
+  undefined,
+  "C with same polyline as A/B must stay hidden even when duration/fingerprint differ"
+);
+assert.ok(slotsAbOnlyCrossFingerprint.time_priority);
+assert.ok(slotsAbOnlyCrossFingerprint.general_road_priority);
 
 const slotsWithCd = api.assembleStrategySlotRoutes({
   time_priority: timeRoute,

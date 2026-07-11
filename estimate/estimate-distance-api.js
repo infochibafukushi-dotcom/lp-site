@@ -148,17 +148,26 @@
     ].join("|");
   }
 
+  function isSameEncodedPath(left, right){
+    const polyLeft = String(left?.encodedPolyline || "");
+    const polyRight = String(right?.encodedPolyline || "");
+    return Boolean(polyLeft && polyRight && polyLeft === polyRight);
+  }
+
   function isDuplicateRoute(left, right){
     if(!left || !right){
       return false;
     }
+    // Identical polyline means the same driven path, even when request
+    // fingerprints differ (e.g. TRAFFIC_AWARE vs TRAFFIC_UNAWARE for C).
+    // Slot C must not be shown as a filler copy of A/B in that case.
+    if(isSameEncodedPath(left, right)){
+      return true;
+    }
+    // Near distance/time heuristics only apply within the same request shape,
+    // so role-different A/B fetches with distinct paths are not collapsed.
     if(getRouteRoutingFingerprint(left) !== getRouteRoutingFingerprint(right)){
       return false;
-    }
-    const polyLeft = String(left.encodedPolyline || "");
-    const polyRight = String(right.encodedPolyline || "");
-    if(polyLeft && polyRight && polyLeft === polyRight){
-      return true;
     }
     const distLeft = Number(left.distanceMeters) || 0;
     const distRight = Number(right.distanceMeters) || 0;
@@ -1271,6 +1280,7 @@
     ensureMinimumRouteCandidates: ensureMinimumRouteCandidates,
     DISPLAY_STRATEGY_ORDER: DISPLAY_STRATEGY_ORDER.slice(),
     isDuplicateRoute: isDuplicateRoute,
+    isSameEncodedPath: isSameEncodedPath,
     geocodeAddress: geocodeAddress
   };
 })(typeof window !== "undefined" ? window : globalThis);

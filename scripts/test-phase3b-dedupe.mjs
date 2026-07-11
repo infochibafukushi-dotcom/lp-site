@@ -5,49 +5,20 @@ import vm from "node:vm";
 
 const root = path.resolve(import.meta.dirname, "..");
 
-function loadPresentation(){
-  const code = fs.readFileSync(path.join(root, "shared/pre-fixed-fare-route-presentation.js"), "utf8");
-  vm.runInThisContext(code);
-  return global.PreFixedFareRoutePresentation;
+function loadScripts(){
+  const sandbox = { window: {}, globalThis: {}, console };
+  sandbox.window = sandbox.globalThis;
+  sandbox.global = sandbox.globalThis;
+  const presentation = fs.readFileSync(path.join(root, "shared/pre-fixed-fare-route-presentation.js"), "utf8");
+  const api = fs.readFileSync(path.join(root, "estimate/estimate-distance-api.js"), "utf8");
+  vm.runInNewContext(presentation + "\n" + api, sandbox);
+  return {
+    presentation: sandbox.globalThis.PreFixedFareRoutePresentation,
+    api: sandbox.globalThis.EstimateDistanceApi
+  };
 }
 
-function getRouteRoutingFingerprint(route){
-  return [
-    route?.avoidHighways === true ? "1" : "0",
-    route?.avoidTolls === true ? "1" : "0",
-    String(route?.routingPreference || "TRAFFIC_AWARE"),
-    String(route?.intermediateWaypoint?.waypointId || "")
-  ].join("|");
-}
-
-function isDuplicateRoute(left, right){
-  if(!left || !right){
-    return false;
-  }
-  if(getRouteRoutingFingerprint(left) !== getRouteRoutingFingerprint(right)){
-    return false;
-  }
-  const polyLeft = String(left.encodedPolyline || "");
-  const polyRight = String(right.encodedPolyline || "");
-  if(polyLeft && polyRight && polyLeft === polyRight){
-    return true;
-  }
-  const distLeft = Number(left.distanceMeters) || 0;
-  const distRight = Number(right.distanceMeters) || 0;
-  const durLeft = Number(left.durationSeconds) || 0;
-  const durRight = Number(right.durationSeconds) || 0;
-  if(distLeft > 0 && distRight > 0 && distLeft === distRight && durLeft === durRight){
-    return true;
-  }
-  if(distLeft > 0 && distRight > 0 && Math.abs(distLeft - distRight) < 100){
-    if(Math.abs(durLeft - durRight) < 60){
-      return true;
-    }
-  }
-  return false;
-}
-
-const presentation = loadPresentation();
+const { presentation, api } = loadScripts();
 
 assert.equal(
   presentation.resolveTimePriorityLabel({ usesToll: false }),
@@ -81,18 +52,33 @@ const generalRoute = {
   distanceMeters: 1200,
   durationSeconds: 300
 };
+const distinctGeneralRoute = Object.assign({}, generalRoute, {
+  encodedPolyline: "def",
+  distanceMeters: 1500,
+  durationSeconds: 420
+});
 
-assert.equal(isDuplicateRoute(timeRoute, generalRoute), false, "different routing fingerprints must not dedupe");
+assert.equal(
+  api.isDuplicateRoute(timeRoute, generalRoute),
+  true,
+  "same polyline must dedupe even across A/B routing fingerprints"
+);
+assert.equal(
+  api.isDuplicateRoute(timeRoute, distinctGeneralRoute),
+  false,
+  "different polyline with different fingerprint must not dedupe"
+);
 
 const timeRouteCopy = Object.assign({}, timeRoute, { routeStrategy: "recommended" });
-assert.equal(isDuplicateRoute(timeRoute, timeRouteCopy), true, "same fingerprint and polyline must dedupe");
+assert.equal(api.isDuplicateRoute(timeRoute, timeRouteCopy), true, "same fingerprint and polyline must dedupe");
 
 const nearTimeRoute = Object.assign({}, timeRoute, {
   routeStrategy: "pool_candidate",
+  encodedPolyline: "near-abc",
   distanceMeters: 1250,
   durationSeconds: 330
 });
-assert.equal(isDuplicateRoute(timeRoute, nearTimeRoute), true, "near metrics with same fingerprint must dedupe");
+assert.equal(api.isDuplicateRoute(timeRoute, nearTimeRoute), true, "near metrics with same fingerprint must dedupe");
 
 const resolved = presentation.resolveRoutePresentation({
   routeStrategy: "time_priority",
