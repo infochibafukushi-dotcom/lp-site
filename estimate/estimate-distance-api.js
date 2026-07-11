@@ -192,36 +192,49 @@
     }).filter(Boolean).slice(0, MAX_ROUTE_CANDIDATES);
   }
 
-  function assembleStrategySlotRoutes(strategyFetches, poolRoutes){
+  function isCoreDisplayStrategy(strategy){
+    return strategy === "time_priority" || strategy === "general_road_priority";
+  }
+
+  function canAssignStrategySlot(strategy, route, kept){
+    if(!route){
+      return false;
+    }
+    if(strategy === "toll_allowed" && !routeUsesToll(route)){
+      return false;
+    }
+    if(strategy === "shorter_distance"){
+      if(!Number(route.distanceMeters) || !Number(route.durationSeconds)){
+        return false;
+      }
+      if(isDuplicateOfAny(route, kept)){
+        return false;
+      }
+      return true;
+    }
+    // A/B are always kept when their dedicated fetches succeed,
+    // even if distance/time/path are similar to each other.
+    if(isCoreDisplayStrategy(strategy)){
+      return true;
+    }
+    return !isDuplicateOfAny(route, kept);
+  }
+
+  function assembleStrategySlotRoutes(strategyFetches){
     const slots = {};
     const kept = [];
 
+    // Only assign routes from their dedicated strategy fetches.
+    // Do not backfill empty C/D slots from the recommended/arterial pool.
     DISPLAY_STRATEGY_ORDER.forEach(function(strategy){
       const route = strategyFetches?.[strategy];
-      if(!route || isDuplicateOfAny(route, kept)){
+      if(!canAssignStrategySlot(strategy, route, kept)){
         return;
       }
       slots[strategy] = applyRoutePresentation(Object.assign({}, route, {
         routeStrategy: strategy
       }), strategy);
       kept.push(slots[strategy]);
-    });
-
-    dedupeRoutes(poolRoutes || []).forEach(function(poolRoute){
-      for(let index = 0; index < DISPLAY_STRATEGY_ORDER.length; index += 1){
-        const strategy = DISPLAY_STRATEGY_ORDER[index];
-        if(slots[strategy]){
-          continue;
-        }
-        if(isDuplicateOfAny(poolRoute, kept)){
-          continue;
-        }
-        slots[strategy] = applyRoutePresentation(Object.assign({}, poolRoute, {
-          routeStrategy: strategy
-        }), strategy);
-        kept.push(slots[strategy]);
-        break;
-      }
     });
 
     return slots;
@@ -248,7 +261,7 @@
         route = await fetchTimePriorityRoute(options, userAvoidTolls);
       }
 
-      if(!route || isDuplicateOfAny(route, kept)){
+      if(!canAssignStrategySlot(strategy, route, kept)){
         continue;
       }
       nextSlots[strategy] = applyRoutePresentation(Object.assign({}, route, {
@@ -284,14 +297,25 @@
   }
 
   function routeUsesToll(route){
-    const tollInfo = route?.tollInfo;
+    const tollInfo = route?.tollInfo || route?.travelAdvisory?.tollInfo || null;
     if(!tollInfo){
       return false;
     }
-    if(tollInfo.estimatedPrice){
+    const estimatedPrice = tollInfo.estimatedPrice;
+    if(Array.isArray(estimatedPrice) && estimatedPrice.length > 0){
       return true;
     }
-    if(Array.isArray(tollInfo.tollInfos) && tollInfo.tollInfos.length){
+    if(estimatedPrice && !Array.isArray(estimatedPrice) && typeof estimatedPrice === "object"){
+      const units = Number(estimatedPrice.units);
+      const nanos = Number(estimatedPrice.nanos);
+      if((Number.isFinite(units) && units !== 0) || (Number.isFinite(nanos) && nanos !== 0)){
+        return true;
+      }
+      if(estimatedPrice.currencyCode){
+        return true;
+      }
+    }
+    if(Array.isArray(tollInfo.tollInfos) && tollInfo.tollInfos.length > 0){
       return true;
     }
     return false;
@@ -743,7 +767,7 @@
       strategy: route.routeStrategy || null,
       distanceMeters: Number(route.distanceMeters) || 0,
       durationSeconds: Number(route.durationSeconds) || 0,
-      usesToll: routeUsesToll(route) || route.usesToll === true,
+      usesToll: routeUsesToll(route),
       encodedPolyline: String(route.encodedPolyline || "")
     };
   }
@@ -755,7 +779,7 @@
     const commonSeconds = Number(returnCommonRoute?.durationSeconds) || 0;
     const selectableMeters = Number(selectableRoute?.distanceMeters) || 0;
     const selectableSeconds = Number(selectableRoute?.durationSeconds) || 0;
-    const usesToll = routeUsesToll(selectableRoute) || selectableRoute?.usesToll === true;
+    const usesToll = routeUsesToll(selectableRoute);
     const routeLabel = resolveRouteDisplayLabel(selectableRoute, index);
     const routeDescription = resolveRouteDisplayDescription(selectableRoute);
     return {
@@ -929,8 +953,7 @@
     }
 
     const routeGenerationStrategies = DISPLAY_STRATEGY_ORDER.concat([
-      "recommended",
-      "arterial_road"
+      "recommended"
     ]);
 
     const timePriorityRoute = await fetchTimePriorityRoute(options, userAvoidTolls);
@@ -946,7 +969,6 @@
     let shorterDistanceRoute = recommendedRoute
       ? pickShorterDistanceRoute(recommendedPool, recommendedRoute)
       : null;
-    const arterialRoute = await fetchArterialRoute(options, userAvoidTolls);
     const tollAllowedRoute = recommendedRoute
       ? await fetchTollAllowedRoute(options, recommendedRoute)
       : await fetchTollAllowedRoute(options, timePriorityRoute);
@@ -963,23 +985,12 @@
       shorterDistanceRoute = await fetchDistancePriorityRoute(options, userAvoidTolls, provisionalRoutes);
     }
 
-    const poolExtras = [];
-    if(recommendedRoute){
-      poolExtras.push(recommendedRoute);
-    }
-    recommendedPool.slice(1).forEach(function(route){
-      poolExtras.push(route);
-    });
-    if(arterialRoute){
-      poolExtras.push(arterialRoute);
-    }
-
     let slots = assembleStrategySlotRoutes({
       time_priority: timePriorityRoute,
       general_road_priority: generalRoadPriorityRoute,
       shorter_distance: shorterDistanceRoute,
       toll_allowed: tollAllowedRoute
-    }, poolExtras);
+    });
     slots = await fillMissingStrategySlots(slots, options, userAvoidTolls);
 
     const orderedRoutes = slotsToOrderedRoutes(slots);

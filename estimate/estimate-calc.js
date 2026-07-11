@@ -1073,14 +1073,24 @@
   }
 
   function resolveRouteUsesToll(route){
-    if(route?.usesToll === true){
-      return true;
-    }
     if(typeof global !== "undefined" && global.PreFixedFareRoutePresentation
       && typeof global.PreFixedFareRoutePresentation.routeUsesToll === "function"){
       return global.PreFixedFareRoutePresentation.routeUsesToll(route);
     }
-    return route?.roadType === "toll" || route?.routeStrategy === "toll_allowed";
+    const tollInfo = route?.tollInfo;
+    if(!tollInfo){
+      return false;
+    }
+    if(Array.isArray(tollInfo.estimatedPrice) && tollInfo.estimatedPrice.length > 0){
+      return true;
+    }
+    if(tollInfo.estimatedPrice && !Array.isArray(tollInfo.estimatedPrice)){
+      return true;
+    }
+    if(Array.isArray(tollInfo.tollInfos) && tollInfo.tollInfos.length > 0){
+      return true;
+    }
+    return false;
   }
 
   function buildRouteCandidateSnapshot(route, index){

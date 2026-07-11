@@ -35,14 +35,25 @@
   const INTERNAL_SUMMARY_PATTERN = /^(DEFAULT_ROUTE|POOL_CANDIDATE|ROUTE_\d+)$/i;
 
   function routeUsesToll(route){
-    const tollInfo = route?.tollInfo;
+    const tollInfo = route?.tollInfo || route?.travelAdvisory?.tollInfo || null;
     if(!tollInfo){
       return false;
     }
-    if(tollInfo.estimatedPrice){
+    const estimatedPrice = tollInfo.estimatedPrice;
+    if(Array.isArray(estimatedPrice) && estimatedPrice.length > 0){
       return true;
     }
-    if(Array.isArray(tollInfo.tollInfos) && tollInfo.tollInfos.length){
+    if(estimatedPrice && !Array.isArray(estimatedPrice) && typeof estimatedPrice === "object"){
+      const units = Number(estimatedPrice.units);
+      const nanos = Number(estimatedPrice.nanos);
+      if((Number.isFinite(units) && units !== 0) || (Number.isFinite(nanos) && nanos !== 0)){
+        return true;
+      }
+      if(estimatedPrice.currencyCode){
+        return true;
+      }
+    }
+    if(Array.isArray(tollInfo.tollInfos) && tollInfo.tollInfos.length > 0){
       return true;
     }
     return false;
@@ -57,7 +68,7 @@
   }
 
   function resolveTimePriorityLabel(route){
-    const usesToll = routeUsesToll(route) || route?.usesToll === true;
+    const usesToll = routeUsesToll(route);
     return usesToll ? "時間優先（有料道）" : "時間優先ルート";
   }
 
@@ -86,7 +97,8 @@
     }
     const resolvedStrategy = String(strategy || resolveStrategy(route) || "").trim();
     const presentation = getPresentation(resolvedStrategy);
-    const usesToll = routeUsesToll(route) || resolvedStrategy === "toll_allowed" || route?.roadType === "toll";
+    // usesToll must reflect actual toll usage, not request intent (roadType/strategy).
+    const usesToll = routeUsesToll(route);
     const apiSummary = getApiRouteSummary(route);
     let routeLabel = presentation?.routeLabel || String(route.routeLabel || "").trim() || "ルート候補";
     let routeDescription = presentation?.routeDescription || String(route.routeDescription || "").trim();

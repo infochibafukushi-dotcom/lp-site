@@ -54,8 +54,13 @@ assert.equal(
   "時間優先ルート"
 );
 assert.equal(
-  presentation.resolveTimePriorityLabel({ usesToll: true, tollInfo: { estimatedPrice: {} } }),
+  presentation.resolveTimePriorityLabel({ tollInfo: { estimatedPrice: { currencyCode: "JPY", units: "500" } } }),
   "時間優先（有料道）"
+);
+assert.equal(
+  presentation.resolveTimePriorityLabel({ usesToll: true }),
+  "時間優先ルート",
+  "usesToll flag alone must not imply toll usage"
 );
 
 const timeRoute = {

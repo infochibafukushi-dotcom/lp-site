@@ -1863,7 +1863,25 @@
     if(isPreFixedFareMode() && !isPreFixedFareConfirmable()){
       return "確認対応として予約へ進む";
     }
+    const routePrefix = getSelectedRouteCtaPrefix();
+    if(routePrefix){
+      return routePrefix + "　この内容で予約する";
+    }
     return "この内容で予約する";
+  }
+
+  function getSelectedRouteCtaPrefix(){
+    if(!state.routePlan || !isPreFixedFareMode()){
+      return "";
+    }
+    const strategy = getActiveRouteMapStrategy(state.routePlan);
+    const abInfo = getRouteAbInfo(strategy, {
+      roundTrip: canUseRoundTripPairSelection(state.routePlan)
+    });
+    if(!abInfo?.abLabel){
+      return "";
+    }
+    return abInfo.abLabel + "ルート";
   }
 
   function getRouteCalcButtonLabel(){
@@ -2020,10 +2038,13 @@
       return routePlan;
     }
     if(canUseRoundTripPairSelection(routePlan)){
-      if(getSelectedRoundTripPairStrategy(routePlan)){
+      const pairs = buildRoundTripRoutePairs(routePlan);
+      const selectedStrategy = getSelectedRoundTripPairStrategy(routePlan);
+      const selectedStillValid = selectedStrategy
+        && pairs.some(function(pair){ return pair.strategy === selectedStrategy; });
+      if(selectedStillValid){
         return routePlan;
       }
-      const pairs = buildRoundTripRoutePairs(routePlan);
       const defaultPair = pairs.find(function(pair){
         return pair.strategy === "time_priority";
       }) || pairs[0];
@@ -2036,18 +2057,34 @@
     }
     let outboundLeg = routePlan.outboundRoutePlan || routePlan;
     let returnLeg = routePlan.returnRoutePlan || null;
-    if(outboundLeg && legAllowsRouteSelection(outboundLeg) && outboundLeg.routeSelectionConfirmed !== true){
-      const defaultOutbound = findRouteCandidateByStrategy(outboundLeg, "time_priority")
-        || getDisplayRouteCandidatesFromLeg(outboundLeg)[0];
-      if(defaultOutbound){
-        outboundLeg = applyRouteToLegPlan(outboundLeg, defaultOutbound);
+    if(outboundLeg && legAllowsRouteSelection(outboundLeg)){
+      const outboundRoutes = getDisplayRouteCandidatesFromLeg(outboundLeg);
+      const selectedOutboundId = String(outboundLeg.selectedRouteId || "");
+      const outboundStillValid = outboundLeg.routeSelectionConfirmed === true
+        && outboundRoutes.some(function(route){
+          return String(route?.routeId || "") === selectedOutboundId;
+        });
+      if(!outboundStillValid){
+        const defaultOutbound = findRouteCandidateByStrategy(outboundLeg, "time_priority")
+          || outboundRoutes[0];
+        if(defaultOutbound){
+          outboundLeg = applyRouteToLegPlan(outboundLeg, defaultOutbound);
+        }
       }
     }
-    if(returnLeg && legAllowsRouteSelection(returnLeg) && returnLeg.routeSelectionConfirmed !== true){
-      const defaultReturn = findRouteCandidateByStrategy(returnLeg, "time_priority")
-        || getDisplayRouteCandidatesFromLeg(returnLeg)[0];
-      if(defaultReturn){
-        returnLeg = applyRouteToLegPlan(returnLeg, defaultReturn);
+    if(returnLeg && legAllowsRouteSelection(returnLeg)){
+      const returnRoutes = getDisplayRouteCandidatesFromLeg(returnLeg);
+      const selectedReturnId = String(returnLeg.selectedRouteId || "");
+      const returnStillValid = returnLeg.routeSelectionConfirmed === true
+        && returnRoutes.some(function(route){
+          return String(route?.routeId || "") === selectedReturnId;
+        });
+      if(!returnStillValid){
+        const defaultReturn = findRouteCandidateByStrategy(returnLeg, "time_priority")
+          || returnRoutes[0];
+        if(defaultReturn){
+          returnLeg = applyRouteToLegPlan(returnLeg, defaultReturn);
+        }
       }
     }
     if(routePlan.outboundRoutePlan){
@@ -2268,6 +2305,30 @@
     );
   }
 
+  function routeActuallyUsesToll(route){
+    if(!route){
+      return false;
+    }
+    if(window.PreFixedFareRoutePresentation
+      && typeof window.PreFixedFareRoutePresentation.routeUsesToll === "function"){
+      return window.PreFixedFareRoutePresentation.routeUsesToll(route) === true;
+    }
+    const tollInfo = route.tollInfo;
+    if(!tollInfo){
+      return false;
+    }
+    if(Array.isArray(tollInfo.estimatedPrice) && tollInfo.estimatedPrice.length > 0){
+      return true;
+    }
+    if(tollInfo.estimatedPrice && !Array.isArray(tollInfo.estimatedPrice)){
+      return true;
+    }
+    if(Array.isArray(tollInfo.tollInfos) && tollInfo.tollInfos.length > 0){
+      return true;
+    }
+    return false;
+  }
+
   function renderSharedTollNote(hasTollNote){
     if(!hasTollNote){
       return "";
@@ -2386,8 +2447,7 @@
         totalDistanceMeters: outboundMeters + returnMeters,
         totalDurationSeconds: outboundSeconds + returnSeconds,
         usesToll: outboundRoute.usesToll === true || returnRoute.usesToll === true
-          || getRouteStrategyKey(outboundRoute) === "time_priority"
-          || getRouteStrategyKey(returnRoute) === "time_priority"
+          || routeActuallyUsesToll(outboundRoute) || routeActuallyUsesToll(returnRoute)
       };
     }).filter(Boolean);
   }
@@ -2567,7 +2627,9 @@
       return Boolean(getRouteAbInfo(pair.strategy, { roundTrip: true }));
     });
     const hasTollNote = pairs.some(function(pair){
-      return pair.usesToll === true;
+      return pair.usesToll === true
+        || routeActuallyUsesToll(pair.outboundRoute)
+        || routeActuallyUsesToll(pair.returnRoute);
     });
     const cards = pairs.map(function(pair){
       const isMapActive = pair.strategy === activeMapStrategy;
@@ -2641,7 +2703,7 @@
     });
     const useAbLayout = abRoutes.length >= 2;
     const hasTollNote = routes.some(function(route){
-      return route.usesToll === true || route.routeStrategy === "toll_allowed" || route.routeStrategy === "time_priority";
+      return routeActuallyUsesToll(route);
     });
 
     const compact = options?.compact === true;
@@ -2661,7 +2723,7 @@
       const description = getRouteDisplayDescription(route);
       const roadTypeLabel = getRoadTypeLabel(route.roadType || legPlan.roadType || state.roadType);
       const abInfo = getRouteAbInfo(route);
-      const tollNote = !useAbLayout && (route.usesToll === true || route.routeStrategy === "toll_allowed" || route.routeStrategy === "time_priority")
+      const tollNote = !useAbLayout && routeActuallyUsesToll(route)
         ? "有料道路料金は見積料金に含まれず、別途必要です。"
         : "";
       const waypointLabel = route.intermediateWaypoint?.waypointLabel

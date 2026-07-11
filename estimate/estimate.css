@@ -1144,6 +1144,7 @@
   align-items:center;
   justify-content:center;
   min-height:48px;
+  max-width:min(100%, 280px);
   padding:12px 14px;
   border-radius:12px;
   background:#e87f00;
@@ -1151,7 +1152,9 @@
   font-size:14px;
   font-weight:700;
   text-decoration:none;
-  white-space:nowrap;
+  white-space:normal;
+  text-align:center;
+  line-height:1.35;
 }
 .estimate-page.estimate-has-sticky-reserve-bar,
 .estimate-page.estimate-has-mobile-reserve-bar,
@@ -1744,8 +1747,11 @@ body.estimate-has-mobile-reserve-bar .estimate-wrap{
   .estimate-sticky-reserve-bar-btn,
   .estimate-mobile-reserve-bar-btn{
     min-height:44px;
-    padding:10px 12px;
-    font-size:13px;
+    max-width:min(62%, 220px);
+    padding:8px 10px;
+    font-size:12px;
+    line-height:1.3;
+    white-space:normal;
   }
   .estimate-page.estimate-has-sticky-reserve-bar .estimate-result,
   .estimate-page.estimate-has-mobile-reserve-bar .estimate-result,
