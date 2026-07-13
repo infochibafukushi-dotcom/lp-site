@@ -514,6 +514,16 @@
     `;
   }
 
+  function softWrapPricingName(name){
+    const raw = String(name || "");
+    // Prefer natural phrase breaks for long Japanese labels on narrow screens.
+    return raw
+      .replace(/リクライニング(?=車いす)/g, "リクライニング\u200B")
+      .replace(/高速道路・(?=駐車料金)/g, "高速道路・\u200B")
+      .replace(/ご利用中の(?=車いす)/g, "ご利用中の\u200B")
+      .replace(/待機・(?=付き添い)/g, "待機・\u200B");
+  }
+
   function renderMenuListItems(items, showPrices){
     return items.length ? items.map((item, itemIndex) => `
       <div style="padding:14px 0;${itemIndex < items.length - 1 ? 'border-bottom:1px solid #f3eee7;' : ''}">
@@ -535,6 +545,54 @@
     `).join("") : `<div style="padding:16px 0;font-size:13px;color:#999;">メニューはまだありません</div>`;
   }
 
+  function renderPricingItems(items, groupIndex){
+    if(!items.length){
+      return `<div class="pricing-item-empty">料金項目はまだありません</div>`;
+    }
+
+    return items.map((item, itemIndex) => {
+      const panelId = `pricing-desc-${groupIndex}-${itemIndex}`;
+      const buttonId = `pricing-info-${groupIndex}-${itemIndex}`;
+      const nameId = `pricing-name-${groupIndex}-${itemIndex}`;
+      const hasDescription = Boolean(String(item.description || "").trim());
+      const nameHtml = window.IndexUtils.escapeHtml(softWrapPricingName(item.name || ""));
+      const priceHtml = window.IndexUtils.escapeHtml(item.price || "");
+      const descHtml = hasDescription
+        ? window.IndexUtils.escapeHtml(item.description || "")
+        : "";
+
+      return `
+        <div class="pricing-item" data-pricing-item>
+          <div class="pricing-item-header" data-pricing-toggle${hasDescription ? "" : " data-pricing-no-desc"}>
+            <div class="pricing-item-name" id="${nameId}">${nameHtml}</div>
+            <div class="pricing-item-price">${priceHtml}</div>
+            ${hasDescription ? `
+            <button
+              type="button"
+              class="pricing-info-button"
+              id="${buttonId}"
+              aria-expanded="false"
+              aria-controls="${panelId}"
+              aria-label="${window.IndexUtils.escapeAttr((item.name || "料金") + "の説明を表示")}"
+              data-pricing-info-btn
+            >ℹ️</button>
+            ` : `<span class="pricing-info-button pricing-info-button-spacer" aria-hidden="true"></span>`}
+          </div>
+          ${hasDescription ? `
+          <div
+            class="pricing-item-description"
+            id="${panelId}"
+            role="region"
+            aria-labelledby="${nameId}"
+            hidden
+            data-pricing-desc
+          >${descHtml}</div>
+          ` : ""}
+        </div>
+      `;
+    }).join("");
+  }
+
   function renderMenuList(section, config){
     const isAreaSection = section?.sectionId === "taiou-area";
     const isPricingSection = section?.sectionId === "pricing";
@@ -545,17 +603,21 @@
 
     const cardsHtml = groups.length ? groups.map((group, groupIndex) => {
       const items = Array.isArray(group.items) ? group.items.filter(item => item && item.visible !== false) : [];
-      const itemsHtml = renderMenuListItems(items, showPrices);
 
       if(isPricingSection){
+        const itemsHtml = renderPricingItems(items, groupIndex);
+        const title = String(group.title || `カテゴリ${groupIndex + 1}`).trim();
         return `
-          <div id="menu-list-cat-${groupIndex}" class="pricing-menu-card" style="background:#ffffff;border:1px solid #e7dfd4;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.04);margin:0 0 18px 0;">
-            <div style="padding:0 16px;">
+          <div id="menu-list-cat-${groupIndex}" class="pricing-menu-card">
+            <h3 class="pricing-card-title">${window.IndexUtils.escapeHtml(title)}</h3>
+            <div class="pricing-card-body">
               ${itemsHtml}
             </div>
           </div>
         `;
       }
+
+      const itemsHtml = renderMenuListItems(items, showPrices);
 
       return `
         <div id="menu-list-cat-${groupIndex}" style="background:#ffffff;border:1px solid #e7dfd4;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.04);margin:0 0 18px 0;">

@@ -291,30 +291,76 @@
     document.head.appendChild(script);
   }
 
-  function hydratePricingSectionFromFareMaster(sections, pricingTable){
-    if(!Array.isArray(sections) || !Array.isArray(pricingTable) || !pricingTable.length) return sections;
-    return sections.map(function(section){
-      if(section.sectionId !== "pricing" || section.type !== "menu-list") return section;
-      const next = Object.assign({}, section);
-      next.menuGroups = [{
-        title: "料金表",
-        items: pricingTable.map(function(row){
-          return { name: row.name, price: row.price, description: "" };
-        }),
-      }];
-      return next;
+  function setPricingItemOpen(itemEl, open){
+    if(!itemEl) return;
+    const btn = itemEl.querySelector("[data-pricing-info-btn]");
+    const panel = itemEl.querySelector("[data-pricing-desc]");
+    if(!btn || !panel) return;
+    const name = itemEl.querySelector(".pricing-item-name");
+    const labelBase = name ? String(name.textContent || "").trim() : "料金";
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
+    btn.setAttribute("aria-label", open ? (labelBase + "の説明を閉じる") : (labelBase + "の説明を表示"));
+    btn.textContent = open ? "✕" : "ℹ️";
+    if(open){
+      panel.hidden = false;
+      itemEl.classList.add("is-open");
+    }else{
+      panel.hidden = true;
+      itemEl.classList.remove("is-open");
+    }
+  }
+
+  function closeAllPricingItems(exceptItem){
+    const section = document.getElementById("pricing");
+    if(!section) return;
+    section.querySelectorAll("[data-pricing-item].is-open").forEach(function(itemEl){
+      if(exceptItem && itemEl === exceptItem) return;
+      setPricingItemOpen(itemEl, false);
     });
   }
 
-  async function loadPricingTableFromFareMaster(){
-    const apiBase = window.EstimateQuoteConfig?.API_BASE || "";
-    if(!apiBase || !window.FareMasterClient?.fetchDisplayPricing) return null;
-    try{
-      const data = await window.FareMasterClient.fetchDisplayPricing(apiBase);
-      return data?.pricingTable || null;
-    }catch{
-      return null;
+  function togglePricingItem(itemEl){
+    if(!itemEl || itemEl.querySelector("[data-pricing-no-desc]")) return;
+    const isOpen = itemEl.classList.contains("is-open");
+    closeAllPricingItems(itemEl);
+    setPricingItemOpen(itemEl, !isOpen);
+  }
+
+  function bindPricingInfoToggles(){
+    const section = document.getElementById("pricing");
+    if(!section || section.dataset.pricingBound === "1") return;
+    section.dataset.pricingBound = "1";
+
+    section.addEventListener("click", function(event){
+      const header = event.target.closest("[data-pricing-toggle]");
+      if(!header || !section.contains(header)) return;
+      if(header.hasAttribute("data-pricing-no-desc")) return;
+      const itemEl = header.closest("[data-pricing-item]");
+      if(!itemEl) return;
+      event.preventDefault();
+      togglePricingItem(itemEl);
+    });
+  }
+
+  function bindPricingCarechanOffset(){
+    const pricing = document.getElementById("pricing");
+    const root = document.documentElement;
+    if(!pricing || !window.IntersectionObserver){
+      root.classList.remove("pricing-in-view");
+      return;
     }
+    if(root.dataset.pricingCarechanBound === "1") return;
+    root.dataset.pricingCarechanBound = "1";
+
+    const observer = new IntersectionObserver(function(entries){
+      const visible = entries.some(function(entry){ return entry.isIntersecting; });
+      root.classList.toggle("pricing-in-view", visible);
+    }, {
+      root: null,
+      threshold: 0.05,
+      rootMargin: "0px 0px -20% 0px"
+    });
+    observer.observe(pricing);
   }
 
   async function loadSections(config){
@@ -343,12 +389,13 @@
         sections = window.IndexUtils.hydrateFaqSections(sections, faqData);
       }
 
-      const pricingTable = await loadPricingTableFromFareMaster();
-      if(pricingTable){
-        sections = hydratePricingSectionFromFareMaster(sections, pricingTable);
-      }
+      // LP料金表は sections.json（管理画面）を正とし、fare-master では上書きしない。
+      // かんたん見積は従来どおり fare-master / estimate config を利用する。
 
       container.innerHTML = sections.map((section, idx) => window.IndexRenderers.renderSection(section, idx, config)).join("");
+
+      bindPricingInfoToggles();
+      bindPricingCarechanOffset();
 
       if(faqData && window.IndexUtils && typeof window.IndexUtils.getFeaturedFaqItems === "function"){
         injectFaqJsonLd(window.IndexUtils.getFeaturedFaqItems(faqData));

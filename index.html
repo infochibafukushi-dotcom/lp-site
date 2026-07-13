@@ -11,7 +11,7 @@
 <meta property="og:url" content="https://infochibafukushi-dotcom.github.io/lp-site/">
 <meta property="og:image" content="https://infochibafukushi-dotcom.github.io/lp-site/assets/logo/1773058066605-image-1.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="./carechan.css?v=lp-pc-carechan-108-20260702">
+<link rel="stylesheet" href="./carechan.css?v=lp-pricing-cards-20260713">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -219,9 +219,125 @@ a.estimate-pulse-button.section-bottom-link,
 #pricing .pricing-menu-card{
   width:100%;
   max-width:720px;
+  margin:0 0 18px 0;
   margin-left:auto;
   margin-right:auto;
   box-sizing:border-box;
+  background:#ffffff;
+  border:1px solid #e7dfd4;
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,.04);
+}
+#pricing .pricing-card-title{
+  margin:0;
+  padding:14px 16px 10px;
+  font-size:clamp(17px, 4.2vw, 20px);
+  font-weight:800;
+  line-height:1.4;
+  color:#2d2a26;
+  border-bottom:1px solid #f0e8dd;
+  background:#fffaf3;
+  writing-mode:horizontal-tb;
+  word-break:normal;
+  overflow-wrap:normal;
+}
+#pricing .pricing-card-body{
+  padding:4px 12px 8px;
+}
+#pricing .pricing-item{
+  border-bottom:1px solid #f3eee7;
+}
+#pricing .pricing-item:last-child{
+  border-bottom:none;
+}
+#pricing .pricing-item-header{
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) auto 40px;
+  align-items:center;
+  gap:8px;
+  padding:12px 4px;
+  cursor:pointer;
+  min-width:0;
+}
+#pricing .pricing-item-header[data-pricing-no-desc]{
+  cursor:default;
+}
+#pricing .pricing-item-name{
+  min-width:0;
+  writing-mode:horizontal-tb;
+  word-break:normal;
+  overflow-wrap:normal;
+  line-break:strict;
+  font-size:clamp(15px, 3.8vw, 18px);
+  font-weight:700;
+  line-height:1.45;
+  color:#2d2a26;
+}
+#pricing .pricing-item-price{
+  white-space:nowrap;
+  text-align:right;
+  font-size:clamp(15px, 3.8vw, 18px);
+  font-weight:800;
+  line-height:1.2;
+  color:#9a6b16;
+  letter-spacing:0.01em;
+}
+#pricing .pricing-info-button{
+  width:40px;
+  height:40px;
+  flex-shrink:0;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  margin:0;
+  padding:0;
+  border:1px solid #e7dfd4;
+  border-radius:999px;
+  background:#fff;
+  color:#5f5b55;
+  font-size:16px;
+  line-height:1;
+  cursor:pointer;
+  box-sizing:border-box;
+}
+#pricing .pricing-info-button:hover{
+  background:#fff7ea;
+  border-color:#e0c89a;
+}
+#pricing .pricing-info-button:focus-visible{
+  outline:3px solid #0057b8;
+  outline-offset:2px;
+}
+#pricing .pricing-info-button-spacer{
+  border:none;
+  background:transparent;
+  pointer-events:none;
+}
+#pricing .pricing-item.is-open .pricing-info-button{
+  background:#2d2a26;
+  border-color:#2d2a26;
+  color:#fff;
+  font-size:14px;
+}
+#pricing .pricing-item-description{
+  margin:0 4px 12px;
+  padding:12px 12px 14px;
+  border-top:1px solid #efe7dc;
+  font-size:13px;
+  line-height:1.85;
+  color:#555;
+  white-space:pre-line;
+  word-break:normal;
+  overflow-wrap:break-word;
+  writing-mode:horizontal-tb;
+  background:#fbf8f3;
+  border-radius:0 0 10px 10px;
+}
+#pricing .pricing-item-empty{
+  padding:16px 4px;
+  font-size:13px;
+  color:#999;
 }
 @media (max-width: 768px){
   #pricing .pricing-section-inner,
@@ -229,6 +345,39 @@ a.estimate-pulse-button.section-bottom-link,
   #pricing .pricing-menu-card{
     width:100%;
     max-width:none;
+  }
+  #pricing .pricing-card-body{
+    padding:2px 10px 6px;
+  }
+  #pricing .pricing-item-header{
+    gap:6px;
+    padding:10px 2px;
+  }
+  #pricing .pricing-item-name{
+    font-size:15px;
+  }
+  #pricing .pricing-item-price{
+    font-size:15px;
+  }
+}
+html.pricing-in-view .carechan-widget{
+  right:auto !important;
+  left:10px !important;
+  bottom:110px !important;
+  align-items:flex-start !important;
+}
+html.pricing-in-view .carechan-bubble-wrap{
+  display:none !important;
+}
+@media (min-width: 769px){
+  html.pricing-in-view .carechan-widget{
+    left:auto !important;
+    right:28px !important;
+    bottom:36px !important;
+    align-items:flex-end !important;
+  }
+  html.pricing-in-view .carechan-bubble-wrap{
+    display:block !important;
   }
 }
 
@@ -2281,13 +2430,13 @@ footer{
 <script src="./shared/estimate-quote-config.js?v=20260710A" defer></script>
 <script src="./shared/fare-faq-sync.js?v=20260710B" defer></script>
 <script src="./shared/fare-master-client.js?v=20260711A" defer></script>
-<script src="./index-utils.js?v=lp-official-line-20260704" defer></script>
+<script src="./index-utils.js?v=lp-pricing-cards-20260713" defer></script>
 <script src="./index-sections-buttons.js?v=lp-official-line-20260704" defer></script>
-<script src="./index-renderers.js?v=lp-layout-fix-20260704" defer></script>
+<script src="./index-renderers.js?v=lp-pricing-cards-20260713" defer></script>
 <script src="./index-slider.js?v=lp-official-line-20260704" defer></script>
-<script src="./index-main.js?v=lp-official-line-20260704" defer></script>
+<script src="./index-main.js?v=lp-pricing-cards-20260713" defer></script>
 <script src="./carechan-cta-defaults.js" defer></script>
-<script src="./index-carechan.js?v=carechan-bubble-rotate-20260701" defer></script>
+<script src="./index-carechan.js?v=lp-pricing-cards-20260713" defer></script>
 
 <script>
 (function(){
