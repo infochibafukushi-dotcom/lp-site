@@ -926,7 +926,7 @@
         name: step.choiceName,
         checked: item.id === state.roundTripAddonId,
         showAmount: true,
-        approximateAmount: true
+        amountStyle: "fixed-ja"
       });
     }).join("");
 
