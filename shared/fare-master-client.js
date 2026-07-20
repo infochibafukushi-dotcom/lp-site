@@ -53,6 +53,22 @@
     const preservedFareMode = String(staticConfig?.fareMode || "").trim();
     const merged = Object.assign({}, staticConfig, fareMasterPayload.estimateConfig);
     if(preservedFareMode) merged.fareMode = preservedFareMode;
+    // Display copy for waiting/escort is owned by static estimate-config.json.
+    // Keep fare-master amounts/refs, but do not let master description text hide site copy updates.
+    const staticAddonItems = staticConfig?.categories?.roundTripAddon?.items;
+    const mergedAddonItems = merged?.categories?.roundTripAddon?.items;
+    if(Array.isArray(staticAddonItems) && Array.isArray(mergedAddonItems)){
+      const staticById = {};
+      staticAddonItems.forEach(function(item){
+        if(item?.id) staticById[item.id] = item;
+      });
+      merged.categories.roundTripAddon.items = mergedAddonItems.map(function(item){
+        const staticItem = staticById[item?.id];
+        const staticDescription = staticItem ? String(staticItem.description || "").trim() : "";
+        if(!staticDescription) return item;
+        return Object.assign({}, item, { description: staticItem.description });
+      });
+    }
     merged.fareMasterId = fareMasterPayload.fareMasterId;
     merged.fareVersionId = fareMasterPayload.fareVersionId;
     merged.fareVersion = fareMasterPayload.fareVersion;
